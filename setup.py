@@ -7,7 +7,7 @@ setup(
     description="Aspire Academy shared Dash branding, components, and layouts",
     author="Kenny McMillan",
     packages=find_packages(),
-    package_data={"aspire_dash": ["assets/*", "assets/**/*", "templates/*"]},
+    package_data={"aspire_dash": ["assets/*", "assets/**/*", "templates/*", "brand.yml"]},
     include_package_data=True,
     python_requires=">=3.10",
     install_requires=[
