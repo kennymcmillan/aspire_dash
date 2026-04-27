@@ -1,0 +1,100 @@
+# Aspire Academy — Brand Configuration
+# Single source of truth for colours, fonts, and logo paths.
+# Brand blue #004185 from aspire.qa, adapted for dark sidebar + light canvas.
+
+name: Aspire Academy
+tagline: Sports Analytics
+
+# Primary colour palette
+colors:
+  # Aspire blue scale (derived from brand blue #004185)
+  aspire-900: "#001d3d"    # Sidebar background (deep navy)
+  aspire-800: "#002855"    # Sidebar hover
+  aspire-700: "#003566"    # Sidebar active / borders
+  aspire-600: "#004185"    # PRIMARY — brand blue (buttons, accents)
+  aspire-500: "#0059b3"    # Lighter blue (links, highlights)
+  aspire-400: "#3b82f6"    # Info / interactive
+  aspire-300: "#60a5fa"    # Light blue accents
+  aspire-200: "#93c5fd"    # Subtle blue tints
+  aspire-100: "#dbeafe"    # Very light blue background
+  aspire-50:  "#eff6ff"    # Near-white blue wash
+
+  # Neutral scale (for text, backgrounds, borders)
+  slate-50: "#f8fafc"
+  slate-100: "#f1f5f9"
+  slate-200: "#e2e8f0"
+  slate-300: "#cbd5e1"
+  slate-400: "#94a3b8"
+  slate-500: "#64748b"
+  slate-600: "#475569"
+  slate-700: "#334155"
+  slate-800: "#1e293b"
+  slate-900: "#0f172a"
+
+  # Secondary blue (links, hover states — from aspire.qa --bg-secondary)
+  secondary: "#1876ab"
+
+  # Accent (Aspire blue — primary buttons, CTA)
+  accent: "#004185"
+  accent-hover: "#003566"
+
+  # Semantic
+  success: "#16a34a"
+  warning: "#d97706"
+  danger: "#dc2626"
+  info: "#3b82f6"
+
+  # Gold (from aspire.qa --yellow: #fbb800 — active states, highlights, emphasis)
+  gold: "#fbb800"
+  gold-light: "#fef3c7"
+
+  # Chart palette (10 colours, Aspire blue first)
+  chart:
+    - "#004185"  # aspire blue
+    - "#16a34a"  # forest green
+    - "#d97706"  # deep amber
+    - "#dc2626"  # rich red
+    - "#7c3aed"  # purple
+    - "#0891b2"  # cyan
+    - "#ea580c"  # orange
+    - "#db2777"  # pink
+    - "#0d9488"  # teal
+    - "#4f46e5"  # indigo
+
+# Typography
+# Official Aspire font is Poppins, but Inter is preferred for data-heavy dashboards
+# (superior tabular-nums, font-feature-settings, optical sizing).
+# Set body/heading to Poppins if strict brand compliance is needed.
+fonts:
+  heading: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
+  body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
+  brand: "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
+  mono: "'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace"
+
+# Sidebar (deep navy blue — not grey slate)
+sidebar:
+  width: 220
+  bg: "#001d3d"
+  border: "#003566"
+  link-color: "#93c5fd"
+  link-hover-bg: "#002855"
+  link-active-bg: "#004185"
+
+# Radius scale (px)
+radius:
+  sm: 6
+  md: 8
+  lg: 12
+  full: 9999
+
+# Shadow scale
+shadows:
+  sm: "0 1px 2px 0 rgba(0,0,0,0.05)"
+  md: "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1)"
+  lg: "0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)"
+
+# Logo
+logo:
+  filename: "aspire-logo.png"
+  alt: "Aspire Academy"
+  svg_url: "https://www.aspire.qa/images/aspire-academy-logo.svg"
