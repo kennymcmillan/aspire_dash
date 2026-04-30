@@ -1,4 +1,4 @@
-"""Reusable Dash components — sidebar, header, cards, toast, badges."""
+"""Reusable Dash components — sidebar, topnav, header, cards, toast, badges."""
 
 import dash
 from dash import html, dcc, clientside_callback, Input, Output, State
@@ -10,6 +10,144 @@ from .theme import (
     LOGO_FILENAME, LOGO_ALT, SLATE, ASPIRE,
     SHADOW_SM, SHADOW_MD, RADIUS_LG, RADIUS_FULL,
 )
+
+
+# ── Top Nav ──────────────────────────────────────────────────────────────────
+
+def topnav(
+    nav_items: list[dict],
+    title: str = "",
+    logo_src: str | None = None,
+    right_content=None,
+):
+    """Horizontal sticky top-navigation bar — alternative to sidebar() for full-width layouts.
+
+    Parameters
+    ----------
+    nav_items : list[dict]
+        Each dict: ``{"label": str, "href": str, "icon": str (FA class), "id": str}``.
+        ``id`` is used by ``register_topnav_active`` to set the active class.
+    title : str
+        App name shown right of the logo.
+    logo_src : str or None
+        Logo image src.  Use ``dash.get_relative_path("/assets/aspire_logo.png")``
+        so the path resolves correctly on Posit Connect (app runs under a URL prefix).
+    right_content : Component or None
+        Optional element placed at the far right (e.g. a date badge).
+
+    CSS
+    ---
+    Add the topnav CSS to your app's ``assets/overrides.css``::
+
+        .topnav-link { ... }
+        .topnav-link:hover { ... }
+        .topnav-link.active { background: #004185; color: white; }
+
+    Or install the aspire_dash base CSS (via ``setup_app``) — it includes
+    ``.topnav-link`` rules automatically from v0.2.0 onwards.
+
+    Pair with ``register_topnav_active(app, nav_items)`` to highlight the
+    active page link on navigation.
+    """
+    nav_links = []
+    for item in nav_items:
+        nav_links.append(
+            dcc.Link(
+                html.Div(
+                    [
+                        html.I(className=item.get("icon", ""),
+                               style={"marginRight": "6px", "fontSize": "12px"}),
+                        html.Span(item["label"]),
+                    ],
+                    className="topnav-link",
+                    id=item.get("id", ""),
+                ),
+                href=dash.get_relative_path(item["href"]),
+                style={"textDecoration": "none"},
+            )
+        )
+
+    left = html.Div(
+        [
+            html.Img(src=logo_src, style={"height": "30px", "width": "auto"}) if logo_src else None,
+            html.Span(title, style={
+                "fontWeight": "700", "fontSize": "15px",
+                "color": "#1e293b", "marginLeft": "10px" if logo_src else "0",
+            }) if title else None,
+        ],
+        style={"display": "flex", "alignItems": "center", "flexShrink": "0"},
+    )
+
+    centre = html.Div(nav_links,
+                      style={"display": "flex", "gap": "4px", "alignItems": "center"})
+
+    right = html.Div(
+        right_content,
+        style={"flexShrink": "0"},
+    ) if right_content else html.Div(style={"flexShrink": "0"})
+
+    return html.Div(
+        [left, centre, right],
+        style={
+            "display": "flex", "justifyContent": "space-between",
+            "alignItems": "center", "padding": "10px 24px",
+            "borderBottom": "1px solid #dbeafe", "background": "#f5f9ff",
+            "gap": "24px",
+        },
+    )
+
+
+def register_topnav_active(app, nav_items: list[dict], url_id: str = "url"):
+    """Register the clientside callback that highlights the active topnav link.
+
+    Parameters
+    ----------
+    app : Dash
+        The Dash app instance.
+    nav_items : list[dict]
+        Same list passed to ``topnav()`` — must include ``"href"`` and ``"id"`` keys.
+    url_id : str
+        ID of the ``dcc.Location`` component (default ``"url"``).
+
+    Usage
+    -----
+    Call once in your ``create_app()`` after ``_register_callbacks``::
+
+        from aspire_dash.components import topnav, register_topnav_active
+
+        register_topnav_active(app, NAV_ITEMS)
+    """
+    link_ids = [item["id"] for item in nav_items]
+    path_map  = {item["href"]: item["id"] for item in nav_items}
+    url_prefix = dash.get_relative_path("/")
+
+    clientside_callback(
+        """
+        function(pathname) {
+            const linkMap = """ + str(path_map).replace("'", '"') + """;
+            const allIds  = """ + str(link_ids).replace("'", '"') + """;
+            const prefix  = """ + '"' + url_prefix + '"' + """;
+            let relPath = pathname;
+            if (prefix !== "/" && pathname.startsWith(prefix)) {
+                relPath = "/" + pathname.slice(prefix.length);
+            }
+            let activeId = linkMap[relPath] || null;
+            if (!activeId) {
+                for (const [path, id] of Object.entries(linkMap)) {
+                    if (path !== "/" && relPath.startsWith(path)) { activeId = id; break; }
+                }
+            }
+            allIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.className = (id === activeId) ? "topnav-link active" : "topnav-link";
+            });
+            return window.dash_clientside.no_update;
+        }
+        """,
+        Output(url_id, "search"),
+        Input(url_id, "pathname"),
+    )
 
 
 # ── Sidebar ──────────────────────────────────────────────────────────────────

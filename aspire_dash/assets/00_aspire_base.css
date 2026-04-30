@@ -122,6 +122,32 @@ body {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   TOP NAV — horizontal sticky bar (alternative to sidebar)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.topnav-link {
+    display: flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 150ms, color 150ms;
+    white-space: nowrap;
+}
+.topnav-link:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+.topnav-link.active {
+    background: #004185;
+    color: white;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
    SIDEBAR — 220px dark (aspire-900), collapsible
    ═══════════════════════════════════════════════════════════════════════════ */
 .sidebar {

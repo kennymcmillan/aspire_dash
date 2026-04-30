@@ -3,7 +3,11 @@
 Usage in any Dash app:
 
     from aspire_dash import setup_app, STYLESHEETS
-    from aspire_dash.components import sidebar, header, card, toast, badge
+    from aspire_dash.components import (
+        topnav, register_topnav_active,   # horizontal nav (no sidebar)
+        sidebar, header,                   # sidebar nav (classic layout)
+        card, toast, badge,
+    )
     from aspire_dash.layouts import page_layout
     from aspire_dash.theme import CHART_COLORS, ACCENT
     from aspire_dash.charts import GRAPH_CONFIG
