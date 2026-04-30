@@ -527,6 +527,44 @@ def dark_mode_toggle():
     )
 
 
+# ── Loading overlay ─────────────────────────────────────────────────────────
+
+def loading_overlay(children, color: str = "#004185", overlay_opacity: float = 0.4,
+                    z_index: int = 999):
+    """Aspire-branded centered spinner overlay.
+
+    Wraps `children` in a `dcc.Loading` configured to match the SAMS Attendance
+    Dashboard pattern: centered fixed spinner over a translucent white scrim,
+    aspire-blue stroke. Use this around `dcc.Store` + `page_container` so the
+    spinner shows during slow data fetches, not just page renders.
+
+    Example::
+
+        from aspire_dash.components import loading_overlay
+        app.layout = html.Div([
+            ...
+            loading_overlay([
+                dcc.Store(id='my-data'),
+                page_container,
+            ]),
+        ])
+
+    Why wrap the Store inside? `dcc.Loading` only triggers on Outputs *inside*
+    its children. If your slow callback's Output is a `dcc.Store` outside the
+    Loading, the spinner doesn't show during the fetch — only during the
+    downstream render. Putting the Store inside fixes that.
+    """
+    return dcc.Loading(
+        children,
+        type="circle",
+        color=color,
+        style={"position": "fixed", "top": "50%", "left": "50%",
+               "transform": "translate(-50%, -50%)", "zIndex": str(z_index)},
+        overlay_style={"visibility": "visible", "opacity": overlay_opacity,
+                       "backgroundColor": "white"},
+    )
+
+
 # ── Print Header/Footer ─────────────────────────────────────────────────────
 
 def print_header(title="", subtitle="", logo_src="/assets/aspire-logo.png"):
