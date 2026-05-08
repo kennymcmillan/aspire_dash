@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="aspire_dash",
-    version="0.1.0",
+    version="0.2.0",
     description="Aspire Academy shared Dash branding, components, and layouts",
     author="Kenny McMillan",
     packages=find_packages(),

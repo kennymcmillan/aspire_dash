@@ -158,6 +158,7 @@ def sidebar(
     nav_items: list[dict] | None = None,
     logo_gradient: tuple[str, str] = ("#004185", "#0059b3"),
     footer: object = None,
+    logo_src: str | None = None,
 ):
     """Collapsible sidebar with hamburger toggle (standard for all apps).
 
@@ -174,6 +175,12 @@ def sidebar(
         Two hex colours for the gradient icon box.
     footer : Component or None
         Optional footer element at bottom of sidebar.
+    logo_src : str | None
+        Logo image src. When deploying to Posit Connect, callers should
+        pass ``dash.get_relative_path("/assets/aspire-logo.png")`` so the
+        path is prefixed with the Connect content GUID. Defaults to the
+        absolute ``/assets/<LOGO_FILENAME>`` for back-compat with apps
+        that haven't migrated yet (works locally, breaks on Connect).
     """
     nav_items = nav_items or []
 
@@ -206,7 +213,7 @@ def sidebar(
         html.Div([
             html.Div([
                 html.Img(
-                    src=f"/assets/{LOGO_FILENAME}",
+                    src=logo_src or f"/assets/{LOGO_FILENAME}",
                     style={"height": "32px", "width": "auto"},
                 ),
             ], style={
