@@ -1,0 +1,63 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: pytest (py${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+
+      - name: Install package (editable) + test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pytest pytest-cov numpy plotly dash-svg
+
+      - name: Run pytest
+        run: pytest -q --tb=short
+
+  smoke-install:
+    name: pip-install from fresh clone (py${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install + import-smoke (catches package_data / wheel issues)
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+          python -c "
+          import aspire_dash
+          from aspire_dash import setup_app, STYLESHEETS
+          from aspire_dash.components import sidebar, header, card, summary_card
+          from aspire_dash.layouts import page_layout
+          from aspire_dash.observability import configure, timed, bump
+          from aspire_dash.stats import compute_stats
+          from aspire_dash.timeseries import build_sd_traces, aggregate_sessions
+          print(f'aspire_dash {aspire_dash.__version__} imports OK')
+          "

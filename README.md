@@ -1,5 +1,7 @@
 # aspire_dash
 
+[![tests](https://github.com/kennymcmillan/aspire_dash/actions/workflows/test.yml/badge.svg)](https://github.com/kennymcmillan/aspire_dash/actions/workflows/test.yml)
+
 > Build a fully Aspire-branded Plotly Dash app in **one command**.
 
 Shared component, styling, callback, and chart library for every

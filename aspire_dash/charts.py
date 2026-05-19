@@ -4,6 +4,8 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from .theme import CHART_COLORS, FONT_FAMILY, SLATE
 
+__all__ = ["GRAPH_CONFIG", "apply_template"]
+
 # ── Graph config (hide modebar by default) ───────────────────────────────────
 GRAPH_CONFIG = {
     "displayModeBar": False,

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from dash import dcc, html, Input, Output, State
 
-from .theme import ASPIRE_BLUE, ASPIRE_NAVY, SLATE
+from .theme import ASPIRE_BLUE, ASPIRE_NAVY, SLATE  # noqa: F401
 
 
 def _import_dag():
@@ -170,3 +170,94 @@ def register_dirty_tracking(
         return dirty
 
     return store_id
+
+
+# ── Plain dash_table.DataTable wrapper ─────────────────────────────────────
+
+def aspire_datatable(
+    id: str,
+    data: list[dict] | None = None,
+    columns: list[dict] | None = None,
+    *,
+    page_size: int = 50,
+    sort: bool = True,
+    filter_: bool = True,
+    export: str | None = None,
+    style_overrides: dict | None = None,
+    totals_row_label: str | None = None,
+):
+    """Branded ``dash_table.DataTable`` with Aspire-blue headers + zebra rows.
+
+    Use this when AG Grid is overkill — read-only summary tables, modest
+    row counts (< 500), no editing.
+
+    Parameters
+    ----------
+    id : str
+        Component id.
+    data : list of dict
+        Row data (``df.to_dict("records")``).
+    columns : list of dict
+        Column definitions (``[{"name": "Sport", "id": "sport"}, ...]``).
+    page_size : int
+        Rows per page (default 50).
+    sort : bool
+        Enable native sorting.
+    filter_ : bool
+        Enable native filter row.
+    export : str or None
+        ``"csv"`` to enable native CSV export; default disabled.
+    style_overrides : dict or None
+        Merge into the returned style kwargs (advanced — usually you
+        want one of the conditional dicts).
+    totals_row_label : str or None
+        If set, the first-column value matching this label is rendered
+        in navy with white text (e.g. ``"TOTAL"`` row).
+    """
+    from dash import dash_table
+
+    base_style = dict(
+        style_cell={
+            "padding": "8px 10px",
+            "fontFamily": "Inter, sans-serif",
+            "fontSize": "13px",
+            "textAlign": "left",
+        },
+        style_header={
+            "backgroundColor": ASPIRE_BLUE,
+            "color": "white",
+            "fontWeight": "700",
+            "border": "none",
+        },
+        style_data_conditional=[
+            {"if": {"row_index": "odd"}, "backgroundColor": "#fafbfc"},
+        ],
+        style_as_list_view=True,
+    )
+
+    if totals_row_label:
+        # first column is index 0; using filter_query on first column id
+        first_id = (columns or [{"id": ""}])[0].get("id", "")
+        base_style["style_data_conditional"].append({
+            "if": {"filter_query": f'{{{first_id}}} = "{totals_row_label}"'},
+            "backgroundColor": ASPIRE_NAVY,
+            "color": "white",
+            "fontWeight": "700",
+        })
+
+    if style_overrides:
+        base_style.update(style_overrides)
+
+    kwargs = dict(
+        id=id,
+        data=data or [],
+        columns=columns or [],
+        page_size=page_size,
+        sort_action="native" if sort else "none",
+        filter_action="native" if filter_ else "none",
+    )
+    if export == "csv":
+        kwargs["export_format"] = "csv"
+    kwargs.update(base_style)
+
+    return dash_table.DataTable(**kwargs)

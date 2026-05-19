@@ -184,6 +184,59 @@ def format_period_label(
     return f"{s.strftime('%d %b %Y')} – {e.strftime('%d %b %Y')}"
 
 
+def format_time_ago(when, *, now=None) -> str:
+    """Render a timestamp as a relative phrase ("Updated 3m ago", "2d ago").
+
+    Used by every dashboard that shows a "last refreshed" or "last logged"
+    stamp. Standardises the unit thresholds across apps.
+
+    Parameters
+    ----------
+    when : datetime | date | ISO string | None
+        The past timestamp to compare against now.
+    now : datetime | None
+        Override for testing. Defaults to ``datetime.now()`` in the same
+        tz as ``when`` (naive vs aware preserved).
+
+    Returns
+    -------
+    str: "just now", "Xm ago", "Xh ago", "Xd ago", "Xw ago", "Xmo ago",
+    "Xy ago", or "—" if input is falsy / invalid.
+    """
+    from datetime import datetime
+    if when is None or when == "":
+        return "—"
+    try:
+        if isinstance(when, str):
+            when_dt = datetime.fromisoformat(when.replace("Z", "+00:00"))
+        elif isinstance(when, datetime):
+            when_dt = when
+        elif isinstance(when, date):
+            when_dt = datetime(when.year, when.month, when.day)
+        else:
+            return "—"
+    except (TypeError, ValueError):
+        return "—"
+
+    now_dt = now or datetime.now(when_dt.tzinfo) if when_dt.tzinfo else (now or datetime.now())
+    delta_s = (now_dt - when_dt).total_seconds()
+    if delta_s < 0:
+        return "in the future"
+    if delta_s < 60:
+        return "just now"
+    if delta_s < 3600:
+        return f"{int(delta_s // 60)}m ago"
+    if delta_s < 86400:
+        return f"{int(delta_s // 3600)}h ago"
+    if delta_s < 7 * 86400:
+        return f"{int(delta_s // 86400)}d ago"
+    if delta_s < 30 * 86400:
+        return f"{int(delta_s // (7 * 86400))}w ago"
+    if delta_s < 365 * 86400:
+        return f"{int(delta_s // (30 * 86400))}mo ago"
+    return f"{int(delta_s // (365 * 86400))}y ago"
+
+
 def days_ago_chip_label(days: int, label: str = "") -> str:
     """Render a tabular-nums-friendly "<label> · <N>d ago" string.
 

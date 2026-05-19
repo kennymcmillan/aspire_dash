@@ -1136,3 +1136,225 @@ def aspire_tabs(id: str, tabs: list[dict], value: str | None = None):
         children=tab_children,
         parent_style=TABS_PARENT_STYLE,
     )
+
+
+# ── Confirm modal ──────────────────────────────────────────────────────────
+
+def confirm_modal(
+    id: str,
+    title: str = "Confirm action",
+    body: object = "Are you sure?",
+    confirm_label: str = "Confirm",
+    cancel_label: str = "Cancel",
+    confirm_color: str = "danger",
+    icon: str = "fa-solid fa-triangle-exclamation",
+):
+    """Standard confirm/cancel modal used by delete + destructive flows.
+
+    Renders a ``dbc.Modal`` with ID ``id`` and two buttons:
+    - ``{id}-confirm`` — the destructive button (Input this in your callback)
+    - ``{id}-cancel`` — closes the modal
+
+    Toggle ``is_open`` from your own callback when the trigger fires.
+
+    Example::
+
+        # Layout
+        confirm_modal("delete-diary", title="Delete diary?",
+                      body="This will soft-delete every row from 12 May.",
+                      confirm_label="Delete")
+
+        # Callback
+        @callback(Output("delete-diary", "is_open"),
+                  Input("row-delete-btn", "n_clicks"),
+                  Input("delete-diary-confirm", "n_clicks"),
+                  Input("delete-diary-cancel", "n_clicks"),
+                  State("delete-diary", "is_open"),
+                  prevent_initial_call=True)
+        def _toggle(open_n, confirm_n, cancel_n, is_open):
+            return not is_open
+    """
+    header_el = html.Div([
+        html.I(className=icon, style={
+            "color": "#d97706" if confirm_color in ("warning", "danger") else ASPIRE["600"],
+            "marginRight": "10px",
+        }),
+        html.Strong(title),
+    ], style={"display": "flex", "alignItems": "center"})
+
+    return dbc.Modal([
+        dbc.ModalHeader(header_el, close_button=True),
+        dbc.ModalBody(body),
+        dbc.ModalFooter([
+            dbc.Button(cancel_label, id=f"{id}-cancel", color="light", n_clicks=0),
+            dbc.Button(confirm_label, id=f"{id}-confirm",
+                       color=confirm_color, n_clicks=0,
+                       style={"marginLeft": "8px"}),
+        ]),
+    ], id=id, is_open=False, centered=True, backdrop="static")
+
+
+# ── File upload card ──────────────────────────────────────────────────────
+
+def file_upload_card(
+    id: str,
+    label: str = "Drag and drop or click to upload",
+    accept: str | None = None,
+    icon: str = "fa-solid fa-cloud-arrow-up",
+    multiple: bool = False,
+    height: str = "120px",
+):
+    """Branded ``dcc.Upload`` dropzone with Aspire styling.
+
+    Pattern from iso-leg-press (.dat parse) and aspire-nutrition (diary upload).
+    Returns a ``dcc.Upload`` with the Aspire blue dashed border + cloud icon
+    + label. Read the upload via ``Input(id, "contents")``.
+
+    Parameters
+    ----------
+    id : str
+        Component id for the upload.
+    label : str
+        Drop-zone instructions.
+    accept : str or None
+        MIME type / extension filter (e.g. ``".csv,.xlsx"`` or ``"image/*"``).
+    icon : str
+        FontAwesome class (defaults to cloud-arrow-up).
+    multiple : bool
+        Allow multiple files.
+    height : str
+        CSS height of the dropzone.
+    """
+    return dcc.Upload(
+        id=id,
+        accept=accept,
+        multiple=multiple,
+        children=html.Div([
+            html.I(className=icon, style={
+                "fontSize": "32px", "color": ASPIRE["600"], "marginBottom": "8px",
+            }),
+            html.Div(label, style={
+                "fontSize": "13px", "color": SLATE["600"], "fontWeight": "500",
+            }),
+        ], style={
+            "display": "flex", "flexDirection": "column",
+            "alignItems": "center", "justifyContent": "center",
+            "height": "100%", "textAlign": "center",
+        }),
+        style={
+            "width": "100%",
+            "height": height,
+            "border": f"2px dashed {ASPIRE['400']}",
+            "borderRadius": f"{RADIUS_LG}px",
+            "background": "#f8fafc",
+            "cursor": "pointer",
+            "transition": "background-color 150ms, border-color 150ms",
+        },
+        style_active={
+            "background": ASPIRE["50"],
+            "border": f"2px dashed {ASPIRE['600']}",
+        },
+    )
+
+
+# ── Connect user chip ─────────────────────────────────────────────────────
+
+def connect_user_chip(default: str = "anonymous", icon: str = "fa-solid fa-user"):
+    """Inline chip showing the Posit Connect-authenticated user.
+
+    Reads the ``RSTUDIO_USER_NAME`` environment variable that Connect
+    injects into every running content process. Falls back to
+    ``default`` locally where the env var is unset.
+
+    Used in mapping_app for ``updated_by`` audit, in nutrition for
+    edit-attribution display. Drop into a header's ``right_content``.
+    """
+    import os as _os
+    user = _os.environ.get("RSTUDIO_USER_NAME") or default
+    return html.Span([
+        html.I(className=icon, style={
+            "marginRight": "6px", "fontSize": "11px", "color": SLATE["500"],
+        }),
+        user,
+    ], style={
+        "display": "inline-flex", "alignItems": "center",
+        "padding": "4px 10px",
+        "background": SLATE["100"],
+        "color": SLATE["700"],
+        "borderRadius": "999px",
+        "fontSize": "12px", "fontWeight": "600",
+        "fontFamily": FONT_FAMILY,
+    })
+
+
+# ── Linear step card (numbered) ────────────────────────────────────────────
+
+def linear_step_card(
+    step_num: int,
+    title: str,
+    children=None,
+    description: str | None = None,
+    *,
+    state: str = "active",
+):
+    """Numbered card for linear workflows (Step 1 → 2 → 3).
+
+    Pattern from aspire-nutrition's diary upload (Steps 1–5) and target
+    setup. Numbered badge + heading + optional description + body slot.
+
+    Parameters
+    ----------
+    step_num : int
+        The step number rendered in the badge.
+    title : str
+        Heading text.
+    children : object
+        Body content (form fields, instructions, action buttons).
+    description : str or None
+        Optional one-line description below the heading.
+    state : "active" | "complete" | "pending"
+        Visual state. ``complete`` shows a check, ``pending`` is muted.
+    """
+    if state == "complete":
+        badge_bg, badge_fg, badge_content = (
+            "#dcfce7", "#166534",
+            html.I(className="fa-solid fa-check"),
+        )
+    elif state == "pending":
+        badge_bg, badge_fg, badge_content = (
+            SLATE["100"], SLATE["500"], str(step_num),
+        )
+    else:
+        badge_bg, badge_fg, badge_content = (
+            ASPIRE["600"], "white", str(step_num),
+        )
+
+    return html.Div([
+        html.Div([
+            html.Div(badge_content, style={
+                "width": "28px", "height": "28px", "borderRadius": "50%",
+                "background": badge_bg, "color": badge_fg,
+                "display": "flex", "alignItems": "center", "justifyContent": "center",
+                "fontWeight": "700", "fontSize": "13px",
+                "flexShrink": "0",
+            }),
+            html.Div([
+                html.Div(title, style={
+                    "fontSize": "15px", "fontWeight": "700",
+                    "color": SLATE["800"] if state != "pending" else SLATE["400"],
+                }),
+                html.Div(description, style={
+                    "fontSize": "12px", "color": SLATE["500"], "marginTop": "2px",
+                }) if description else None,
+            ], style={"marginLeft": "12px", "flex": "1"}),
+        ], style={"display": "flex", "alignItems": "flex-start", "marginBottom": "10px"}),
+        html.Div(children, style={"marginLeft": "40px"}) if children else None,
+    ], style={
+        "background": "white",
+        "border": f"1px solid {SLATE['200']}",
+        "borderRadius": f"{RADIUS_LG}px",
+        "padding": "14px 16px",
+        "boxShadow": SHADOW_SM,
+        "marginBottom": "12px",
+        "opacity": "0.65" if state == "pending" else "1",
+    })

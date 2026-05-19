@@ -709,3 +709,68 @@ def color_badge(text, bg="#f3f4f6", color="#374151"):
         "backgroundColor": bg, "color": color,
         "whiteSpace": "nowrap",
     })
+
+
+# ── Sport dropdown ─────────────────────────────────────────────────────────
+
+#: Default sport list used across Aspire dashboards. Override per app as
+#: needed — most apps only show a subset of these.
+ASPIRE_SPORTS = [
+    "Athletics", "Fencing", "Padel", "Squash",
+    "Swimming", "Table Tennis", "Shooting",
+]
+
+
+def sport_dropdown(
+    id: str,
+    sports: list[str] | list[dict] | dict | None = None,
+    value: str | list | None = None,
+    multi: bool = False,
+    placeholder: str = "Select sport...",
+    clearable: bool = True,
+    include_all: bool = False,
+):
+    """Branded sport-selection dropdown.
+
+    Standardises the sport dropdown across budget, medical, attendance,
+    training, nutrition, mapping, GCC. Pass a list of sport names, a
+    list of ``{"label", "value"}`` dicts, or a ``{id: name}`` dict.
+
+    Parameters
+    ----------
+    id : str
+        Component id.
+    sports : list[str] | list[dict] | dict | None
+        Sport options. None uses ``ASPIRE_SPORTS``.
+    value : str or list or None
+        Initial selection.
+    multi : bool
+        Allow multi-select.
+    placeholder : str
+        Placeholder text.
+    clearable : bool
+        Show the clear button.
+    include_all : bool
+        Prepend an ``"All sports"`` option (value ``"all"``).
+    """
+    if sports is None:
+        opts = [{"label": s, "value": s} for s in ASPIRE_SPORTS]
+    elif isinstance(sports, dict):
+        opts = [{"label": v, "value": k} for k, v in sports.items()]
+    elif sports and isinstance(sports[0], dict):
+        opts = list(sports)
+    else:
+        opts = [{"label": s, "value": s} for s in sports]
+
+    if include_all:
+        opts = [{"label": "All sports", "value": "all"}] + opts
+
+    return dcc.Dropdown(
+        id=id,
+        options=opts,
+        value=value,
+        multi=multi,
+        placeholder=placeholder,
+        clearable=clearable,
+        style={"minWidth": "180px"},
+    )

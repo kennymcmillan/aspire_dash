@@ -35,6 +35,11 @@ from collections import Counter
 from functools import wraps
 from typing import Callable
 
+__all__ = [
+    "configure", "timed", "bump", "get_metrics", "reset_metrics",
+    "LOG_LEVEL", "SLOW_CALLBACK_MS",
+]
+
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 SLOW_CALLBACK_MS = int(os.environ.get("SLOW_CALLBACK_MS", "3000"))
 

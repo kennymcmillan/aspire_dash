@@ -22,6 +22,13 @@ from typing import Callable, Iterable
 import numpy as np
 import plotly.graph_objects as go
 
+__all__ = [
+    "DEFAULT_COLORS",
+    "build_sd_traces", "build_4pt_ma_traces", "build_acute_traces",
+    "build_sd_outlier_traces", "build_main_line_trace",
+    "aggregate_sessions",
+]
+
 
 # Default trace styling (Aspire palette where applicable)
 DEFAULT_COLORS = {

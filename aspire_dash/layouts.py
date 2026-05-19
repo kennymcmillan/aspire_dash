@@ -3,6 +3,8 @@
 from dash import html, dcc, page_container
 from .theme import SIDEBAR_WIDTH, SLATE
 
+__all__ = ["page_layout", "single_page_layout"]
+
 
 def page_layout(sidebar_el, header_el=None, use_pages=True):
     """Full app layout: sidebar + main area (with Dash Pages support).

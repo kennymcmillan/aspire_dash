@@ -49,10 +49,19 @@ Usage in any Dash app:
         pdf_export, send_pdf,
     )
     from aspire_dash.tables import (
-        aspire_grid, register_dirty_tracking,
+        aspire_grid, register_dirty_tracking, aspire_datatable,
         DEFAULT_COL_DEF, EDITABLE_COL_DEF,
         DEFAULT_GRID_OPTIONS, EDITABLE_GRID_OPTIONS,
     )
+
+    # New in 0.7 — second harvest pass (modal, upload, datatable,
+    # time-ago, sport dropdown, Connect user chip, step card):
+    from aspire_dash.components import (
+        confirm_modal, file_upload_card,
+        connect_user_chip, linear_step_card,
+    )
+    from aspire_dash.time import format_time_ago
+    from aspire_dash.sports import sport_dropdown, ASPIRE_SPORTS
 
     app = Dash(__name__, external_stylesheets=STYLESHEETS, use_pages=True)
     setup_app(app)
@@ -62,7 +71,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 
 # ── External stylesheets every Aspire app should load ────────────────────────
 STYLESHEETS = [

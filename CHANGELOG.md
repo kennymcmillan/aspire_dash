@@ -4,6 +4,34 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [Unreleased]
+
+### Added
+
+- **`tests/`** — pytest suite covering import-smoke for every module,
+  theme constants, all component-returning functions, observability
+  counters, stats/timeseries helpers, time arithmetic, budget formatters,
+  athlete picker, sports/viz/firstbeat renderers. **103 tests; ~1.2 s run.**
+- **`.github/workflows/test.yml`** — CI matrix runs pytest on
+  py3.10/3.11/3.12 + a separate `pip install .` smoke job on a fresh
+  clone (catches `package_data` / wheel issues).
+- **`__all__` lists** on the modules with stable public APIs:
+  `observability`, `stats`, `timeseries`, `charts`, `layouts`.
+  Larger modules (components, sports, athlete) intentionally deferred
+  until the maintainer sets the contract.
+- **README test-status badge.**
+
+### Changed
+
+- **`install_requires` now has upper bounds**: `dash>=2.14,<5`,
+  `dash-bootstrap-components>=1.5,<3`, `plotly>=5.18,<7`,
+  `pyyaml>=6.0,<7`, `dash-svg>=0.0.12,<1`. Prevents a silent break
+  when downstream apps pip-install after a major release of any of
+  these. Loosen when we've actually tested the new majors.
+- **`extras_require={"test": [...]}`** — `pip install aspire_dash[test]`
+  pulls pytest + numpy for downstream consumers who want to test
+  against the live package.
+
 ## [0.6.0] — 2026-05-20
 
 ### Added

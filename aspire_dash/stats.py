@@ -9,6 +9,8 @@ from typing import Iterable
 
 import numpy as np
 
+__all__ = ["compute_stats"]
+
 
 def compute_stats(values: Iterable[float]) -> dict:
     """Return mean, std, cv, min, max, n for a list of values.
