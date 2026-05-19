@@ -1300,3 +1300,142 @@ html.dark .Select-option {
 html.dark .Select-option.is-focused {
     background-color: var(--dm-surface-raised) !important;
 }
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Period pills — connected pill-button radio group
+ * Used by aspire_dash.time.period_pill_filter()
+ * Promoted from medical-dashboard/assets/02_medical.css
+ * ──────────────────────────────────────────────────────────────────────── */
+.period-pills {
+    display: inline-flex;
+    align-items: center;
+    background: var(--slate-100, #f1f5f9);
+    border-radius: 8px;
+    padding: 2px;
+    gap: 0;
+}
+
+.period-pills label {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-500, #64748b);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 150ms ease, color 150ms ease;
+    white-space: nowrap;
+}
+
+.period-pills label:hover {
+    color: var(--slate-800, #1e293b);
+}
+
+.period-pills input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.period-pills label:has(input:checked) {
+    background: white;
+    color: var(--aspire-600, #004185);
+    box-shadow: 0 1px 2px rgba(0, 65, 133, 0.12);
+}
+
+html.dark .period-pills {
+    background: var(--dm-surface-raised, #2a3441);
+}
+html.dark .period-pills label {
+    color: var(--dm-text-muted, #94a3b8);
+}
+html.dark .period-pills label:has(input:checked) {
+    background: var(--dm-surface, #1e2530);
+    color: var(--aspire-400, #3b82f6);
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Branded loading spinner — Aspire-blue stroke on light-blue track
+ * Wrap dcc.Loading children in <div class="spinner-wrap"> for full chrome.
+ * ──────────────────────────────────────────────────────────────────────── */
+.spinner-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px 32px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 65, 133, 0.12);
+    border: 1px solid var(--aspire-50, #eff6ff);
+}
+.spinner-core {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--aspire-50, #eff6ff);
+    border-top-color: var(--aspire-600, #004185);
+    border-radius: 50%;
+    animation: aspire-spin 0.9s linear infinite;
+}
+.spinner-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--aspire-600, #004185);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+@keyframes aspire-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Aspire tabs — Aspire-blue underline indicator for dcc.Tabs
+ * Apply via aspire_dash.components.aspire_tabs() — provides matching styles
+ * for static markup too.
+ * ──────────────────────────────────────────────────────────────────────── */
+.aspire-tabs .tab {
+    padding: 10px 22px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--slate-500, #64748b);
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    transition: color 150ms ease, border-color 150ms ease;
+}
+.aspire-tabs .tab.tab--selected {
+    font-weight: 700;
+    color: var(--aspire-600, #004185);
+    border-bottom-color: var(--aspire-600, #004185);
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Athlete avatar circle (fallback initials) — paired with photo <img>
+ * Used by aspire_dash.athlete.athlete_avatar().
+ * ──────────────────────────────────────────────────────────────────────── */
+.athlete-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--aspire-600, #004185);
+    color: white;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid var(--slate-200, #e2e8f0);
+}
+.athlete-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.athlete-avatar.is-target {
+    border-color: var(--gold, #fbb800);
+}

@@ -7,6 +7,8 @@ Usage in any Dash app:
         topnav, register_topnav_active,   # horizontal nav (no sidebar)
         sidebar, header,                   # sidebar nav (classic layout)
         card, toast, badge,
+        status_pill, freshness_banner,    # new in 0.6
+        kpi_stat, aspire_tabs,            # new in 0.6
     )
     from aspire_dash.layouts import page_layout
     from aspire_dash.theme import CHART_COLORS, ACCENT
@@ -26,6 +28,32 @@ Usage in any Dash app:
     # Cache pre-warming on app boot (new in 0.5):
     from aspire_dash.cache_prewarm import cache_prewarm
 
+    # New in 0.6 — modules harvested from medical, nutrition, budget,
+    # attendance, training, and mapping apps:
+    from aspire_dash.time import (
+        period_pill_filter, period_mode_to_dates,
+        sunday_of, monday_of, first_of_month, to_date, date_range,
+        format_period_label, days_ago_chip_label,
+    )
+    from aspire_dash.athlete import (
+        athlete_avatar, athlete_profile_header,
+        athlete_picker, register_athlete_picker,
+        PICKER_STORE_ID,
+    )
+    from aspire_dash.budget import (
+        fmt_currency, fmt_k, fmt_m, fmt_pct,
+        variance_card, utilisation_card, rollup_chips,
+    )
+    from aspire_dash.export import (
+        excel_export_button, pdf_download_button,
+        pdf_export, send_pdf,
+    )
+    from aspire_dash.tables import (
+        aspire_grid, register_dirty_tracking,
+        DEFAULT_COL_DEF, EDITABLE_COL_DEF,
+        DEFAULT_GRID_OPTIONS, EDITABLE_GRID_OPTIONS,
+    )
+
     app = Dash(__name__, external_stylesheets=STYLESHEETS, use_pages=True)
     setup_app(app)
 """
@@ -34,7 +62,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 # ── External stylesheets every Aspire app should load ────────────────────────
 STYLESHEETS = [

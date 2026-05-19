@@ -448,6 +448,47 @@ def kpi_tile(label, value, unit="", color=None, target=None, size="lg",
         md=md_col, className=className)
 
 
+def kpi_strip(metrics, *, size="lg", colors=None):
+    """One-line convenience for a KPI row from a plain dict.
+
+    Each entry in `metrics` is one of:
+        {"label": "Energy", "value": 1971, "unit": "kcal"}            # 3-key
+        ("Energy", 1971, "kcal")                                       # tuple
+
+    `colors` is an optional dict mapping label.lower() -> color hex.
+    Defaults to ASPIRE_BLUE for every tile.
+
+    Example:
+        kpi_strip([
+            {"label": "Athletes", "value": 142,  "unit": ""},
+            {"label": "Sports",   "value": 7,    "unit": ""},
+            {"label": "Diaries",  "value": 1042, "unit": "this year"},
+            {"label": "Avg kcal", "value": 2104, "unit": "kcal/day"},
+        ])
+    """
+    from aspire_dash.theme import ASPIRE_BLUE
+    colors = colors or {}
+    specs = []
+    for m in metrics:
+        if isinstance(m, dict):
+            label = m["label"]
+            value = m.get("value")
+            unit = m.get("unit", "")
+        elif isinstance(m, tuple):
+            if len(m) == 3:
+                label, value, unit = m
+            elif len(m) == 2:
+                label, value = m
+                unit = ""
+            else:
+                raise ValueError(f"kpi_strip tuple must be (label, value[, unit]): {m!r}")
+        else:
+            raise ValueError(f"kpi_strip entry must be dict or tuple: {m!r}")
+        color = colors.get(label.lower(), ASPIRE_BLUE)
+        specs.append((label, value, unit, color))
+    return kpi_tile_row(specs, size=size)
+
+
 def kpi_tile_row(specs, target_by_key=None, size="lg", className="g-2"):
     """Render a row of kpi_tile() components from a spec list.
 
@@ -806,3 +847,292 @@ def send_export(triggered_id, df, filename_base, sheet_name="Sheet1"):
     buf.seek(0)
     encoded = base64.b64encode(buf.read()).decode()
     return dict(content=encoded, filename=f"{filename_base}.xlsx", base64=True)
+
+
+# ── Status Pill ─────────────────────────────────────────────────────────────
+
+#: Status → (background, foreground) palette using Aspire tokens.
+#: Lifted from sams-attendance-dashboard and medical-dashboard, where
+#: every page reimplemented its own Active/Inactive/Injured pill.
+STATUS_PILL_PALETTE = {
+    "current":    ("#dcfce7", "#166534"),  # green — fresh / available / present
+    "active":     ("#dcfce7", "#166534"),
+    "available":  ("#dcfce7", "#166534"),
+    "present":    ("#dcfce7", "#166534"),
+    "ok":         ("#dcfce7", "#166534"),
+    "stale":      ("#fef3c7", "#92400e"),  # amber — warn / pending / on leave
+    "warning":    ("#fef3c7", "#92400e"),
+    "pending":    ("#fef3c7", "#92400e"),
+    "on_leave":   ("#fef3c7", "#92400e"),
+    "absent":     ("#fee2e2", "#991b1b"),  # red — silent / injured / risk
+    "silent":     ("#fee2e2", "#991b1b"),
+    "injured":    ("#fee2e2", "#991b1b"),
+    "sidelined":  ("#fee2e2", "#991b1b"),
+    "high_risk":  ("#fee2e2", "#991b1b"),
+    "inactive":   ("#f1f5f9", "#475569"),  # slate — neutral / retired / archived
+    "neutral":    ("#f1f5f9", "#475569"),
+    "retired":    ("#f1f5f9", "#475569"),
+    "archived":   ("#f1f5f9", "#475569"),
+}
+
+
+def status_pill(
+    status: str | None,
+    label: str | None = None,
+    palette: dict | None = None,
+    size: str = "md",
+):
+    """Coloured pill for state values (Active / Injured / Sidelined / ...).
+
+    Parameters
+    ----------
+    status : str or None
+        Status key — looked up in ``palette`` (defaults to
+        ``STATUS_PILL_PALETTE``). Case-insensitive; spaces and dashes
+        treated as underscores. Unknown values fall back to neutral slate.
+    label : str or None
+        Visible text. Defaults to a Title-Cased ``status``.
+    palette : dict or None
+        Override palette mapping ``key → (bg_hex, fg_hex)``. Useful for
+        domain-specific colours (e.g. injury severity bands).
+    size : "sm" | "md" | "lg"
+        Visual density.
+
+    Example::
+
+        status_pill("active")        # green pill "Active"
+        status_pill("on_leave")      # amber pill "On Leave"
+        status_pill("injured", "Injured · 14d")  # red pill, custom label
+    """
+    key = (status or "").strip().lower().replace(" ", "_").replace("-", "_")
+    pal = palette or STATUS_PILL_PALETTE
+    bg, fg = pal.get(key, ("#f1f5f9", "#475569"))
+    text = label if label is not None else (status or "—").replace("_", " ").title()
+    size_map = {
+        "sm": ("10px", "2px 8px"),
+        "md": ("11px", "3px 10px"),
+        "lg": ("13px", "5px 14px"),
+    }
+    font_size, padding = size_map.get(size, size_map["md"])
+    return html.Span(
+        text,
+        style={
+            "display": "inline-flex", "alignItems": "center",
+            "background": bg, "color": fg,
+            "padding": padding,
+            "borderRadius": "999px",
+            "fontSize": font_size, "fontWeight": "600",
+            "fontVariantNumeric": "tabular-nums",
+            "lineHeight": "1.2",
+            "whiteSpace": "nowrap",
+        },
+    )
+
+
+# ── Freshness Banner ────────────────────────────────────────────────────────
+
+#: Default thresholds (in days) for the freshness classifier.
+FRESHNESS_THRESHOLDS = {"fresh": 7, "stale": 30}
+
+
+def _freshness_status(days: int | float | None) -> str:
+    """Classify days-since-last-log into 'current' / 'stale' / 'silent'."""
+    if days is None or days >= 9999:
+        return "silent"
+    try:
+        d = float(days)
+    except (TypeError, ValueError):
+        return "silent"
+    if d <= FRESHNESS_THRESHOLDS["fresh"]:
+        return "current"
+    if d <= FRESHNESS_THRESHOLDS["stale"]:
+        return "stale"
+    return "silent"
+
+
+def freshness_banner(
+    rows,
+    label: str = "Data freshness",
+    sort: str = "worst_first",
+    empty_text: str = "No data available",
+):
+    """One-line banner with one chip per source, coloured by recency.
+
+    Lifted from medical-dashboard. The same pattern fits nutrition's
+    multi-sport diary freshness, training plan freshness, scraper
+    freshness — anywhere a dashboard needs a visible "logging is
+    healthy" signal.
+
+    Parameters
+    ----------
+    rows : iterable of dict
+        Each row: ``{"label": str, "days": int | None, "status": str | None}``.
+        - ``label``: the chip text prefix (sport, scraper name, etc.)
+        - ``days``: days since last update (None / 9999 = never)
+        - ``status``: optional manual override; if omitted, derived from days
+    label : str
+        Eyebrow text on the left.
+    sort : "worst_first" | "best_first" | "as_is"
+        Chip ordering. Default sorts staler items left.
+    empty_text : str
+        Shown when ``rows`` is empty.
+    """
+    rows = list(rows or [])
+    if not rows:
+        chips = [html.Span(empty_text, style={"color": SLATE["500"]})]
+    else:
+        if sort == "worst_first":
+            rows = sorted(rows, key=lambda r: -(r.get("days") or 0))
+        elif sort == "best_first":
+            rows = sorted(rows, key=lambda r: (r.get("days") or 0))
+        chips = []
+        for r in rows:
+            days = r.get("days")
+            status = r.get("status") or _freshness_status(days)
+            bg, fg = STATUS_PILL_PALETTE.get(status, ("#e2e8f0", "#334155"))
+            if days is None or days >= 9999:
+                txt = f"{r.get('label', '—')} · never"
+            else:
+                txt = f"{r.get('label', '—')} · {int(days)}d ago"
+            chips.append(html.Div(txt, style={
+                "background": bg, "color": fg,
+                "padding": "4px 10px", "borderRadius": "999px",
+                "fontSize": "12px", "fontWeight": "600",
+                "marginRight": "8px", "display": "inline-block",
+                "fontVariantNumeric": "tabular-nums",
+            }))
+
+    return html.Div([
+        html.Span(label.upper(), style={
+            "fontSize": "11px", "fontWeight": "700",
+            "color": SLATE["500"], "letterSpacing": "0.4px",
+            "marginRight": "12px",
+        }),
+        *chips,
+    ], style={
+        "background": "white",
+        "border": f"1px solid {SLATE['200']}",
+        "borderRadius": f"{RADIUS_LG}px",
+        "padding": "10px 16px",
+        "marginBottom": "16px",
+        "display": "flex", "alignItems": "center", "flexWrap": "wrap",
+        "boxShadow": SHADOW_SM,
+    })
+
+
+# ── KPI Stat (vertical label/value/sub) ────────────────────────────────────
+
+def kpi_stat(label, value, sub: str = "", color: str | None = None, icon: str | None = None):
+    """Vertical KPI tile — uppercase label · big value · optional subtitle.
+
+    Distinct from ``summary_card`` (denser layout, white-on-white) and
+    ``kpi_tile`` (vs-target progress bar). This one is the bare KPI used
+    in medical-dashboard squad cards and the budget app's variance row.
+
+    Use directly inside a flex/grid or wrap in ``dbc.Col``.
+
+    Parameters
+    ----------
+    label : str
+        Uppercase eyebrow (e.g. "Days lost", "Budget").
+    value : str | int | float
+        Big number — pre-format thousands / currency / pct before passing in.
+    sub : str
+        Optional subtitle (e.g. "vs target", "138/174").
+    color : str or None
+        Hex for the value text. Defaults to Aspire blue.
+    icon : str or None
+        FontAwesome class for an inline label icon.
+    """
+    val_color = color or ASPIRE["600"]
+    icon_el = html.I(className=icon, style={
+        "fontSize": "10px", "marginRight": "6px", "color": SLATE["400"],
+    }) if icon else None
+    return html.Div([
+        html.Div(
+            [icon_el, label] if icon_el else label,
+            style={
+                "fontSize": "11px", "fontWeight": "600",
+                "color": SLATE["500"], "textTransform": "uppercase",
+                "letterSpacing": "0.4px",
+                "display": "flex", "alignItems": "center",
+            },
+        ),
+        html.Div(str(value), style={
+            "fontSize": "26px", "fontWeight": "700", "color": val_color,
+            "marginTop": "4px", "fontVariantNumeric": "tabular-nums",
+            "lineHeight": "1.15",
+        }),
+        html.Div(sub, style={
+            "fontSize": "12px", "color": SLATE["400"], "marginTop": "2px",
+        }) if sub else None,
+    ], style={
+        "background": "white",
+        "border": f"1px solid {SLATE['200']}",
+        "borderRadius": f"{RADIUS_LG}px",
+        "padding": "14px 16px",
+        "boxShadow": SHADOW_SM,
+    })
+
+
+# ── Aspire Tabs ────────────────────────────────────────────────────────────
+
+#: Style dicts for un-selected dcc.Tab. Lift from aspire-budget-dashboard.
+TAB_STYLE = {
+    "padding": "10px 22px",
+    "fontSize": "14px",
+    "fontWeight": "500",
+    "color": SLATE["500"],
+    "background": "transparent",
+    "border": "none",
+    "borderBottom": "3px solid transparent",
+    "transition": "color .15s ease, border-color .15s ease",
+}
+TAB_SELECTED_STYLE = {
+    "padding": "10px 22px",
+    "fontSize": "14px",
+    "fontWeight": "700",
+    "color": ACCENT,
+    "background": "transparent",
+    "border": "none",
+    "borderBottom": f"3px solid {ACCENT}",
+}
+TABS_PARENT_STYLE = {
+    "borderBottom": f"1px solid {SLATE['200']}",
+    "marginTop": "8px",
+}
+
+
+def aspire_tabs(id: str, tabs: list[dict], value: str | None = None):
+    """Branded ``dcc.Tabs`` with the Aspire-blue underline indicator.
+
+    Replaces hand-rolled TAB_STYLE / TAB_SELECTED_STYLE dicts in every
+    app that uses ``dcc.Tabs``. Same Aspire navy + gold accent applies
+    via ``ACCENT`` from theme.
+
+    Parameters
+    ----------
+    id : str
+        Component id of the ``dcc.Tabs`` (callbacks read its ``value``).
+    tabs : list of dict
+        Each dict: ``{"label": str, "value": str}``. Optionally a
+        ``"children"`` key for static tab content (otherwise feed
+        ``dcc.Tabs`` output into your own router callback).
+    value : str or None
+        Initial active tab; defaults to first entry's value.
+    """
+    tab_children = []
+    for t in tabs:
+        kwargs = {
+            "label": t["label"], "value": t["value"],
+            "style": TAB_STYLE, "selected_style": TAB_SELECTED_STYLE,
+        }
+        if "children" in t:
+            kwargs["children"] = t["children"]
+        tab_children.append(dcc.Tab(**kwargs))
+    return dcc.Tabs(
+        id=id,
+        value=value or (tabs[0]["value"] if tabs else None),
+        children=tab_children,
+        parent_style=TABS_PARENT_STYLE,
+    )

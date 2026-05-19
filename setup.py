@@ -3,8 +3,8 @@ from setuptools import setup, find_packages
 
 setup(
     name="aspire_dash",
-    version="0.4.0",
-    description="Aspire Academy shared Dash branding, components, layouts, observability, timeseries",
+    version="0.6.0",
+    description="Aspire Academy shared Dash branding, components, layouts, observability, timeseries, athlete + budget + time + export + tables modules",
     author="Kenny McMillan",
     packages=find_packages(),
     package_data={"aspire_dash": ["assets/*", "assets/**/*", "templates/*", "brand.yml"]},

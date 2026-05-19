@@ -1,0 +1,172 @@
+"""AG Grid wrappers with Aspire defaults + editable / dirty-tracking presets.
+
+Lifted from mapping_app's editable athlete table, SAMS_register's
+read-only browser, and iso-leg-press's results table. The base config —
+12px Inter, slate borders, Aspire-blue header — is identical across
+them, so callers just pass ``columnDefs`` + ``rowData``.
+
+Note: ``aspire_grid`` requires ``dash-ag-grid``. Add to your app's
+``requirements.txt`` if you use it.
+"""
+from __future__ import annotations
+
+from dash import dcc, html, Input, Output, State
+
+from .theme import ASPIRE_BLUE, ASPIRE_NAVY, SLATE
+
+
+def _import_dag():
+    import dash_ag_grid as dag
+    return dag
+
+
+# ── Default config presets ────────────────────────────────────────────────
+
+DEFAULT_COL_DEF = {
+    "resizable": True,
+    "sortable": True,
+    "filter": True,
+    "minWidth": 130,
+    "cellStyle": {"fontSize": "12px", "fontFamily": "Inter, sans-serif"},
+}
+EDITABLE_COL_DEF = {**DEFAULT_COL_DEF, "editable": True}
+
+DEFAULT_GRID_OPTIONS = {
+    "rowHeight": 32,
+    "headerHeight": 38,
+    "suppressMovableColumns": True,
+    "enableCellTextSelection": True,
+    "animateRows": False,
+}
+EDITABLE_GRID_OPTIONS = {
+    **DEFAULT_GRID_OPTIONS,
+    "stopEditingWhenCellsLoseFocus": True,
+}
+
+#: Style block applied to .ag-theme-alpine to recolour the header with
+#: Aspire blue and tighten the row borders to slate-200. Include in your
+#: app's assets/custom.css OR import the rules from 00_aspire_base.css
+#: (added in v0.6).
+ASPIRE_AG_THEME_OVERRIDES = """
+.ag-theme-alpine {
+    --ag-header-background-color: var(--aspire-600, #004185);
+    --ag-header-foreground-color: white;
+    --ag-row-border-color: var(--slate-200, #e2e8f0);
+    --ag-font-family: Inter, sans-serif;
+    --ag-font-size: 12px;
+}
+.ag-theme-alpine .ag-cell-inline-editing { background: #fff8e1; }
+.ag-theme-alpine .ag-row-modified { background: #fff8e1 !important; }
+""".strip()
+
+
+def aspire_grid(
+    id: str,
+    columnDefs: list[dict] | None = None,
+    rowData: list[dict] | None = None,
+    *,
+    editable: bool = False,
+    height: str = "calc(100vh - 200px)",
+    grid_options_overrides: dict | None = None,
+    column_def_overrides: dict | None = None,
+):
+    """Branded AG Grid with sensible defaults.
+
+    Parameters
+    ----------
+    id : str
+        Component id (used by callbacks to read ``rowData`` /
+        ``virtualRowData`` / ``cellValueChanged``).
+    columnDefs : list of dict
+        AG Grid column definitions. Defaults to ``[]`` so the layout
+        can render before data lands.
+    rowData : list of dict
+        Initial rows.
+    editable : bool
+        If True, every column is editable by default and the grid uses
+        ``stopEditingWhenCellsLoseFocus``. Override per column via
+        ``columnDefs[i]["editable"] = False``.
+    height : str
+        CSS height. Defaults to fill the viewport below a 200px header.
+    grid_options_overrides : dict or None
+        Merge into ``dashGridOptions``.
+    column_def_overrides : dict or None
+        Merge into ``defaultColDef``.
+
+    Returns
+    -------
+    ``dag.AgGrid`` component. Wrap in ``loading_overlay`` for branded
+    spinner during initial load.
+    """
+    dag = _import_dag()
+    default_col = (EDITABLE_COL_DEF if editable else DEFAULT_COL_DEF).copy()
+    if column_def_overrides:
+        default_col.update(column_def_overrides)
+    grid_options = (EDITABLE_GRID_OPTIONS if editable else DEFAULT_GRID_OPTIONS).copy()
+    if grid_options_overrides:
+        grid_options.update(grid_options_overrides)
+
+    return dag.AgGrid(
+        id=id,
+        columnDefs=columnDefs or [],
+        rowData=rowData or [],
+        defaultColDef=default_col,
+        dashGridOptions=grid_options,
+        style={"height": height, "width": "100%"},
+        className="ag-theme-alpine",
+    )
+
+
+def register_dirty_tracking(
+    app,
+    grid_id: str,
+    *,
+    key_field: str,
+    dirty_store_id: str | None = None,
+):
+    """Wire a dirty-row tracker to an editable AG Grid.
+
+    Each edit captures the row's key field into a ``dcc.Store`` so a
+    Save callback can push only changed rows back to the backend.
+    Pattern from mapping_app.
+
+    Parameters
+    ----------
+    app : Dash
+    grid_id : str
+        ID of the grid (matches ``aspire_grid(id=...)``).
+    key_field : str
+        Column name that uniquely identifies a row (e.g. ``"sams_mrn"``).
+    dirty_store_id : str or None
+        ID of the ``dcc.Store`` that holds the dirty-key list. Defaults
+        to ``f"{grid_id}-dirty"``. Add this store to your layout::
+
+            dcc.Store(id=f"{grid_id}-dirty", data=[])
+
+    Returns
+    -------
+    str — the dirty-store id (for convenience).
+    """
+    store_id = dirty_store_id or f"{grid_id}-dirty"
+
+    @app.callback(
+        Output(store_id, "data"),
+        Input(grid_id, "cellValueChanged"),
+        State(store_id, "data"),
+        prevent_initial_call=True,
+    )
+    def _track_dirty(change, dirty):
+        if not change:
+            return dirty
+        rec = change[0] if isinstance(change, list) else change
+        row = rec.get("data") or {}
+        key = row.get(key_field)
+        if key is None:
+            return dirty
+        if dirty is None:
+            dirty = []
+        if key not in dirty:
+            dirty.append(key)
+        return dirty
+
+    return store_id
