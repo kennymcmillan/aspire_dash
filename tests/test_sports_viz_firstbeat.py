@@ -73,3 +73,38 @@ def test_get_acwr_status_buckets():
         out = get_acwr_status(acwr)
         assert isinstance(out, dict)
         assert "status" in out and "color" in out
+
+
+# ── v0.7 sport dropdown ────────────────────────────────────────────────────
+
+def test_sport_dropdown_default_list():
+    from aspire_dash.sports import sport_dropdown, ASPIRE_SPORTS
+    out = sport_dropdown("sp-dd")
+    assert is_dash_component(out)
+    assert "Athletics" in ASPIRE_SPORTS
+
+
+def test_sport_dropdown_with_dict_options():
+    from aspire_dash.sports import sport_dropdown
+    out = sport_dropdown("sp-dd", sports={1: "Athletics", 2: "Fencing"},
+                         value=1, include_all=True)
+    assert is_dash_component(out)
+
+
+def test_sport_dropdown_multi():
+    from aspire_dash.sports import sport_dropdown
+    assert is_dash_component(sport_dropdown("sp-dd", multi=True))
+
+
+# ── v0.7 aspire_datatable ──────────────────────────────────────────────────
+
+def test_aspire_datatable_renders():
+    from aspire_dash.tables import aspire_datatable
+    out = aspire_datatable(
+        "tbl",
+        data=[{"Sport": "A", "Budget": 1000}, {"Sport": "TOTAL", "Budget": 1000}],
+        columns=[{"name": "Sport", "id": "Sport"},
+                 {"name": "Budget", "id": "Budget"}],
+        totals_row_label="TOTAL",
+    )
+    assert is_dash_component(out)
