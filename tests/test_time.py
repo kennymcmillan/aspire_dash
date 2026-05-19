@@ -51,3 +51,18 @@ def test_format_period_label_safe_default():
     from aspire_dash.time import format_period_label
     s = format_period_label(date(2026, 1, 1), date(2026, 1, 7))
     assert isinstance(s, str) and s
+
+
+def test_format_time_ago_buckets():
+    """v0.7: relative time bucketing (5m / 3h / 2d / 6w → 1mo / 2y)."""
+    from datetime import datetime, timedelta
+    from aspire_dash.time import format_time_ago
+    now = datetime(2026, 5, 20, 12, 0, 0)
+    assert format_time_ago(now - timedelta(seconds=30), now=now) == "just now"
+    assert format_time_ago(now - timedelta(minutes=5), now=now) == "5m ago"
+    assert format_time_ago(now - timedelta(hours=3), now=now) == "3h ago"
+    assert format_time_ago(now - timedelta(days=2), now=now) == "2d ago"
+    assert format_time_ago(now - timedelta(weeks=2), now=now) == "2w ago"
+    assert format_time_ago(None, now=now) == "—"
+    assert format_time_ago("", now=now) == "—"
+    assert format_time_ago("not-a-date", now=now) == "—"

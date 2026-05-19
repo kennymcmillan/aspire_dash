@@ -116,3 +116,54 @@ def test_status_pill_renders():
     assert is_dash_component(status_pill("ok", label="Healthy"))
     # None status should also render (defensive default)
     assert is_dash_component(status_pill(None))
+
+
+# ── v0.7 additions ──────────────────────────────────────────────────────────
+
+def test_confirm_modal_renders():
+    from aspire_dash.components import confirm_modal
+    out = confirm_modal("delete-x", title="Delete?", body="Are you sure?")
+    assert is_dash_component(out)
+
+
+def test_file_upload_card_renders():
+    from aspire_dash.components import file_upload_card
+    out = file_upload_card("upload-x", label="Drop CSV", accept=".csv")
+    assert is_dash_component(out)
+
+
+def test_connect_user_chip_renders():
+    from aspire_dash.components import connect_user_chip
+    assert is_dash_component(connect_user_chip())
+    assert is_dash_component(connect_user_chip(default="kenny"))
+
+
+def test_linear_step_card_states():
+    from aspire_dash.components import linear_step_card
+    for state in ("active", "complete", "pending"):
+        out = linear_step_card(1, "Step", "desc", state=state)
+        assert is_dash_component(out)
+
+
+def test_aspire_tabs_renders():
+    from aspire_dash.components import aspire_tabs
+    out = aspire_tabs("tabs-x", [
+        {"label": "A", "value": "a"}, {"label": "B", "value": "b"},
+    ])
+    assert is_dash_component(out)
+
+
+def test_freshness_banner_renders():
+    from aspire_dash.components import freshness_banner
+    out = freshness_banner([
+        {"label": "Athletics", "days": 2},
+        {"label": "Padel", "days": 60},
+        {"label": "Squash", "days": None},
+    ])
+    assert is_dash_component(out)
+
+
+def test_kpi_stat_renders():
+    from aspire_dash.components import kpi_stat
+    out = kpi_stat("Days lost", 234, sub="last 12 months")
+    assert is_dash_component(out)
