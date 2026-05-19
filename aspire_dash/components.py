@@ -356,6 +356,124 @@ def summary_card(label, value, sub=None, icon=None, color_class=""):
     })
 
 
+# ── KPI Tile ────────────────────────────────────────────────────────────────
+
+def kpi_tile(label, value, unit="", color=None, target=None, size="lg",
+             md_col=3, className="mb-2"):
+    """KPI tile: uppercase label · big value · unit subtitle · optional
+    vs-target progress bar with band coloring.
+
+    Used for metric strips (calories / mph / kg / pct), dashboard KPI
+    rows, and the macro-totals card on data-bound pages.
+
+    Parameters
+    ----------
+    label : str
+        Uppercase title (e.g. "Energy", "Protein").
+    value : float | int | None
+        The big number. None renders as "—".
+    unit : str
+        Right of the number (e.g. "kcal", "g", "mg"). Also shown in
+        the target-comparison subtitle when target is provided.
+    color : str
+        Hex/CSS color for the left-stripe accent + value text. Falls
+        back to ASPIRE_BLUE if not supplied.
+    target : dict | None
+        Optional vs-target context. Shape:
+            {target_value | target_resolved_target,  # absolute target
+             pct_of_target,                          # already-computed %
+             band: "in" | "below" | "above"}
+        When present, the tile gets a progress bar + a "X% of target"
+        subtitle colored by band_color(band).
+    size : "lg" | "sm"
+        Visual density. lg = 1.8rem value, sm = 1.4rem value.
+    md_col : int
+        Bootstrap col width within a dbc.Row (1-12). Default 3 = 4-up.
+    className : str
+        Extra classes on the wrapping Col.
+
+    Returns a dbc.Col so the tiles slot into a dbc.Row directly.
+    """
+    from aspire_dash.theme import band_color, ASPIRE_BLUE  # local — avoid cycle
+
+    accent = color or ASPIRE_BLUE
+    value_text_size = "1.8rem" if size == "lg" else "1.4rem"
+    label_text_size = "0.7rem" if size == "lg" else "0.65rem"
+    padding         = "12px 16px" if size == "lg" else "8px 12px"
+    border_width    = "4px" if size == "lg" else "3px"
+    border_radius   = "8px" if size == "lg" else "6px"
+
+    bar = None
+    sub = html.Div(unit, className="text-muted small",
+                   style={"fontSize": label_text_size})
+
+    has_target = bool(target) and (target.get("target_resolved_target")
+                                   or target.get("target_value"))
+    if has_target and value:
+        tgt_val = (target.get("target_resolved_target")
+                   or target.get("target_value"))
+        band = (target.get("band") or "").lower()
+        pct = target.get("pct_of_target")
+        bc_hex = band_color(band, as_hex=True)
+        bc_bs  = band_color(band)
+        bar = dbc.Progress(
+            value=min(100, (value / tgt_val) * 100) if tgt_val else 0,
+            style={"height": "5px", "marginTop": "6px"},
+            color=bc_bs,
+        )
+        pct_txt = (f"{pct:.0f}% of target" if pct is not None
+                   else f"{value/tgt_val*100:.0f}% of {tgt_val:,.0f}{unit}")
+        sub = html.Div([
+            html.Span(unit), html.Span(" · "),
+            html.Span(pct_txt, style={"color": bc_hex, "fontWeight": "600"}),
+        ], className="text-muted small")
+
+    return dbc.Col(html.Div([
+        html.Div(label, className="text-muted small",
+                 style={"textTransform": "uppercase",
+                        "letterSpacing": "0.5px",
+                        "fontSize": label_text_size}),
+        html.Div(f"{value:,.0f}" if value else "—",
+                 style={"fontSize": value_text_size,
+                        "fontWeight": "700",
+                        "color": accent, "lineHeight": "1.1"}),
+        sub,
+        bar,
+    ], style={"padding": padding,
+              "background": "white",
+              "border": f"1px solid {SLATE['200']}",
+              "borderRadius": border_radius,
+              "borderLeft": f"{border_width} solid {accent}",
+              "height": "100%"}),
+        md=md_col, className=className)
+
+
+def kpi_tile_row(specs, target_by_key=None, size="lg", className="g-2"):
+    """Render a row of kpi_tile() components from a spec list.
+
+    Each spec is a tuple:
+        (label, key, value, unit, color)        # 5-tuple, with target lookup
+        (label, value, unit, color)             # 4-tuple, no target lookup
+
+    target_by_key : dict[str, dict] | None
+        Maps key -> target dict (see kpi_tile docstring). Only used
+        for 5-tuple specs.
+    """
+    by_key = target_by_key or {}
+    cols = []
+    for spec in specs:
+        if len(spec) == 5:
+            label, key, value, unit, color = spec
+        elif len(spec) == 4:
+            label, value, unit, color = spec
+            key = None
+        else:
+            raise ValueError(f"kpi_tile_row spec must be 4 or 5 elements: {spec!r}")
+        target = by_key.get((key or "").lower()) if key else None
+        cols.append(kpi_tile(label, value, unit, color, target=target, size=size))
+    return dbc.Row(cols, className=className)
+
+
 # ── Graph Card ──────────────────────────────────────────────────────────────
 
 def graph_card(figure, config=None, title=None, style=None, **graph_kwargs):

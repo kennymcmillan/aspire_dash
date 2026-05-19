@@ -55,3 +55,36 @@ SHADOW_LG = BRAND["shadows"]["lg"]
 # ── Logo ─────────────────────────────────────────────────────────────────────
 LOGO_FILENAME = BRAND["logo"]["filename"]
 LOGO_ALT = BRAND["logo"]["alt"]
+
+
+# ── Band classification → colors ─────────────────────────────────────────────
+# Used by KPI tiles, target-vs-actual progress bars, and any UI that
+# classifies a measured value as below / in / above an acceptable band.
+# Two mappings: bootstrap class (for dbc.Progress color=) and hex (for
+# inline styles / chart traces).
+
+BAND_BS = {
+    "in":    "success",   # green — value sits within target band
+    "below": "warning",   # gold  — below band, action recommended
+    "above": "danger",    # red   — over band, action recommended
+}
+
+BAND_HEX = {
+    "in":    SUCCESS,
+    "below": GOLD,
+    "above": DANGER,
+}
+
+
+def band_color(band: str | None, *, as_hex: bool = False) -> str:
+    """Map a band label to either a bootstrap color class or a hex code.
+
+        band_color("in")             -> "success"
+        band_color("above")          -> "danger"
+        band_color("in", as_hex=True) -> "#16a34a"
+        band_color(None)             -> "secondary" / SLATE["500"]
+    """
+    key = (band or "").lower()
+    if as_hex:
+        return BAND_HEX.get(key, SLATE.get("500", "#64748b"))
+    return BAND_BS.get(key, "secondary")

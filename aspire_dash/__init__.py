@@ -19,6 +19,13 @@ Usage in any Dash app:
         skel_avatar_list, skel_kpi_strip,
     )
 
+    # KPI tiles + band-coloured progress (new in 0.5):
+    from aspire_dash.components import kpi_tile, kpi_tile_row
+    from aspire_dash.theme import band_color, BAND_BS, BAND_HEX
+
+    # Cache pre-warming on app boot (new in 0.5):
+    from aspire_dash.cache_prewarm import cache_prewarm
+
     app = Dash(__name__, external_stylesheets=STYLESHEETS, use_pages=True)
     setup_app(app)
 """
@@ -27,7 +34,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 # ── External stylesheets every Aspire app should load ────────────────────────
 STYLESHEETS = [
