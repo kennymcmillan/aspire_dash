@@ -12,6 +12,13 @@ Usage in any Dash app:
     from aspire_dash.theme import CHART_COLORS, ACCENT
     from aspire_dash.charts import GRAPH_CONFIG
 
+    # Skeleton shimmer placeholders (new in 0.4):
+    from aspire_dash.skeletons import (
+        skel_line, skel_card, skel_tile, skel_circle,
+        skel_table_rows, skel_metric_tiles, skel_card_grid,
+        skel_avatar_list, skel_kpi_strip,
+    )
+
     app = Dash(__name__, external_stylesheets=STYLESHEETS, use_pages=True)
     setup_app(app)
 """
@@ -20,7 +27,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.1.0"
+__version__ = "0.4.0"
 
 # ── External stylesheets every Aspire app should load ────────────────────────
 STYLESHEETS = [
