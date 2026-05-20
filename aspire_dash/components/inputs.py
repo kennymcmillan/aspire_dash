@@ -17,7 +17,7 @@ from ..theme import (
 )
 
 
-__all__ = ['toggle_group', 'filter_bar', 'dark_mode_toggle', 'aspire_tabs']
+__all__ = ['toggle_group', 'mode_toggle', 'filter_bar', 'dark_mode_toggle', 'aspire_tabs']
 
 # ── Toggle Group ─────────────────────────────────────────────────────────────
 
@@ -57,6 +57,104 @@ def toggle_group(toggle_id, options, value=None):
         "borderRadius": "8px", "padding": "2px",
     })
 
+
+
+# ── Mode Toggle (mutually-exclusive analysis modes) ─────────────────────────
+
+MODE_TOGGLE_COLORS = {
+    "navy":    "mode-btn-active-navy",
+    "blue":    "mode-btn-active-blue",
+    "red":     "mode-btn-active-red",
+    "emerald": "mode-btn-active-emerald",
+}
+
+
+def mode_toggle(id_prefix, options, default=None, register_callback=True):
+    """Mutually-exclusive button group — exactly one mode active at all times.
+
+    Generalises the SD/MA/Acute/Adaptive overlay toggle from DASH_VALD. Renders
+    a row of ``html.Button`` elements plus a backing ``dcc.Store`` that holds
+    the currently-active option's ``value``. Subscribe to ``f"{id_prefix}-store"``
+    from your chart callback to switch overlays.
+
+    Parameters
+    ----------
+    id_prefix : str
+        Base id. Buttons get ``f"{id_prefix}-btn-{value}"``; store gets
+        ``f"{id_prefix}-store"``.
+    options : list of dict
+        Each: ``{"label": str, "value": str, "color": "navy"|"blue"|"red"|"emerald"}``.
+        ``color`` defaults to ``"navy"``.
+    default : str or None
+        Initial active ``value``. Defaults to the first option's value.
+    register_callback : bool
+        If True (default), registers the mutex clientside callback inline so the
+        caller doesn't have to. Set False for layout-only smoke tests.
+    """
+    if not options:
+        raise ValueError("mode_toggle requires at least one option")
+
+    default = default or options[0]["value"]
+    store_id = f"{id_prefix}-store"
+    button_ids = [f"{id_prefix}-btn-{opt['value']}" for opt in options]
+
+    buttons = []
+    for opt, bid in zip(options, button_ids):
+        is_active = opt["value"] == default
+        active_class = MODE_TOGGLE_COLORS.get(opt.get("color", "navy"), "mode-btn-active-navy")
+        cls = f"mode-btn {active_class}" if is_active else "mode-btn"
+        buttons.append(html.Button(opt["label"], id=bid, n_clicks=0, className=cls))
+
+    layout = html.Div([
+        html.Div(buttons, className="mode-toggle-group"),
+        dcc.Store(id=store_id, data=default),
+    ])
+
+    if register_callback:
+        _register_mode_toggle_callback(id_prefix, options)
+
+    return layout
+
+
+def _register_mode_toggle_callback(id_prefix, options):
+    """Wire the mutex clientside callback for a mode_toggle."""
+    import json
+    button_ids = [f"{id_prefix}-btn-{opt['value']}" for opt in options]
+    store_id = f"{id_prefix}-store"
+    values = [opt["value"] for opt in options]
+    value_to_class = {
+        opt["value"]: f"mode-btn {MODE_TOGGLE_COLORS.get(opt.get('color', 'navy'), 'mode-btn-active-navy')}"
+        for opt in options
+    }
+
+    sig = ", ".join(f"c{i}" for i in range(len(options)))
+    js = f"""
+    function({sig}, currentValue) {{
+        const ctx = dash_clientside.callback_context;
+        const VALUES = {json.dumps(values)};
+        const BUTTON_IDS = {json.dumps(button_ids)};
+        const VALUE_TO_CLASS = {json.dumps(value_to_class)};
+
+        let activeValue = currentValue || VALUES[0];
+        if (ctx.triggered && ctx.triggered.length > 0) {{
+            const tid = ctx.triggered[0].prop_id.split(".")[0];
+            const idx = BUTTON_IDS.indexOf(tid);
+            if (idx >= 0) activeValue = VALUES[idx];
+        }}
+
+        const classes = VALUES.map(v =>
+            v === activeValue ? VALUE_TO_CLASS[v] : "mode-btn"
+        );
+        return [...classes, activeValue];
+    }}
+    """
+
+    clientside_callback(
+        js,
+        [Output(bid, "className") for bid in button_ids] + [Output(store_id, "data")],
+        [Input(bid, "n_clicks") for bid in button_ids],
+        [State(store_id, "data")],
+    )
 
 
 # ── Filter Bar ───────────────────────────────────────────────────────────────

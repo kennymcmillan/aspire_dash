@@ -53,6 +53,58 @@ def test_toast_returns_component():
     assert is_dash_component(toast("my-toast"))
 
 
+def test_mode_toggle_returns_component():
+    from aspire_dash.components import mode_toggle
+    out = mode_toggle("test-mode", [
+        {"label": "SD", "value": "sd", "color": "navy"},
+        {"label": "MA", "value": "ma", "color": "blue"},
+    ], default="sd", register_callback=False)
+    assert is_dash_component(out)
+
+
+def test_mode_toggle_first_default():
+    """Default is first option's value when none specified."""
+    from aspire_dash.components import mode_toggle
+    out = mode_toggle("m1", [
+        {"label": "A", "value": "a"},
+        {"label": "B", "value": "b"},
+    ], register_callback=False)
+    # children[1] is the Store, children[0] is the button row
+    store = out.children[1]
+    assert store.data == "a"
+
+
+def test_mode_toggle_marks_active_button():
+    from aspire_dash.components import mode_toggle
+    out = mode_toggle("m2", [
+        {"label": "X", "value": "x", "color": "emerald"},
+        {"label": "Y", "value": "y", "color": "red"},
+    ], default="y", register_callback=False)
+    btn_row = out.children[0]
+    classes = [b.className for b in btn_row.children]
+    assert "mode-btn-active-red" in classes[1]
+    assert "mode-btn-active" not in classes[0]  # off button has no active class
+
+
+def test_mode_toggle_empty_options_raises():
+    from aspire_dash.components import mode_toggle
+    import pytest
+    with pytest.raises(ValueError):
+        mode_toggle("m3", [], register_callback=False)
+
+
+def test_mode_toggle_register_callback_via_dash_app():
+    """register_callback=True should wire a clientside callback without error."""
+    import dash
+    from aspire_dash.components import mode_toggle
+    app = dash.Dash(__name__)  # noqa: F841 — establishes callback context
+    out = mode_toggle("m4", [
+        {"label": "A", "value": "a", "color": "navy"},
+        {"label": "B", "value": "b", "color": "blue"},
+    ], register_callback=True)
+    assert is_dash_component(out)
+
+
 def test_badge_pill_variants():
     from aspire_dash.components import badge
     assert is_dash_component(badge("New", color="success"))
