@@ -518,3 +518,70 @@ def register_athlete_picker(
             return athlete, _picker_selected_chip(athlete), False
 
         return no_update, no_update, no_update
+
+
+# ── Last-test-date dropdown options (sort by recent) ───────────────────────
+
+def athlete_options_with_recency(
+    profiles: list[dict],
+    last_test_dates: dict[str, str | None] | None = None,
+    *,
+    id_field: str = "profileId",
+    name_field: str = "fullName",
+    label_date_fmt: str = "%d %b",
+) -> list[dict]:
+    """Build dropdown options sorted by most-recent test, with the date
+    appended to the label.
+
+    Example output::
+
+        [
+            {"label": "Aleix Paris (15 Nov)", "value": "abc-123"},
+            {"label": "Mohamed Noufal (12 Oct)", "value": "def-456"},
+            {"label": "Bob Stale", "value": "ghi-789"},  # no recent date
+        ]
+
+    Args:
+        profiles:        list of athlete dicts (anything with ``id_field``
+                          and ``name_field``).
+        last_test_dates: mapping ``profileId → ISO date "YYYY-MM-DD"``.
+                          Athletes missing from the map (or with ``None``)
+                          fall to the bottom alphabetically.
+        id_field:        which dict key holds the unique id (default
+                          ``profileId`` — VALD shape). Override for SAMS
+                          (``playerId``), Whoop (``user_id``), etc.
+        name_field:      which dict key holds the display name.
+        label_date_fmt:  strftime format for the date suffix
+                          (default "%d %b" → "15 Nov").
+
+    Caller owns the cache for ``last_test_dates`` — see DASH_VALD's
+    ``helpers._fetch_last_test_date_snapshot`` for a 30-min TTL pattern.
+    """
+    from datetime import datetime as _dt
+
+    last = last_test_dates or {}
+
+    def _sort_key(p):
+        d = last.get(p.get(id_field))
+        if d:
+            try:
+                # Negative ordinal → ascending sort yields recent-first
+                return (0, -_dt.strptime(d, "%Y-%m-%d").toordinal(),
+                          p.get(name_field, ""))
+            except ValueError:
+                pass
+        return (1, 0, p.get(name_field, ""))
+
+    def _fmt(iso: str) -> str:
+        try:
+            return _dt.strptime(iso, "%Y-%m-%d").strftime(label_date_fmt)
+        except Exception:
+            return iso
+
+    out: list[dict] = []
+    for p in sorted(profiles, key=_sort_key):
+        name = p.get(name_field, "?")
+        d = last.get(p.get(id_field))
+        label = f"{name} ({_fmt(d)})" if d else name
+        out.append({"label": label, "value": p.get(id_field)})
+    return out
