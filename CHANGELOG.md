@@ -4,6 +4,31 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.9.0] — 2026-05-20
+
+### Changed
+
+- **`components.py` split into a focused sub-package**: the 1,361-line
+  single-file module is now `components/` with 6 submodules:
+    nav            sidebar, topnav, header + active-link callbacks
+    cards          card, summary_card, graph_card, info_box,
+                   linear_step_card, file_upload_card, connect_user_chip
+    kpi            kpi_tile, kpi_strip, kpi_tile_row, kpi_stat
+    feedback       toast, badge, empty_state, loading_overlay,
+                   status_pill, freshness_banner, confirm_modal
+    inputs         toggle_group, filter_bar, dark_mode_toggle, aspire_tabs
+    print_export   print_header, print_footer, export_buttons, send_export
+
+  Backwards-compatible — every `from aspire_dash.components import X`
+  keeps working via `components/__init__.py` re-exports. Direct
+  submodule imports (`from aspire_dash.components.kpi import kpi_tile`)
+  also supported for the more discriminating caller.
+
+  Verified: aspire_dash 122/122 tests pass post-split, aspire-nutrition
+  (downstream consumer) 237/237 tests pass against the new layout.
+
+- Bumped `__version__` to 0.9.0 across `__init__.py` + `setup.py`.
+
 ## [0.8.0] — 2026-05-20
 
 ### Added
