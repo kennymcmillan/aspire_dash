@@ -1,0 +1,14 @@
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-q --strict-markers --tb=short"
+markers = [
+    "slow: ~10s or more (requires Playwright + Chrome). Run with `pytest -m slow` explicitly.",
+]
+filterwarnings = [
+    # Library deprecation warnings (summary_card, stat_card aliases) are
+    # expected to fire when older test code still calls them. Don't drown
+    # the test output.
+    "ignore::DeprecationWarning",
+]

@@ -4,6 +4,35 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.8.0] — 2026-05-20
+
+### Added
+
+- **`tests/test_scaffold_e2e.py`** — end-to-end smoke for the scaffolder:
+  runs `python -m aspire_dash new <name>`, AST-parses every generated
+  `.py`, imports the app module, verifies modern components are used
+  (`kpi_strip`, `skeletons`, `register_toast`, `truststore`), and (slow
+  leg, gated on Playwright + Chrome) launches the scaffolded app in
+  a subprocess and uses a real browser to verify the Home page renders
+  with the KPI strip + callback-replaced content.
+- Pytest `slow` marker registered in `pyproject.toml`.
+
+### Changed
+
+- **Deprecated `summary_card` + `stat_card`**: both now emit a
+  `DeprecationWarning` pointing to `kpi_tile`. Aliases preserved
+  through 0.x; will be removed at 1.0.
+- Bumped `__version__` to 0.8.0 across `__init__.py` + `setup.py`.
+
+### Fixed
+
+- **Scaffolder template bugs caught by the e2e**: `MANIFEST`,
+  `HOME_PY`, `REPORTS_PY`, `API_CLIENT_PY`, and `DEPLOY_SH` had
+  doubled `{{}}` braces from a copy-paste of `.format()`-escape syntax
+  even though those templates aren't `.format()`-ed. Result: invalid
+  manifest.json, broken Home page callback (`Cannot read properties
+  of undefined`). Replaced with proper single braces.
+
 ## [Unreleased]
 
 ### Added

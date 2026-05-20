@@ -239,6 +239,11 @@ STAT_COLORS = {
 def stat_card(label, value, sub=None, icon=None, color="blue"):
     """Gradient stat card for sport dashboards (competitions, wins, rankings).
 
+    .. deprecated:: 0.8
+        Use :func:`aspire_dash.components.kpi_tile` for new code.
+        ``stat_card`` predates the Aspire signature (left-accent stripe +
+        vs-target progress bar). Kept as alias-with-warning through 0.x.
+
     Parameters
     ----------
     label : str
@@ -252,6 +257,14 @@ def stat_card(label, value, sub=None, icon=None, color="blue"):
     color : str
         Preset name: blue, green, red, amber, purple, teal, gray.
     """
+    import warnings
+    warnings.warn(
+        "aspire_dash.sports.stat_card is deprecated; use kpi_tile() from "
+        "aspire_dash.components for the new Aspire signature "
+        "(left-accent stripe + optional vs-target progress bar). "
+        "stat_card will be removed at 1.0.",
+        DeprecationWarning, stacklevel=2,
+    )
     c = STAT_COLORS.get(color, STAT_COLORS["blue"])
 
     icon_el = html.I(className=icon, style={

@@ -328,7 +328,22 @@ def card(children, className="", style=None, **kwargs):
 
 
 def summary_card(label, value, sub=None, icon=None, color_class=""):
-    """KPI summary card (label + big value + optional subtitle)."""
+    """KPI summary card (label + big value + optional subtitle).
+
+    .. deprecated:: 0.8
+        Use :func:`kpi_tile` for new code. ``summary_card`` lacks the
+        left-accent stripe, vs-target progress bar, and size variants
+        that the rest of the Aspire stack now standardises on.
+        Kept as an alias-with-warning through 0.x — will be removed
+        at 1.0.
+    """
+    import warnings
+    warnings.warn(
+        "aspire_dash.components.summary_card is deprecated; use kpi_tile() "
+        "for the new Aspire signature (left-accent stripe + optional "
+        "vs-target progress bar). summary_card will be removed at 1.0.",
+        DeprecationWarning, stacklevel=2,
+    )
     icon_el = html.I(className=icon, style={
         "fontSize": "12px", "marginRight": "4px",
     }) if icon else None

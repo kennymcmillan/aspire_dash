@@ -101,16 +101,16 @@ def layout(**kwargs):
 
         # Static KPI strip (replace with real data via callback if dynamic)
         kpi_strip([
-            {{"label": "Athletes", "value": 0, "unit": ""}},
-            {{"label": "Sports",   "value": 0, "unit": ""}},
-            {{"label": "Today",    "value": 0, "unit": "events"}},
-            {{"label": "Status",   "value": 0, "unit": "active"}},
+            {"label": "Athletes", "value": 0, "unit": ""},
+            {"label": "Sports",   "value": 0, "unit": ""},
+            {"label": "Today",    "value": 0, "unit": "events"},
+            {"label": "Status",   "value": 0, "unit": "active"},
         ]),
 
         # Data-bound section — skeleton until the callback resolves
         html.Div(id="home-content", className="mt-4",
                   children=skel_card(height="200px")),
-    ], style={{"maxWidth": "1200px", "padding": "0 16px"}})
+    ], style={"maxWidth": "1200px", "padding": "0 16px"})
 
 
 @callback(
@@ -122,9 +122,9 @@ def _load_home(_id):
     # Until then the skeleton is visible — try setting NETWORK to
     # 'Slow 3G' in devtools to see it.
     return card([
-        html.H4("Welcome", style={{"color": ASPIRE_BLUE}}),
+        html.H4("Welcome", style={"color": ASPIRE_BLUE}),
         html.P("Replace this with your data-bound content.",
-               style={{"color": SLATE["500"]}}),
+               style={"color": SLATE["500"]}),
     ])
 """
 
@@ -143,7 +143,7 @@ def layout(**kwargs):
         html.H2("Reports", className="section-title my-3"),
         card([empty_state(text="No reports yet",
                            hint="Add your first report here")]),
-    ], style={{"maxWidth": "1200px", "padding": "0 16px"}})
+    ], style={"maxWidth": "1200px", "padding": "0 16px"})
 """
 
 
@@ -176,7 +176,7 @@ API_KEY = os.getenv("API_KEY", "")
 
 _client = httpx.Client(
     base_url=API_URL,
-    headers={{"X-API-Key": API_KEY}} if API_KEY else {{}},
+    headers={"X-API-Key": API_KEY} if API_KEY else {},
     timeout=20.0,
 )
 
@@ -220,21 +220,21 @@ CONNECT_API_KEY=
 
 
 MANIFEST = """\
-{{"version": 1,
-  "metadata": {{
+{"version": 1,
+  "metadata": {
     "appmode": "python-dash",
     "entrypoint": "app:server",
     "primary_document": "app.py"
-  }},
-  "python": {{
+  },
+  "python": {
     "version": "3.12.0",
-    "package_manager": {{
+    "package_manager": {
       "name": "pip",
       "version": "23.0",
       "package_file": "requirements.txt"
-    }}
-  }}
-}}
+    }
+  }
+}
 """
 
 
@@ -271,7 +271,7 @@ DEPLOY_SH = """\
 #!/usr/bin/env bash
 # Push the latest code, then deploy to Posit Connect.
 set -euo pipefail
-MSG="${{1:-deploy}}"
+MSG="${1:-deploy}"
 git add -A
 git commit -m "$MSG" || true
 git push
