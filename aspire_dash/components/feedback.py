@@ -17,7 +17,8 @@ from ..theme import (
 )
 
 
-__all__ = ['toast', 'badge', 'empty_state', 'loading_overlay', 'status_pill', 'freshness_banner', 'confirm_modal']
+__all__ = ['toast', 'badge', 'empty_state', 'loading_overlay', 'status_pill',
+            'freshness_banner', 'confirm_modal', 'rate_limit_banner']
 
 # ── Toast ────────────────────────────────────────────────────────────────────
 
@@ -341,3 +342,47 @@ def confirm_modal(
     ], id=id, is_open=False, centered=True, backdrop="static")
 
 
+
+
+# ── Rate-limit banner ────────────────────────────────────────────────────────
+
+def rate_limit_banner(
+    banner_id: str = "rate-limit-banner",
+    visible: bool = False,
+    message: str = "API rate limit reached — some data may be delayed.",
+):
+    """Sticky-top amber banner shown when a backend API rate-limits us.
+
+    Wire to `aspire_dash.observability.get_metrics()` counter on a polling
+    callback (or update `is_open` from the callback that catches the 429)::
+
+        from aspire_dash.observability import get_metrics
+
+        @callback(Output("rate-limit-banner", "style"),
+                  Input("rate-limit-tick", "n_intervals"))
+        def _show_banner(_):
+            recent_429s = get_metrics().get("vald.429", 0)
+            return {"display": "flex"} if recent_429s else {"display": "none"}
+
+    Args:
+        banner_id: component id so callbacks can toggle visibility.
+        visible:   initial show state (default False).
+        message:   text content; override per-app to match the upstream.
+    """
+    return html.Div(
+        [
+            html.I(className="fa-solid fa-triangle-exclamation",
+                    style={"marginRight": "6px"}),
+            html.Span(message),
+        ],
+        id=banner_id,
+        className="rate-limit-banner",
+        style={
+            "display": "flex" if visible else "none",
+            "alignItems": "center", "justifyContent": "center",
+            "background": "#fef3c7", "color": "#92400e",
+            "borderBottom": "1px solid #fbbf24",
+            "padding": "8px 16px", "fontSize": "13px", "fontWeight": "500",
+            "position": "sticky", "top": "0", "zIndex": "60", "gap": "8px",
+        },
+    )

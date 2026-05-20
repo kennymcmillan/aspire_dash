@@ -163,6 +163,26 @@ def test_freshness_banner_renders():
     assert is_dash_component(out)
 
 
+def test_rate_limit_banner_default_hidden():
+    from aspire_dash.components import rate_limit_banner
+    out = rate_limit_banner()
+    assert is_dash_component(out)
+    # Hidden by default
+    assert out.style.get("display") == "none"
+
+
+def test_rate_limit_banner_visible():
+    from aspire_dash.components import rate_limit_banner
+    out = rate_limit_banner(visible=True, message="VALD 429 — backing off")
+    assert out.style.get("display") == "flex"
+
+
+def test_rate_limit_banner_custom_id():
+    from aspire_dash.components import rate_limit_banner
+    out = rate_limit_banner(banner_id="custom-banner")
+    assert out.id == "custom-banner"
+
+
 def test_kpi_stat_renders():
     from aspire_dash.components import kpi_stat
     out = kpi_stat("Days lost", 234, sub="last 12 months")
