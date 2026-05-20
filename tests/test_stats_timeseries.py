@@ -63,9 +63,31 @@ def test_build_acute_traces_flags_outliers():
     dates = [f"d{i}" for i in range(5)]
     values = [10, 10.5, 10.2, 10.8, 50.0]  # last is huge outlier
     out = build_acute_traces(dates, values)
-    # upper, lower, rolling mean + alert marker = 4
+    # upper, lower, rolling mean + acute marker = 4
     assert len(out) == 4
-    assert out[-1].name == "Alert"
+    # Marker is named 'Acute' (not 'Alert') and is AMBER (not red) so users
+    # don't mistake an acute-trend-break for an outside-±2 SD outlier.
+    acute_marker = out[-1]
+    assert acute_marker.name == "Acute"
+    line_color = (acute_marker.marker.line.color or "").lower()
+    # Should not be red (#ef4444 or any 'rgb(239,68,68)' variant)
+    assert "239" not in line_color and "#ef" not in line_color, \
+        f"acute marker should be amber, not red: {line_color}"
+
+
+def test_build_acute_traces_uses_amber_not_red():
+    """Regression: red dots used to fire on rolling ±1.5 SD which is
+    tighter than the ±2 SD bands shown — users saw 'red dot inside band'
+    and thought the chart was broken. Acute now uses amber."""
+    from aspire_dash.timeseries import build_acute_traces, DEFAULT_COLORS
+    dates = [f"d{i}" for i in range(6)]
+    values = [10, 10.2, 10.1, 10.3, 12.0, 9.8]  # mild deviation
+    out = build_acute_traces(dates, values)
+    for tr in out:
+        if getattr(tr, "name", "") == "Acute":
+            color = tr.marker.line.color
+            assert color == DEFAULT_COLORS["alert_amber"], \
+                f"acute marker must be alert_amber, got {color}"
 
 
 def test_build_main_line_trace_default_linear_not_spline():

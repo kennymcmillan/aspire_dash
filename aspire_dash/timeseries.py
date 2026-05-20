@@ -132,11 +132,15 @@ def build_acute_traces(dates, values, window=4, sd_mult=1.5, colors=DEFAULT_COLO
     alert_vals = [values[i] for i in range(n)
                    if values[i] < lower[i] or values[i] > upper[i]]
     if alert_dates:
+        # Amber, not red — acute fires on rolling ±1.5 SD which can be
+        # tighter than the ±2 SD bands shown. Reserving red for true
+        # outliers (build_sd_outlier_traces) avoids "red dot inside the
+        # band" confusion.
         traces.append(go.Scatter(
             x=alert_dates, y=alert_vals, mode="markers",
-            marker=dict(size=16, color="rgba(239,68,68,0.3)", symbol="circle",
-                        line=dict(width=2, color=colors["alert_red"])),
-            name="Alert", hoverinfo="skip",
+            marker=dict(size=14, color="rgba(245,158,11,0.25)", symbol="circle",
+                        line=dict(width=2, color=colors["alert_amber"])),
+            name="Acute", hoverinfo="skip",
         ))
     return traces
 
