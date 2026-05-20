@@ -25,7 +25,7 @@ import plotly.graph_objects as go
 __all__ = [
     "DEFAULT_COLORS",
     "build_sd_traces", "build_4pt_ma_traces", "build_acute_traces",
-    "build_sd_outlier_traces", "build_main_line_trace",
+    "build_adaptive_traces", "build_sd_outlier_traces", "build_main_line_trace",
     "aggregate_sessions",
 ]
 
@@ -44,6 +44,8 @@ DEFAULT_COLORS = {
     "acute_fill": "rgba(254, 243, 199, 0.6)",
     "acute_line": "#f59e0b",
     "acute_rolling": "#6b7280",
+    "adaptive_fill": "rgba(209, 250, 229, 0.6)",   # #d1fae5 — matches Next.js
+    "adaptive_line": "#10b981",                     # #10b981 — emerald-500
     "alert_red": "#ef4444",
     "alert_amber": "#f59e0b",
 }
@@ -143,6 +145,28 @@ def build_acute_traces(dates, values, window=4, sd_mult=1.5, colors=DEFAULT_COLO
             name="Acute", hoverinfo="skip",
         ))
     return traces
+
+
+def build_adaptive_traces(dates, lars, uars, colors=DEFAULT_COLORS):
+    """Evolving LAR/UAR band from a Bayesian adaptive-range fit.
+
+    Pass parallel ``dates``, lower (``lars``) and upper (``uars``) per-point
+    series — typically the output of an R Plumber ``/compute-ranges`` call.
+    Returns three traces: dashed upper line, dashed lower line (which
+    fills to the upper via ``fill='tonexty'``), and a filled emerald band
+    between them.
+    """
+    if not dates or len(dates) != len(lars) or len(dates) != len(uars):
+        return []
+    return [
+        go.Scatter(x=dates, y=uars, mode="lines",
+                    line=dict(color=colors["adaptive_line"], width=1.5, dash="dash"),
+                    showlegend=False, hoverinfo="skip"),
+        go.Scatter(x=dates, y=lars, mode="lines",
+                    line=dict(color=colors["adaptive_line"], width=1.5, dash="dash"),
+                    fill="tonexty", fillcolor=colors["adaptive_fill"],
+                    showlegend=False, hoverinfo="skip"),
+    ]
 
 
 def build_sd_outlier_traces(dates, values, stats, sd_threshold=2, colors=DEFAULT_COLORS):
