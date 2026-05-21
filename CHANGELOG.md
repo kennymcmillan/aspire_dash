@@ -4,6 +4,18 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.10.1] — 2026-05-22
+
+### Fixed
+
+- **`sidebar()` nav links now route correctly under a Connect subpath.**
+  Was using raw `href=item["href"]` which resolved to the Connect root
+  (`posit.aspire.qa/skeletons`) instead of the app
+  (`/content/<GUID>/skeletons`) — sidebar clicks silently 404'd in
+  production deploys. Now uses `dash.get_relative_path(item["href"])`
+  the same way `topnav()` did. Caught by the aspire_dash component
+  showcase deploy.
+
 ## [0.10.0] — 2026-05-22
 
 ### Added

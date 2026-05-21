@@ -31,6 +31,8 @@ nav = [
     # Overview
     {"label": "Component Showcase", "href": "/",
      "icon": "fa-solid fa-palette",      "section": "Overview"},
+    {"label": "Layouts (sidebar/topnav/quarto)", "href": "/layouts",
+     "icon": "fa-solid fa-square-poll-vertical"},
 
     # Brand foundations
     {"label": "Colour Palette",     "href": "/colours",

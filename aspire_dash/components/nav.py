@@ -211,7 +211,12 @@ def sidebar(
         nav_children.append(
             dcc.Link(
                 [icon_el, item["label"]],
-                href=item["href"],
+                # get_relative_path so the link resolves correctly when the
+                # app is mounted at a subpath (e.g. Posit Connect's
+                # /content/<GUID>/ root). Raw href="/skeletons" would
+                # bounce to the Connect root, not the app — clicks would
+                # silently 404. Matches topnav()'s wiring.
+                href=dash.get_relative_path(item["href"]),
                 className="sidebar-link",
             )
         )
