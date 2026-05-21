@@ -17,7 +17,8 @@ from ..theme import (
 )
 
 
-__all__ = ['print_header', 'print_footer', 'export_buttons', 'send_export']
+__all__ = ['print_header', 'print_footer', 'export_buttons', 'send_export',
+           'a4_report_shell', 'register_print_button', 'safe_markdown_label']
 
 # ── Print Header/Footer ─────────────────────────────────────────────────────
 
@@ -35,6 +36,151 @@ def print_header(title="", subtitle="", logo_src="/assets/aspire-logo.png"):
 def print_footer(text="Aspire Academy — Confidential"):
     """Footer shown only when printing — hidden on screen."""
     return html.Div(text, className="print-footer")
+
+
+# ── A4 Report Shell ─────────────────────────────────────────────────────────
+
+def a4_report_shell(
+    title: str,
+    body,
+    *,
+    subtitle: str = "",
+    back_href: str = "/",
+    back_label: str = "← Back",
+    print_button_id: str = "ar-print-btn",
+    period_label_id: str = None,
+    width: str = "210mm",
+    min_height: str = "297mm",
+    page_padding: str = "12mm 14mm",
+):
+    """Standard printable A4 report layout — toolbar + page body.
+
+    Used for per-fencer reports, weekly summaries, monthly briefs, etc.
+    A no-print toolbar (Back link + Print button) sits above an A4-sized
+    white page with the Aspire title bar and the caller's body content
+    inside.
+
+    Wire the Print button with ``register_print_button(app)`` (or attach
+    your own ``clientside_callback`` calling ``window.print()``).
+
+    Parameters
+    ----------
+    title : str
+        Header title under the Aspire mark (e.g. "Fencing · Player Report").
+    body : Dash component or list
+        The page content to render below the header bar.
+    subtitle : str
+        Smaller pre-title line (defaults to "Aspire Academy").
+    back_href : str
+        Target of the Back link. Use ``dash.get_relative_path("/overview")``
+        when called from within a registered page.
+    back_label : str
+        Label for the Back link (defaults to ``"← Back"``).
+    print_button_id : str
+        Component id for the Print button (so callers can register a
+        clientside callback to fire window.print()).
+    period_label_id : str or None
+        Optional id for the period-label span (top-right of the title bar).
+        Caller updates via callback. Falls back to a static empty span.
+    width, min_height, page_padding : str
+        CSS sizing — defaults match A4 portrait.
+
+    Returns
+    -------
+    ``html.Div`` ready to drop into a page layout.
+    """
+    period_label_kwargs = (
+        {"id": period_label_id} if period_label_id else {}
+    )
+    return html.Div([
+        # Toolbar — hidden when printing
+        html.Div([
+            dcc.Link(back_label, href=back_href,
+                      style={"fontSize": "13px", "color": "#0369a1",
+                              "textDecoration": "none",
+                              "marginRight": "auto"}),
+            html.Button([
+                html.I(className="fa-solid fa-print",
+                       style={"marginRight": "6px"}),
+                "Print / Save PDF",
+            ], id=print_button_id, n_clicks=0,
+               style={"background": "#004185", "color": "white",
+                       "border": "none", "borderRadius": "5px",
+                       "padding": "8px 14px", "fontSize": "13px",
+                       "cursor": "pointer"}),
+        ], className="no-print",
+           style={"display": "flex", "alignItems": "center",
+                   "padding": "10px 20px", "background": "#f8fafc",
+                   "borderBottom": "1px solid #e2e8f0"}),
+
+        # A4 page
+        html.Div([
+            # Title strip
+            html.Div([
+                html.Div([
+                    html.I(className="fa-solid fa-medal",
+                           style={"color": "white", "fontSize": "14px"}),
+                ], style={"background": "#004185", "padding": "6px 8px",
+                           "borderRadius": "6px",
+                           "display": "inline-flex",
+                           "alignItems": "center"}),
+                html.Div([
+                    html.Div(subtitle or "Aspire Academy",
+                              style={"fontSize": "11px", "color": "#94a3b8",
+                                     "textTransform": "uppercase",
+                                     "letterSpacing": "0.06em"}),
+                    html.Div(title,
+                              style={"fontSize": "16px", "fontWeight": 700,
+                                     "color": "#0f172a"}),
+                ], style={"marginLeft": "10px"}),
+                html.Span(**period_label_kwargs,
+                          style={"marginLeft": "auto",
+                                 "fontSize": "13px", "fontWeight": 600,
+                                 "color": "#004185"}),
+            ], style={"display": "flex", "alignItems": "center",
+                       "borderBottom": "2px solid #004185",
+                       "padding": "10px 0", "marginBottom": "14px"}),
+
+            # Body
+            body if isinstance(body, list) else [body],
+        ], style={"width": width, "minHeight": min_height,
+                   "padding": page_padding, "margin": "0 auto",
+                   "background": "white",
+                   "boxShadow": "0 0 6px rgba(0,0,0,0.08)"}),
+    ])
+
+
+def register_print_button(app, *, button_id: str = "ar-print-btn"):
+    """Wire the Print button to ``window.print()`` via clientside callback.
+
+    Call once per app — by default it targets the ``ar-print-btn`` id
+    used by ``a4_report_shell``. Pass a different ``button_id`` if you
+    customised it.
+    """
+    app.clientside_callback(
+        "function(n) { if (n) { window.print(); } return ''; }",
+        Output(button_id, "title"),
+        Input(button_id, "n_clicks"),
+        prevent_initial_call=True,
+    )
+
+
+def safe_markdown_label(name: str) -> str:
+    """Strip ``[]()`` and other markdown-syntactic chars from a string
+    before embedding it in a markdown link label.
+
+    Prevents data-driven labels (e.g. a fencer name pulled from an
+    upstream API) from breaking the markdown renderer or injecting an
+    unintended link target. Use whenever you build markdown via f-string
+    on user/external data:
+
+    >>> f"[{safe_markdown_label(name)}](/{id})"
+    """
+    if name is None:
+        return ""
+    return (str(name)
+            .replace("[", "").replace("]", "")
+            .replace("(", "").replace(")", ""))
 
 
 

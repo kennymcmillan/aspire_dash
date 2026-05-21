@@ -167,3 +167,84 @@ def skel_kpi_strip(n: int = 4):
     return html.Div([
         skel_pill(width=80) for _ in range(n)
     ], style={"display": "flex", "gap": "8px", "alignItems": "center"})
+
+
+def skel_sync_overlay(
+    caption: str,
+    sub_caption: str = "should take a few seconds…",
+    *,
+    rows: int = 8,
+    overlay_id: str = "sync-overlay",
+    height: str = "calc(100vh - 160px)",
+):
+    """Initial-load skeleton with spinning icon + caption header.
+
+    Use when a page has to wait on a slow upstream sync (e.g. SAMS or an
+    external API) before the real content can render. Sits above the grid;
+    a sibling callback flips its style to ``display: none`` once the sync
+    callback resolves and reveals the real component below.
+
+    Parameters
+    ----------
+    caption : str
+        Primary text e.g. "Syncing Athlete Management System data".
+    sub_caption : str
+        Trailing context — defaults to "should take a few seconds…".
+    rows : int
+        Number of shimmer placeholder rows below the caption (default 8).
+    overlay_id : str
+        Component id, so the caller's callback can toggle display.
+    height : str
+        CSS height matching the actual grid below for layout stability.
+
+    Returns
+    -------
+    html.Div ready to drop into a layout. The caller hides it with a
+    ``Output(overlay_id, "style")`` callback when ready.
+
+    Example
+    -------
+    >>> # in your page layout
+    >>> skel_sync_overlay("Syncing SAMS data")
+    >>> dag.AgGrid(id="my-grid", ...)
+    >>> # in callbacks.py
+    >>> @callback(Output("sync-overlay", "style"),
+    ...           Input("sync-result", "data"))
+    ... def _hide(result):
+    ...     return {"display": "none"} if result else {}
+    """
+    return html.Div(
+        id=overlay_id,
+        children=[
+            html.Div([
+                html.I(className="fa-solid fa-rotate fa-spin",
+                       style={"color": "#0369a1", "fontSize": "20px",
+                               "marginRight": "10px"}),
+                html.Span(caption,
+                          style={"fontSize": "16px", "fontWeight": 600,
+                                 "color": "#0f172a"}),
+                html.Span(f" — {sub_caption}",
+                          style={"fontSize": "13px", "color": "#64748b",
+                                  "marginLeft": "4px"}),
+            ], style={"padding": "14px 16px",
+                       "borderBottom": "1px solid #e2e8f0",
+                       "background": "#f8fafc",
+                       "display": "flex", "alignItems": "center"}),
+            html.Div([
+                # Pure-CSS shimmer rows. The .skeleton-row CSS rule lives
+                # in 00_aspire_base.css (auto-copied by setup_app); falls
+                # back to a static grey bar if the CSS isn't loaded.
+                html.Div(className="skeleton-row",
+                         style={"height": "28px", "margin": "6px 4px",
+                                "borderRadius": "4px",
+                                "background": "#f1f5f9"})
+                for _ in range(rows)
+            ], style={"padding": "8px"}),
+        ],
+        style={"background": "white",
+                "border": "1px solid #e2e8f0",
+                "borderRadius": "8px",
+                "height": height,
+                "width": "100%",
+                "overflow": "hidden"},
+    )

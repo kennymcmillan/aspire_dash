@@ -40,7 +40,26 @@ DEFAULT_GRID_OPTIONS = {
 }
 EDITABLE_GRID_OPTIONS = {
     **DEFAULT_GRID_OPTIONS,
+    # Excel-style commit: tab/enter/click-elsewhere commits the edit and
+    # fires cellValueChanged. Escape cancels.
     "stopEditingWhenCellsLoseFocus": True,
+    "enterNavigatesVertically": True,
+    "enterNavigatesVerticallyAfterEdit": True,
+    "undoRedoCellEditing": True,
+    "undoRedoCellEditingLimit": 20,
+    # Do NOT set singleClickEdit: True — it makes every plain click on a
+    # cell fire cellClicked, which (combined with a dcc.Loading wrapper)
+    # produces a 'screen reloads on click' visual bug for the user. Stick
+    # with the AG Grid default (double-click to edit).
+}
+
+# Numeric column preset — pass via `columnDefs`. Uses the built-in
+# `cellDataType` instead of custom `valueParser`-function shapes, which
+# the dash-ag-grid runtime silently rejects in some 35.x builds.
+NUMERIC_COL_DEF = {
+    "type": "numericColumn",
+    "cellDataType": "number",
+    "cellEditor": "agNumberCellEditor",
 }
 
 #: Style block applied to .ag-theme-alpine to recolour the header with
@@ -95,8 +114,20 @@ def aspire_grid(
 
     Returns
     -------
-    ``dag.AgGrid`` component. Wrap in ``loading_overlay`` for branded
-    spinner during initial load.
+    ``dag.AgGrid`` component.
+
+    Notes
+    -----
+    Do NOT wrap an editable grid in ``dcc.Loading`` — the spinner
+    overlays on every cellClicked callback even when the callback
+    returns ``no_update``, producing a 'screen reloads on click' visual
+    flash. For initial-load feedback prefer ``skel_sync_overlay``
+    (sibling Div with display:none toggle) above the grid.
+
+    For numeric cells, merge ``NUMERIC_COL_DEF`` into your column def
+    rather than supplying a custom ``valueParser`` — the
+    ``cellDataType: "number"`` route is the built-in path and is
+    documented by Plotly.
     """
     dag = _import_dag()
     default_col = (EDITABLE_COL_DEF if editable else DEFAULT_COL_DEF).copy()

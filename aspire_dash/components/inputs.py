@@ -17,7 +17,49 @@ from ..theme import (
 )
 
 
-__all__ = ['toggle_group', 'mode_toggle', 'filter_bar', 'dark_mode_toggle', 'aspire_tabs']
+__all__ = ['toggle_group', 'mode_toggle', 'filter_bar', 'dark_mode_toggle',
+           'aspire_tabs', 'date_picker_single']
+
+# ── Date picker ──────────────────────────────────────────────────────────────
+
+def date_picker_single(picker_id, value=None, *,
+                        display_format="D MMM YYYY",
+                        width="140px",
+                        **kwargs):
+    """``dcc.DatePickerSingle`` with a known-good display format.
+
+    ``"D MMM YYYY"`` renders ``19 May 2026``. We don't include ``ddd``
+    (day-of-week) because dash's underlying picker silently misparses
+    that token into ``dd`` + ``d``, producing ``Tu19 19 May 2026`` —
+    a real-world bug we hit and fixed in the fencing planner.
+
+    Parameters
+    ----------
+    picker_id : str
+        Component id for callbacks.
+    value : str or date or None
+        Initial date — passes straight through to ``date`` prop.
+    display_format : str
+        Moment.js format string. Defaults to the safe ``D MMM YYYY``.
+        Avoid ``ddd`` and ``dd`` tokens (rendering bug). Use ``dddd``
+        (full weekday) if you really need a day name.
+    width : str
+        CSS width.
+    **kwargs
+        Forwarded to ``dcc.DatePickerSingle``.
+
+    Returns
+    -------
+    ``dcc.DatePickerSingle``.
+    """
+    return dcc.DatePickerSingle(
+        id=picker_id,
+        date=value,
+        display_format=display_format,
+        style={"fontSize": "12px", "width": width, **kwargs.pop("style", {})},
+        **kwargs,
+    )
+
 
 # ── Toggle Group ─────────────────────────────────────────────────────────────
 

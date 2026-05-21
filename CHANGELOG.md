@@ -4,6 +4,58 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.10.0] — 2026-05-22
+
+### Added
+
+- **`skel_sync_overlay(caption, sub_caption, rows, overlay_id, height)`**
+  in `skeletons.py`. Initial-load skeleton with spinning icon + caption
+  + N shimmer placeholder rows. Hide via a callback on
+  `Output(overlay_id, "style")` once your upstream sync completes.
+  Caller pattern shipped in the fencing-planner Data Entry page
+  (15-20 s SAMS cold sync). Pairs with a sibling Div that holds the
+  real grid (`display: none` initial → revealed by the same callback).
+
+- **`date_picker_single(picker_id, value, display_format, width)`** in
+  `components/inputs.py`. Wrapper around `dcc.DatePickerSingle` with
+  `"D MMM YYYY"` as the default format — avoids the **`ddd` rendering
+  bug** in dash's underlying picker (renders `Tu19 19 May 2026`
+  instead of `Tue 19 May 2026` because of broken token splitting).
+  Docstring documents the safe vs unsafe format tokens.
+
+- **`a4_report_shell(title, body, subtitle, back_href, ...)`** in
+  `components/print_export.py`. Standard printable A4 layout:
+  no-print toolbar (Back + Print button) above an A4-sized white page
+  with the Aspire title bar and the caller's body. Lifted from
+  weekly-report, fencer-report and monthly-brief pages in the fencing
+  planner — same shape across all three.
+
+- **`register_print_button(app, button_id)`** companion clientside
+  callback to wire `window.print()` to a button.
+
+- **`safe_markdown_label(name)`** utility: strips `[]()` from strings
+  before they get embedded in markdown link labels. Defensive against
+  upstream-data names that contain those characters.
+
+- **`NUMERIC_COL_DEF`** preset in `tables.py`: `{type: numericColumn,
+  cellDataType: number, cellEditor: agNumberCellEditor}`. Documented
+  replacement for the custom `valueParser` shape that silently
+  blocked edit mode in some dash-ag-grid 35.x builds.
+
+- **`.skeleton-row` CSS rule** in `00_aspire_base.css` — backing for
+  `skel_sync_overlay`.
+
+### Changed
+
+- **`aspire_grid` (`EDITABLE_GRID_OPTIONS`)** now includes
+  `enterNavigatesVertically`, `enterNavigatesVerticallyAfterEdit`,
+  `undoRedoCellEditing` — Excel-style Tab/Enter commit behaviour. Also
+  explicitly notes in the docstring that **wrapping the grid in
+  `dcc.Loading` is a footgun**: the spinner overlays on every
+  cellClicked callback (even when the callback returns no_update),
+  producing a 'screen reloads on click' visual flash. Use
+  `skel_sync_overlay` as a sibling above the grid instead.
+
 ## [0.9.0] — 2026-05-20
 
 ### Changed
