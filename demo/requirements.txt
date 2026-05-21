@@ -1,0 +1,8 @@
+dash>=2.17.0
+dash-bootstrap-components>=1.6.0
+dash-ag-grid>=31.0.0
+plotly>=5.18.0
+pandas>=2.0.0
+# aspire_dash itself — pinned to the v0.10.0 SHA so the deployed demo
+# always reflects exactly the published library version.
+aspire_dash @ git+https://github.com/kennymcmillan/aspire_dash.git@f608ca052a291b64add0322223026e48b8b2e3c3

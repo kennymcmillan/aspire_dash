@@ -14,3 +14,8 @@ Thumbs.db
 .vscode/
 .idea/
 .claude/settings.local.json
+
+# The demo app's deployment lock file is environment-specific
+demo/rsconnect-python/
+demo/demo_skeletons.png
+demo/screenshots/

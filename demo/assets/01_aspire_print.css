@@ -1,0 +1,169 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ASPIRE ACADEMY — Print Stylesheet
+   Comprehensive print rules merged from Budget app + Next.js best practices.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Print header/footer — hidden on screen, shown on print */
+.print-header, .print-footer { display: none; }
+
+@media print {
+    /* ── Base: white background, preserve colours ── */
+    body {
+        background: white !important;
+        font-size: 11px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* ── Page setup ── */
+    @page { size: A4 landscape; margin: 8mm; }
+
+    /* ── Hide sidebar + header + chrome ── */
+    .sidebar, .header, .top-header { display: none !important; }
+    .main-area, .main-content {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    /* ── Hide interactive UI ── */
+    .btn, button:not(.sr-ct-row button) { display: none !important; }
+    .filter-pill { display: none !important; }
+    .toggle-group { display: none !important; }
+    .controls-bar { display: none !important; }
+    .dash-spreadsheet-container input[type="text"] { display: none !important; }
+    .dash-filter { display: none !important; }
+    .dcc-loading { display: none !important; }
+    dcc-dropdown, .dash-dropdown { pointer-events: none !important; }
+    .dropdown-menu { display: none !important; }
+    .toast { display: none !important; }
+    .modal-backdrop { display: none !important; }
+    ._dash-debug-menu { display: none !important; }
+
+    /* ── Cards: no shadows, print-safe borders ── */
+    .card, .budget-card, .chart-card, .athlete-card {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        box-shadow: none !important;
+        border: 1px solid #d1d5db !important;
+    }
+
+    /* ── DataTable: expand, no scroll ── */
+    .dash-spreadsheet-container,
+    .dash-table-container {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        border: none !important;
+    }
+    .dash-spreadsheet-inner {
+        overflow: visible !important;
+    }
+    table {
+        font-size: 9px !important;
+        width: 100% !important;
+    }
+    th {
+        padding: 4px 6px !important;
+        font-size: 8px !important;
+        background-color: var(--slate-100) !important;
+    }
+    td {
+        padding: 3px 6px !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+    }
+    /* Hide checkbox column */
+    .dash-select-cell { display: none !important; }
+    /* Hide editable indicators */
+    td.cell--editable { border-bottom: 1px solid #e2e8f0 !important; }
+
+    /* ── Page break control ── */
+    tr { break-inside: avoid !important; page-break-inside: avoid !important; }
+    h1, h2, h3 { page-break-after: avoid !important; }
+
+    /* Keep summary cards on first page */
+    .dashboard-summary-cards,
+    .summary-strip { page-break-after: avoid !important; }
+
+    /* Tables: repeat thead on every page */
+    thead { display: table-header-group !important; }
+    tfoot { display: table-footer-group !important; }
+    tbody { orphans: 3; widows: 3; }
+
+    /* ── Print header/footer ── */
+    .print-header {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid var(--slate-800);
+    }
+    .print-footer {
+        display: block !important;
+        text-align: center;
+        font-size: 8px;
+        color: var(--slate-400);
+        margin-top: 12px;
+        padding-top: 6px;
+        border-top: 1px solid #e2e8f0;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+    }
+
+    /* ── Compact summary grids ── */
+    .summary-strip, .dashboard-summary-cards {
+        gap: 4px !important;
+    }
+    .summary-strip .budget-card, .dashboard-summary-cards .budget-card {
+        padding: 6px 10px !important;
+    }
+    .card-value { font-size: 14px !important; }
+    .card-label { font-size: 9px !important; }
+    .card-sub { font-size: 8px !important; }
+
+    /* ── Progress bars: preserve colours ── */
+    .progress-bar-fill,
+    .mini-progress-fill {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* ── Report bars: avoid breaks ── */
+    .report-bar-row { break-inside: avoid; }
+    .report-bar-container { break-inside: avoid !important; }
+
+    /* ── Plotly charts: preserve on print ── */
+    .js-plotly-plot {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+    .js-plotly-plot .plotly .modebar-container { display: none !important; }
+
+    /* ── SVG rings: preserve colours ── */
+    svg circle, svg polyline, svg path {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* ── Dark mode: force light on print ── */
+    html.dark .main-area { background-color: white !important; }
+    html.dark .card, html.dark .budget-card, html.dark .chart-card {
+        background: white !important;
+        color: #1e293b !important;
+        border-color: #d1d5db !important;
+    }
+    html.dark .card-value, html.dark h2, html.dark h3 { color: #1e293b !important; }
+
+    /* ── Links: show URL on print ── */
+    a[href]:after { content: " (" attr(href) ")"; font-size: 8px; color: #64748b; }
+    a[href^="/"]:after, a[href^="#"]:after { content: none; }
+
+    /* ── Page number (supported browsers) ── */
+    @page { @bottom-right { content: counter(page) " / " counter(pages); font-size: 8px; } }
+}

@@ -1,0 +1,52 @@
+/* Aspire Dash — skeleton shimmer placeholders
+ *
+ * Used by aspire_dash.skeletons.* helpers (skel_line, skel_card,
+ * skel_metric_tiles, etc). Provides a soft pulsing outline as a
+ * loading-state alternative to spinners — friendlier UX and gives
+ * the user a sense of what's coming.
+ *
+ * Loaded automatically by every Dash app that uses
+ * aspire_dash.setup_app(app). File name prefix `02_` puts it after
+ * the base theme + print styles.
+ */
+
+@keyframes aspireShimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+@keyframes aspireSkelFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.skel-base {
+  background: linear-gradient(
+    90deg,
+    #f1f5f9 0%,
+    #e2e8f0 50%,
+    #f1f5f9 100%
+  );
+  background-size: 800px 100%;
+  animation: aspireShimmer 1.4s linear infinite;
+  border-radius: 6px;
+  display: block;
+}
+
+/* Size variants */
+.skel-line       { height: 12px; margin: 4px 0; }
+.skel-line-sm    { height: 8px;  margin: 3px 0; }
+.skel-line-lg    { height: 18px; margin: 6px 0; }
+.skel-pill       { height: 24px; border-radius: 12px; width: 80px;
+                   display: inline-block; margin-right: 8px; }
+.skel-card       { height: 120px; border-radius: 10px;
+                   border: 1px solid #e2e8f0; }
+.skel-tile       { height: 70px;  border-radius: 8px; }
+.skel-row        { height: 38px;  margin-bottom: 6px;
+                   border-radius: 6px; }
+.skel-circle     { border-radius: 50%; }
+
+/* Wrapper that fades in so the shimmer doesn't pop. */
+.skel-wrap {
+  animation: aspireSkelFadeIn 0.2s ease-out;
+}
