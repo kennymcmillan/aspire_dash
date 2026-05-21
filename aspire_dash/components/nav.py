@@ -208,15 +208,20 @@ def sidebar(
         icon_el = html.I(className=item.get("icon", "fa-solid fa-circle"), style={
             "width": "16px", "textAlign": "center", "fontSize": "13px", "marginRight": "10px",
         })
+        # get_relative_path so the link resolves correctly when the app
+        # is mounted at a subpath (e.g. Posit Connect's /content/<GUID>/
+        # root). Raw href="/skeletons" would bounce to the Connect root,
+        # not the app — clicks would silently 404. Matches topnav()'s
+        # wiring. Falls back to the raw href when called outside a Dash
+        # app context (unit tests, ad-hoc preview).
+        try:
+            link_href = dash.get_relative_path(item["href"])
+        except Exception:
+            link_href = item["href"]
         nav_children.append(
             dcc.Link(
                 [icon_el, item["label"]],
-                # get_relative_path so the link resolves correctly when the
-                # app is mounted at a subpath (e.g. Posit Connect's
-                # /content/<GUID>/ root). Raw href="/skeletons" would
-                # bounce to the Connect root, not the app — clicks would
-                # silently 404. Matches topnav()'s wiring.
-                href=dash.get_relative_path(item["href"]),
+                href=link_href,
                 className="sidebar-link",
             )
         )
