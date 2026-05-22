@@ -4,6 +4,47 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.11.0] — 2026-05-22
+
+### Brand correction
+
+- **Font: Inter → Poppins.** Sniff of https://www.aspire.qa confirms
+  Poppins (weights 100-900 via Google Fonts) is the actual brand font.
+  We were rendering off-brand for years. Inter stays loaded as the
+  fallback for tabular-heavy contexts (better tabular-nums) via the new
+  `data` font token in `brand.yml`.
+
+### Changed (design-audit fixes — all visual, no API breaks)
+
+- **Warmer page background `#f7f9fc`** (was `--slate-100 #f1f5f9`). Cards
+  now read more elevated without needing heavier shadows.
+- **3-tier elevation system** `--elev-1/2/3` with slate-tinted shadows
+  instead of pure black. Existing `--shadow-sm/md/lg` kept as aliases.
+- **Border radius collapsed to 8 px canonical.** `--radius-sm` and
+  `--radius-lg` are now aliases for `--radius-md` (8 px). Was visually
+  fragmented across 4 different sizes that no two components agreed on.
+- **Card hover lift**: `.card`, `.budget-card`, `.athlete-card` all
+  share the same 1 px translateY + elev-2 shadow on hover. Stripe/Linear/
+  Whoop-style "premium analytics" feel.
+- **Plotly defaults tightened** in `charts.py`: vertical gridlines
+  removed, axis-line on Y dropped, horizontal legend at y=-0.18,
+  margins tightened to `(40, 16, 8, 32)`, gridcolor dropped to slate-50
+  (near-invisible). Existing charts pick this up automatically.
+
+### Added
+
+- `.kpi-tile` CSS class with `.accent-aspire / .accent-secondary /
+  .accent-gold / .accent-success / .accent-warning / .accent-danger`
+  modifiers. Sub-elements `.kpi-label`, `.kpi-value`, `.kpi-sub`
+  give consistent type scale across the library.
+- `.aspire-table` CSS class — uppercase header row with 2 px aspire-blue
+  bottom border, slate-50 zebra striping, aspire-50 row hover. Drop-in
+  for any plain `<table>` to make it feel branded.
+- `.aspire-section-heading` CSS class — 5 px letter-spacing, weight
+  500, uppercase Poppins. Matches the H2 style on aspire.qa marketing.
+- `brand.yml`: new `data` font token for tabular contexts where Inter
+  is preferable (medical tables, GCC medal counts, etc.).
+
 ## [0.10.1] — 2026-05-22
 
 ### Fixed

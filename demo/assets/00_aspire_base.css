@@ -5,8 +5,12 @@
    Loaded as 00_ to ensure it runs before any app-specific CSS.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Font — variable Inter for sharp rendering at all weights ── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap');
+/* ── Fonts ──
+   Poppins is the official Aspire brand font (per https://www.aspire.qa).
+   Inter is kept for data-dense surfaces where its tabular-nums and
+   variable-axis features shine — opt-in via .font-data class or the
+   `data` brand.yml token. */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:opsz,wght@14..32,100..900&display=swap');
 
 /* ── CSS Custom Properties (Tailwind Slate + semantic colours) ── */
 :root {
@@ -78,16 +82,29 @@
     --gold: #fbb800;
     --gold-light: #fef3c7;
 
-    /* Radius scale */
-    --radius-sm: 6px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
+    /* Radius scale — collapsed to two values per the design audit
+       (was fragmented across 4 sizes that no two components agreed on).
+       8 px is the canonical card/input/code radius; full is for pills,
+       badges, avatars. Legacy --radius-sm/lg are aliases to keep older
+       components rendering. */
+    --radius-sm: 8px;      /* legacy alias — same as md */
+    --radius-md: 8px;      /* canonical */
+    --radius-lg: 12px;     /* legacy alias — same as md visually preferred */
     --radius-full: 9999px;
 
-    /* Shadow scale */
-    --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
-    --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+    /* Elevation tiers — design-audit recommendation, three distinct
+       levels of perceived depth. Use --elev-1 for resting cards,
+       --elev-2 for hovered/popovers, --elev-3 for modals + drawers.
+       Tints carry a slate hue (slate-900 at low opacity) so shadows
+       feel cohesive with the slate page background instead of pure black. */
+    --elev-1: 0 1px 2px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.03);
+    --elev-2: 0 4px 12px rgba(15,23,42,0.08);
+    --elev-3: 0 12px 32px rgba(15,23,42,0.12);
+
+    /* Back-compat shadow aliases */
+    --shadow-sm: var(--elev-1);
+    --shadow-md: var(--elev-2);
+    --shadow-lg: var(--elev-3);
 }
 
 
@@ -95,8 +112,12 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background-color: var(--slate-100);
+    /* Poppins is the official Aspire brand font (per aspire.qa). */
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    /* Warmer page background — was --slate-100 (#f1f5f9). #f7f9fc has
+       a slightly warmer cast that makes white cards pop more without
+       needing heavier shadows. Direct steal from Stripe/Linear pattern. */
+    background-color: #f7f9fc;
     color: var(--slate-800);
     font-size: 14px;
     line-height: 1.5;
@@ -299,26 +320,35 @@ body {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   CARDS
+   CARDS — Audit-driven redesign (2026-05-22).
+   All cards share the same elevation system + canonical 8 px radius +
+   1 px slate-200 border. Hover lifts via translateY (premium analytics
+   feel — same gesture used by Linear, Stripe, Whoop).
    ═══════════════════════════════════════════════════════════════════════════ */
-.card {
-    background: white;
-    border-radius: var(--radius-lg);
-    padding: 16px;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow-sm);
-}
-
-.budget-card {
+.card,
+.budget-card,
+.athlete-card {
     background: white;
     border: 1px solid var(--slate-200);
-    border-radius: var(--radius-md);
+    border-radius: 8px;
     padding: 16px 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
-    transition: box-shadow 0.2s;
+    box-shadow: var(--elev-1);
+    transition: box-shadow 0.15s ease, transform 0.15s ease,
+                border-color 0.15s ease;
 }
-.budget-card:hover {
-    box-shadow: var(--shadow-md);
+.card:hover,
+.budget-card:hover,
+.athlete-card:hover {
+    box-shadow: var(--elev-2);
+    transform: translateY(-1px);
+}
+/* Some cards live inside <a> (clickable). Keep the lift behaviour but
+   don't double-apply. */
+a > .card,
+a > .budget-card,
+a > .athlete-card {
+    text-decoration: none;
+    color: inherit;
 }
 .budget-card .card-label {
     font-size: 12px;
@@ -370,6 +400,113 @@ body {
 .card-green  { border-left-color: #22c55e; background: linear-gradient(to right, #dcfce7, #ffffff); }
 .card-yellow { border-left-color: #eab308; background: linear-gradient(to right, #fef9c3, #ffffff); }
 .card-red    { border-left-color: #ef4444; background: linear-gradient(to right, #fee2e2, #fef2f2); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   KPI TILES — Audit-driven redesign (2026-05-22).
+   Premium feel: bigger value font, tabular-nums for alignment, accent
+   stripe coloured by metric type. Use via:
+       html.Div(..., className="kpi-tile accent-gold")
+   Built-in helper kpi_tile() emits this class automatically.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.kpi-tile {
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-left: 4px solid var(--aspire-600);
+    border-radius: 8px;
+    padding: 14px 18px;
+    box-shadow: var(--elev-1);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.kpi-tile:hover {
+    box-shadow: var(--elev-2);
+    transform: translateY(-1px);
+}
+.kpi-tile .kpi-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--slate-500);
+    margin-bottom: 4px;
+}
+.kpi-tile .kpi-value {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--slate-900);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+.kpi-tile .kpi-sub {
+    font-size: 11px;
+    color: var(--slate-500);
+    margin-top: 4px;
+}
+.kpi-tile.accent-aspire    { border-left-color: var(--aspire-600); }
+.kpi-tile.accent-secondary { border-left-color: var(--aspire-secondary); }
+.kpi-tile.accent-gold      { border-left-color: var(--gold); }
+.kpi-tile.accent-success   { border-left-color: var(--success, #16a34a); }
+.kpi-tile.accent-warning   { border-left-color: var(--warning, #d97706); }
+.kpi-tile.accent-danger    { border-left-color: var(--danger,  #dc2626); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ASPIRE H2 — premium section heading style sniffed from aspire.qa
+   (letter-spacing 5px, weight 500, uppercase). Apply via
+   className="aspire-section-heading" when you want the marketing-site feel.
+   Default <h2> stays smaller + data-friendly.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.aspire-section-heading {
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--aspire-600);
+    margin: 24px 0 12px 0;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TABLES — Audit-driven baseline styling so every <table> reads as
+   "Aspire" even before you reach for AG Grid.
+   ═══════════════════════════════════════════════════════════════════════════ */
+table.aspire-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--elev-1);
+}
+table.aspire-table thead th {
+    background: var(--slate-50);
+    border-bottom: 2px solid var(--aspire-600);
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate-600);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+table.aspire-table tbody td {
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--slate-700);
+    border-bottom: 1px solid var(--slate-100);
+}
+table.aspire-table tbody tr:nth-child(even) {
+    background: var(--slate-50);
+}
+table.aspire-table tbody tr:hover {
+    background: var(--aspire-50);
+}
+table.aspire-table tbody tr:last-child td {
+    border-bottom: none;
+}
 
 /* Card grid */
 .card-grid {

@@ -62,12 +62,14 @@ colors:
     - "#4f46e5"  # indigo
 
 # Typography
-# Official Aspire font is Poppins, but Inter is preferred for data-heavy dashboards
-# (superior tabular-nums, font-feature-settings, optical sizing).
-# Set body/heading to Poppins if strict brand compliance is needed.
+# Per https://www.aspire.qa sniff (2026-05-22): the official Aspire marketing
+# site loads Poppins (weights 100-900 via Google Fonts) — we now match it so
+# every aspire_dash app feels visually continuous with the public brand.
+# Inter is kept as 'data' for tabular-heavy contexts (better tabular-nums).
 fonts:
-  heading: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
-  body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
+  heading: "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
+  body: "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
+  data: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
   brand: "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
   mono: "'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace"
 
