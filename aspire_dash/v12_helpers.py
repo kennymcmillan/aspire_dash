@@ -506,3 +506,92 @@ def asymmetry_bar(left_pct: int, right_pct: int | None = None):
         html.Div(f"R {right_pct}%", className="asym-right",
                   style={"width": f"{right_pct}%"}),
     ], className=f"asymmetry-bar {dev_class}")
+
+
+# ── v0.26 — athlete_card_v2 (Whoop-style, photo + zone gradient + rings) ────
+
+def _initials(name: str) -> str:
+    return "".join(p[0] for p in name.split()[:2]).upper()
+
+
+def athlete_card_v2(
+    name: str,
+    rings: list[dict],
+    *,
+    zone: str = "neutral",          # green | yellow | red | aspire | neutral
+    photo_url: str | None = None,
+    meta: str = "",
+    href: str | None = None,
+):
+    """Premium athlete card with photo (or initials fallback) + zone-coloured
+    gradient bg + 3 mini metric rings.
+
+    Built for the Whoop coach dashboard but works for any player-facing
+    surface (future composite player dashboard, athlete profile pages).
+
+    `rings` is a list of `{value, pct, label, color}` dicts (max 3
+    recommended for clean layout). Use `metric_ring()` internally.
+
+    `zone` colours the gradient + avatar border:
+        green   — healthy / high recovery / ready
+        yellow  — caution / moderate / monitor
+        red     — alert / low recovery / sidelined
+        aspire  — neutral brand tone (no health signal)
+        neutral — grey (no data yet)
+
+    `photo_url` — SAMS imageUrl or any direct CDN URL. Falls back to
+    initials with a brand gradient when missing.
+
+    >>> athlete_card_v2(
+    ...     "Ali Owaida", meta="Senior · Fencing", zone="green",
+    ...     photo_url="https://azfpictures.blob.core.windows.net/...",
+    ...     rings=[
+    ...         {"value": 68, "pct": 68, "label": "Recovery", "color": "#16a34a"},
+    ...         {"value": "15.8", "pct": 75, "label": "Strain", "color": "#004185"},
+    ...         {"value": "7h12", "pct": 72, "label": "Sleep", "color": "#16a34a"},
+    ...     ],
+    ... )
+    """
+    # Avatar — photo or initials
+    if photo_url:
+        avatar = html.Img(
+            src=photo_url, alt=name,
+            className="acv2-avatar",
+        )
+    else:
+        avatar = html.Div(
+            _initials(name),
+            className="acv2-avatar-initials",
+        )
+
+    # Header (avatar + name + meta)
+    header = html.Div([
+        avatar,
+        html.Div([
+            html.Div(name, className="acv2-name"),
+            html.Div(meta, className="acv2-meta") if meta else None,
+        ], className="acv2-text"),
+    ], className="acv2-header")
+
+    # Ring row — 3 rings via metric_ring()
+    ring_blocks = []
+    for r in rings:
+        ring_blocks.append(html.Div([
+            metric_ring(
+                r["value"], r["pct"],
+                label="",                      # label rendered below SVG
+                size=58,
+            ),
+            html.Div(r.get("label", ""), className="acv2-ring-label"),
+        ], className="acv2-ring-block"))
+
+    ring_row = html.Div(ring_blocks, className="acv2-rings")
+
+    card = html.Div([header, ring_row],
+                     className=f"athlete-card-v2 zone-{zone}")
+
+    if href:
+        return html.A(card, href=href,
+                       style={"textDecoration": "none", "color": "inherit",
+                              "display": "block"})
+    return card

@@ -4,6 +4,34 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.26.0] — 2026-05-22
+
+### Added — `athlete_card_v2` (Whoop-style premium card, Forge-built)
+
+Designed via the Forge skill — prototyped in
+`tools/forge/index.html` first (3 zone variants, with + without photo
+states), then ported to semantic CSS + Python helper.
+
+**`aspire_dash.v12_helpers.athlete_card_v2(name, rings, zone, photo_url, meta, href)`**
+
+Replaces the bespoke whoop card. One library helper for any future
+player dashboard. Features:
+
+- **Larger 56 px photo** (vs 44 px) — proper face presence
+- **Initials fallback** with brand-gradient avatar when no photo
+- **Zone-coloured gradient bg** — top-left tint → white. User feedback:
+  *"the gradient in the whoop cards is super nice — we should apply
+  that to some of the other components too"* — gradient now in the lib
+  for reuse via `.zone-green / yellow / red / aspire / neutral`.
+- **3 inline metric rings** at 58 px tighter than v0.13's variant
+- **Hover lift** + `--elev-hover-card` brand-tinted shadow
+
+CSS classes: `.athlete-card-v2 .zone-<zone> .acv2-{header,avatar,
+avatar-initials,name,meta,rings,ring-block,ring-label}`.
+
+Whoop coach dashboard now delegates its `components/athlete_card.py`
+full-card render to this helper.
+
 ## [0.25.1] — 2026-05-22
 
 ### Fixed — Whoop (and any other bespoke-sidebar app) hover effects

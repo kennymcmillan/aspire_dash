@@ -2496,3 +2496,171 @@ body {
         scroll-behavior: auto !important;
     }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v0.26 — athlete_card_v2 (Whoop-style premium card)
+   Zone-coloured gradient bg + larger photo (or initials fallback) + 3 rings.
+   Usage:
+     <div class="athlete-card-v2 zone-green">
+       <div class="acv2-header"> avatar + name + meta </div>
+       <div class="acv2-rings">  ring × 3            </div>
+     </div>
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.athlete-card-v2 {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--slate-200);
+    box-shadow: var(--elev-1);
+    transition: transform var(--duration-normal) var(--ease-out),
+                box-shadow var(--duration-normal) var(--ease-out);
+    will-change: transform;
+}
+.athlete-card-v2:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--elev-hover-card);
+}
+
+/* Zone-tinted gradients (the user said "the gradient on whoop is super
+   nice — apply that to others too") */
+.athlete-card-v2.zone-green {
+    background: linear-gradient(135deg, rgba(22, 163, 74, 0.10) 0%,
+                                          rgba(255, 255, 255, 1) 60%);
+    border-color: #bbf7d0;
+}
+.athlete-card-v2.zone-yellow {
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.12) 0%,
+                                          rgba(255, 255, 255, 1) 60%);
+    border-color: #fde68a;
+}
+.athlete-card-v2.zone-red {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.12) 0%,
+                                          rgba(255, 255, 255, 1) 60%);
+    border-color: #fecaca;
+}
+.athlete-card-v2.zone-aspire {
+    background: linear-gradient(135deg, rgba(0, 65, 133, 0.10) 0%,
+                                          rgba(255, 255, 255, 1) 60%);
+    border-color: var(--aspire-200);
+}
+.athlete-card-v2.zone-neutral {
+    background: linear-gradient(135deg, var(--slate-50) 0%,
+                                          rgba(255, 255, 255, 1) 60%);
+    border-color: var(--slate-200);
+}
+
+/* Header band */
+.athlete-card-v2 .acv2-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+.athlete-card-v2 .acv2-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--slate-900);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.athlete-card-v2 .acv2-meta {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--slate-500);
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.athlete-card-v2 .acv2-text { flex: 1; min-width: 0; }
+
+/* Avatar — photo + initials variants */
+.athlete-card-v2 .acv2-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border-width: 3px;
+    border-style: solid;
+    background: var(--slate-100);
+    flex-shrink: 0;
+}
+.athlete-card-v2 .acv2-avatar-initials {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: white;
+    font-weight: 700;
+    font-size: 18px;
+    border-width: 3px;
+    border-style: solid;
+    flex-shrink: 0;
+}
+
+/* Border tint per zone */
+.athlete-card-v2.zone-green   .acv2-avatar,
+.athlete-card-v2.zone-green   .acv2-avatar-initials {
+    border-color: var(--success);
+}
+.athlete-card-v2.zone-green   .acv2-avatar-initials {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+.athlete-card-v2.zone-yellow  .acv2-avatar,
+.athlete-card-v2.zone-yellow  .acv2-avatar-initials {
+    border-color: var(--warning);
+}
+.athlete-card-v2.zone-yellow  .acv2-avatar-initials {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+.athlete-card-v2.zone-red     .acv2-avatar,
+.athlete-card-v2.zone-red     .acv2-avatar-initials {
+    border-color: var(--danger);
+}
+.athlete-card-v2.zone-red     .acv2-avatar-initials {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+.athlete-card-v2.zone-aspire  .acv2-avatar,
+.athlete-card-v2.zone-aspire  .acv2-avatar-initials {
+    border-color: var(--aspire-600);
+}
+.athlete-card-v2.zone-aspire  .acv2-avatar-initials {
+    background: linear-gradient(135deg, #0059b3, #004185);
+}
+.athlete-card-v2.zone-neutral .acv2-avatar,
+.athlete-card-v2.zone-neutral .acv2-avatar-initials {
+    border-color: var(--slate-400);
+}
+.athlete-card-v2.zone-neutral .acv2-avatar-initials {
+    background: linear-gradient(135deg, #94a3b8, #64748b);
+}
+
+/* Ring row */
+.athlete-card-v2 .acv2-rings {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 8px;
+}
+.athlete-card-v2 .acv2-ring-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+.athlete-card-v2 .acv2-ring-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--slate-500);
+    text-align: center;
+}

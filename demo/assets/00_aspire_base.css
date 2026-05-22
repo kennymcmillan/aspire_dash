@@ -2261,3 +2261,406 @@ table.aspire-table tbody tr:hover {
     font-feature-settings: "lnum" 1;
     font-size: 34px;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v0.24 — Premium micro-interactions (the Linear/Stripe feel)
+   Subtle gradients, hover lifts, focus rings, glassy effects.
+   Applied portfolio-wide via CSS — no per-app code changes.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+    --ease-out:        cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out:     cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
+    --duration-fast:   150ms;
+    --duration-normal: 200ms;
+    --duration-slow:   400ms;
+
+    --elev-hover-card: 0 8px 24px -8px rgba(0, 65, 133, 0.18),
+                       0 4px 12px -4px rgba(15, 23, 42, 0.08);
+    --elev-hover-cta:  0 6px 16px -4px rgba(0, 65, 133, 0.40);
+    --glow-aspire:     0 0 0 4px rgba(0, 65, 133, 0.10);
+    --glow-gold:       0 0 0 4px rgba(251, 184, 0,  0.18);
+    --glow-success:    0 0 0 4px rgba(22, 163, 74,  0.12);
+    --glow-danger:     0 0 0 4px rgba(220, 38, 38,  0.12);
+}
+
+/* Smooth EVERYTHING — universal transition baseline */
+* {
+    transition: background-color var(--duration-fast) var(--ease-out),
+                border-color     var(--duration-fast) var(--ease-out),
+                color            var(--duration-fast) var(--ease-out);
+}
+
+/* Cards — soft brand-tinted hover with directional lift */
+.card,
+.budget-card,
+.athlete-card,
+.kpi-tile,
+.fr-kpi,
+.injury-card,
+.athlete-mini-card,
+.sparkline-tile {
+    transition: transform var(--duration-normal) var(--ease-out),
+                box-shadow var(--duration-normal) var(--ease-out),
+                border-color var(--duration-fast) var(--ease-out);
+    will-change: transform;
+}
+.card:hover,
+.budget-card:hover,
+.athlete-card:hover,
+.kpi-tile:hover,
+.fr-kpi:hover,
+.injury-card:hover,
+.athlete-mini-card:hover,
+.sparkline-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--elev-hover-card);
+    border-color: var(--aspire-200);
+}
+.financial-report .card:hover,
+.financial-report .fr-kpi:hover {
+    transform: none;
+    box-shadow: var(--elev-1);
+    border-color: var(--slate-200);
+}
+
+/* Buttons — gradient bg + hover lift + branded focus ring */
+.btn-primary,
+button.btn-primary,
+.aspire-btn-primary {
+    background: linear-gradient(180deg, #0059b3 0%, #004185 100%) !important;
+    border: none !important;
+    color: white !important;
+    padding: 8px 16px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    box-shadow: 0 1px 2px rgba(0, 65, 133, 0.20) !important;
+    transition: all var(--duration-fast) var(--ease-out) !important;
+    cursor: pointer;
+}
+.btn-primary:hover,
+button.btn-primary:hover,
+.aspire-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--elev-hover-cta) !important;
+    background: linear-gradient(180deg, #006bcc 0%, #004f9e 100%) !important;
+}
+.btn-primary:focus-visible {
+    outline: none;
+    box-shadow: var(--elev-hover-cta), var(--glow-aspire) !important;
+}
+
+/* Inputs — branded focus glow, no fat blue Bootstrap ring */
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+input[type="email"]:focus,
+select:focus,
+textarea:focus,
+.Select-control.is-focused,
+.form-control:focus {
+    outline: none !important;
+    border-color: var(--aspire-500) !important;
+    box-shadow: var(--glow-aspire) !important;
+}
+
+/* Status pills — gentle scale on hover */
+.status-pill,
+.status-badge,
+.badge {
+    transition: transform var(--duration-fast) var(--ease-spring),
+                background-color var(--duration-fast) var(--ease-out);
+}
+.status-pill:hover,
+.status-badge:hover,
+.badge:hover {
+    transform: scale(1.03);
+}
+
+/* Sidebar links — slide-in + brand tint + gold active marker.
+   SCOPED to .sidebar-nav (aspire_dash sidebar() helper) so apps that
+   roll their own sidebar (whoop, etc.) keep their custom palette and
+   don't get Aspire-blue + gold bleed-in from the v0.24 polish pass. */
+.sidebar-nav .sidebar-link {
+    position: relative;
+    transition: background-color var(--duration-fast) var(--ease-out),
+                padding-left     var(--duration-fast) var(--ease-out),
+                color            var(--duration-fast) var(--ease-out);
+}
+.sidebar-nav .sidebar-link::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 0;
+    background: var(--aspire-400);
+    transition: width var(--duration-fast) var(--ease-out);
+}
+.sidebar-nav .sidebar-link:hover {
+    background-color: rgba(0, 65, 133, 0.18);
+    padding-left: 22px;
+    color: white !important;
+}
+.sidebar-nav .sidebar-link:hover::before { width: 3px; }
+.sidebar-nav .sidebar-link.active {
+    background-color: var(--aspire-600);
+    color: white !important;
+    font-weight: 600;
+}
+.sidebar-nav .sidebar-link.active::before { width: 3px; background: var(--gold); }
+
+/* Topnav links — branded underline grow */
+.topnav-link {
+    position: relative;
+    transition: color var(--duration-fast) var(--ease-out);
+}
+.topnav-link::after {
+    content: "";
+    position: absolute;
+    left: 12px; right: 12px; bottom: 6px; height: 2px;
+    background: var(--aspire-600);
+    transform: scaleX(0); transform-origin: center;
+    transition: transform var(--duration-fast) var(--ease-out);
+}
+.topnav-link:hover::after { transform: scaleX(1); }
+.topnav-link.active::after { transform: scaleX(1); background: var(--aspire-600); }
+
+/* Section title — subtle fade-in (page transitions feel premium) */
+.section-title-v2,
+.aspire-section-heading {
+    animation: aspire-fade-up var(--duration-normal) var(--ease-out);
+}
+@keyframes aspire-fade-up {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* AG Grid rows — premium aspire-tint hover */
+.ag-theme-quartz .ag-row:hover,
+.ag-theme-quartz.aspire-themed .ag-row:hover {
+    background-color: var(--aspire-50) !important;
+    transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+/* dcc.Loading spinner colour */
+._dash-loading {
+    color: var(--aspire-600) !important;
+}
+
+/* Gold achievement pulse — opt in via .pulse-gold */
+.pulse-gold {
+    animation: aspire-pulse-gold 2s var(--ease-in-out) infinite;
+}
+@keyframes aspire-pulse-gold {
+    0%, 100% { box-shadow: var(--glow-gold); }
+    50%      { box-shadow: 0 0 0 8px rgba(251, 184, 0, 0.10); }
+}
+
+/* Header backdrop — modern glass effect */
+.header,
+.app-header {
+    background: rgba(247, 249, 252, 0.85) !important;
+    backdrop-filter: blur(14px) saturate(180%);
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+/* Subtle gradient page bg (depth instead of flat slate) */
+body {
+    background: linear-gradient(180deg, #f7f9fc 0%, #f1f5f9 100%) !important;
+    min-height: 100vh;
+}
+
+/* Golden NEW badge */
+.badge-new,
+.badge-pulse-gold {
+    background: linear-gradient(135deg, var(--gold) 0%, #f59e0b 100%);
+    color: #78350f;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(251, 184, 0, 0.30);
+}
+
+/* Honour reduced-motion preference (a11y) */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v0.26 — athlete_card_v2 (Whoop-style premium card)
+   Zone-coloured gradient bg + larger photo (or initials fallback) + 3 rings.
+   Usage:
+     <div class="athlete-card-v2 zone-green">
+       <div class="acv2-header"> avatar + name + meta </div>
+       <div class="acv2-rings">  ring × 3            </div>
+     </div>
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.athlete-card-v2 {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--slate-200);
+    box-shadow: var(--elev-1);
+    transition: transform var(--duration-normal) var(--ease-out),
+                box-shadow var(--duration-normal) var(--ease-out);
+    will-change: transform;
+}
+.athlete-card-v2:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--elev-hover-card);
+}
+
+/* Zone-tinted gradients (the user said "the gradient on whoop is super
+   nice — apply that to others too") */
+.athlete-card-v2.zone-green {
+    background: linear-gradient(135deg, rgba(22, 163, 74, 0.10) 0%,
+                                          rgba(255, 255, 255, 1) 60%);
+    border-color: #bbf7d0;
+}
+.athlete-card-v2.zone-yellow {
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.12) 0%,
+                                          rgba(255, 255, 255, 1) 60%);
+    border-color: #fde68a;
+}
+.athlete-card-v2.zone-red {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.12) 0%,
+                                          rgba(255, 255, 255, 1) 60%);
+    border-color: #fecaca;
+}
+.athlete-card-v2.zone-aspire {
+    background: linear-gradient(135deg, rgba(0, 65, 133, 0.10) 0%,
+                                          rgba(255, 255, 255, 1) 60%);
+    border-color: var(--aspire-200);
+}
+.athlete-card-v2.zone-neutral {
+    background: linear-gradient(135deg, var(--slate-50) 0%,
+                                          rgba(255, 255, 255, 1) 60%);
+    border-color: var(--slate-200);
+}
+
+/* Header band */
+.athlete-card-v2 .acv2-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+.athlete-card-v2 .acv2-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--slate-900);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.athlete-card-v2 .acv2-meta {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--slate-500);
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.athlete-card-v2 .acv2-text { flex: 1; min-width: 0; }
+
+/* Avatar — photo + initials variants */
+.athlete-card-v2 .acv2-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border-width: 3px;
+    border-style: solid;
+    background: var(--slate-100);
+    flex-shrink: 0;
+}
+.athlete-card-v2 .acv2-avatar-initials {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: white;
+    font-weight: 700;
+    font-size: 18px;
+    border-width: 3px;
+    border-style: solid;
+    flex-shrink: 0;
+}
+
+/* Border tint per zone */
+.athlete-card-v2.zone-green   .acv2-avatar,
+.athlete-card-v2.zone-green   .acv2-avatar-initials {
+    border-color: var(--success);
+}
+.athlete-card-v2.zone-green   .acv2-avatar-initials {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+.athlete-card-v2.zone-yellow  .acv2-avatar,
+.athlete-card-v2.zone-yellow  .acv2-avatar-initials {
+    border-color: var(--warning);
+}
+.athlete-card-v2.zone-yellow  .acv2-avatar-initials {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+.athlete-card-v2.zone-red     .acv2-avatar,
+.athlete-card-v2.zone-red     .acv2-avatar-initials {
+    border-color: var(--danger);
+}
+.athlete-card-v2.zone-red     .acv2-avatar-initials {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+.athlete-card-v2.zone-aspire  .acv2-avatar,
+.athlete-card-v2.zone-aspire  .acv2-avatar-initials {
+    border-color: var(--aspire-600);
+}
+.athlete-card-v2.zone-aspire  .acv2-avatar-initials {
+    background: linear-gradient(135deg, #0059b3, #004185);
+}
+.athlete-card-v2.zone-neutral .acv2-avatar,
+.athlete-card-v2.zone-neutral .acv2-avatar-initials {
+    border-color: var(--slate-400);
+}
+.athlete-card-v2.zone-neutral .acv2-avatar-initials {
+    background: linear-gradient(135deg, #94a3b8, #64748b);
+}
+
+/* Ring row */
+.athlete-card-v2 .acv2-rings {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 8px;
+}
+.athlete-card-v2 .acv2-ring-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+.athlete-card-v2 .acv2-ring-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--slate-500);
+    text-align: center;
+}
