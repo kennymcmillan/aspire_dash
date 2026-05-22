@@ -787,3 +787,148 @@ def sport_dropdown(
         clearable=clearable,
         style={"minWidth": "180px"},
     )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# v0.18 — Sport-federation source badge + competition card + world map
+# Extracted from DASH_Fencing_Reports_App. Sport-agnostic so the same
+# helpers cover Squash (PSA/ESF/ASF), TT (ITTF/WTT), Athletics (WA/IAAF),
+# Swimming (FINA/WAQ), Padel (FIP/WPT).
+# ─────────────────────────────────────────────────────────────────────────────
+
+SOURCE_BADGE_COLORS = {
+    "fie":    ("#e0e7ff", "#3730a3"),
+    "eurof":  ("#ccfbf1", "#115e59"),
+    "ftl":    ("#ffedd5", "#9a3412"),
+    "psa":    ("#fee2e2", "#991b1b"),
+    "esf":    ("#dbeafe", "#1e40af"),
+    "asf":    ("#fef3c7", "#92400e"),
+    "ittf":   ("#e0e7ff", "#3730a3"),
+    "wtt":    ("#dcfce7", "#166534"),
+    "wa":     ("#fee2e2", "#991b1b"),
+    "iaaf":   ("#fee2e2", "#991b1b"),
+    "tila":   ("#f3e8ff", "#6b21a8"),
+    "fip":    ("#dbeafe", "#1e40af"),
+    "wpt":    ("#dcfce7", "#166534"),
+    "fina":   ("#cffafe", "#155e75"),
+    "waq":    ("#cffafe", "#155e75"),
+    "olympic":("#fef3c7", "#92400e"),
+    "gcc":    ("#fef3c7", "#92400e"),
+    "default":("#f1f5f9", "#475569"),
+}
+
+
+def source_badge(label, *, federation=None):
+    """Sport-federation tag — coloured pill consistent with the
+    federation's brand. Auto-resolves colour from SOURCE_BADGE_COLORS."""
+    from dash import html
+    key = (federation or label or "").lower()
+    bg, fg = SOURCE_BADGE_COLORS.get(key, SOURCE_BADGE_COLORS["default"])
+    return html.Span(label, style={
+        "display": "inline-flex", "alignItems": "center",
+        "padding": "2px 8px", "borderRadius": "10px",
+        "fontSize": "10.5px", "fontWeight": 700,
+        "letterSpacing": "0.4px", "textTransform": "uppercase",
+        "background": bg, "color": fg,
+        "fontFamily": "Poppins, sans-serif", "lineHeight": "1.4",
+    })
+
+
+def competition_card(event, *, date=None, location=None, result=None,
+                      placement=None, federation=None, category=None,
+                      href=None):
+    """Competition event card — event / date / location / result chain."""
+    from dash import html
+    header = []
+    if federation:
+        header.append(source_badge(federation, federation=federation))
+    if category:
+        header.append(html.Span(category, style={
+            "marginLeft": "6px", "fontSize": "10px", "fontWeight": 600,
+            "color": SLATE["500"], "textTransform": "uppercase",
+            "letterSpacing": "0.4px",
+        }))
+    body = []
+    if header:
+        body.append(html.Div(header, style={"marginBottom": "4px"}))
+    body.append(html.Div(event, style={"fontSize": "14px", "fontWeight": 700,
+                                          "color": SLATE["900"],
+                                          "lineHeight": "1.3"}))
+    meta = []
+    if date:
+        meta.append(html.I(className="fa-solid fa-calendar",
+                            style={"fontSize": "10px",
+                                    "color": SLATE["400"],
+                                    "marginRight": "4px"}))
+        meta.append(html.Span(date, style={"color": SLATE["500"]}))
+    if location:
+        if date:
+            meta.append(html.Span(" · ", style={"color": SLATE["300"],
+                                                   "margin": "0 4px"}))
+        meta.append(html.I(className="fa-solid fa-location-dot",
+                            style={"fontSize": "10px",
+                                    "color": SLATE["400"],
+                                    "marginRight": "4px"}))
+        meta.append(html.Span(location, style={"color": SLATE["500"]}))
+    if meta:
+        body.append(html.Div(meta, style={"fontSize": "11px",
+                                            "marginTop": "4px",
+                                            "display": "flex",
+                                            "alignItems": "center"}))
+    if result or placement is not None:
+        result_color = ("#fbb800" if placement == 1
+                        else "#94a3b8" if placement == 2
+                        else "#a16207" if placement == 3
+                        else "#004185")
+        body.append(html.Div([
+            html.Span(f"#{placement}" if placement else "",
+                       style={"fontWeight": 700, "color": result_color,
+                              "marginRight": "8px",
+                              "fontVariantNumeric": "tabular-nums"}),
+            html.Span(result or "", style={"color": SLATE["700"],
+                                              "fontWeight": 600}),
+        ], style={"marginTop": "6px", "paddingTop": "6px",
+                   "borderTop": f"1px solid {SLATE['100']}",
+                   "fontSize": "12px"}))
+    card = html.Div(body, className="card",
+                     style={"padding": "12px 14px",
+                            "fontFamily": "Poppins, sans-serif"})
+    if href:
+        return html.A(card, href=href,
+                       style={"textDecoration": "none", "color": "inherit"})
+    return card
+
+
+def world_map(df, country_col, value_col, *, title=None, height=380,
+               scope="world", highlight_country=None):
+    """Choropleth world map — country distribution of a metric. ISO-3 codes."""
+    import plotly.graph_objects as go
+    fig = go.Figure(go.Choropleth(
+        locations=df[country_col], z=df[value_col],
+        locationmode="ISO-3",
+        colorscale=[[0.0, "#dbeafe"], [0.5, "#0059b3"], [1.0, "#001d3d"]],
+        marker_line_color="white", marker_line_width=0.6,
+        colorbar=dict(thickness=10,
+                       title=dict(text=value_col, side="right",
+                                  font=dict(size=11))),
+    ))
+    if highlight_country:
+        fig.add_trace(go.Choropleth(
+            locations=[highlight_country], z=[1],
+            locationmode="ISO-3",
+            colorscale=[[0, "#fbb800"], [1, "#fbb800"]],
+            showscale=False,
+            marker_line_color="#001d3d", marker_line_width=1.5,
+            hoverinfo="skip",
+        ))
+    fig.update_layout(
+        title=title, height=height,
+        geo=dict(scope=scope, showcoastlines=True,
+                  coastlinecolor=SLATE["200"],
+                  showland=True, landcolor=SLATE["50"],
+                  showcountries=True, countrycolor="white",
+                  projection_type="natural earth"),
+        margin=dict(t=24 if title else 8, b=8, l=8, r=8),
+        font=dict(family="Poppins", size=11),
+    )
+    return fig
