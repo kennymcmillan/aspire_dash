@@ -82,18 +82,28 @@ sidebar:
   link-hover-bg: "#002855"
   link-active-bg: "#004185"
 
-# Radius scale (px)
+# Radius scale (px) — 8 px canonical (v0.23 polish pass)
+# All three tiers collapse to 8 px per the brand audit. Was 6/8/12 — the
+# 12 was the worst offender (every "card" looked too rounded vs the CSS
+# layer's 8 px discipline). Use radius.full for pills/avatars only.
 radius:
-  sm: 6
+  sm: 8
   md: 8
-  lg: 12
+  lg: 8
   full: 9999
 
-# Shadow scale
+# Shadow scale (slate-tinted for premium feel — v0.23 polish pass)
+# Was rgba(0,0,0,...) pure-black. Slate tint (#0f172a-equiv) reads as
+# considered, brand-aware depth — matches Linear/Stripe/Whoop. The CSS
+# layer's --elev-1/2/3 tokens already use these values; Python now agrees.
 shadows:
-  sm: "0 1px 2px 0 rgba(0,0,0,0.05)"
-  md: "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1)"
-  lg: "0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)"
+  sm: "0 1px 2px 0 rgba(15,23,42,0.04), 0 1px 3px 0 rgba(15,23,42,0.03)"
+  md: "0 4px 12px -2px rgba(15,23,42,0.08), 0 2px 4px -2px rgba(15,23,42,0.04)"
+  lg: "0 12px 32px -8px rgba(15,23,42,0.12), 0 8px 16px -6px rgba(15,23,42,0.06)"
+
+# Page background — warmer than slate-100, lighter than white
+# Use via theme.BG_PAGE in Python; --aspire-bg-page in CSS
+bg_page: "#f7f9fc"
 
 # Logo
 logo:

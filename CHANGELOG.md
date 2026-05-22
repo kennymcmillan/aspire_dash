@@ -4,6 +4,67 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.23.0] — 2026-05-22
+
+### Brand-audit polish pass (B → A across the portfolio)
+
+Audit found the CSS layer was A-quality (after v0.19) but Python
+components were importing stale `brand.yml` tokens (RADIUS_LG=12 vs
+canonical 8, pure-black shadows vs slate-tinted) and writing inline
+styles that bypassed the canonical CSS classes. Result: half the
+portfolio rendered "premium" (Forge components) and half "Bootstrap"
+(legacy inline). This release closes that gap.
+
+**`brand.yml` — three highest-leverage edits** (radii + shadows + page
+bg). Every module that imports `RADIUS_LG` / `SHADOW_SM` instantly
+upgrades on next SHA bump:
+
+- `radius.sm/md/lg` all → 8 px (was 6/8/12). 8 px is canonical.
+- `shadows.sm/md/lg` → slate-tinted (`rgba(15,23,42,...)`) replacing
+  pure-black `rgba(0,0,0,...)`. Matches Linear/Stripe/Whoop depth.
+- New `bg_page: #f7f9fc` token — exposes the warmer-than-slate-100
+  page bg as `theme.BG_PAGE` (was hardcoded in 6 modules).
+
+**Typography:**
+- `charts.py` Plotly template font Poppins → Inter (brand rule:
+  tabular/numeric → Inter). Every Plotly chart in the portfolio
+  shifts to the data font without per-app edits.
+- `theme.py` exports `FONT_HEADING`, `FONT_DATA`, `FONT_MONO` (was
+  only `FONT_FAMILY` + `FONT_MONO`).
+
+**Empty state dedup:**
+- `components.feedback.empty_state()` now delegates to
+  `v12_helpers.aspire_empty()`. One implementation, branded
+  gradient + dashed aspire-200 border by default. Eliminates the
+  visible split between Bootstrap-grey (old) and Aspire-branded (new)
+  empty states across the portfolio.
+
+**KPI rhythm:**
+- `components/kpi.py` small variant radius 6 → 8, value sizes switch
+  from `rem` to two-step px scale (26 / 30) matching CSS. Progress
+  bar height 5 → 4 px (on-scale).
+
+**Card depth:**
+- `components/cards.py` `summary_card` drops its inline shadow and
+  routes through `.budget-card` class (already correct in CSS). Hover
+  lift now works because inline `boxShadow` no longer overrides it.
+
+**VALD palette align:**
+- `vald.py` bulk-replace `#6b7280` (Tailwind gray-500) → `#64748b`
+  (slate-500) and `#e5e7eb` (Tailwind gray-200) → `#e2e8f0`
+  (slate-200). VALD charts now read as Aspire, not legacy palette.
+
+**AG Grid cleanup:**
+- `tables.py` deprecates `ASPIRE_AG_THEME_OVERRIDES` (CSS authoritative
+  via `.ag-theme-quartz.aspire-themed`). No more duplicated CSS string.
+
+### Migration
+
+No consumer changes required. Bump aspire_dash SHA pin → every app
+inherits the polish automatically. Forge-built modules (financial,
+v12_helpers, plots, charts) were already A-quality; legacy modules
+(cards, kpi, budget, athlete, viz, etc.) now match by inheritance.
+
 ## [0.22.3] — 2026-05-22
 
 ### Fixed (CRITICAL — sidebar 404s on apps that pre-wrap hrefs)

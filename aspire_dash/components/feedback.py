@@ -60,17 +60,14 @@ def badge(text, color="gray", pill=True):
 # ── Empty State ──────────────────────────────────────────────────────────────
 
 def empty_state(icon="fa-solid fa-inbox", text="No data found", hint=""):
-    """Centered empty state with icon, text, and hint."""
-    return html.Div([
-        html.Div(html.I(className=icon), className="empty-state-icon",
-                 style={"fontSize": "48px", "marginBottom": "12px", "opacity": "0.5"}),
-        html.Div(text, style={"fontSize": "15px", "fontWeight": "500"}),
-        html.Div(hint, style={"fontSize": "13px", "color": "#d1d5db", "marginTop": "4px"}) if hint else None,
-    ], className="empty-state", style={
-        "display": "flex", "flexDirection": "column",
-        "alignItems": "center", "justifyContent": "center",
-        "padding": "60px 24px", "color": "#9ca3af", "textAlign": "center",
-    })
+    """Centered empty state with icon, text, and hint.
+
+    v0.23: now delegates to ``v12_helpers.aspire_empty()`` — both helpers
+    were diverging visually (this one was Bootstrap-grey, the v12 one was
+    Aspire-branded gradient + dashed brand border). One implementation,
+    one visual, branded by default."""
+    from ..v12_helpers import aspire_empty
+    return aspire_empty(text=text, hint=hint, icon=icon)
 
 
 

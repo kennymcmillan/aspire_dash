@@ -60,11 +60,13 @@ def kpi_tile(label, value, unit="", color=None, target=None, size="lg",
     from aspire_dash.theme import band_color, ASPIRE_BLUE  # local — avoid cycle
 
     accent = color or ASPIRE_BLUE
-    value_text_size = "1.8rem" if size == "lg" else "1.4rem"
-    label_text_size = "0.7rem" if size == "lg" else "0.65rem"
+    # v0.23: two-step KPI rhythm (26px small / 30px large) + canonical
+    # 8 px radius for both sizes (was 6 / 8 mix). Padding still scales.
+    value_text_size = "30px" if size == "lg" else "26px"
+    label_text_size = "11px" if size == "lg" else "10.5px"
     padding         = "12px 16px" if size == "lg" else "8px 12px"
     border_width    = "4px" if size == "lg" else "3px"
-    border_radius   = "8px" if size == "lg" else "6px"
+    border_radius   = "8px"
 
     bar = None
     sub = html.Div(unit, className="text-muted small",
@@ -81,7 +83,7 @@ def kpi_tile(label, value, unit="", color=None, target=None, size="lg",
         bc_bs  = band_color(band)
         bar = dbc.Progress(
             value=min(100, (value / tgt_val) * 100) if tgt_val else 0,
-            style={"height": "5px", "marginTop": "6px"},
+            style={"height": "4px", "marginTop": "6px"},   # v0.23: 5→4 (on-scale)
             color=bc_bs,
         )
         pct_txt = (f"{pct:.0f}% of target" if pct is not None

@@ -62,21 +62,12 @@ NUMERIC_COL_DEF = {
     "cellEditor": "agNumberCellEditor",
 }
 
-#: Style block applied to .ag-theme-alpine to recolour the header with
-#: Aspire blue and tighten the row borders to slate-200. Include in your
-#: app's assets/custom.css OR import the rules from 00_aspire_base.css
-#: (added in v0.6).
-ASPIRE_AG_THEME_OVERRIDES = """
-.ag-theme-alpine {
-    --ag-header-background-color: var(--aspire-600, #004185);
-    --ag-header-foreground-color: white;
-    --ag-row-border-color: var(--slate-200, #e2e8f0);
-    --ag-font-family: Inter, sans-serif;
-    --ag-font-size: 12px;
-}
-.ag-theme-alpine .ag-cell-inline-editing { background: #fff8e1; }
-.ag-theme-alpine .ag-row-modified { background: #fff8e1 !important; }
-""".strip()
+#: DEPRECATED in v0.23 — kept for backwards compatibility only.
+#: These rules are now in ``00_aspire_base.css`` under
+#: ``.ag-theme-quartz.aspire-themed`` (the canonical Aspire AG Grid theme).
+#: Use ``className="ag-theme-quartz aspire-themed"`` on your grid + drop
+#: this overrides string. No need to inject CSS into ``custom.css``.
+ASPIRE_AG_THEME_OVERRIDES = ""    # intentionally empty — CSS is authoritative
 
 
 def aspire_grid(

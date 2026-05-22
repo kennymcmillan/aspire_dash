@@ -31,7 +31,12 @@ GOLD_LIGHT = COLORS["gold-light"]
 
 # ── Typography ───────────────────────────────────────────────────────────────
 FONT_FAMILY = BRAND["fonts"]["body"]
+FONT_HEADING = BRAND["fonts"]["heading"]
+FONT_DATA = BRAND["fonts"]["data"]      # Inter — for tabular/numeric (charts, tables)
 FONT_MONO = BRAND["fonts"]["mono"]
+
+# Page background — v0.23 token (was hardcoded as #f7f9fc / #f8fafc in 6 modules)
+BG_PAGE = BRAND.get("bg_page", "#f7f9fc")
 
 # ── Sidebar ──────────────────────────────────────────────────────────────────
 SIDEBAR_WIDTH = BRAND["sidebar"]["width"]

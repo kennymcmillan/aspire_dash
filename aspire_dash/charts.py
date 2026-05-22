@@ -10,7 +10,7 @@ Default styling tightened per the 2026-05-22 design audit:
 
 import plotly.graph_objects as go
 import plotly.io as pio
-from .theme import CHART_COLORS, FONT_FAMILY, SLATE
+from .theme import CHART_COLORS, FONT_DATA, SLATE   # FONT_DATA = Inter (brand rule: tabular/numeric)
 
 __all__ = ["GRAPH_CONFIG", "apply_template"]
 
@@ -24,7 +24,7 @@ GRAPH_CONFIG = {
 _aspire_template = go.layout.Template()
 _aspire_template.layout = go.Layout(
     font=dict(
-        family=FONT_FAMILY,
+        family=FONT_DATA,
         size=13,
         color=SLATE["700"],
     ),
@@ -60,7 +60,7 @@ _aspire_template.layout = go.Layout(
     hoverlabel=dict(
         bgcolor="white",
         font_size=12,
-        font_family=FONT_FAMILY,
+        font_family=FONT_DATA,
         bordercolor=SLATE["200"],
     ),
 )

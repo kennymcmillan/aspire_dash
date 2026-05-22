@@ -70,12 +70,11 @@ def summary_card(label, value, sub=None, icon=None, color_class=""):
             "fontSize": "12px", "color": SLATE["400"], "marginTop": "2px",
         }) if sub else None,
     ], className=f"budget-card {color_class}".strip(), style={
-        "background": "white",
-        "border": f"1px solid {SLATE['200']}",
-        "borderRadius": "8px",
+        # v0.23: shadow + radius + bg now live in .budget-card class
+        # (00_aspire_base.css). Inline override removed so hover-lift +
+        # slate-tinted elev-1 work from CSS. Kept padding inline because
+        # callers tune density per-page.
         "padding": "16px 20px",
-        "boxShadow": "0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03)",
-        "transition": "box-shadow 0.2s",
     })
 
 
