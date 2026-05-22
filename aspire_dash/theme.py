@@ -11,6 +11,24 @@ with open(_BRAND_PATH, "r", encoding="utf-8") as f:
 COLORS = BRAND["colors"]
 CHART_COLORS = COLORS["chart"]
 
+# v0.25 — Aspire-anchored sequential + diverging scales for Plotly's
+# `color_continuous_scale=` and `color_discrete_sequence=`. Replaces
+# off-brand Plotly stock defaults (Reds, Blues, Viridis) so every
+# chart in the portfolio reads as Aspire.
+SEQUENTIAL_BLUE   = COLORS.get("sequential_blue",   [])
+SEQUENTIAL_GOLD   = COLORS.get("sequential_gold",   [])
+SEQUENTIAL_RED    = COLORS.get("sequential_red",    [])
+SEQUENTIAL_GREEN  = COLORS.get("sequential_green",  [])
+DIVERGING_RED_GREEN = COLORS.get("diverging_red_green", [])
+DIVERGING_GREEN_RED = COLORS.get("diverging_green_red", [])
+
+# Convenience — alias the most common ones
+ASPIRE_SCALE   = SEQUENTIAL_BLUE      # "magnitude" use case
+GOLD_SCALE_C   = SEQUENTIAL_GOLD      # "achievement" / "intensity"
+HEAT_RED_SCALE = SEQUENTIAL_RED       # "danger / load / risk"
+HEAT_GREEN_SCALE = SEQUENTIAL_GREEN   # "recovery / readiness / availability"
+VARIANCE_SCALE = DIVERGING_RED_GREEN  # bad ← neutral → good (default)
+
 SLATE = {k.split("-")[1]: v for k, v in COLORS.items() if k.startswith("slate-")}
 ASPIRE = {k.split("-")[1]: v for k, v in COLORS.items() if k.startswith("aspire-")}
 

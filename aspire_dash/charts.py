@@ -10,9 +10,34 @@ Default styling tightened per the 2026-05-22 design audit:
 
 import plotly.graph_objects as go
 import plotly.io as pio
-from .theme import CHART_COLORS, FONT_DATA, SLATE   # FONT_DATA = Inter (brand rule: tabular/numeric)
+from .theme import (
+    CHART_COLORS, FONT_DATA, SLATE,
+    SEQUENTIAL_BLUE, SEQUENTIAL_GOLD, SEQUENTIAL_RED,
+    SEQUENTIAL_GREEN, DIVERGING_RED_GREEN,
+)   # FONT_DATA = Inter (brand rule: tabular/numeric)
 
-__all__ = ["GRAPH_CONFIG", "apply_template"]
+
+def _scale(colors):
+    """Convert a brand list into Plotly's [(stop, color), ...] form."""
+    if not colors:
+        return None
+    n = len(colors)
+    return [[i / (n - 1), c] for i, c in enumerate(colors)]
+
+
+# Exported colour scales — pass directly to Plotly's
+# `color_continuous_scale=` / `colorscale=`. Replaces stock Plotly
+# defaults (Reds, Blues, Viridis) with Aspire-anchored equivalents.
+ASPIRE_BLUE_SCALE     = _scale(SEQUENTIAL_BLUE)     # magnitude
+ASPIRE_GOLD_SCALE     = _scale(SEQUENTIAL_GOLD)     # achievement
+ASPIRE_HEAT_SCALE     = _scale(SEQUENTIAL_RED)      # load / risk
+ASPIRE_RECOVERY_SCALE = _scale(SEQUENTIAL_GREEN)    # readiness / availability
+ASPIRE_VARIANCE_SCALE = _scale(DIVERGING_RED_GREEN) # bad ← neutral → good
+
+__all__ = ["GRAPH_CONFIG", "apply_template",
+            "ASPIRE_BLUE_SCALE", "ASPIRE_GOLD_SCALE",
+            "ASPIRE_HEAT_SCALE", "ASPIRE_RECOVERY_SCALE",
+            "ASPIRE_VARIANCE_SCALE"]
 
 # ── Graph config (hide modebar by default) ───────────────────────────────────
 GRAPH_CONFIG = {

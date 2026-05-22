@@ -4,6 +4,52 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.25.0] — 2026-05-22
+
+### Chart-palette overhaul (Aspire-anchored, premium tonal harmony)
+
+Audit found the categorical chart palette had 4 blues, 3 greens, and
+4 clashing warms — saturated primary colours competing for attention.
+v0.25 replaces it with a tonally harmonic 10-step palette where every
+colour sits at roughly the same lightness + saturation, hue spacing
+~36° apart. Aspire blue stays the brand anchor.
+
+**New categorical palette (`brand.yml::colors.chart`):**
+
+1. `#004185` Aspire blue (brand anchor)
+2. `#be185d` Magenta rose
+3. `#c2410c` Burnt orange
+4. `#a16207` Mustard
+5. `#65a30d` Lime green
+6. `#047857` Emerald
+7. `#0e7490` Teal
+8. `#0369a1` Sky blue
+9. `#6d28d9` Royal purple
+10. `#b91c1c` Crimson red
+
+**New sequential + diverging scales:**
+
+- `SEQUENTIAL_BLUE`  — Aspire 50 → 900 (magnitude)
+- `SEQUENTIAL_GOLD`  — gold 50 → 900 (achievement)
+- `SEQUENTIAL_RED`   — red 50 → 900 (load / risk)
+- `SEQUENTIAL_GREEN` — green 50 → 900 (recovery / readiness)
+- `DIVERGING_RED_GREEN` — bad ← neutral → good (variance reports)
+- `DIVERGING_GREEN_RED` — high-is-bad variant
+
+**Plotly-ready exports in `aspire_dash.charts`:**
+
+- `ASPIRE_BLUE_SCALE` — pass to `color_continuous_scale=`
+- `ASPIRE_GOLD_SCALE`
+- `ASPIRE_HEAT_SCALE` (replaces stock Plotly `Reds`)
+- `ASPIRE_RECOVERY_SCALE` (replaces stock `Greens`)
+- `ASPIRE_VARIANCE_SCALE` (diverging — for budget / variance pages)
+
+**Migration:** replace `color_continuous_scale="Reds"` with
+`color_continuous_scale=ASPIRE_HEAT_SCALE` in any consumer chart. The
+categorical palette is consumed automatically via the Aspire Plotly
+template (no code change needed — every chart picks up the new colours
+on next deploy).
+
 ## [0.24.0] — 2026-05-22
 
 ### Brand polish — density + premium micro-interactions

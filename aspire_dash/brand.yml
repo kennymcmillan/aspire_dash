@@ -48,18 +48,92 @@ colors:
   gold: "#fbb800"
   gold-light: "#fef3c7"
 
-  # Chart palette (10 colours, Aspire blue first)
+  # ── Categorical chart palette ────────────────────────────────────────
+  # v0.25 — tonally harmonic (was 4 blues / 3 greens / 4 warm clashes).
+  # Each colour is at roughly the same lightness + saturation so no
+  # single category visually dominates. Aspire blue stays the anchor.
+  # Hue spacing ~36° apart on the colour wheel; warms + cools balanced.
   chart:
-    - "#004185"  # aspire blue
-    - "#16a34a"  # forest green
-    - "#d97706"  # deep amber
-    - "#dc2626"  # rich red
-    - "#7c3aed"  # purple
-    - "#0891b2"  # cyan
-    - "#ea580c"  # orange
-    - "#db2777"  # pink
-    - "#0d9488"  # teal
-    - "#4f46e5"  # indigo
+    - "#004185"  # 1.  Aspire blue        (213° — brand anchor)
+    - "#be185d"  # 2.  Magenta rose       (332°)
+    - "#c2410c"  # 3.  Burnt orange       ( 20°)
+    - "#a16207"  # 4.  Mustard            ( 37°)
+    - "#65a30d"  # 5.  Lime green         ( 78°)
+    - "#047857"  # 6.  Emerald            (160°)
+    - "#0e7490"  # 7.  Teal               (190°)
+    - "#0369a1"  # 8.  Sky blue           (203°)
+    - "#6d28d9"  # 9.  Royal purple       (260°)
+    - "#b91c1c"  # 10. Crimson red        (  0°)
+
+  # ── Sequential scales (ordered data — light → dark single hue) ──────
+  # Use these for choropleths, treemaps, heatmaps where the metric has
+  # a natural order. Aspire-anchored, no off-brand Plotly defaults.
+  sequential_blue:
+    - "#dbeafe"
+    - "#93c5fd"
+    - "#60a5fa"
+    - "#3b82f6"
+    - "#0059b3"
+    - "#004185"
+    - "#003566"
+    - "#002855"
+    - "#001d3d"
+
+  sequential_gold:
+    - "#fffbeb"
+    - "#fef3c7"
+    - "#fde68a"
+    - "#fcd34d"
+    - "#fbb800"
+    - "#eab308"
+    - "#ca8a04"
+    - "#a16207"
+    - "#92400e"
+
+  sequential_red:
+    - "#fee2e2"
+    - "#fecaca"
+    - "#fca5a5"
+    - "#f87171"
+    - "#ef4444"
+    - "#dc2626"
+    - "#b91c1c"
+    - "#991b1b"
+    - "#7f1d1d"
+
+  sequential_green:
+    - "#dcfce7"
+    - "#bbf7d0"
+    - "#86efac"
+    - "#4ade80"
+    - "#22c55e"
+    - "#16a34a"
+    - "#15803d"
+    - "#166534"
+    - "#14532d"
+
+  # ── Diverging scale (variance: bad ← neutral → good) ────────────────
+  # Use for variance reports, % change, deviation-from-target. The
+  # midpoint is intentionally near-white so "zero variance" reads as
+  # neutral.
+  diverging_red_green:
+    - "#7f1d1d"
+    - "#dc2626"
+    - "#fca5a5"
+    - "#f8fafc"
+    - "#86efac"
+    - "#16a34a"
+    - "#14532d"
+
+  # Reversed pair when "high = bad" (e.g. load spike, days-since-test)
+  diverging_green_red:
+    - "#14532d"
+    - "#16a34a"
+    - "#86efac"
+    - "#f8fafc"
+    - "#fca5a5"
+    - "#dc2626"
+    - "#7f1d1d"
 
 # Typography
 # Per https://www.aspire.qa sniff (2026-05-22): the official Aspire marketing
