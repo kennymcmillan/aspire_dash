@@ -71,6 +71,8 @@ nav = [
      "icon": "fa-solid fa-stethoscope"},
     {"label": "Financial reports",  "href": "/financial",
      "icon": "fa-solid fa-money-bill-trend-up"},
+    {"label": "✨ v0.17 Plots",     "href": "/plots",
+     "icon": "fa-solid fa-chart-pie"},
 
     # Wearables / performance science
     {"label": "Whoop",              "href": "/whoop",

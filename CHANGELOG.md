@@ -4,6 +4,49 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.17.0] — 2026-05-22
+
+### Added — `aspire_dash.plots` module (chart collection)
+
+11 Plotly chart helpers with the Aspire template + palette baked in.
+All take pandas dataframes (or label/value lists) and return a
+`go.Figure` ready to drop into `dcc.Graph(figure=...)`.
+
+**Distribution charts**
+- `boxplot_by_group(df, value, group, orientation, height)`
+- `violin_by_group(df, value, group, show_box, height)`
+- `ridge_chart(df, value, group, height)` — joy-plot stacked KDEs
+
+**Hierarchy / proportion**
+- `sunburst(df, path, value, height)`
+- `treemap(df, path, value, height)`
+
+**Time-series**
+- `calendar_heatmap(df, date_col, value_col, year, height)` — GitHub-style,
+  Sun first (Qatar week)
+
+**Financial / accumulation**
+- `waterfall(labels, values, total_label, height)` — Aspire-blue for
+  positives, red for negatives, slate-700 for the total bar
+
+**Flow**
+- `sankey(source, target, value, labels, height)` — nodes get the
+  chart palette, links use the source-node colour at 33% alpha
+
+**Comparison**
+- `radar(categories, series, range_max, height)` — multi-series polar
+- `slope_chart(df, x, y, group, height)` — value-at-two-x-points,
+  green/red for up/down deltas
+- `dumbbell(df, label, start, end, start_label, end_label, height)`
+
+Module name: `plots` (separate from existing `viz` which holds SVG
+rings/gauges).
+
+### Demo
+
+- `/plots` page in the showcase — every helper rendered with sample
+  sport-dashboard data + copy-pasteable code snippets.
+
 ## [0.16.0] — 2026-05-22
 
 ### Added — `aspire_dash.metrics` module
