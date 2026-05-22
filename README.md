@@ -209,3 +209,44 @@ python -c "import aspire_dash; print(aspire_dash.__version__)"
 - **0.7**: `firstbeat_sports` API client harvested from the endurance app
 - **0.8**: `tests/` directory + GitHub Actions test runner
 - **1.0**: API freeze + first stable release
+
+
+## Contributing — the Forge workflow
+
+> When you build a new visual or upgrade an existing one, **prototype it
+> in Tailwind+DaisyUI first, then port the final CSS into `aspire_dash`**.
+> This is how Whoop/Firstbeat-quality polish ships consistently across
+> every Aspire app without per-app per-component CSS work.
+
+### For humans
+
+Read `tools/forge/FORGE.md` for the full step-by-step. TL;DR:
+
+1. Open `tools/forge/index.html` in a browser (no build — Tailwind v3 + DaisyUI v4 + Aspire DaisyUI theme via CDN).
+2. Add a `<section>` with **BEFORE** (current Dash render) and **AFTER** (your prototype).
+3. Iterate visually until it looks great.
+4. Extract the final Tailwind class string and condense into a CSS rule in `aspire_dash/assets/00_aspire_base.css` (use a semantic name like `.kpi-tile`).
+5. Add a Python helper in `aspire_dash/v12_helpers.py` (or the appropriate topic module) that emits `className="..."`.
+6. Sync demo CSS: `cp aspire_dash/assets/00_aspire_base.css demo/assets/`.
+7. Bump `__version__` + `setup.py` + `CHANGELOG.md` together.
+8. Update consumer apps' `requirements.txt` SHA pin to inherit the new look.
+
+Every consumer app (fencing planner, nutrition, medical, budget, GCC, mapping, attendance, endurance, ISO leg press, etc.) inherits visual upgrades from one library bump — no per-app work required.
+
+### For Claude users
+
+The same workflow is encoded as a Claude Code skill at `.claude/skills/forge/SKILL.md`. It auto-triggers on phrases like _"redesign X"_, _"make Y look amazing"_, _"upgrade visual"_, _"needs polish"_, _"Whoop-style"_. Claude will open the Forge sandbox, prototype, show a screenshot, and port to CSS once you approve.
+
+The skill ships **in-repo** so any colleague's Claude session loads it automatically — no per-machine install.
+
+### Aspire palette cheat sheet
+
+```
+--aspire-600: #004185   (primary, brand blue)
+--aspire-700: #003566   (hover / active)
+--gold:       #fbb800   (highlights)
+--slate-*               (neutrals)
+--elev-1/2/3            (shadow tiers, low → high)
+Border radius 8 px (cards/inputs), full (pills/badges)
+Body bg #f7f9fc, Poppins font (Inter for tabular data)
+```
