@@ -33,14 +33,21 @@ def layout():
                  "badge('Active', color='emerald')"),
 
         section("status_pill",
-                 "Larger pill with icon — used for save/sync confirmations."),
+                 "Coloured pill for state values — Active/Injured/Sidelined "
+                 "etc. Takes a status string and matches it against a "
+                 "palette dict for the colour."),
         example("Status indicators",
                  html.Div([
-                     status_pill("Saved", color="emerald", icon="fa-check"),
-                     status_pill("Syncing…", color="blue", icon="fa-rotate fa-spin"),
-                     status_pill("Failed", color="red", icon="fa-xmark"),
-                 ], style={"display": "flex", "gap": "8px"}),
-                 "status_pill('Saved', color='emerald', icon='fa-check')"),
+                     status_pill("Active"),
+                     status_pill("Pending"),
+                     status_pill("Injured"),
+                     status_pill("Sidelined"),
+                 ], style={"display": "flex", "gap": "8px",
+                            "flexWrap": "wrap"}),
+                 "status_pill('Active')\n"
+                 "status_pill('Injured')\n"
+                 "# Custom palette:\n"
+                 "status_pill('Saved', palette={'saved': '#10b981'})"),
 
         section("empty_state",
                  "Drop-in for 'no data' panels — icon + title + hint."),
@@ -55,11 +62,22 @@ def layout():
                  ")"),
 
         section("freshness_banner",
-                 "Surfaces last-synced timestamp — staleness colour-coded."),
-        example("Fresh", freshness_banner(days=0),
-                 "freshness_banner(days=0)"),
-        example("Stale", freshness_banner(days=14),
-                 "freshness_banner(days=14)"),
+                 "Per-source recency chips — each row is a dict with "
+                 "{label, days_old} (or days_since). Colour: emerald < 1 d, "
+                 "amber 1-7 d, red > 7 d."),
+        example(
+            "Multiple sources",
+            freshness_banner([
+                {"label": "SAMS attendance", "days_old": 0},
+                {"label": "Volumes",         "days_old": 3},
+                {"label": "Medical logs",    "days_old": 14},
+                {"label": "VALD",            "days_old": 60},
+            ]),
+            "freshness_banner([\n"
+            "    {'label': 'SAMS',    'days_old': 0},\n"
+            "    {'label': 'Medical', 'days_old': 14},\n"
+            "])",
+        ),
 
         section("loading_overlay",
                  "Wraps children with a translucent overlay + spinner during loads. "

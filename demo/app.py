@@ -66,11 +66,21 @@ nav = [
     {"label": "Firstbeat",          "href": "/firstbeat",
      "icon": "fa-solid fa-heart-pulse"},
 
+    # Wearables / performance science
+    {"label": "Whoop",              "href": "/whoop",
+     "icon": "fa-solid fa-bed",          "section": "Wearables"},
+    {"label": "VALD",               "href": "/vald",
+     "icon": "fa-solid fa-person-running"},
+
     # Viz patterns
     {"label": "Charts & Data",      "href": "/charts",
      "icon": "fa-solid fa-chart-bar",    "section": "Charts"},
     {"label": "Viz Components",     "href": "/viz",
      "icon": "fa-solid fa-ring"},
+
+    # Brand assets
+    {"label": "Logo & Assets",      "href": "/assets",
+     "icon": "fa-solid fa-image",        "section": "Assets"},
 ]
 
 app.layout = page_layout(

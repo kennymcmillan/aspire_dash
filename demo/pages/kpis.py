@@ -3,6 +3,7 @@ import dash
 from dash import html
 
 from aspire_dash.components.kpi import kpi_tile, kpi_strip, kpi_stat, kpi_tile_row
+from aspire_dash.theme import ASPIRE
 
 from ._shared import section, example
 
@@ -14,65 +15,87 @@ def layout():
         html.H1("KPI Components",
                 style={"fontSize": "28px", "fontWeight": 700,
                        "marginBottom": "8px"}),
-        html.P("Single tiles, horizontal strips, and dense rows. All read "
-                "from the same Aspire palette so the entire app feels cohesive.",
+        html.P("Single tiles, horizontal strips, and dense rows.",
                 style={"color": "#64748b", "fontSize": "14px",
                        "marginBottom": "24px"}),
 
         section("kpi_tile",
-                 "Single metric with label, value, and optional unit + target progress."),
+                 "Single metric with label, value, and optional unit + "
+                 "target progress."),
         example(
-            "Basic", kpi_tile("Sessions", 423, unit="", size="lg"),
+            "Basic",
+            kpi_tile("Sessions", 423, size="lg"),
             'kpi_tile("Sessions", 423, size="lg")',
         ),
         example(
-            "With target", kpi_tile("Attendance", 87, unit="%",
-                                     target=90, size="lg"),
-            'kpi_tile("Attendance", 87, unit="%", target=90)',
+            "With target progress bar",
+            kpi_tile("Attendance", 87, unit="%", size="lg",
+                      target={"target_value": 90, "band": "ok"}),
+            'kpi_tile("Attendance", 87, unit="%",\n'
+            '         target={"target_value": 90, "band": "ok"})',
         ),
 
         section("kpi_strip",
-                 "Horizontal flow of small KPIs — good for headers + filter bars."),
+                 "Horizontal flow of small KPIs from a list of dicts or tuples."),
         example(
-            "Four metrics",
+            "Four metrics (dicts)",
             kpi_strip([
-                {"label": "Sessions", "value": 423},
-                {"label": "Attendance", "value": "87%"},
-                {"label": "Total min", "value": "11,505"},
-                {"label": "Logged", "value": "92%"},
+                {"label": "Sessions",    "value": 423, "unit": ""},
+                {"label": "Attendance",  "value": 87,  "unit": "%"},
+                {"label": "Total min",   "value": 11505, "unit": "min"},
+                {"label": "Logged",      "value": 92, "unit": "%"},
             ]),
             "kpi_strip([\n"
-            "    {'label': 'Sessions', 'value': 423},\n"
-            "    {'label': 'Attendance', 'value': '87%'},\n"
-            "    {'label': 'Total min', 'value': '11,505'},\n"
-            "    {'label': 'Logged', 'value': '92%'},\n"
+            "    {'label': 'Sessions',   'value': 423,   'unit': ''},\n"
+            "    {'label': 'Attendance', 'value': 87,    'unit': '%'},\n"
+            "    {'label': 'Total min',  'value': 11505, 'unit': 'min'},\n"
+            "    {'label': 'Logged',     'value': 92,    'unit': '%'},\n"
+            "])",
+        ),
+        example(
+            "Tuples shorthand",
+            kpi_strip([
+                ("Athletes", 142,  ""),
+                ("Sports",   7,    ""),
+                ("Diaries",  1042, "this yr"),
+            ]),
+            "kpi_strip([\n"
+            "    ('Athletes', 142,  ''),\n"
+            "    ('Sports',   7,    ''),\n"
+            "    ('Diaries',  1042, 'this yr'),\n"
             "])",
         ),
 
         section("kpi_tile_row",
-                 "Dense tile row — used on dashboard pages."),
+                 "Bootstrap-row of kpi_tile components. Specs are TUPLES "
+                 "(label, value, unit, color) — not dicts. Values must be "
+                 "numeric (kpi_tile formats with .1f). Use formatters in "
+                 "budget.py if you need '$2.4M'-style display."),
         example(
-            "Three tiles",
+            "Three numeric tiles",
             kpi_tile_row([
-                {"label": "Revenue", "value": "$2.4M", "key": "rev"},
-                {"label": "Spend", "value": "$1.8M", "key": "spend"},
-                {"label": "Margin", "value": "25%", "key": "margin"},
+                ("Revenue", 2400000, "QAR",  ASPIRE["600"]),
+                ("Spend",   1800000, "QAR",  ASPIRE["700"]),
+                ("Margin",  25,      "%",    ASPIRE["500"]),
             ]),
+            "from aspire_dash.theme import ASPIRE\n\n"
             "kpi_tile_row([\n"
-            "    {'label': 'Revenue', 'value': '$2.4M', 'key': 'rev'},\n"
-            "    {'label': 'Spend', 'value': '$1.8M', 'key': 'spend'},\n"
-            "    {'label': 'Margin', 'value': '25%', 'key': 'margin'},\n"
+            "    ('Revenue', 2400000, 'QAR', ASPIRE['600']),\n"
+            "    ('Spend',   1800000, 'QAR', ASPIRE['700']),\n"
+            "    ('Margin',  25,      '%',   ASPIRE['500']),\n"
             "])",
         ),
 
         section("kpi_stat",
-                 "Even smaller — label/value pair, slate sub-line."),
+                 "Even smaller — vertical label / big value / sub line."),
         example(
-            "Inline stat",
+            "Inline stats",
             html.Div([
                 kpi_stat("Sessions", "423", "since Sept"),
                 kpi_stat("Attendance", "87%", "23 fencers"),
-            ], style={"display": "flex", "gap": "20px"}),
-            'kpi_stat("Sessions", "423", "since Sept")',
+                kpi_stat("Total min", "11,505", "all activities"),
+            ], style={"display": "flex", "gap": "24px"}),
+            'kpi_stat("Sessions", "423", "since Sept")\n'
+            'kpi_stat("Attendance", "87%", "23 fencers")',
         ),
     ], style={"padding": "24px"})
