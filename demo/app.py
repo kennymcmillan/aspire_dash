@@ -75,6 +75,8 @@ nav = [
      "icon": "fa-solid fa-chart-pie"},
     {"label": "✨ v0.18 New",       "href": "/v18",
      "icon": "fa-solid fa-person-rays"},
+    {"label": "✨ v0.19 New",       "href": "/v19",
+     "icon": "fa-solid fa-wand-magic-sparkles"},
 
     # Wearables / performance science
     {"label": "Whoop",              "href": "/whoop",

@@ -4,6 +4,60 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.19.0] — 2026-05-22
+
+### Visual polish pass (audit-driven, applied portfolio-wide)
+
+CSS-only changes — every connected app inherits on the next SHA bump.
+
+- **Page centred on ultrawide** — `.page-content { max-width: 1360px;
+  margin: 0 auto; padding: 32px; }`. No more content hugging the left
+  edge on 1440px+ screens.
+- **Hover lift bump 1→2 px** — `.card / .budget-card / .athlete-card /
+  .kpi-tile` now translate -2 px with `--elev-2` shadow + soft
+  aspire-200 border tint on hover. Lift registers as intentional.
+- **KPI rhythm tightened** — `.budget-card .card-value` 22→26 px,
+  `.kpi-tile .kpi-value` 32→30 px, `.fr-kpi-value` 28→30 px. Two-step
+  scale (26 / 30) reads cleaner than four discordant sizes.
+- **Tabular-nums universally** — every `.kpi-value / .card-value /
+  .fr-kpi-value / .amc-metric-value / .spk-value / .injury-card /
+  .asymmetry-bar` gets `font-feature-settings: "tnum" 1, "lnum" 1`.
+- **Branded empty state** — `.aspire-empty` now uses a gradient bg +
+  dashed aspire-200 border + aspire-400 icon (instead of neutral grey).
+- **Table-row hover dialled down** — switched from aspire-50 to slate-50.
+  Reserves aspire-blue for primary chrome only.
+- **`.medical-body-card`** — new wrapper class for `body_silhouette()`
+  output. Gradient slate-50→white bg, brand-blue drop shadow on the SVG,
+  centred max-width 320 px. Replaces the awkward left-hugging layout.
+- **Athlete ring card** — `.athlete-mini-card` gets a hairline divider
+  under the header, gap bumped 12→16 px between rings. Matches Whoop's
+  spacing.
+- **`.section-title-v2`** — new class with brand-coloured 3px vertical
+  lozenge marker. Bigger visual differentiation between sections.
+- **Financial scope `.serif` variant** — opt-in `<div className=
+  "financial-report serif">` switches to Source Serif Pro for a true
+  annual-report feel. Annual reports get serifs; dashboards stay sans.
+
+### Added — `aspire_dash.plots.adaptive_trend(...)`
+
+Time-series line with rolling adaptive reference band (mean ± k·SD).
+Used by VALD jump-height trend, Whoop RHR baseline, endurance load.
+Pulls math from `aspire_dash.metrics.adaptive_range`. Aspire-blue fill
+at 12% alpha, dotted baseline line, solid value trace with markers.
+
+### Added — `aspire_dash.nutrition` module
+
+- **`macro_tile(label, value, target, unit, accent)`** — single macro
+  KPI with optional progress-vs-target bar. Bar shifts amber at >100%,
+  red at >110%.
+- **`macro_strip(macros, targets, layout)`** — horizontal strip of
+  energy/protein/carbs/fat tiles. Pre-mapped defaults (Aspire-blue for
+  energy, green for protein, amber for carbs, red for fat).
+
+Promoted from aspire-nutrition so any app that tracks macros vs targets
+(nutrition diary, weekly summary, hydration vs goal, training load vs
+plan) can drop in the same look.
+
 ## [0.18.0] — 2026-05-22
 
 ### Added — `aspire_dash.anthropometric` (Ruwwad report patterns)

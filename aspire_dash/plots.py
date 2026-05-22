@@ -294,3 +294,56 @@ def dumbbell(df, label: str, start: str, end: str, *,
                        margin=dict(t=24 if title else 8, b=40,
                                    l=120, r=24))
     return apply_template(fig)
+
+
+# ── VALD-style trend with adaptive reference band ──────────────────────────
+
+def adaptive_trend(df, x: str, y: str, *,
+                    window: int = 8, k: float = 1.0,
+                    title: str | None = None, height: int = 280,
+                    color: str | None = None,
+                    band_label: str = "Adaptive range"):
+    """Time-series line with rolling adaptive reference band (mean ± k·SD).
+
+    Used by VALD jump-height trend, Whoop RHR baseline, endurance load.
+    Pulls the math from :func:`aspire_dash.metrics.adaptive_range`.
+
+        >>> adaptive_trend(df, x='date', y='jump_cm', window=8, k=1.0)
+    """
+    from .metrics import adaptive_range
+    color = color or "#004185"
+    band = adaptive_range(df[y], window=window, k=k)
+    band = band.reset_index(drop=True)
+    df2 = df.reset_index(drop=True)
+
+    fig = go.Figure()
+    # Band fill (upper - lower) — draw upper first, then lower w/ fill
+    fig.add_trace(go.Scatter(
+        x=df2[x], y=band["upper"], mode="lines",
+        line=dict(color="rgba(0,0,0,0)"), showlegend=False,
+        hoverinfo="skip",
+    ))
+    r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
+    fig.add_trace(go.Scatter(
+        x=df2[x], y=band["lower"], mode="lines",
+        line=dict(color="rgba(0,0,0,0)"),
+        fill="tonexty", fillcolor=f"rgba({r},{g},{b},0.12)",
+        name=band_label, hoverinfo="skip",
+    ))
+    # Rolling mean (dashed) + actual values
+    fig.add_trace(go.Scatter(
+        x=df2[x], y=band["mean"], mode="lines",
+        line=dict(color=color, width=1.5, dash="dot"),
+        name="Baseline", hoverinfo="skip",
+    ))
+    fig.add_trace(go.Scatter(
+        x=df2[x], y=df2[y], mode="lines+markers",
+        line=dict(color=color, width=2.5),
+        marker=dict(size=6, color=color,
+                     line=dict(color="white", width=1.5)),
+        name=y,
+    ))
+    fig.update_layout(title=title, height=height,
+                       legend=dict(orientation="h", y=-0.18, x=0,
+                                   font=dict(size=11)))
+    return apply_template(fig)

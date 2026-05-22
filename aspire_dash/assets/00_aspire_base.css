@@ -314,8 +314,9 @@ body {
 }
 
 .page-content {
-    padding: 24px;
-    max-width: 1400px;
+    padding: 32px;
+    max-width: 1360px;
+    margin: 0 auto;        /* centre on ultrawide screens */
 }
 
 
@@ -2144,4 +2145,119 @@ html.dark .period-pills label:has(input:checked) {
     color: var(--slate-700);
     margin: 24px 0 8px 0;
     letter-spacing: -0.01em;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v0.19 — Polish pass (audit-driven, applied portfolio-wide via SHA bump)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Section title with brand lozenge — appears on every demo page now */
+.section-title-v2 {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--aspire-600);
+    margin: 32px 0 12px 0;
+    position: relative;
+    padding-left: 12px;
+}
+.section-title-v2::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 4px; bottom: 4px;
+    width: 3px;
+    background: var(--aspire-600);
+    border-radius: 2px;
+}
+.section-title-v2:first-child { margin-top: 0; }
+
+/* Hover lift — bump 1→2 px so the lift registers as intentional
+   (matches Linear / Stripe). Plus subtle border tint. */
+.card:hover,
+.budget-card:hover,
+.athlete-card:hover,
+.kpi-tile:hover {
+    box-shadow: var(--elev-2);
+    transform: translateY(-2px);
+    border-color: var(--aspire-200);
+}
+
+/* KPI rhythm — narrow the 22→32 px gap to a two-step scale */
+.budget-card .card-value { font-size: 26px; }
+.kpi-tile .kpi-value     { font-size: 30px; }
+.fr-kpi-value            { font-size: 30px; }
+
+/* Tabular nums + lining figures across every numeric surface */
+.kpi-value, .card-value, .fr-kpi-value, .amc-metric-value, .amc-score,
+.kpi-tile, .athlete-mini-card, .sparkline-tile, .spk-value, .spk-delta,
+.dt-display, .injury-card, .asymmetry-bar {
+    font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* Branded empty state — gradient bg + dashed brand border */
+.aspire-empty {
+    background: linear-gradient(180deg, var(--aspire-50), white);
+    border: 1px dashed var(--aspire-200);
+    border-radius: 12px;
+    padding: 56px 24px;
+}
+.aspire-empty-icon { color: var(--aspire-400); opacity: 1; }
+
+/* Table row hover tint dialled down — slate-50 instead of aspire-50,
+   reserves aspire-blue for primary chrome only */
+table.aspire-table tbody tr:hover {
+    background: var(--slate-50);
+}
+
+/* Body silhouette breathing room — drop-shadow tints the SVG with
+   brand blue and prevents the awkward left-hugging */
+.medical-body-card {
+    padding: 24px 40px;
+    background: linear-gradient(180deg, var(--slate-50), white);
+    border: 1px solid var(--slate-200);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.medical-body-card svg {
+    max-width: 320px;
+    width: 100%;
+    filter: drop-shadow(0 4px 12px rgba(0,65,133,0.08));
+}
+
+/* Athlete ring card spacing — hairline divider + bigger gap */
+.athlete-mini-card .amc-header {
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--slate-100);
+    margin-bottom: 12px;
+}
+.athlete-mini-card .amc-metrics {
+    gap: 16px;
+    padding-top: 4px;
+}
+.athlete-mini-card { padding: 16px 18px; }
+.athlete-mini-card .amc-metric .amc-metric-label {
+    font-size: 9.5px;
+    color: var(--slate-500);
+}
+
+/* Financial scope serif option — opt-in via .financial-report.serif */
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;600;700&display=swap');
+.financial-report.serif {
+    font-family: 'Source Serif Pro', 'Charter', Georgia, serif;
+    font-size: 15px;
+    line-height: 1.65;
+    letter-spacing: 0;
+}
+.financial-report.serif h1 {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+.financial-report.serif .fr-kpi-value {
+    font-feature-settings: "lnum" 1;
+    font-size: 34px;
 }

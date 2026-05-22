@@ -203,7 +203,9 @@ def body_silhouette(region_metric: dict[str, float],
         dangerously_allow_html=True,
         style={"textAlign": "center"},
     ))
-    return html.Div(children, className="card")
+    # v0.19 — use medical-body-card scope for centered SVG + brand-tinted
+    # drop shadow (audit recommendation, applied portfolio-wide).
+    return html.Div(children, className="medical-body-card")
 
 
 def injury_list(injuries: list[dict]):
