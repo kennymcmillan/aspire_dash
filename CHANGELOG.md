@@ -4,6 +4,20 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.25.1] — 2026-05-22
+
+### Fixed — Whoop (and any other bespoke-sidebar app) hover effects
+
+- v0.24's premium sidebar styles (`.sidebar-link` Aspire-blue hover bg
+  + 22 px slide-in + gold active marker) were unscoped, so any app
+  using `className="sidebar-link"` got Aspire-blue + gold effects
+  bleeding into its own theme. Whoop coach dashboard (teal/green
+  palette) showed inconsistent hover states because half its links
+  were Aspire-tinted.
+- Now scoped to `.sidebar-nav .sidebar-link` (the wrapper class used
+  by `aspire_dash.components.sidebar()`). Apps that roll their own
+  sidebar keep their custom palette uncluttered.
+
 ## [0.25.0] — 2026-05-22
 
 ### Chart-palette overhaul (Aspire-anchored, premium tonal harmony)

@@ -2380,14 +2380,17 @@ textarea:focus,
     transform: scale(1.03);
 }
 
-/* Sidebar links — slide-in + brand tint + gold active marker */
-.sidebar-link {
+/* Sidebar links — slide-in + brand tint + gold active marker.
+   SCOPED to .sidebar-nav (aspire_dash sidebar() helper) so apps that
+   roll their own sidebar (whoop, etc.) keep their custom palette and
+   don't get Aspire-blue + gold bleed-in from the v0.24 polish pass. */
+.sidebar-nav .sidebar-link {
     position: relative;
     transition: background-color var(--duration-fast) var(--ease-out),
                 padding-left     var(--duration-fast) var(--ease-out),
                 color            var(--duration-fast) var(--ease-out);
 }
-.sidebar-link::before {
+.sidebar-nav .sidebar-link::before {
     content: "";
     position: absolute;
     left: 0; top: 0; bottom: 0;
@@ -2395,18 +2398,18 @@ textarea:focus,
     background: var(--aspire-400);
     transition: width var(--duration-fast) var(--ease-out);
 }
-.sidebar-link:hover {
+.sidebar-nav .sidebar-link:hover {
     background-color: rgba(0, 65, 133, 0.18);
     padding-left: 22px;
     color: white !important;
 }
-.sidebar-link:hover::before { width: 3px; }
-.sidebar-link.active {
+.sidebar-nav .sidebar-link:hover::before { width: 3px; }
+.sidebar-nav .sidebar-link.active {
     background-color: var(--aspire-600);
     color: white !important;
     font-weight: 600;
 }
-.sidebar-link.active::before { width: 3px; background: var(--gold); }
+.sidebar-nav .sidebar-link.active::before { width: 3px; background: var(--gold); }
 
 /* Topnav links — branded underline grow */
 .topnav-link {
