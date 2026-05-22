@@ -4,6 +4,26 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.19.1] — 2026-05-22
+
+### Fixed (CRITICAL — visible across every connected app)
+
+- **Sidebar Aspire logo now shows on Connect.** `sidebar()` was using
+  the raw absolute path `f"/assets/{LOGO_FILENAME}"` which 404'd on
+  Connect's `/content/<GUID>/` subpath. Now auto-wraps via
+  `dash.get_relative_path()` — locally returns `"/assets/..."`, on
+  Connect prefixes correctly. Documented in
+  `tool-posit-connect` SKILL.md. **Every connected app inherits this
+  fix on next SHA bump — no consumer-side change needed.**
+- **Medical `body_silhouette()` SVG renders correctly on Connect.**
+  Was using `dcc.Markdown(svg, dangerously_allow_html=True)` which on
+  some Connect runtime versions rendered the SVG markup as raw text
+  inside a `<code>` block. Switched to a base64 data URL inside
+  `html.Img` — works universally, no extra deps.
+- **`metric_ring()` / `athlete_card_rings()` Whoop-style rings
+  render correctly on Connect.** Same root cause as the body
+  silhouette — `dcc.Markdown` SVG-as-text bug. Same data-URL fix.
+
 ## [0.19.0] — 2026-05-22
 
 ### Visual polish pass (audit-driven, applied portfolio-wide)

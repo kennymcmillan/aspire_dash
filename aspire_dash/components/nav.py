@@ -19,6 +19,20 @@ from ..theme import (
 
 __all__ = ['topnav', 'register_topnav_active', 'sidebar', 'hamburger_button', 'register_sidebar_toggle', 'header']
 
+
+def _safe_relative(path: str) -> str:
+    """`dash.get_relative_path(path)` with a no-op fallback when called
+    outside a Dash app context (unit tests, ad-hoc preview).
+
+    Used by sidebar/topnav for asset URLs + link hrefs so they resolve
+    under Connect's /content/<GUID>/ subpath when an app is running,
+    while staying importable in test fixtures."""
+    try:
+        return dash.get_relative_path(path)
+    except Exception:
+        return path
+
+
 # ── Top Nav ──────────────────────────────────────────────────────────────────
 
 def topnav(
@@ -234,11 +248,16 @@ def sidebar(
         )
 
     sidebar_el = html.Div([
-        # Logo
+        # Logo — auto-prefix the asset URL so it resolves under Connect's
+        # /content/<GUID>/ subpath. dash.get_relative_path is a no-op
+        # locally (returns "/assets/..."), so consumer apps don't need to
+        # remember to pass logo_src=. Falls back to raw path when called
+        # outside a Dash app context (unit tests). Documented in
+        # tool-posit-connect SKILL.md "Static assets (images) on Connect".
         html.Div([
             html.Div([
                 html.Img(
-                    src=logo_src or f"/assets/{LOGO_FILENAME}",
+                    src=logo_src or _safe_relative(f"/assets/{LOGO_FILENAME}"),
                     style={"height": "32px", "width": "auto"},
                 ),
             ], style={

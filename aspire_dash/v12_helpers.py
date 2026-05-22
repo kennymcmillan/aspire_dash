@@ -393,15 +393,17 @@ def metric_ring(
         f'</svg>'
     )
 
+    # Render SVG as data URL — works universally. dcc.Markdown +
+    # dangerously_allow_html was rendering the markup as raw text
+    # on Connect's deployed runtime in v0.13–v0.18.
+    import base64
+    svg_b64 = base64.b64encode(svg_inner.encode("utf-8")).decode("ascii")
     return html.Div([
         html.Div([
-            # SVG ring rendered via dangerously_allow_html-style approach
-            # using DangerouslySetInnerHTML — Dash exposes this via
-            # iframe-srcdoc; instead use html.Div with dash_dangerously_set
-            # ... simpler: emit via dcc.Markdown which permits raw HTML
-            # with dangerously_allow_html=True.
-            dcc.Markdown(svg_inner, dangerously_allow_html=True,
-                          style={"position": "absolute", "inset": "0"}),
+            html.Img(src=f"data:image/svg+xml;base64,{svg_b64}",
+                      style={"position": "absolute", "inset": "0",
+                              "width": "100%", "height": "100%"},
+                      alt=label),
             html.Div(
                 html.Span(f"{value}{unit}", style={
                     "fontWeight": "700", "fontSize": fs_value,

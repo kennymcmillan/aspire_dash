@@ -198,10 +198,19 @@ def body_silhouette(region_metric: dict[str, float],
             "textTransform": "uppercase", "letterSpacing": "0.05em",
             "color": "#64748b", "marginBottom": "8px",
         }))
-    children.append(dcc.Markdown(
-        render_svg(region_metric, max_value=max_value),
-        dangerously_allow_html=True,
-        style={"textAlign": "center"},
+    # Render the SVG as a data URL inside an html.Img so it works on
+    # Connect (dcc.Markdown's dangerously_allow_html was rendering raw
+    # SVG markup as code-block text on some Connect setups). Data URL
+    # is universally supported, no extra deps.
+    import base64
+    svg_str = render_svg(region_metric, max_value=max_value)
+    svg_b64 = base64.b64encode(svg_str.encode("utf-8")).decode("ascii")
+    children.append(html.Img(
+        src=f"data:image/svg+xml;base64,{svg_b64}",
+        style={"maxWidth": "320px", "width": "100%",
+                "height": "auto", "display": "block",
+                "margin": "0 auto"},
+        alt="Body region heatmap",
     ))
     # v0.19 — use medical-body-card scope for centered SVG + brand-tinted
     # drop shadow (audit recommendation, applied portfolio-wide).
