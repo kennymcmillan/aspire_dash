@@ -1,23 +1,53 @@
-"""aspire_dash v0.12.0 — new helpers ported from the Forge prototypes.
+"""aspire_dash helpers — KITCHEN-SINK module, organised by intent.
 
-Lives in a single module for the v0.12.0 release so the additions are
-easy to audit. In a future minor we may split these out into their
-existing topic modules (kpi.py, inputs.py, athlete.py, etc.).
+This module grew from a v0.12 "ported from Forge" experiment into the
+main extension surface across v0.13 → v0.35. Everything here is a PURE
+addition (no existing API changes). Consumer apps opt-in via:
 
-All helpers are PURE additions — no existing API changes. Consumer
-apps opt in by importing from `aspire_dash.v12_helpers`.
+    from aspire_dash.v12_helpers import <name>
+    # OR via topic-module re-exports:
+    from aspire_dash.athlete import athlete_card_v2, athlete_card_compact
 
-Public API:
-    kpi_tile_v2      — KPI tile with delta arrow + accent stripe colour
-    date_toolbar     — unified [◀ date ▶ Today] toolbar
-    status_pill_v2   — pill with leading icon + tone palette
-    athlete_card     — Whoop-style card (photo + name + score + sub-metrics)
-    aspire_grid_v2   — AG Grid with .ag-theme-aspire branded header
-    aspire_loading   — full-page loading panel with branded spinner
-    aspire_empty     — branded empty state (Aspire-tinted icon)
-    sparkline_tile   — KPI value + inline mini-line-chart
-    injury_card      — medical-domain card with severity colour stripe
-    asymmetry_bar    — VALD-style left/right asymmetry bar
+═══════════════════════════════════════════════════════════════════════════
+TABLE OF CONTENTS — find functions by intent
+═══════════════════════════════════════════════════════════════════════════
+
+╔═ KPI / STAT TILES ════════════════════════════════════════════════════════
+║   kpi_tile_v2         — Tile with delta arrow + accent stripe colour (v0.12)
+║   gradient_stat_card  — Tile with gradient bg + icon (v0.13)
+║   stat_with_trend     — KPI value + branded ▲/▼ chip (v0.33)
+║   stat_card_mega      — KPI + chip + ring + sparkline hero tile (v0.34)
+║   kpi_with_sparkline  — KPI value + inline area chart (v0.33)
+║   sparkline_tile      — KPI value + inline mini-line-chart (v0.12)
+╠═ ATHLETE CARDS ═══════════════════════════════════════════════════════════
+║   athlete_card        — Whoop-style mini-card (v0.12)
+║   athlete_card_rings  — Card with 3 mini metric rings (v0.13)
+║   athlete_card_v2     — Premium card w/ 56px photo + zone gradient (v0.26)
+║   athlete_card_compact— Dense variant w/ 40px avatar + bottom stats (v0.31)
+║   metric_ring         — SVG ring with value + percent arc + gradient (v0.13)
+║   radial_multi_track  — Apex-style concentric ring chart (v0.35)
+╠═ INPUTS / NAV / FEEDBACK ═════════════════════════════════════════════════
+║   date_toolbar        — Unified [◀ date ▶ Today] control (v0.12)
+║   status_pill_v2      — Pill with icon + tone palette (v0.12)
+║   callout             — Branded alert with severity variants (v0.34)
+║   aspire_loading      — Branded full-page spinner (v0.12)
+║   aspire_empty        — Branded empty state (v0.12)
+╠═ PROGRESS / TIMELINES ════════════════════════════════════════════════════
+║   progress_stack      — Stacked horizontal bar + legend (v0.33)
+║   tracker_strip       — 30-cell consistency timeline (v0.34)
+║   asymmetry_bar       — VALD L/R split bar (v0.12)
+╠═ DOMAIN-SPECIFIC ═════════════════════════════════════════════════════════
+║   injury_card         — Medical severity card (v0.12)
+║   aspire_grid_v2      — Branded AG Grid wrapper (v0.12)
+╠═ CHART HELPERS ═══════════════════════════════════════════════════════════
+║   donut_with_focus    — Plotly donut + centre summary (v0.33)
+║   add_pb_markers      — Personal-best annotations on Plotly figs (v0.35)
+║   (see also: aspire_dash.charts for reference lines, gradient fills,
+║    drop shadows, and aspire_dash.sports_science for ACWR / FV / HR
+║    zone / bullet / sRPE chart helpers — v0.35)
+╠═ CARDS (PANELS) ══════════════════════════════════════════════════════════
+║   glass_card          — Frosted-glass surface for hero panels (v0.35)
+╚═══════════════════════════════════════════════════════════════════════════
 """
 from __future__ import annotations
 
