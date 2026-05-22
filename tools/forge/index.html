@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="aspire">
+<head>
+  <meta charset="UTF-8" />
+  <title>aspire_dash · Forge — design sandbox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!--
+    FORGE — Tailwind + DaisyUI sandbox for prototyping aspire_dash components.
+
+    Workflow:
+      1. Open this file directly in a browser (no build step needed)
+      2. Edit the HTML in this file to prototype a component visually
+      3. Use full Tailwind utility classes + DaisyUI semantic classes
+      4. Iterate until it looks dramatically better than the current Dash version
+      5. Extract the final CSS rules into aspire_dash/assets/00_aspire_base.css
+      6. Add a matching Python helper that emits the same class names
+      7. Bump aspire_dash version and ship
+
+    Once consumer apps bump the aspire_dash SHA, every visual benefits.
+  -->
+
+  <!-- Poppins (Aspire brand font, per aspire.qa sniff) -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind v3 via CDN (zero build step) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- DaisyUI v4 (semantic Tailwind components: btn, card, badge, etc.) -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+
+  <!-- Custom "aspire" DaisyUI theme — palette pulled from brand.yml -->
+  <style>
+    :root, [data-theme="aspire"] {
+      --p:  208 100% 26%;   /* primary   = aspire-600 #004185 */
+      --pc: 0   0%   100%;  /* primary-content (text on primary) */
+      --s:  201 75%  38%;   /* secondary = aspire-secondary #1876ab */
+      --sc: 0   0%   100%;
+      --a:  44  100% 49%;   /* accent    = gold #fbb800 */
+      --ac: 222 47%  11%;
+      --n:  216 90%  12%;   /* neutral   = aspire-900 #001d3d */
+      --nc: 0   0%   100%;
+      --b1: 0 0% 100%;      /* base-100 = white card */
+      --b2: 220 13% 95%;    /* base-200 = slate-100-ish */
+      --b3: 220 13% 91%;    /* base-300 = slate-200 */
+      --bc: 215 25% 27%;    /* base-content = slate-700 */
+      --su: 142 76% 36%;    /* success */
+      --wa: 32 95%  44%;    /* warning */
+      --er: 0   84% 60%;    /* error / danger */
+    }
+    html, body {
+      font-family: 'Poppins', sans-serif;
+      background: #f7f9fc;
+      color: #334155;
+    }
+  </style>
+</head>
+<body class="p-8">
+
+  <!-- Toolbar -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">aspire_dash · Forge</h1>
+      <p class="text-sm text-slate-500">
+        Tailwind + DaisyUI sandbox for prototyping components before porting back to Dash.
+      </p>
+    </div>
+    <div class="flex gap-2">
+      <a href="#kpi-tile" class="btn btn-sm">KPI Tile</a>
+      <a href="#date-picker" class="btn btn-sm">Date Picker</a>
+      <a href="#status" class="btn btn-sm">Status Pill</a>
+      <a href="#card" class="btn btn-sm">Athlete Card</a>
+    </div>
+  </div>
+
+  <!-- ═══ KPI TILE — prototype ═══ -->
+  <section id="kpi-tile" class="mb-12">
+    <h2 class="text-lg font-semibold mb-1 text-slate-800">KPI Tile — current vs prototype</h2>
+    <p class="text-xs text-slate-500 mb-4">
+      Goal: replace the current 22 px-value tile with a 32 px tabular-nums
+      version that reads as "premium analytics" instead of "Bootstrap card".
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- BEFORE — what the current aspire_dash kpi_tile() renders -->
+      <div>
+        <div class="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Before</div>
+        <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+          <div class="text-[11px] uppercase tracking-wider text-slate-500 mb-1">Sessions</div>
+          <div class="text-2xl font-bold text-blue-700">423</div>
+          <div class="text-xs text-slate-500 mt-1">since Sept</div>
+        </div>
+      </div>
+
+      <!-- AFTER — prototype using Tailwind utility classes -->
+      <div>
+        <div class="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Prototype</div>
+        <div class="bg-white border border-slate-200 border-l-[4px] border-l-[#004185]
+                    rounded-lg px-5 py-3.5 shadow-sm hover:shadow-md hover:-translate-y-0.5
+                    transition-all duration-150">
+          <div class="text-[11px] font-semibold uppercase tracking-[0.5px] text-slate-500 mb-1">
+            Sessions
+          </div>
+          <div class="text-[32px] font-bold leading-none text-slate-900
+                      tabular-nums tracking-tight">
+            423
+          </div>
+          <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
+            <span class="text-green-600 font-semibold">▲ +12</span>
+            <span>vs last month</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI tile variants — accent stripe colour by metric type -->
+    <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white border border-slate-200 border-l-4 border-l-[#004185] rounded-lg px-5 py-3.5 shadow-sm">
+        <div class="text-[11px] font-semibold uppercase tracking-[0.5px] text-slate-500 mb-1">Revenue</div>
+        <div class="text-[28px] font-bold text-slate-900 tabular-nums tracking-tight leading-none">$2.4M</div>
+      </div>
+      <div class="bg-white border border-slate-200 border-l-4 border-l-[#16a34a] rounded-lg px-5 py-3.5 shadow-sm">
+        <div class="text-[11px] font-semibold uppercase tracking-[0.5px] text-slate-500 mb-1">Margin</div>
+        <div class="text-[28px] font-bold text-slate-900 tabular-nums tracking-tight leading-none">25%</div>
+      </div>
+      <div class="bg-white border border-slate-200 border-l-4 border-l-[#fbb800] rounded-lg px-5 py-3.5 shadow-sm">
+        <div class="text-[11px] font-semibold uppercase tracking-[0.5px] text-slate-500 mb-1">Pending</div>
+        <div class="text-[28px] font-bold text-slate-900 tabular-nums tracking-tight leading-none">12</div>
+      </div>
+      <div class="bg-white border border-slate-200 border-l-4 border-l-[#dc2626] rounded-lg px-5 py-3.5 shadow-sm">
+        <div class="text-[11px] font-semibold uppercase tracking-[0.5px] text-slate-500 mb-1">Issues</div>
+        <div class="text-[28px] font-bold text-slate-900 tabular-nums tracking-tight leading-none">3</div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ DATE PICKER — prototype ═══ -->
+  <section id="date-picker" class="mb-12">
+    <h2 class="text-lg font-semibold mb-1 text-slate-800">Date Picker — toolbar pattern</h2>
+    <p class="text-xs text-slate-500 mb-4">
+      Replace plain dcc.DatePickerSingle with a flanked "◀ date ▶" toolbar
+      that reads as a coherent control instead of three separate elements.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- BEFORE -->
+      <div>
+        <div class="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Before</div>
+        <div class="flex items-center gap-2">
+          <button class="px-2 py-1 border rounded text-slate-500">◀</button>
+          <input type="text" value="22 May 2026" class="px-3 py-1.5 border border-slate-300 rounded">
+          <button class="px-2 py-1 border rounded text-slate-500">▶</button>
+          <button class="ml-2 px-3 py-1.5 border rounded">Today</button>
+        </div>
+      </div>
+
+      <!-- AFTER -->
+      <div>
+        <div class="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Prototype</div>
+        <div class="inline-flex items-center bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+          <button class="px-3 py-2 hover:bg-slate-100 text-slate-500 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <div class="px-4 py-2 border-x border-slate-200 flex items-center gap-2 cursor-pointer hover:bg-slate-50 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#004185" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span class="text-sm font-medium text-slate-700 tabular-nums">22 May 2026</span>
+          </div>
+          <button class="px-3 py-2 hover:bg-slate-100 text-slate-500 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+          <button class="px-3 py-2 text-xs font-semibold text-[#004185] hover:bg-[#eff6ff] border-l border-slate-200 transition">
+            TODAY
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ STATUS PILL — prototype ═══ -->
+  <section id="status" class="mb-12">
+    <h2 class="text-lg font-semibold mb-1 text-slate-800">Status Pill — semantic pills</h2>
+    <p class="text-xs text-slate-500 mb-4">
+      DaisyUI's `badge` + tailwind colour utilities give us pixel-tight
+      pills with consistent type. Currently we render at default 14 px
+      and they look bulky.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <div class="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Before</div>
+        <div class="flex flex-wrap gap-2">
+          <span class="bg-green-100 text-green-700 text-sm px-2 py-1 rounded">Active</span>
+          <span class="bg-yellow-100 text-yellow-700 text-sm px-2 py-1 rounded">Pending</span>
+          <span class="bg-red-100 text-red-700 text-sm px-2 py-1 rounded">Injured</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Prototype (DaisyUI badge-*)</div>
+        <div class="flex flex-wrap gap-2">
+          <span class="badge badge-success gap-1 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            Active
+          </span>
+          <span class="badge badge-warning gap-1 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Pending
+          </span>
+          <span class="badge badge-error gap-1 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Injured
+          </span>
+          <span class="badge badge-primary gap-1 text-white">Saved 22:42:31</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ ATHLETE CARD — prototype ═══ -->
+  <section id="card" class="mb-12">
+    <h2 class="text-lg font-semibold mb-1 text-slate-800">Athlete Card — Whoop-style with inline insights</h2>
+    <p class="text-xs text-slate-500 mb-4">
+      What Whoop/Firstbeat do right: card carries photo + name + 3 KPIs +
+      sparkline + status — all in ~200 px height. No empty space.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Recovery-style athlete card -->
+      <div class="bg-white border border-slate-200 border-l-4 border-l-green-500 rounded-lg p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-150 cursor-pointer">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-full bg-[#004185] text-white flex items-center justify-center font-bold text-sm">AT</div>
+          <div class="min-w-0">
+            <div class="text-sm font-semibold text-slate-900 truncate">Ali Turki Owaida</div>
+            <div class="text-[11px] text-slate-500">SENIOR · Fencing</div>
+          </div>
+          <div class="ml-auto text-2xl font-bold text-green-600 tabular-nums leading-none">68</div>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div>
+            <div class="text-[9px] uppercase text-slate-400 tracking-wider">Strain</div>
+            <div class="text-sm font-semibold text-slate-700 tabular-nums">15.8</div>
+          </div>
+          <div>
+            <div class="text-[9px] uppercase text-slate-400 tracking-wider">HRV</div>
+            <div class="text-sm font-semibold text-slate-700 tabular-nums">52ms</div>
+          </div>
+          <div>
+            <div class="text-[9px] uppercase text-slate-400 tracking-wider">Sleep</div>
+            <div class="text-sm font-semibold text-slate-700 tabular-nums">7h 12</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Yellow / cautious -->
+      <div class="bg-white border border-slate-200 border-l-4 border-l-amber-500 rounded-lg p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-150 cursor-pointer">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-full bg-[#004185] text-white flex items-center justify-center font-bold text-sm">MH</div>
+          <div class="min-w-0">
+            <div class="text-sm font-semibold text-slate-900 truncate">Mohammed AlHazaa</div>
+            <div class="text-[11px] text-slate-500">SENIOR · Fencing</div>
+          </div>
+          <div class="ml-auto text-2xl font-bold text-amber-600 tabular-nums leading-none">42</div>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div>
+            <div class="text-[9px] uppercase text-slate-400 tracking-wider">Strain</div>
+            <div class="text-sm font-semibold text-slate-700 tabular-nums">18.6</div>
+          </div>
+          <div>
+            <div class="text-[9px] uppercase text-slate-400 tracking-wider">HRV</div>
+            <div class="text-sm font-semibold text-slate-700 tabular-nums">38ms</div>
+          </div>
+          <div>
+            <div class="text-[9px] uppercase text-slate-400 tracking-wider">Sleep</div>
+            <div class="text-sm font-semibold text-slate-700 tabular-nums">5h 48</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Red / overloaded -->
+      <div class="bg-white border border-slate-200 border-l-4 border-l-red-500 rounded-lg p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-150 cursor-pointer">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-full bg-[#004185] text-white flex items-center justify-center font-bold text-sm">KH</div>
+          <div class="min-w-0">
+            <div class="text-sm font-semibold text-slate-900 truncate">Khaled Hussein</div>
+            <div class="text-[11px] text-slate-500">SENIOR · Fencing</div>
+          </div>
+          <div class="ml-auto text-2xl font-bold text-red-600 tabular-nums leading-none">23</div>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div>
+            <div class="text-[9px] uppercase text-slate-400 tracking-wider">Strain</div>
+            <div class="text-sm font-semibold text-slate-700 tabular-nums">20.3</div>
+          </div>
+          <div>
+            <div class="text-[9px] uppercase text-slate-400 tracking-wider">HRV</div>
+            <div class="text-sm font-semibold text-slate-700 tabular-nums">28ms</div>
+          </div>
+          <div>
+            <div class="text-[9px] uppercase text-slate-400 tracking-wider">Sleep</div>
+            <div class="text-sm font-semibold text-slate-700 tabular-nums">4h 32</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Notes -->
+  <section class="mt-16 p-6 bg-slate-50 border border-slate-200 rounded-lg">
+    <h2 class="text-base font-semibold mb-2 text-slate-800">How this gets into aspire_dash</h2>
+    <ol class="text-sm text-slate-600 space-y-2 list-decimal list-inside">
+      <li>Edit this file. Tailwind utilities are unlimited; DaisyUI gives semantic classes (`btn`, `card`, `badge`, `tab`).</li>
+      <li>When a prototype looks great, copy the class string (e.g. `border border-slate-200 border-l-4 border-l-[#004185] rounded-lg px-5 py-3.5 shadow-sm`).</li>
+      <li>Convert to a single CSS rule in <code class="text-xs bg-white px-1 py-0.5 rounded">aspire_dash/assets/00_aspire_base.css</code> with a class name like <code class="text-xs bg-white px-1 py-0.5 rounded">.kpi-tile</code>.</li>
+      <li>Update the Python helper (e.g. <code class="text-xs bg-white px-1 py-0.5 rounded">aspire_dash/components/kpi.py</code>) to emit <code class="text-xs bg-white px-1 py-0.5 rounded">className="kpi-tile accent-aspire"</code>.</li>
+      <li>Sync to <code class="text-xs bg-white px-1 py-0.5 rounded">demo/assets/00_aspire_base.css</code> (setup_app only copies once).</li>
+      <li>Bump version + CHANGELOG. Every consumer app picks up the new look on next SHA bump.</li>
+    </ol>
+  </section>
+
+</body>
+</html>
