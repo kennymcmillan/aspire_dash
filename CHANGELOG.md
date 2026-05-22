@@ -4,6 +4,27 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.12.4] — 2026-05-22
+
+### Fixed (CRITICAL — setup_app crashed on Connect)
+
+- **Removed the broken `app.config.update({"requests_pathname_prefix"...})` block.**
+  After Dash() runs, those keys are read-only on `app.config` — calling
+  `update()` raises `AttributeError: Read-only: can only be set in the
+  Dash constructor or during init_app()`. So 0.12.1's "Connect subpath
+  fix" actually crashed every consumer at boot on Connect.
+
+  The whole block was also redundant: Dash already reads
+  `DASH_URL_BASE_PATHNAME` from the environment in its own constructor
+  when `url_base_pathname` isn't passed explicitly. Connect sets this
+  env var, so the prefix is picked up correctly by Dash itself. The
+  sidebar/topnav helpers then resolve link hrefs through
+  `dash.get_relative_path()` at render time and the prefixed paths
+  flow through end-to-end.
+
+  Caught by the DASH_VALD deploy — Connect job log showed the
+  AttributeError on `setup_app(app)`.
+
 ## [0.12.3] — 2026-05-22
 
 ### Added
