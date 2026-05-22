@@ -558,6 +558,7 @@ def athlete_card_v2(
     photo_url: str | None = None,
     meta: str = "",
     href: str | None = None,
+    is_target: bool = False,        # v0.31.4 — gold accent + 🎯 badge for target athletes
 ):
     """Premium athlete card with photo (or initials fallback) + zone-coloured
     gradient bg + 3 mini metric rings.
@@ -600,27 +601,32 @@ def athlete_card_v2(
             className="acv2-avatar-initials",
         )
 
-    # Header (avatar + name + meta)
-    header = html.Div([
+    # Header (avatar + name + meta + optional 🎯 target badge)
+    header_children = [
         avatar,
         html.Div([
             html.Div(name, className="acv2-name"),
             html.Div(meta, className="acv2-meta") if meta else None,
         ], className="acv2-text"),
-    ], className="acv2-header")
+    ]
+    if is_target:
+        header_children.append(
+            html.Span("🎯", className="acv2-target-badge",
+                       title="Target Athlete")
+        )
+    header = html.Div(header_children, className="acv2-header")
 
     # Ring row — 3 rings via metric_ring()
     # v0.30.1 — honour per-ring `color` (hex) OR `tone` (preset) instead
-    # of defaulting everything to aspire blue (Whoop: each metric has its
-    # own dynamic colour from get_recovery_color / get_strain_color etc.)
+    # of defaulting everything to aspire blue.
     ring_blocks = []
     for r in rings:
         ring_blocks.append(html.Div([
             metric_ring(
                 r["value"], r["pct"],
-                label="",                       # label rendered below SVG
-                color=r.get("color"),           # explicit hex wins
-                tone=r.get("tone", "aspire"),   # tone preset fallback
+                label="",
+                color=r.get("color"),
+                tone=r.get("tone", "aspire"),
                 size=58,
             ),
             html.Div(r.get("label", ""), className="acv2-ring-label"),
@@ -628,8 +634,10 @@ def athlete_card_v2(
 
     ring_row = html.Div(ring_blocks, className="acv2-rings")
 
-    card = html.Div([header, ring_row],
-                     className=f"athlete-card-v2 zone-{zone}")
+    card_class = f"athlete-card-v2 zone-{zone}"
+    if is_target:
+        card_class += " is-target"
+    card = html.Div([header, ring_row], className=card_class)
 
     if href:
         return html.A(card, href=href,
@@ -649,6 +657,7 @@ def athlete_card_compact(
     photo_url: str | None = None,
     meta: str = "",
     href: str | None = None,
+    is_target: bool = False,        # v0.31.4 — gold accent + 🎯 badge
 ):
     """Compact athlete card — denser layout, more info per card than v2.
 
@@ -689,13 +698,19 @@ def athlete_card_compact(
     else:
         avatar = html.Div(_initials(name), className="acc-avatar-initials")
 
-    header = html.Div([
+    header_children = [
         avatar,
         html.Div([
             html.Div(name, className="acc-name"),
             html.Div(meta, className="acc-meta") if meta else None,
         ], className="acc-text"),
-    ], className="acc-header")
+    ]
+    if is_target:
+        header_children.append(
+            html.Span("🎯", className="acc-target-badge",
+                       title="Target Athlete")
+        )
+    header = html.Div(header_children, className="acc-header")
 
     # Rings row — smaller (48 px) than v2's 58 px for density
     ring_blocks = []
@@ -739,8 +754,10 @@ def athlete_card_compact(
     if stat_row is not None:
         children.append(stat_row)
 
-    card = html.Div(children,
-                     className=f"athlete-card-compact zone-{zone}")
+    card_class = f"athlete-card-compact zone-{zone}"
+    if is_target:
+        card_class += " is-target"
+    card = html.Div(children, className=card_class)
 
     if href:
         return html.A(card, href=href,

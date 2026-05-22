@@ -2796,6 +2796,50 @@ body {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   v0.31.4 — .is-target modifier (Aspire pathway "Target Athlete" indicator)
+   - 🎯 badge top-right of the card header
+   - Gold outline around the WHOLE card (so target status is visible)
+   - PHOTO BORDER keeps the recovery-zone tint (green/yellow/red) so the
+     recovery signal is never hidden by the target indicator.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.athlete-card-v2.is-target,
+.athlete-card-compact.is-target {
+    box-shadow: 0 0 0 2px var(--gold, #fbb800),
+                 var(--elev-1, 0 1px 2px rgba(15,23,42,0.04),
+                                0 1px 3px rgba(15,23,42,0.03));
+}
+.athlete-card-v2.is-target:hover,
+.athlete-card-compact.is-target:hover {
+    box-shadow: 0 0 0 2px var(--gold, #fbb800),
+                 0 8px 24px -8px rgba(251,184,0,0.30),
+                 0 4px 12px -4px rgba(15,23,42,0.10);
+}
+
+/* 🎯 badge — top-right corner */
+.athlete-card-v2 .acv2-header,
+.athlete-card-compact .acc-header {
+    position: relative;
+}
+.acv2-target-badge,
+.acc-target-badge {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-size: 14px;
+    line-height: 1;
+    filter: drop-shadow(0 1px 2px rgba(251, 184, 0, 0.5));
+    cursor: help;
+    user-select: none;
+    z-index: 2;
+}
+.acc-target-badge { font-size: 12px; top: 5px; right: 6px; }
+
+/* Photo border STAYS the zone colour — don't override it on target.
+   Recovery status is more important to see at-a-glance than target flag. */
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
    v0.26 — athlete_card_v2 (Whoop-style premium card)
    Zone-coloured gradient bg + larger photo (or initials fallback) + 3 rings.
    Usage:
