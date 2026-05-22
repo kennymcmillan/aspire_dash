@@ -161,7 +161,125 @@ def layout():
             "    ],\n"
             ")"
         ),
+
+        # ── athlete_card_v2 — Whoop-style premium card (v0.26+) ─────────
+        section("athlete_card_v2 — premium card w/ face photo + zone gradient",
+                 "v0.26 added 56 px photo + zone-coloured top-left gradient. "
+                 "v0.30.1 added per-ring colour override + gradient ring stroke. "
+                 "v0.31.4 added 🎯 target-athlete indicator."),
+        html.Div([
+            _card_v2("Ali Turki Owaida", "SENIOR · Fencing", "green",
+                      photo_url="https://i.pravatar.cc/100?img=11",
+                      rings=[(68, 68, "Recovery", "#16a34a"),
+                             ("15.8", 75, "Strain", "#004185"),
+                             ("7h12", 72, "Sleep", "#16a34a")],
+                      is_target=True),
+            _card_v2("Mohammed AlHazaa", "SENIOR · Fencing", "yellow",
+                      photo_url=None,  # initials fallback
+                      rings=[(42, 42, "Recovery", "#d97706"),
+                             ("18.6", 88, "Strain", "#dc2626"),
+                             ("5h48", 58, "Sleep", "#d97706")]),
+            _card_v2("Khaled Hussein", "SENIOR · Fencing", "red",
+                      photo_url="https://i.pravatar.cc/100?img=33",
+                      rings=[(23, 23, "Recovery", "#dc2626"),
+                             ("20.3", 95, "Strain", "#dc2626"),
+                             ("4h32", 45, "Sleep", "#dc2626")],
+                      is_target=True),
+        ], style={"display": "grid",
+                   "gridTemplateColumns": "repeat(3, 1fr)",
+                   "gap": "16px", "marginBottom": "12px"}),
+        code_block(
+            "from aspire_dash.athlete import athlete_card_v2\n\n"
+            "athlete_card_v2(\n"
+            '    "Ali Turki Owaida", meta="SENIOR · Fencing", zone="green",\n'
+            '    photo_url="https://...",   # SAMS imageUrl/profileImageUrl\n'
+            "    is_target=True,            # 🎯 Aspire pathway indicator\n"
+            "    rings=[\n"
+            '        {"value": 68,     "pct": 68, "label": "Recovery", "color": "#16a34a"},\n'
+            '        {"value": "15.8", "pct": 75, "label": "Strain",   "color": "#004185"},\n'
+            '        {"value": "7h12", "pct": 72, "label": "Sleep",    "color": "#16a34a"},\n'
+            "    ],\n"
+            ")"
+        ),
+
+        # ── athlete_card_compact — denser variant (v0.31) ───────────────
+        section("athlete_card_compact — dense variant (4+ across)",
+                 "Smaller 40 px avatar + 48 px rings + optional bottom stats "
+                 "row (HRV / RHR / Deep). Use for squad grids when you need "
+                 "more cards visible."),
+        html.Div([
+            _card_compact("Ali Turki Owaida", "Fencing", "green",
+                           photo_url="https://i.pravatar.cc/100?img=11",
+                           rings=[(68, 68, "Recovery", "#16a34a"),
+                                  ("15.8", 75, "Strain", "#004185"),
+                                  ("7h12", 72, "Sleep", "#16a34a")],
+                           stats=[("HRV", "62 ms", None),
+                                  ("RHR", "52 bpm", "green"),
+                                  ("Deep", "98 m", None)],
+                           is_target=True),
+            _card_compact("Mohammed AlHazaa", "Fencing", "yellow",
+                           photo_url=None,
+                           rings=[(42, 42, "Recovery", "#d97706"),
+                                  ("18.6", 88, "Strain", "#dc2626"),
+                                  ("5h48", 58, "Sleep", "#d97706")],
+                           stats=[("HRV", "48 ms", None),
+                                  ("RHR", "61 bpm", "yellow"),
+                                  ("Deep", "76 m", None)]),
+            _card_compact("Khaled Hussein", "Fencing", "red",
+                           photo_url="https://i.pravatar.cc/100?img=33",
+                           rings=[(23, 23, "Recovery", "#dc2626"),
+                                  ("20.3", 95, "Strain", "#dc2626"),
+                                  ("4h32", 45, "Sleep", "#dc2626")],
+                           stats=[("HRV", "38 ms", None),
+                                  ("RHR", "68 bpm", "red"),
+                                  ("Deep", "52 m", None)]),
+            _card_compact("Ziad Morsy", "Swimming", "aspire",
+                           photo_url=None,
+                           rings=[(55, 55, "Recovery", "#0059b3"),
+                                  ("12.4", 60, "Strain", "#004185"),
+                                  ("6h30", 65, "Sleep", "#0059b3")],
+                           stats=[("HRV", "54 ms", None),
+                                  ("RHR", "57 bpm", "aspire"),
+                                  ("Deep", "82 m", None)]),
+        ], style={"display": "grid",
+                   "gridTemplateColumns": "repeat(4, 1fr)",
+                   "gap": "12px", "marginBottom": "12px"}),
+        code_block(
+            "from aspire_dash.athlete import athlete_card_compact\n\n"
+            "athlete_card_compact(\n"
+            '    "Ali Owaida", meta="Fencing", zone="green",\n'
+            '    photo_url="https://...",\n'
+            "    is_target=True,\n"
+            "    rings=[{...}, {...}, {...}],\n"
+            "    stats=[\n"
+            '        {"label": "HRV", "value": "62 ms"},\n'
+            '        {"label": "RHR", "value": "52 bpm", "status_dot": "green"},\n'
+            '        {"label": "Deep", "value": "98 m"},\n'
+            "    ],\n"
+            ")"
+        ),
     ], style={"padding": "24px"})
+
+
+def _card_v2(name, meta, zone, photo_url, rings, is_target=False):
+    from aspire_dash.athlete import athlete_card_v2
+    return athlete_card_v2(
+        name, meta=meta, zone=zone, photo_url=photo_url, is_target=is_target,
+        rings=[{"value": v, "pct": p, "label": l, "color": c}
+               for v, p, l, c in rings],
+    )
+
+
+def _card_compact(name, meta, zone, photo_url, rings, stats, is_target=False):
+    from aspire_dash.athlete import athlete_card_compact
+    return athlete_card_compact(
+        name, meta=meta, zone=zone, photo_url=photo_url, is_target=is_target,
+        rings=[{"value": v, "pct": p, "label": l, "color": c}
+               for v, p, l, c in rings],
+        stats=[{"label": l, "value": v,
+                 **({"status_dot": d} if d else {})}
+               for l, v, d in stats],
+    )
 
 
 # Local helper — imports v0.13's athlete_card_rings with the right shape

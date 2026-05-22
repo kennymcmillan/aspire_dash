@@ -4,6 +4,24 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.31.4] — 2026-05-22
+
+### Added — `is_target` modifier + whoop-card-with-face demo
+
+Both `athlete_card_v2` and `athlete_card_compact` now accept
+`is_target: bool = False`. When True:
+
+- **🎯 emoji badge** top-right of the card header with gold drop-shadow
+- **Gold outline** around the whole card (2 px gold ring outside —
+  visible on hover too)
+- **Photo border STAYS the zone colour** (green/yellow/red) — user
+  feedback: *"the ring around the pic should be the colour that the
+  recovery is e.g. green"*. Recovery signal more important to see
+  at-a-glance than the target flag.
+
+Demo: whoop showcase page (`/whoop`) now demonstrates both cards with
+photo + initials fallback + all 3 zones + is_target variants.
+
 ## [0.31.0] — 2026-05-22
 
 ### Added — `athlete_card_compact` (dense whoop-style variant)
