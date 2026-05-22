@@ -4,6 +4,38 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.34.0] — 2026-05-22
+
+### Added — 3 more Tremor-borrowed patterns
+
+**`tracker_strip(cells, label, height, show_legend)`**
+Tremor "Tracker" pattern — 30-cell (or N-cell) consistency timeline.
+Each cell is a small coloured rectangle with hover tooltip. Tones:
+success / warning / danger / aspire / neutral / empty. Hover scales the
+cell 1.15× and lifts shadow. Optional 4-swatch legend below. Perfect
+for attendance / recovery / training-load timelines, sync-health
+dashboards.
+
+**`callout(title, children, severity, icon, dismissable)`**
+Replaces `dbc.Alert` portfolio-wide. Tremor "Callout" pattern —
+left-coloured-stripe block with icon + title + body. Severities:
+`info` (aspire-blue) / `success` (green) / `warning` (amber) /
+`danger` (red) / `aspire` (gold). Optional × dismiss button. Auto-
+picks FontAwesome icon per severity. CSS class `.aspire-callout
+.callout-{severity}`.
+
+**`stat_card_mega(label, value, series, ring_pct, ring_label, delta,
+delta_pct, delta_direction, accent, sub)`**
+Hero-tile combining KPI value + trend chip + mini ring + sparkline in
+one composition. Best layout for "top-of-page" dashboard summary rows
+when you have multiple signals per metric (current value + trend
+direction + target-attainment % + recent history). All five v0.33 +
+v0.34 primitives compose cleanly.
+
+CSS prefixes: `.tracker-strip .trk-*`, `.aspire-callout .callout-*`,
+`.stat-card-mega .scm-*`. All hover lift + accent stripe modifiers
+match the rest of the v12 library.
+
 ## [0.33.0] — 2026-05-22
 
 ### Added — 4 Tremor-inspired component patterns

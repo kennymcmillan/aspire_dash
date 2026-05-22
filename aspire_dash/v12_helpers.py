@@ -974,3 +974,217 @@ def donut_with_focus(
     )
     return dcc.Graph(figure=fig, config=GRAPH_CONFIG,
                       style={"height": f"{height}px"})
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# v0.34 — 3 more Tremor-borrowed patterns
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def tracker_strip(
+    cells: list[dict],
+    *,
+    label: str | None = None,
+    height: int = 28,
+    show_legend: bool = True,
+):
+    """30-cell (or N-cell) consistency timeline (Tremor "Tracker" pattern).
+
+    Each cell is a small coloured rectangle with hover tooltip. Use for
+    attendance/recovery/training-load timelines, sync-health dashboards.
+
+    Each `cell` is a dict: ``{tone, tooltip}``.
+    `tone` ∈ ``success | warning | danger | aspire | neutral`` (or a
+    direct hex string).
+
+    >>> tracker_strip(
+    ...     label="Last 30 days · Recovery",
+    ...     cells=[
+    ...         {"tone": "success", "tooltip": "2026-04-22: 78%"},
+    ...         {"tone": "warning", "tooltip": "2026-04-23: 58%"},
+    ...         ...
+    ...     ],
+    ... )
+    """
+    from .theme import SUCCESS, WARNING, DANGER, ASPIRE, SLATE
+
+    TONES = {
+        "success": SUCCESS, "warning": WARNING, "danger": DANGER,
+        "aspire":  ASPIRE["600"], "neutral": SLATE["300"],
+        "empty":   SLATE["100"],
+    }
+    cell_divs = []
+    for c in cells:
+        tone = c.get("tone", "neutral")
+        color = TONES.get(tone, tone)   # accept hex too
+        cell_divs.append(html.Div(
+            title=c.get("tooltip", ""),
+            className=f"trk-cell trk-{tone if tone in TONES else 'custom'}",
+            style={"backgroundColor": color},
+        ))
+
+    legend = None
+    if show_legend:
+        legend = html.Div([
+            html.Div([html.Span(className="trk-swatch",
+                                  style={"backgroundColor": SUCCESS}),
+                       html.Span("Good", className="trk-legend-label")],
+                      className="trk-legend-item"),
+            html.Div([html.Span(className="trk-swatch",
+                                  style={"backgroundColor": WARNING}),
+                       html.Span("Caution", className="trk-legend-label")],
+                      className="trk-legend-item"),
+            html.Div([html.Span(className="trk-swatch",
+                                  style={"backgroundColor": DANGER}),
+                       html.Span("Alert", className="trk-legend-label")],
+                      className="trk-legend-item"),
+            html.Div([html.Span(className="trk-swatch",
+                                  style={"backgroundColor": SLATE["100"]}),
+                       html.Span("No data", className="trk-legend-label")],
+                      className="trk-legend-item"),
+        ], className="trk-legend")
+
+    return html.Div([
+        html.Div(label, className="trk-title") if label else None,
+        html.Div(cell_divs, className="trk-strip",
+                  style={"--trk-cells": str(len(cells)),
+                          "height": f"{height}px"}),
+        legend,
+    ], className="tracker-strip")
+
+
+def callout(
+    title: str,
+    children=None,
+    *,
+    severity: str = "info",        # info | success | warning | danger | aspire
+    icon: str | None = None,        # FontAwesome class; auto-picked from severity if None
+    dismissable: bool = False,
+):
+    """Branded alert / info / warning block — replaces dbc.Alert.
+
+    Tremor "Callout" pattern — coloured-left-stripe panel with icon + title
+    + body content. Severity colour-codes via aspire-dash semantic tones.
+
+    >>> callout("Heads up", "Sync window is set to ±45 days.",
+    ...         severity="warning")
+    """
+    SEV_ICONS = {
+        "info":    "fa-solid fa-circle-info",
+        "success": "fa-solid fa-circle-check",
+        "warning": "fa-solid fa-triangle-exclamation",
+        "danger":  "fa-solid fa-circle-exclamation",
+        "aspire":  "fa-solid fa-bullseye",
+    }
+    icon_class = icon or SEV_ICONS.get(severity, SEV_ICONS["info"])
+
+    return html.Div([
+        html.Div([
+            html.I(className=icon_class, **{"aria-hidden": "true"}),
+            html.Span(title, className="callout-title"),
+            html.Button("×", className="callout-close",
+                          n_clicks=0) if dismissable else None,
+        ], className="callout-header"),
+        html.Div(children, className="callout-body") if children else None,
+    ], className=f"aspire-callout callout-{severity}",
+       **({"data-dismissable": "true"} if dismissable else {}))
+
+
+def stat_card_mega(
+    label: str,
+    value,
+    *,
+    series: list[float] | None = None,
+    ring_pct: float | None = None,
+    ring_label: str = "",
+    delta: str | None = None,
+    delta_pct: str | None = None,
+    delta_direction: str = "flat",
+    accent: str = "aspire",
+    sub: str | None = None,
+):
+    """Hero-tile combining KPI value + trend chip + mini ring + sparkline.
+
+    The 'mega' card for top-of-page summary rows. Best Tremor-style
+    composition of v0.33 primitives.
+
+    Layout:
+      ┌──────────────────────────────┐
+      │ LABEL                       │
+      │ 42                  ▲ +8 24%│
+      │ sub-text                    │
+      │ ┌──────┐ ╭──────────────╮  │
+      │ │ ring │ │  sparkline   │  │
+      │ │  78% │ │   ╱╲    ╱╲   │  │
+      │ └──────┘ ╰──────────────╯  │
+      └──────────────────────────────┘
+    """
+    import plotly.graph_objects as go
+    from .theme import ASPIRE, SUCCESS, WARNING, DANGER, GOLD, SLATE
+    from .charts import GRAPH_CONFIG
+
+    ACCENTS = {
+        "aspire":  ASPIRE["600"],
+        "success": SUCCESS,
+        "warning": WARNING,
+        "danger":  DANGER,
+        "gold":    GOLD,
+    }
+    accent_hex = ACCENTS.get(accent, ASPIRE["600"])
+
+    # Trend chip
+    delta_color = {"up": SUCCESS, "down": DANGER}.get(delta_direction, SLATE["500"])
+    delta_arrow = {"up": "▲", "down": "▼"}.get(delta_direction, "–")
+    chip = None
+    if delta or delta_pct:
+        chip = html.Div([
+            html.Span(delta_arrow, className="scm-arrow"),
+            html.Span(delta or "", className="scm-delta"),
+            html.Span(f"({delta_pct})", className="scm-pct") if delta_pct else None,
+        ], className="scm-trend", style={"color": delta_color})
+
+    # Sparkline (small)
+    spark_graph = None
+    if series:
+        fig = go.Figure(go.Scatter(
+            x=list(range(len(series))), y=series, mode="lines",
+            line=dict(color=accent_hex, width=1.8),
+            fill="tozeroy",
+            fillcolor=_hex_to_rgba_v33(accent_hex, 0.18),
+            hoverinfo="skip",
+        ))
+        y_min = min(series); y_max = max(series)
+        fig.update_layout(
+            height=44, margin=dict(t=0, b=0, l=0, r=0),
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            showlegend=False,
+            xaxis=dict(visible=False),
+            yaxis=dict(visible=False, range=[y_min * 0.95, y_max * 1.05]),
+        )
+        spark_graph = dcc.Graph(figure=fig, config=GRAPH_CONFIG,
+                                  style={"height": "44px", "width": "100%"})
+
+    # Mini ring
+    ring_el = None
+    if ring_pct is not None:
+        ring_el = metric_ring(
+            f"{int(ring_pct)}%", pct=ring_pct,
+            color=accent_hex, size=52, label="",
+        )
+
+    bottom_row = None
+    if ring_el or spark_graph:
+        bottom_row = html.Div([
+            ring_el,
+            html.Div(spark_graph, className="scm-spark") if spark_graph else None,
+        ], className="scm-bottom")
+
+    return html.Div([
+        html.Div(label, className="scm-label"),
+        html.Div([
+            html.Div(str(value), className="scm-value"),
+            chip,
+        ], className="scm-value-row"),
+        html.Div(sub, className="scm-sub") if sub else None,
+        bottom_row,
+    ], className=f"stat-card-mega scm-accent-{accent}")

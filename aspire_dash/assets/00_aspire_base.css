@@ -2977,6 +2977,171 @@ body {
     margin-top: 4px;
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v0.34 — 3 more Tremor patterns
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── tracker_strip — 30-cell consistency timeline ── */
+.tracker-strip { font-family: inherit; }
+.tracker-strip .trk-title {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--slate-500);
+    margin-bottom: 8px;
+}
+.tracker-strip .trk-strip {
+    display: grid;
+    grid-template-columns: repeat(var(--trk-cells, 30), 1fr);
+    gap: 2px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+.tracker-strip .trk-cell {
+    height: 100%;
+    border-radius: 2px;
+    transition: transform var(--duration-fast, 150ms) var(--ease-out, ease-out);
+    cursor: help;
+}
+.tracker-strip .trk-cell:hover {
+    transform: scaleY(1.15);
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
+    z-index: 2;
+    position: relative;
+}
+.tracker-strip .trk-legend {
+    display: flex; gap: 16px;
+    font-size: 11px;
+    color: var(--slate-600);
+}
+.tracker-strip .trk-legend-item {
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.tracker-strip .trk-swatch {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+}
+.tracker-strip .trk-legend-label { font-weight: 500; }
+
+
+/* ── callout — branded alert/info block (replaces dbc.Alert) ── */
+.aspire-callout {
+    display: block;
+    border-radius: 8px;
+    padding: 12px 16px;
+    border-left: 4px solid var(--aspire-600);
+    background: rgba(0, 65, 133, 0.04);
+    margin-bottom: 16px;
+    transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+.aspire-callout:hover {
+    box-shadow: var(--elev-1, 0 1px 2px rgba(15,23,42,0.04));
+}
+.aspire-callout .callout-header {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; font-weight: 700;
+}
+.aspire-callout .callout-title { flex: 1; }
+.aspire-callout .callout-body {
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--slate-700);
+    padding-left: 26px;
+    line-height: 1.5;
+}
+.aspire-callout .callout-close {
+    background: none; border: none;
+    font-size: 20px; line-height: 1;
+    color: var(--slate-400);
+    cursor: pointer;
+    padding: 0 4px;
+    transition: color var(--duration-fast) var(--ease-out);
+}
+.aspire-callout .callout-close:hover { color: var(--slate-700); }
+
+/* Severity variants */
+.aspire-callout.callout-info     { border-left-color: var(--aspire-600);
+                                    background: rgba(0, 65, 133, 0.04); }
+.aspire-callout.callout-info     .callout-header,
+.aspire-callout.callout-info     i { color: var(--aspire-700); }
+.aspire-callout.callout-success  { border-left-color: #16a34a;
+                                    background: rgba(22, 163, 74, 0.06); }
+.aspire-callout.callout-success  .callout-header,
+.aspire-callout.callout-success  i { color: #166534; }
+.aspire-callout.callout-warning  { border-left-color: #d97706;
+                                    background: rgba(217, 119, 6, 0.06); }
+.aspire-callout.callout-warning  .callout-header,
+.aspire-callout.callout-warning  i { color: #92400e; }
+.aspire-callout.callout-danger   { border-left-color: #dc2626;
+                                    background: rgba(220, 38, 38, 0.06); }
+.aspire-callout.callout-danger   .callout-header,
+.aspire-callout.callout-danger   i { color: #991b1b; }
+.aspire-callout.callout-aspire   { border-left-color: var(--gold);
+                                    background: rgba(251, 184, 0, 0.08); }
+.aspire-callout.callout-aspire   .callout-header,
+.aspire-callout.callout-aspire   i { color: #92400e; }
+
+
+/* ── stat_card_mega — KPI + chip + ring + sparkline hero tile ── */
+.stat-card-mega {
+    background: linear-gradient(180deg, white 0%, var(--slate-50) 100%);
+    border: 1px solid var(--slate-200);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: var(--elev-1);
+    border-left: 4px solid var(--aspire-600);
+    transition: transform var(--duration-normal) var(--ease-out),
+                box-shadow var(--duration-normal) var(--ease-out),
+                border-color var(--duration-fast) var(--ease-out);
+}
+.stat-card-mega:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--elev-hover-card);
+    border-color: var(--aspire-200);
+}
+.stat-card-mega.scm-accent-aspire  { border-left-color: var(--aspire-600); }
+.stat-card-mega.scm-accent-success { border-left-color: #16a34a; }
+.stat-card-mega.scm-accent-warning { border-left-color: #d97706; }
+.stat-card-mega.scm-accent-danger  { border-left-color: #dc2626; }
+.stat-card-mega.scm-accent-gold    { border-left-color: var(--gold); }
+
+.stat-card-mega .scm-label {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--slate-500);
+}
+.stat-card-mega .scm-value-row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-top: 2px;
+}
+.stat-card-mega .scm-value {
+    font-size: 32px; font-weight: 700; line-height: 1.1;
+    color: var(--slate-900);
+    font-variant-numeric: tabular-nums;
+}
+.stat-card-mega .scm-trend {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 12px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    background: rgba(0, 65, 133, 0.06);
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+.stat-card-mega .scm-arrow { font-size: 10px; }
+.stat-card-mega .scm-pct { color: var(--slate-500); font-weight: 500; }
+.stat-card-mega .scm-sub {
+    font-size: 11px; color: var(--slate-500); margin-top: 4px;
+}
+.stat-card-mega .scm-bottom {
+    display: flex; align-items: center; gap: 14px;
+    margin-top: 10px;
+}
+.stat-card-mega .scm-spark {
+    flex: 1; min-width: 0;
+}
+
 /* Photo border STAYS the zone colour — don't override it on target.
    Recovery status is more important to see at-a-glance than target flag. */
 
