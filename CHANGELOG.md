@@ -4,6 +4,36 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.22.0] — 2026-05-22
+
+### Added — `aspire_dash.vald` (exact ForceDecks compositions)
+
+Verbatim port of the DASH_VALD chart compositions. Apps can now drop
+in the same 4-panel CMJ dashboard, group heatmap, and adaptive-band
+chart without reaching into the VALD deploy.
+
+- **`VALD_LAYOUT`** — exact paper/grid/font preset (Inter, dotted grid)
+- **`VALD_COLORS`** — exact 17-key palette
+- **`analytics_chart(data_points, stats, mode)`** — single large chart;
+  mode ∈ `{sd_bands, 4pt_ma, acute}`
+- **`cmj_panel_chart(data_points, stats, mode, adaptive_obs)`** —
+  compact 192 px panel for the 2×2 grid; same 4 modes + adaptive
+- **`group_heatmap(athletes_data)`** — athletes × dates Z-score matrix
+- **`adaptive_chart(data_points, adaptive_obs)`** — emerald LAR/UAR
+  band from R Plumber Bayesian API
+- **`vald_cmj_grid(panels)`** — 2×2 grid wrapper for the CMJ dashboard
+
+All compositions sit on top of the existing `aspire_dash.timeseries`
+overlay builders (`build_sd_traces`, `build_4pt_ma_traces`,
+`build_acute_traces`, `build_adaptive_traces`) — same primitives the
+VALD app already uses, just one layer up.
+
+### Demo
+
+- `/vald` page in showcase now renders the actual 4-panel CMJ dashboard,
+  analytics chart with 4 mode toggles, group heatmap, and the
+  17-colour palette swatch grid.
+
 ## [0.21.0] — 2026-05-22
 
 ### Added — `aspire_dash.countries` module
