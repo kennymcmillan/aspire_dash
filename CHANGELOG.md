@@ -4,6 +4,34 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.14.0] — 2026-05-22
+
+### Added — `aspire_dash.medical` module (extracted from medical-dashboard)
+
+- **`body_silhouette(region_metric, max_value, title)`** — branded
+  body-region heatmap card. Anatomical SVG (etal/bodymap, MIT licensed)
+  with SAMS region names mapped onto 14 body parts. Pass a dict of
+  `{SAMS region: metric value}` and the function fills each region
+  with an Aspire-blue gradient based on the value-to-max ratio.
+
+- **`injury_list(injuries)`** — multi-injury container. Each row is a
+  v0.12 `injury_card`. Auto-renders branded `aspire_empty(...)` when
+  the list is empty ("No active injuries — all squad fit to train").
+
+- **`render_svg(region_metric, max_value)`** — lower-level helper if
+  you want to embed the bare SVG without the card chrome.
+
+- **`SAMS_TO_BODYMAP`** dict — exported so apps can audit which SAMS
+  regions map to which bodymap IDs.
+
+- **`/assets/body-bodymap.svg`** (33 KB) shipped with the package.
+  `setup_app()` copies it into each consumer's `/assets/` automatically.
+
+These were duplicated maintenance liabilities in medical-dashboard's
+`components/body_silhouette.py`. Promoting upstream so attendance,
+training-load, and the athlete profile pages across the portfolio can
+all show the same body heatmap pattern.
+
 ## [0.13.0] — 2026-05-22
 
 ### Added — Whoop rings promoted from whoop_coach_dashboard

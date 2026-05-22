@@ -67,6 +67,8 @@ nav = [
      "icon": "fa-solid fa-medal"},
     {"label": "Firstbeat",          "href": "/firstbeat",
      "icon": "fa-solid fa-heart-pulse"},
+    {"label": "Medical",            "href": "/medical",
+     "icon": "fa-solid fa-stethoscope"},
 
     # Wearables / performance science
     {"label": "Whoop",              "href": "/whoop",
