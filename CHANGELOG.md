@@ -4,6 +4,32 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.16.0] — 2026-05-22
+
+### Added — `aspire_dash.metrics` module
+
+Athlete-monitoring calculations — foundation for every longitudinal
+chart in the portfolio. NumPy/pandas-friendly, no hidden state.
+
+- **SDS** — `sds(value, mean, sd)` scalar and `sds_series(series,
+  baseline_window)` rolling
+- **Moving averages** — `moving_average(series, window)` simple +
+  `exponential_moving_average(series, span)` EWMA
+- **ACWR** — `acwr(series, acute=7, chronic=28, method='rolling'|'ewma')`
+  + `acwr_zone(ratio)` returning `'low' | 'ok' | 'high' | 'danger'`
+  with the published sweet-spot (0.8-1.3) + danger (≥1.5) thresholds
+- **Adaptive reference ranges** — `adaptive_range(series, window, k)`
+  returning a DataFrame of `mean / lower / upper` for the rolling
+  mean ± k·SD band. Used by VALD jump-height chart and Whoop RHR
+  baseline.
+- **LMS percentile bands** — `lms_to_percentile` + `percentile_to_value`
+  for CDC / WHO anthropometric growth-chart percentile curves.
+- **Helpers** — `coefficient_of_variation`, `z_score`, `percentile_rank`.
+
+Use for: anthropometric growth curves, VALD adaptive-range traces,
+endurance ACWR badges, HRV / RHR baselines, any athlete-monitoring
+chart that shades a "normal" band over a time series.
+
 ## [0.15.0] — 2026-05-22
 
 ### Added — `aspire_dash.financial` module (scoped report style)
