@@ -4,6 +4,44 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.33.0] — 2026-05-22
+
+### Added — 4 Tremor-inspired component patterns
+
+Translation of the best-in-class React+Tailwind dashboard patterns to
+Plotly+Aspire. All four sit in `aspire_dash.v12_helpers`.
+
+**`kpi_with_sparkline(label, value, series, delta, delta_direction,
+accent, sub, height)`**
+Tremor "Tracker" pattern — big number + trend chip on the right + an
+inline area chart filling the bottom half of the tile. Aspire-tinted
+fill at 0.20 opacity over a 2 px accent line. Accent stripe + hover
+lift like other Aspire cards.
+
+**`progress_stack(items, total, label, height)`**
+Tremor "Category Bar" pattern — horizontal stacked progress bar with
+inline category labels and a legend strip below. Each segment gets a
+proportional width + colour, with hover tooltips on each. Good for
+budget allocations, athlete-readiness breakdowns, sport-medal splits.
+
+**`stat_with_trend(label, value, delta, delta_pct, delta_direction,
+accent, sub)`**
+Tremor "Stats" pattern — KPI value + branded `▲ +8 (+24%)` trend chip
+below. No chart, just typography on a coloured-stripe card. Use for
+season-over-season comparison rows.
+
+**`donut_with_focus(values, labels, colors, centre_label, centre_value,
+height)`**
+Plotly donut with thick white slice borders (3 px), Aspire palette,
+slate-800 hover labels, centre-text summary annotation, and rounded
+corners via marker_line. Hover dims non-active segments via opacity.
+
+All four available as `from aspire_dash.v12_helpers import …`. CSS
+prefixes: `.kpi-with-sparkline .kws-*`, `.progress-stack .ps-*`,
+`.stat-with-trend .swt-*`. Hover lift + accent stripe modifiers
+(`--accent-aspire / success / warning / danger / gold`) match other
+v12 components.
+
 ## [0.32.0] — 2026-05-22
 
 ### Fine-grained polish pass (12 of 30 audit items shipped)

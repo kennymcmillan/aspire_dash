@@ -778,3 +778,199 @@ def athlete_card_compact(
                        style={"textDecoration": "none", "color": "inherit",
                               "display": "block"})
     return card
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# v0.33 — Tremor-inspired component patterns (translated to Plotly + Aspire)
+# ═══════════════════════════════════════════════════════════════════════════
+
+def _hex_to_rgba_v33(hex_, alpha):
+    h = hex_.lstrip("#")
+    if len(h) == 3:
+        h = "".join(c * 2 for c in h)
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    return f"rgba({r},{g},{b},{alpha})"
+
+
+def kpi_with_sparkline(
+    label: str,
+    value,
+    series: list[float],
+    *,
+    delta: str | None = None,
+    delta_direction: str = "flat",   # 'up' | 'down' | 'flat'
+    accent: str = "aspire",          # aspire | success | warning | danger | gold
+    sub: str | None = None,
+    height: int = 96,
+):
+    """Big-number KPI with an inline area chart at the bottom.
+
+    Tremor "Tracker" pattern. Large value top + trend chip on the right
+    + sparkline area filling the bottom 50%. Branded via accent token.
+    """
+    import plotly.graph_objects as go
+    from .theme import ASPIRE, SUCCESS, WARNING, DANGER, GOLD, SLATE
+    from .charts import GRAPH_CONFIG
+
+    ACCENTS = {
+        "aspire":  ASPIRE["600"],
+        "success": SUCCESS,
+        "warning": WARNING,
+        "danger":  DANGER,
+        "gold":    GOLD,
+    }
+    accent_hex = ACCENTS.get(accent, ASPIRE["600"])
+
+    x = list(range(len(series)))
+    fig = go.Figure(go.Scatter(
+        x=x, y=series, mode="lines",
+        line=dict(color=accent_hex, width=2),
+        fill="tozeroy",
+        fillcolor=_hex_to_rgba_v33(accent_hex, 0.20),
+        hoverinfo="skip",
+    ))
+    y_min = min(series) if series else 0
+    y_max = max(series) if series else 1
+    fig.update_layout(
+        height=height // 2, margin=dict(t=0, b=0, l=0, r=0),
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        showlegend=False,
+        xaxis=dict(visible=False),
+        yaxis=dict(visible=False, range=[y_min * 0.95, y_max * 1.05]),
+    )
+
+    delta_color = {"up": SUCCESS, "down": DANGER}.get(delta_direction, SLATE["500"])
+    delta_arrow = {"up": "▲", "down": "▼"}.get(delta_direction, "")
+    delta_chip = None
+    if delta is not None:
+        delta_chip = html.Span(
+            f"{delta_arrow} {delta}",
+            className="kws-delta",
+            style={"color": delta_color},
+        )
+
+    return html.Div([
+        html.Div([
+            html.Div([
+                html.Div(label, className="kws-label"),
+                html.Div(str(value), className="kws-value"),
+                html.Div(sub or "", className="kws-sub") if sub else None,
+            ], className="kws-text"),
+            delta_chip,
+        ], className="kws-row"),
+        dcc.Graph(figure=fig, config=GRAPH_CONFIG,
+                   style={"height": f"{height // 2}px",
+                          "width": "100%", "marginTop": "8px"}),
+    ], className=f"kpi-with-sparkline kws-accent-{accent}")
+
+
+def progress_stack(
+    items: list[dict],
+    *,
+    total: float | None = None,
+    label: str | None = None,
+    height: int = 10,
+):
+    """Horizontal stacked progress bar with inline category labels.
+
+    Tremor "Category Bar" — segments coloured by category, each
+    proportional to its value, with legend strip below.
+    """
+    from .theme import SLATE
+    if total is None:
+        total = sum(i["value"] for i in items) or 1
+
+    segments = [
+        html.Div(
+            style={"width": f"{(i['value'] / total) * 100:.1f}%",
+                    "backgroundColor": i.get("color", SLATE["400"]),
+                    "height": "100%"},
+            title=f"{i['label']}: {i['value']:,.0f}",
+        ) for i in items
+    ]
+    legend_items = [
+        html.Div([
+            html.Span(className="ps-swatch",
+                        style={"backgroundColor": i.get("color", SLATE["400"])}),
+            html.Span(i["label"], className="ps-legend-label"),
+            html.Span(f"{i['value']:,.0f}", className="ps-legend-value"),
+        ], className="ps-legend-item") for i in items
+    ]
+    return html.Div([
+        html.Div(label, className="ps-title") if label else None,
+        html.Div(segments, className="ps-bar",
+                  style={"height": f"{height}px"}),
+        html.Div(legend_items, className="ps-legend"),
+    ], className="progress-stack")
+
+
+def stat_with_trend(
+    label: str,
+    value,
+    *,
+    delta: str | None = None,
+    delta_pct: str | None = None,
+    delta_direction: str = "flat",
+    accent: str = "aspire",
+    sub: str | None = None,
+):
+    """KPI value + branded trend chip (Tremor 'Stats')."""
+    from .theme import SUCCESS, DANGER, SLATE
+    delta_color = {"up": SUCCESS, "down": DANGER}.get(delta_direction, SLATE["500"])
+    delta_arrow = {"up": "▲", "down": "▼"}.get(delta_direction, "–")
+
+    chip = None
+    if delta or delta_pct:
+        chip = html.Div([
+            html.Span(delta_arrow, className="swt-arrow"),
+            html.Span(delta or "", className="swt-delta"),
+            html.Span(f"({delta_pct})", className="swt-pct") if delta_pct else None,
+        ], className="swt-trend", style={"color": delta_color})
+
+    return html.Div([
+        html.Div(label, className="swt-label"),
+        html.Div(str(value), className="swt-value"),
+        chip,
+        html.Div(sub, className="swt-sub") if sub else None,
+    ], className=f"stat-with-trend swt-accent-{accent}")
+
+
+def donut_with_focus(
+    values: list[float],
+    labels: list[str],
+    *,
+    colors: list[str] | None = None,
+    centre_label: str = "",
+    centre_value: str = "",
+    height: int = 240,
+):
+    """Plotly donut with hover-tinted segments + centre summary."""
+    import plotly.graph_objects as go
+    from .theme import CHART_COLORS, SLATE, FONT_HEADING
+    from .charts import GRAPH_CONFIG
+
+    cols = colors or CHART_COLORS[:len(values)]
+    fig = go.Figure(go.Pie(
+        values=values, labels=labels,
+        marker=dict(colors=cols, line=dict(color="white", width=2)),
+        hole=0.7, sort=False, textinfo="none",
+        hoverinfo="label+percent",
+        opacity=0.92,
+    ))
+    fig.update_traces(
+        hoverlabel=dict(bgcolor=SLATE["800"], font_color="white"),
+        marker_line_width=3,
+    )
+    fig.update_layout(
+        height=height, margin=dict(t=10, b=10, l=10, r=10),
+        showlegend=False,
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        annotations=[
+            dict(text=centre_value, x=0.5, y=0.55, showarrow=False,
+                 font=dict(size=26, color=SLATE["900"], family=FONT_HEADING)),
+            dict(text=centre_label, x=0.5, y=0.40, showarrow=False,
+                 font=dict(size=11, color=SLATE["500"], family=FONT_HEADING)),
+        ],
+    )
+    return dcc.Graph(figure=fig, config=GRAPH_CONFIG,
+                      style={"height": f"{height}px"})

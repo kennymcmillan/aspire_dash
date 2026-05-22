@@ -2835,6 +2835,148 @@ body {
 }
 .acc-target-badge { font-size: 12px; top: 5px; right: 6px; }
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v0.33 — Tremor-inspired components
+   1. kpi_with_sparkline — big number + inline area chart
+   2. progress_stack    — horizontal stacked bar + legend strip
+   3. stat_with_trend   — value + ▲/▼ trend chip
+   4. donut_with_focus  — donut centre summary (styled via plotly layout)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── kpi_with_sparkline ── */
+.kpi-with-sparkline {
+    background: linear-gradient(180deg, white 0%, var(--slate-50) 100%);
+    border: 1px solid var(--slate-200);
+    border-radius: 12px;
+    padding: 14px 16px 4px;
+    box-shadow: var(--elev-1);
+    transition: transform var(--duration-normal) var(--ease-out),
+                box-shadow var(--duration-normal) var(--ease-out),
+                border-color var(--duration-fast) var(--ease-out);
+    border-left-width: 4px;
+}
+.kpi-with-sparkline:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--elev-hover-card);
+    border-color: var(--aspire-200);
+}
+.kpi-with-sparkline .kws-row {
+    display: flex; justify-content: space-between;
+    align-items: flex-start;
+}
+.kpi-with-sparkline .kws-text { flex: 1; min-width: 0; }
+.kpi-with-sparkline .kws-label {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--slate-500);
+}
+.kpi-with-sparkline .kws-value {
+    font-size: 28px; font-weight: 700;
+    line-height: 1.1; color: var(--slate-900);
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+}
+.kpi-with-sparkline .kws-sub {
+    font-size: 11px; color: var(--slate-500);
+    margin-top: 2px;
+}
+.kpi-with-sparkline .kws-delta {
+    font-size: 12px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 6px;
+    padding: 2px 8px;
+}
+/* Accent stripe by token */
+.kpi-with-sparkline.kws-accent-aspire  { border-left-color: var(--aspire-600); }
+.kpi-with-sparkline.kws-accent-success { border-left-color: #16a34a; }
+.kpi-with-sparkline.kws-accent-warning { border-left-color: #d97706; }
+.kpi-with-sparkline.kws-accent-danger  { border-left-color: #dc2626; }
+.kpi-with-sparkline.kws-accent-gold    { border-left-color: var(--gold); }
+
+/* ── progress_stack ── */
+.progress-stack { font-family: inherit; }
+.progress-stack .ps-title {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--slate-500);
+    margin-bottom: 8px;
+}
+.progress-stack .ps-bar {
+    display: flex;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--slate-100);
+    margin-bottom: 10px;
+}
+.progress-stack .ps-bar > div {
+    transition: width var(--duration-normal) var(--ease-out);
+}
+.progress-stack .ps-legend {
+    display: flex; flex-wrap: wrap;
+    gap: 16px;
+}
+.progress-stack .ps-legend-item {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--slate-700);
+}
+.progress-stack .ps-swatch {
+    width: 10px; height: 10px; border-radius: 2px;
+    display: inline-block;
+}
+.progress-stack .ps-legend-label { font-weight: 600; }
+.progress-stack .ps-legend-value {
+    color: var(--slate-500);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── stat_with_trend ── */
+.stat-with-trend {
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: var(--elev-1);
+    transition: transform var(--duration-normal) var(--ease-out),
+                box-shadow var(--duration-normal) var(--ease-out);
+    border-left: 4px solid var(--aspire-600);
+}
+.stat-with-trend:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--elev-2);
+}
+.stat-with-trend.swt-accent-success { border-left-color: #16a34a; }
+.stat-with-trend.swt-accent-warning { border-left-color: #d97706; }
+.stat-with-trend.swt-accent-danger  { border-left-color: #dc2626; }
+.stat-with-trend.swt-accent-gold    { border-left-color: var(--gold); }
+.stat-with-trend .swt-label {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--slate-500);
+}
+.stat-with-trend .swt-value {
+    font-size: 30px; font-weight: 700;
+    line-height: 1.1; color: var(--slate-900);
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+}
+.stat-with-trend .swt-trend {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 12px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    margin-top: 4px;
+    background: rgba(0, 65, 133, 0.06);
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+.stat-with-trend .swt-arrow { font-size: 10px; }
+.stat-with-trend .swt-pct   { color: var(--slate-500); font-weight: 500; }
+.stat-with-trend .swt-sub {
+    font-size: 11px; color: var(--slate-500);
+    margin-top: 4px;
+}
+
 /* Photo border STAYS the zone colour — don't override it on target.
    Recovery status is more important to see at-a-glance than target flag. */
 
