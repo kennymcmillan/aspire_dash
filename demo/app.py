@@ -73,6 +73,8 @@ nav = [
      "icon": "fa-solid fa-money-bill-trend-up"},
     {"label": "✨ v0.17 Plots",     "href": "/plots",
      "icon": "fa-solid fa-chart-pie"},
+    {"label": "✨ v0.18 New",       "href": "/v18",
+     "icon": "fa-solid fa-person-rays"},
 
     # Wearables / performance science
     {"label": "Whoop",              "href": "/whoop",

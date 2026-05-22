@@ -123,4 +123,52 @@ def layout():
                     target="_blank",
                     style={"fontSize": "12px", "color": "#0369a1"}),
         ]),
+
+        # ── Whoop 3-ring athlete card (v0.13.0) ──────────────────────────
+        section("Whoop 3-ring athlete card (saved in lib as v0.13)",
+                 "Drop the Whoop card into any future player dashboard "
+                 "with one import. Recovery + Strain + Sleep rings inline."),
+        html.Div([
+            _athlete_card(
+                "Ali Turki Owaida", "SENIOR · Fencing", "good",
+                [(68,  68, "Recovery", "good"),
+                 ("15.8", 75, "Strain",   "aspire"),
+                 ("7h12", 72, "Sleep",    "good")],
+            ),
+            _athlete_card(
+                "Mohammed AlHazaa", "SENIOR · Fencing", "warn",
+                [(42,  42, "Recovery", "warn"),
+                 ("18.6", 88, "Strain",   "danger"),
+                 ("5h48", 58, "Sleep",    "warn")],
+            ),
+            _athlete_card(
+                "Khaled Hussein", "SENIOR · Fencing", "danger",
+                [(23,  23, "Recovery", "danger"),
+                 ("20.3", 95, "Strain",   "danger"),
+                 ("4h32", 45, "Sleep",    "danger")],
+            ),
+        ], style={"display": "grid",
+                   "gridTemplateColumns": "repeat(3, 1fr)",
+                   "gap": "12px", "marginBottom": "12px"}),
+        code_block(
+            "from aspire_dash.v12_helpers import athlete_card_rings\n\n"
+            "athlete_card_rings(\n"
+            '    "Ali Turki Owaida", meta="SENIOR · Fencing", tone="good",\n'
+            "    rings=[\n"
+            '        {"value": 68,     "pct": 68, "label": "Recovery", "tone": "good"},\n'
+            '        {"value": "15.8", "pct": 75, "label": "Strain",   "tone": "aspire"},\n'
+            '        {"value": "7h12", "pct": 72, "label": "Sleep",    "tone": "good"},\n'
+            "    ],\n"
+            ")"
+        ),
     ], style={"padding": "24px"})
+
+
+# Local helper — imports v0.13's athlete_card_rings with the right shape
+def _athlete_card(name, meta, tone, rings):
+    from aspire_dash.v12_helpers import athlete_card_rings
+    return athlete_card_rings(
+        name, meta=meta, tone=tone,
+        rings=[{"value": v, "pct": p, "label": l, "tone": t}
+               for v, p, l, t in rings],
+    )

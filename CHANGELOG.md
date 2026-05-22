@@ -4,6 +4,48 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.18.0] — 2026-05-22
+
+### Added — `aspire_dash.anthropometric` (Ruwwad report patterns)
+
+Promoted from the Next.js DASH_Anthro app so any Aspire Dash app
+touching height / weight / skinfolds / somatotype can drop in the
+same visuals.
+
+- **`somatochart(points, title, height)`** — Heath-Carter triangle.
+  Vertices from Nandikolmath 2024 (DOI 10.34256/ijk2417). Multiple
+  points show a trajectory.
+- **`growth_chart(df, age_col, value_col, lms_table, percentiles)`** —
+  CDC / WHO LMS percentile-band growth chart with athlete trace.
+  Uses `metrics.percentile_to_value` (v0.16) for the bands.
+- **`athlete_snapshot_card(title, measurements)`** — Ruwwad attribute
+  table: label / value / unit per row, aspire-navy header.
+- **`limb_symmetry_bar(label, left, right)`** — L/R proportionality
+  strip with auto-coloured border (green ≥97%, amber ≥92%, red <92%).
+
+Anthro visuals can be Forge-polished in a future pass — this v0.18
+ships the data shapes + math correctly so apps can adopt immediately.
+
+### Added — `aspire_dash.sports` extensions (Fencing-reports patterns)
+
+Sport-agnostic so the same helpers cover Squash (PSA/ESF/ASF), TT
+(ITTF/WTT), Athletics (WA/Tila), Swimming (FINA/WAQ), Padel (FIP/WPT).
+
+- **`source_badge(label, federation)`** — coloured federation tag pill.
+  16 federations pre-mapped in `SOURCE_BADGE_COLORS` (extendable).
+- **`competition_card(event, date, location, result, placement,
+  federation, category, href)`** — career-feed card. Gold/silver/bronze
+  colour for placement 1/2/3.
+- **`world_map(df, country_col, value_col, highlight_country, scope)`** —
+  ISO-3 choropleth with Aspire-blue gradient + gold-outlined highlight
+  country.
+
+### Demo
+
+- `/v18` page renders every new helper with sample data.
+- `/whoop` page gains the v0.13 3-ring athlete card (also visible at
+  `/v12`) so it lives where users expect.
+
 ## [0.17.0] — 2026-05-22
 
 ### Added — `aspire_dash.plots` module (chart collection)
