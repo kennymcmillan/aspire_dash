@@ -4,6 +4,45 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.21.0] — 2026-05-22
+
+### Added — `aspire_dash.countries` module
+
+One-stop reference for 204 countries. Apps stop hand-rolling country
+dicts; everything resolves through one import.
+
+**Functions:**
+- `lookup(code)` — full record `{ioc, iso2, iso3, name, emoji, flag_url}`
+- `name(code)`, `emoji(code)`, `iso2(code)`, `iso3(code)`
+- `flag_url(code, size, fmt)` — flagcdn PNG (8 sizes) or SVG
+- `flag_img(code, size, shape, border)` — `html.Img` with shape
+  options (`rect` / `circle` / `square`)
+- `normalise(code_or_name)` — canonicalise any input → IOC
+- `search(name)` — fuzzy search by partial name
+- `ALL` — dict of every country, keyed by IOC
+
+**Data:**
+- 204 IOC codes mapped to ISO-2, ISO-3, full name, flag emoji
+- Re-exports from `sports.py`: `IOC_TO_ISO`, `ioc_to_iso`,
+  `ioc_to_iso3`, `normalize_country`, `country_flag`, `flag_with_name`
+
+### Changed — Showcase sidebar reorganised
+
+Nav was grouped by version (✨ v0.17 / v0.18 / v0.19 / v0.20).
+Re-grouped by purpose so users find things by what they DO, not when
+they shipped:
+
+- **Brand:** Brand assets, Countries & flags, Colour palette, Palette Lab
+- **Building blocks:** KPIs, Cards, Inputs, Feedback, Skeletons, Tables,
+  Print & export, Athlete cards + rings
+- **Athlete & performance:** Athlete, Anthropometric, Medical,
+  Firstbeat, Whoop, VALD, Nutrition, Adaptive trend
+- **Sport reporting:** Sports patterns
+- **Finance:** Budget, Financial reports
+- **Charts:** Charts & data, Plot collection, Viz components
+
+Logo & assets demo page kept under "Reference" as legacy.
+
 ## [0.20.0] — 2026-05-22
 
 ### Added — `aspire_dash.brand_logos` (Aspire + Qatar federation library)

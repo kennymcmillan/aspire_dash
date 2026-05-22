@@ -26,75 +26,81 @@ server = app.server
 
 setup_app(app)
 
-# Sidebar nav — grouped by aspire_dash subpackage.
+# Sidebar nav — grouped by what it IS, not when it shipped.
 nav = [
     # Overview
     {"label": "Component Showcase", "href": "/",
      "icon": "fa-solid fa-palette",      "section": "Overview"},
-    {"label": "✨ v0.12.0 New",   "href": "/v12",
-     "icon": "fa-solid fa-star"},
-    {"label": "Layouts (sidebar/topnav/quarto)", "href": "/layouts",
+    {"label": "Layouts",            "href": "/layouts",
      "icon": "fa-solid fa-square-poll-vertical"},
 
     # Brand foundations
-    {"label": "Colour Palette",     "href": "/colours",
-     "icon": "fa-solid fa-swatchbook",   "section": "Brand"},
+    {"label": "Brand assets",       "href": "/brand",
+     "icon": "fa-solid fa-flag",         "section": "Brand"},
+    {"label": "Countries & flags",  "href": "/countries",
+     "icon": "fa-solid fa-globe"},
+    {"label": "Colour palette",     "href": "/colours",
+     "icon": "fa-solid fa-swatchbook"},
     {"label": "Palette Lab",        "href": "/palette-lab",
      "icon": "fa-solid fa-flask"},
 
-    # Components — by submodule
+    # Building blocks (atomic UI)
     {"label": "KPIs",               "href": "/kpis",
-     "icon": "fa-solid fa-chart-simple", "section": "Components"},
-    {"label": "Cards & Layouts",    "href": "/cards",
+     "icon": "fa-solid fa-chart-simple", "section": "Building blocks"},
+    {"label": "Cards & layouts",    "href": "/cards",
      "icon": "fa-solid fa-table-columns"},
-    {"label": "Inputs & Filters",   "href": "/inputs",
+    {"label": "Inputs & filters",   "href": "/inputs",
      "icon": "fa-solid fa-sliders"},
-    {"label": "Feedback",           "href": "/feedback",
+    {"label": "Feedback & badges",  "href": "/feedback",
      "icon": "fa-solid fa-comment-dots"},
     {"label": "Skeletons",          "href": "/skeletons",
      "icon": "fa-solid fa-ghost"},
-    {"label": "Tables & Grids",     "href": "/tables",
+    {"label": "Tables & grids",     "href": "/tables",
      "icon": "fa-solid fa-table"},
-    {"label": "Print & Export",     "href": "/print-export",
+    {"label": "Print & export",     "href": "/print-export",
      "icon": "fa-solid fa-print"},
+    {"label": "Athlete cards + rings", "href": "/v12",
+     "icon": "fa-solid fa-id-card"},
 
-    # Domain components
+    # Athlete / performance domain
     {"label": "Athlete",            "href": "/athlete",
-     "icon": "fa-solid fa-user",         "section": "Domain"},
-    {"label": "Budget",             "href": "/budget",
-     "icon": "fa-solid fa-money-bill"},
-    {"label": "Sports",             "href": "/sports",
-     "icon": "fa-solid fa-medal"},
-    {"label": "Firstbeat",          "href": "/firstbeat",
-     "icon": "fa-solid fa-heart-pulse"},
+     "icon": "fa-solid fa-user",         "section": "Athlete & performance"},
+    {"label": "Anthropometric",     "href": "/v18",
+     "icon": "fa-solid fa-person-rays"},
     {"label": "Medical",            "href": "/medical",
      "icon": "fa-solid fa-stethoscope"},
-    {"label": "Financial reports",  "href": "/financial",
-     "icon": "fa-solid fa-money-bill-trend-up"},
-    {"label": "✨ v0.17 Plots",     "href": "/plots",
-     "icon": "fa-solid fa-chart-pie"},
-    {"label": "✨ v0.18 New",       "href": "/v18",
-     "icon": "fa-solid fa-person-rays"},
-    {"label": "✨ v0.19 New",       "href": "/v19",
-     "icon": "fa-solid fa-wand-magic-sparkles"},
-    {"label": "✨ v0.20 Brand",     "href": "/brand",
-     "icon": "fa-solid fa-flag"},
-
-    # Wearables / performance science
+    {"label": "Firstbeat",          "href": "/firstbeat",
+     "icon": "fa-solid fa-heart-pulse"},
     {"label": "Whoop",              "href": "/whoop",
-     "icon": "fa-solid fa-bed",          "section": "Wearables"},
+     "icon": "fa-solid fa-bed"},
     {"label": "VALD",               "href": "/vald",
      "icon": "fa-solid fa-person-running"},
+    {"label": "Nutrition",          "href": "/v19",
+     "icon": "fa-solid fa-apple-whole"},
+    {"label": "Adaptive trend",     "href": "/v19#adaptive_trend",
+     "icon": "fa-solid fa-chart-line"},
 
-    # Viz patterns
-    {"label": "Charts & Data",      "href": "/charts",
+    # Sport reporting
+    {"label": "Sports patterns",    "href": "/sports",
+     "icon": "fa-solid fa-medal",        "section": "Sport reporting"},
+
+    # Finance + admin
+    {"label": "Budget",             "href": "/budget",
+     "icon": "fa-solid fa-money-bill",   "section": "Finance"},
+    {"label": "Financial reports",  "href": "/financial",
+     "icon": "fa-solid fa-money-bill-trend-up"},
+
+    # Charts
+    {"label": "Charts & data",      "href": "/charts",
      "icon": "fa-solid fa-chart-bar",    "section": "Charts"},
-    {"label": "Viz Components",     "href": "/viz",
+    {"label": "Plot collection",    "href": "/plots",
+     "icon": "fa-solid fa-chart-pie"},
+    {"label": "Viz components",     "href": "/viz",
      "icon": "fa-solid fa-ring"},
 
-    # Brand assets
-    {"label": "Logo & Assets",      "href": "/assets",
-     "icon": "fa-solid fa-image",        "section": "Assets"},
+    # Legacy
+    {"label": "Logo & assets (legacy)", "href": "/assets",
+     "icon": "fa-solid fa-image",        "section": "Reference"},
 ]
 
 app.layout = page_layout(
