@@ -4,6 +4,31 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.31.0] — 2026-05-22
+
+### Added — `athlete_card_compact` (dense whoop-style variant)
+
+Sibling to `athlete_card_v2` (the premium 56 px photo + 3 rings card).
+The compact variant trades the hero photo for higher information
+density:
+
+- **40 px avatar** (was 56 px) — fits 4+ across in grids
+- **48 px rings** (was 58 px)
+- **Optional bottom stats row** — `[{label, value, status_dot}]`
+  e.g. `HRV / RHR / Deep` with optional coloured status dot
+
+Use case split:
+- `athlete_card_v2` — hero rows, 2-3 across, photo-prominent
+- `athlete_card_compact` — squad grids, 4+ across, more info per card
+
+Both re-exported from `aspire_dash.athlete` for easy import:
+```python
+from aspire_dash.athlete import athlete_card_v2, athlete_card_compact
+```
+
+Same universal `zone-{green,yellow,red,aspire,gold,neutral}` modifier
+support as v2 (avatar border tinted to match).
+
 ## [0.30.1] — 2026-05-22
 
 ### Fixed (CRITICAL — whoop rings lost per-metric colour)

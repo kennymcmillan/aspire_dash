@@ -2646,6 +2646,156 @@ body {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   v0.31 — athlete_card_compact (dense whoop-style, more info per card)
+   Pairs with v0.26 athlete_card_v2 (premium 56px photo + gradient bg).
+   Use compact for 4+ across grids (squad views); use v2 for hero rows.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.athlete-card-compact {
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--elev-1);
+    transition: transform var(--duration-normal) var(--ease-out),
+                box-shadow var(--duration-normal) var(--ease-out),
+                border-color var(--duration-fast) var(--ease-out);
+    will-change: transform;
+}
+.athlete-card-compact:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--elev-hover-card);
+    border-color: var(--aspire-200);
+}
+
+.athlete-card-compact .acc-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+}
+
+.athlete-card-compact .acc-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--slate-300);
+    background: var(--slate-100);
+    flex-shrink: 0;
+}
+.athlete-card-compact .acc-avatar-initials {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    background: linear-gradient(135deg, #0059b3, #004185);
+    border: 2px solid var(--aspire-600);
+    flex-shrink: 0;
+}
+
+.athlete-card-compact .acc-text   { flex: 1; min-width: 0; }
+.athlete-card-compact .acc-name   {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--slate-900);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.athlete-card-compact .acc-meta   {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--slate-500);
+    margin-top: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Avatar border picks up the zone tint */
+.athlete-card-compact.zone-green   .acc-avatar,
+.athlete-card-compact.zone-green   .acc-avatar-initials { border-color: var(--success); }
+.athlete-card-compact.zone-yellow  .acc-avatar,
+.athlete-card-compact.zone-yellow  .acc-avatar-initials { border-color: var(--warning); }
+.athlete-card-compact.zone-red     .acc-avatar,
+.athlete-card-compact.zone-red     .acc-avatar-initials { border-color: var(--danger); }
+.athlete-card-compact.zone-aspire  .acc-avatar,
+.athlete-card-compact.zone-aspire  .acc-avatar-initials { border-color: var(--aspire-600); }
+.athlete-card-compact.zone-gold    .acc-avatar,
+.athlete-card-compact.zone-gold    .acc-avatar-initials { border-color: var(--gold); }
+
+/* Rings row */
+.athlete-card-compact .acc-rings {
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 6px;
+}
+.athlete-card-compact .acc-ring-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+.athlete-card-compact .acc-ring-label {
+    font-size: 8.5px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: var(--slate-500);
+}
+
+/* Bottom stats row */
+.athlete-card-compact .acc-stats {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 14px;
+    border-top: 1px solid rgba(15, 23, 42, 0.05);
+    background: var(--slate-50);
+    gap: 8px;
+}
+.athlete-card-compact .acc-stat-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+.athlete-card-compact .acc-stat-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: var(--slate-500);
+}
+.athlete-card-compact .acc-stat-value {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--slate-800);
+    font-variant-numeric: tabular-nums;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.athlete-card-compact .acc-stat-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
    v0.26 — athlete_card_v2 (Whoop-style premium card)
    Zone-coloured gradient bg + larger photo (or initials fallback) + 3 rings.
    Usage:

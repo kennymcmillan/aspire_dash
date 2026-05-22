@@ -34,7 +34,7 @@ def _initials(name: str | None) -> str:
 
 # v0.29 — re-export athlete_card_v2 from v12_helpers under aspire_dash.athlete
 # so it lives where callers expect ("athlete things go in athlete module").
-from .v12_helpers import athlete_card_v2     # noqa: F401  (public re-export)
+from .v12_helpers import athlete_card_v2, athlete_card_compact     # noqa: F401  (public re-exports)
 
 
 def athlete_avatar(

@@ -636,3 +636,114 @@ def athlete_card_v2(
                        style={"textDecoration": "none", "color": "inherit",
                               "display": "block"})
     return card
+
+
+# ── v0.31 — athlete_card_compact (legacy whoop-style dense layout) ──────────
+
+def athlete_card_compact(
+    name: str,
+    rings: list[dict],
+    stats: list[dict] | None = None,
+    *,
+    zone: str = "neutral",
+    photo_url: str | None = None,
+    meta: str = "",
+    href: str | None = None,
+):
+    """Compact athlete card — denser layout, more info per card than v2.
+
+    Layout (top → bottom):
+      - Header: 40 px avatar (photo OR initials) + name (+ optional meta)
+      - Rings row: 3 small rings (48 px), inline
+      - Stats row (optional): list of `{label, value, color, status_dot}`
+        e.g. ``[{"label": "HRV", "value": "62 ms", "color": "#1876ab"},
+                 {"label": "RHR", "value": "52 bpm", "status_dot": "green"}]``
+
+    Use this for grids where you want 4+ cards across (squad views,
+    sport rosters). For 2-3 across with hero photo, use `athlete_card_v2`.
+
+    `zone` — green / yellow / red / aspire / gold / neutral → tints the
+    card bg with the universal `.zone-*` modifier (v0.29).
+
+    >>> athlete_card_compact(
+    ...     "Ali Owaida", meta="Senior · Fencing", zone="green",
+    ...     photo_url="https://...",
+    ...     rings=[
+    ...         {"value": 68, "pct": 68, "label": "Recovery", "color": "#16a34a"},
+    ...         {"value": "15.8", "pct": 75, "label": "Strain", "color": "#004185"},
+    ...         {"value": "7h12", "pct": 72, "label": "Sleep", "color": "#16a34a"},
+    ...     ],
+    ...     stats=[
+    ...         {"label": "HRV", "value": "62 ms"},
+    ...         {"label": "RHR", "value": "52 bpm", "status_dot": "green"},
+    ...         {"label": "Deep", "value": "98 m"},
+    ...     ],
+    ... )
+    """
+    # Avatar — 40 px photo or initials
+    if photo_url:
+        avatar = html.Img(
+            src=photo_url, alt=name,
+            className="acc-avatar",
+        )
+    else:
+        avatar = html.Div(_initials(name), className="acc-avatar-initials")
+
+    header = html.Div([
+        avatar,
+        html.Div([
+            html.Div(name, className="acc-name"),
+            html.Div(meta, className="acc-meta") if meta else None,
+        ], className="acc-text"),
+    ], className="acc-header")
+
+    # Rings row — smaller (48 px) than v2's 58 px for density
+    ring_blocks = []
+    for r in rings:
+        ring_blocks.append(html.Div([
+            metric_ring(
+                r["value"], r["pct"],
+                label="",
+                color=r.get("color"),
+                tone=r.get("tone", "aspire"),
+                size=48,
+            ),
+            html.Div(r.get("label", ""), className="acc-ring-label"),
+        ], className="acc-ring-block"))
+    ring_row = html.Div(ring_blocks, className="acc-rings")
+
+    # Optional stats row
+    stat_row = None
+    if stats:
+        stat_dot_colors = {
+            "green":  "#16a34a",
+            "yellow": "#d97706",
+            "red":    "#dc2626",
+            "aspire": "#004185",
+        }
+        stat_items = []
+        for s in stats:
+            dot = None
+            if s.get("status_dot"):
+                dot = html.Span(className="acc-stat-dot",
+                                  style={"backgroundColor":
+                                          stat_dot_colors.get(s["status_dot"], "#94a3b8")})
+            stat_items.append(html.Div([
+                html.Span(s.get("label", ""), className="acc-stat-label"),
+                html.Span([dot, s.get("value", "")] if dot else s.get("value", ""),
+                            className="acc-stat-value"),
+            ], className="acc-stat-item"))
+        stat_row = html.Div(stat_items, className="acc-stats")
+
+    children = [header, ring_row]
+    if stat_row is not None:
+        children.append(stat_row)
+
+    card = html.Div(children,
+                     className=f"athlete-card-compact zone-{zone}")
+
+    if href:
+        return html.A(card, href=href,
+                       style={"textDecoration": "none", "color": "inherit",
+                              "display": "block"})
+    return card
