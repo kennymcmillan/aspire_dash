@@ -4,6 +4,51 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.35.0] — 2026-05-22
+
+### Added — sports-science module + Freefrontend extras
+
+**New `aspire_dash.sports_science` module — 5 domain-specific charts:**
+
+- **`force_velocity_scatter(samples, title, height, show_pmax)`**
+  VALD ForceDecks FV profile — scatter + best-fit linear regression +
+  Pmax star marker. Samozino/Morin approach. Aspire-blue points, gold
+  Pmax star, dashed FV line.
+
+- **`acwr_chart(dates, daily_loads, acute_days=7, chronic_days=28)`**
+  Full rolling Acute:Chronic ratio line with shaded zones — green
+  sweet-spot (0.8-1.3), amber caution (1.3-1.5), red danger (1.5+).
+  Reference dot at 1.0.
+
+- **`hr_zone_distribution(sessions, mode='session'|'season')`**
+  Z1-Z5 stacked bar — single bar per session OR aggregated 'Season'
+  bar. Zone colours: slate / green / gold / amber / red.
+
+- **`bullet_chart(value, target, ranges, label, sub, unit)`**
+  Tactical bullet chart — Plotly Indicator with bar + qualitative-
+  range bg + target marker line. Better than progress bars for "actual
+  vs goal" + delta from reference.
+
+- **`session_load_bubble(sessions)`**
+  sRPE × duration training-load map. Bubble size = total session-RPE
+  load; colour by RPE band (green ≤4, gold 5-7, red ≥8). Reference
+  bands per zone.
+
+**Freefrontend extras in `aspire_dash.v12_helpers`:**
+
+- **`radial_multi_track(metrics, size)`** — Apex-style concentric ring
+  chart, 3+ metrics stacked outer→inner with gradient strokes + legend
+  with values aligned right.
+
+- **`add_pb_markers(fig, markers)`** — Apex marker-on-line annotation
+  helper. Adds gold star markers + dashed dropline + label text per
+  milestone, no legend clutter.
+
+- **`glass_card(children, padding)`** — frosted-glass surface
+  (Tailwind glass-morphism). For "current session" hero panels on
+  coloured page backgrounds. `backdrop-filter: blur(12px)` + soft
+  shadow + 65% white bg.
+
 ## [0.34.0] — 2026-05-22
 
 ### Added — 3 more Tremor-borrowed patterns

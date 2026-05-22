@@ -1188,3 +1188,125 @@ def stat_card_mega(
         html.Div(sub, className="scm-sub") if sub else None,
         bottom_row,
     ], className=f"stat-card-mega scm-accent-{accent}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# v0.35 — Freefrontend extras (radial multi-track + PB markers + glass card)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def radial_multi_track(
+    metrics: list[dict],
+    *,
+    size: int = 220,
+):
+    """Apex-style concentric multi-track ring chart.
+
+    Three (or more) metrics stacked as concentric rings — outer, middle,
+    inner — each with its own goal-attainment %. Tremor/Apex pattern that
+    packs multiple progress signals into one tile.
+
+    `metrics` = list of `{value, pct, label, color}` dicts (outer → inner).
+
+    >>> radial_multi_track([
+    ...     {"value": "68%", "pct": 68, "label": "Recovery", "color": "#16a34a"},
+    ...     {"value": "75%", "pct": 75, "label": "Strain",   "color": "#004185"},
+    ...     {"value": "72%", "pct": 72, "label": "Sleep",    "color": "#fbb800"},
+    ... ])
+    """
+    import math, base64
+
+    cx = size / 2
+    rings = []
+    legend = []
+    n = len(metrics)
+
+    # Outer radius for outermost ring; each inner ring is ~10 px smaller
+    for i, m in enumerate(metrics):
+        r = (size / 2) - 14 - (i * 18)
+        sw = 10
+        pct = max(0, min(100, m.get("pct", 0)))
+        circ = 2 * math.pi * r
+        dash_offset = circ - (pct / 100) * circ
+        color = m.get("color", "#004185")
+        rings.append(
+            f'<defs><linearGradient id="rmt-g{i}" x1="0%" y1="0%" x2="100%" y2="100%">'
+            f'<stop offset="0%" stop-color="{color}" stop-opacity="0.85"/>'
+            f'<stop offset="100%" stop-color="{color}" stop-opacity="1"/>'
+            f'</linearGradient></defs>'
+            f'<circle cx="{cx}" cy="{cx}" r="{r}" fill="none" '
+            f'stroke="#e2e8f0" stroke-width="{sw}"/>'
+            f'<circle cx="{cx}" cy="{cx}" r="{r}" fill="none" '
+            f'stroke="url(#rmt-g{i})" stroke-width="{sw}" '
+            f'stroke-dasharray="{circ:.2f}" stroke-dashoffset="{dash_offset:.2f}" '
+            f'stroke-linecap="round" '
+            f'transform="rotate(-90 {cx} {cx})"/>'
+        )
+        legend.append(html.Div([
+            html.Span(className="rmt-swatch",
+                        style={"backgroundColor": color}),
+            html.Span(m.get("label", ""), className="rmt-legend-label"),
+            html.Span(m.get("value", ""), className="rmt-legend-value"),
+        ], className="rmt-legend-item"))
+
+    svg_inner = (
+        f'<svg width="{size}" height="{size}" '
+        f'xmlns="http://www.w3.org/2000/svg">'
+        + "".join(rings) +
+        '</svg>'
+    )
+    svg_b64 = base64.b64encode(svg_inner.encode("utf-8")).decode("ascii")
+
+    return html.Div([
+        html.Img(src=f"data:image/svg+xml;base64,{svg_b64}",
+                  style={"width": f"{size}px", "height": f"{size}px"},
+                  className="rmt-svg"),
+        html.Div(legend, className="rmt-legend"),
+    ], className="radial-multi-track")
+
+
+def add_pb_markers(fig, markers: list[dict]):
+    """Add personal-best (or any milestone) markers to an existing Plotly fig.
+
+    `markers` = list of `{x, y, label, color?}`. Each renders as a gold
+    star marker + dashed annotation line + label text above. Apex-style
+    "marker on line" annotation that doesn't clutter the legend.
+
+    >>> add_pb_markers(fig, [
+    ...     {"x": "2026-02-14", "y": 13.42, "label": "PB"},
+    ...     {"x": "2026-05-22", "y": 13.18, "label": "Season Best"},
+    ... ])
+    """
+    import plotly.graph_objects as go
+    from .theme import GOLD, SLATE
+    for m in markers:
+        color = m.get("color", GOLD)
+        fig.add_trace(go.Scatter(
+            x=[m["x"]], y=[m["y"]], mode="markers+text",
+            marker=dict(symbol="star", size=16, color=color,
+                         line=dict(color="white", width=2)),
+            text=[m.get("label", "")], textposition="top center",
+            textfont=dict(size=11, color=SLATE["800"], weight=600),
+            hovertemplate=f"<b>{m.get('label','')}</b><br>%{{x}}<br>%{{y}}<extra></extra>",
+            showlegend=False,
+        ))
+        # vertical dashed line down to the x-axis
+        fig.add_shape(
+            type="line", x0=m["x"], x1=m["x"], y0=0, y1=m["y"],
+            line=dict(color=color, dash="dot", width=1),
+            layer="below",
+        )
+    return fig
+
+
+def glass_card(children, *, padding: str = "20px"):
+    """Frosted-glass surface (Tailwind glass-morphism pattern).
+
+    Use for hero panels — "current session" overview, top-of-page
+    summary against a coloured page bg. Renders semi-transparent
+    background + backdrop-filter blur + soft border.
+
+    >>> glass_card([html.H2("Current Session"), html.Div(...)])
+    """
+    return html.Div(children, className="glass-card",
+                     style={"padding": padding})

@@ -3142,6 +3142,70 @@ body {
     flex: 1; min-width: 0;
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v0.35 — Freefrontend extras
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── radial_multi_track — concentric rings + legend ── */
+.radial-multi-track {
+    display: flex; align-items: center; gap: 16px;
+    background: linear-gradient(180deg, white 0%, var(--slate-50) 100%);
+    border: 1px solid var(--slate-200);
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: var(--elev-1);
+    transition: transform var(--duration-normal) var(--ease-out),
+                box-shadow var(--duration-normal) var(--ease-out);
+}
+.radial-multi-track:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--elev-hover-card);
+}
+.radial-multi-track .rmt-svg { flex-shrink: 0; }
+.radial-multi-track .rmt-legend {
+    display: flex; flex-direction: column; gap: 6px;
+    flex: 1; min-width: 0;
+}
+.radial-multi-track .rmt-legend-item {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px;
+}
+.radial-multi-track .rmt-swatch {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+}
+.radial-multi-track .rmt-legend-label {
+    font-weight: 600; color: var(--slate-700);
+}
+.radial-multi-track .rmt-legend-value {
+    margin-left: auto;
+    font-weight: 700; color: var(--slate-900);
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* ── glass_card — frosted-glass surface ── */
+.glass-card {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.40);
+    border-radius: 16px;
+    box-shadow:
+        0 8px 32px rgba(15, 23, 42, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.50);
+    transition: transform var(--duration-normal) var(--ease-out),
+                box-shadow var(--duration-normal) var(--ease-out);
+}
+.glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 12px 40px rgba(15, 23, 42, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.50);
+}
+
 /* Photo border STAYS the zone colour — don't override it on target.
    Recovery status is more important to see at-a-glance than target flag. */
 
