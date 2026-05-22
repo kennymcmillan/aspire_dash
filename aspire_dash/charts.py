@@ -11,7 +11,7 @@ Default styling tightened per the 2026-05-22 design audit:
 import plotly.graph_objects as go
 import plotly.io as pio
 from .theme import (
-    CHART_COLORS, FONT_DATA, SLATE,
+    CHART_COLORS, FONT_DATA, SLATE, ASPIRE,
     SEQUENTIAL_BLUE, SEQUENTIAL_GOLD, SEQUENTIAL_RED,
     SEQUENTIAL_GREEN, DIVERGING_RED_GREEN,
 )   # FONT_DATA = Inter (brand rule: tabular/numeric)
@@ -37,7 +37,11 @@ ASPIRE_VARIANCE_SCALE = _scale(DIVERGING_RED_GREEN) # bad ← neutral → good
 __all__ = ["GRAPH_CONFIG", "apply_template",
             "ASPIRE_BLUE_SCALE", "ASPIRE_GOLD_SCALE",
             "ASPIRE_HEAT_SCALE", "ASPIRE_RECOVERY_SCALE",
-            "ASPIRE_VARIANCE_SCALE"]
+            "ASPIRE_VARIANCE_SCALE",
+            # v0.28 chart-polish helpers
+            "add_reference_line", "aspire_area_fill",
+            "aspire_bar_gradient", "add_drop_shadow_trace",
+            "aspire_hover_template"]
 
 # ── Graph config (hide modebar by default) ───────────────────────────────────
 GRAPH_CONFIG = {
@@ -82,11 +86,23 @@ _aspire_template.layout = go.Layout(
         bgcolor="rgba(255,255,255,0)",
         borderwidth=0,
     ),
+    # v0.28 — premium hover labels (slate-700 bg + white text + branded
+    # radius). Replaces stock Plotly white-on-white tooltips. Matches the
+    # Linear / Stripe / Whoop tooltip feel.
     hoverlabel=dict(
-        bgcolor="white",
+        bgcolor=SLATE["800"],
         font_size=12,
         font_family=FONT_DATA,
-        bordercolor=SLATE["200"],
+        font_color="white",
+        bordercolor=SLATE["900"],
+        align="left",
+    ),
+    # v0.28 — branded modebar (when shown). Default GRAPH_CONFIG hides it,
+    # but apps that opt back in get Aspire-blue active icons.
+    modebar=dict(
+        bgcolor="rgba(255,255,255,0)",
+        color=SLATE["400"],
+        activecolor=ASPIRE["600"],
     ),
 )
 
@@ -99,3 +115,149 @@ def apply_template(fig):
     """Apply the Aspire template to an existing figure."""
     fig.update_layout(template="aspire")
     return fig
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# v0.28 — Branded chart polish helpers (lift every figure portfolio-wide)
+# All Aspire-tokened so every app inherits the same chart vocabulary.
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+def _hex_to_rgba(hex_, alpha):
+    h = hex_.lstrip("#")
+    if len(h) == 3:
+        h = "".join(c * 2 for c in h)
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    return f"rgba({r},{g},{b},{alpha})"
+
+
+# ── 1. Reference lines (mean / target / threshold) ──────────────────────────
+
+_REF_STYLES = {
+    "mean":      {"color": SLATE["500"], "dash": "dot",     "width": 1.5},
+    "target":    {"color": ASPIRE["600"], "dash": "dash",   "width": 1.5},
+    "threshold": {"color": "#dc2626",     "dash": "dashdot","width": 1.5},
+    "baseline":  {"color": SLATE["400"], "dash": "solid",   "width": 1},
+}
+
+
+def add_reference_line(fig, value, *, kind: str = "mean", label: str | None = None,
+                        annotation_position: str = "top right"):
+    """Add a horizontal reference line with branded styling.
+
+    `kind` ∈ {'mean', 'target', 'threshold', 'baseline'} — picks the
+    colour/dash preset so every chart's reference lines look identical.
+    Pass `label` to annotate the line.
+
+    >>> add_reference_line(fig, value=df['load'].mean(), kind='mean', label='Avg')
+    >>> add_reference_line(fig, value=14.0, kind='target', label='Target')
+    >>> add_reference_line(fig, value=21.0, kind='threshold', label='Risk')
+    """
+    style = _REF_STYLES.get(kind, _REF_STYLES["mean"])
+    annotation = None
+    if label:
+        annotation = dict(
+            text=label,
+            font=dict(size=10, color=style["color"], family=FONT_DATA),
+            bgcolor="rgba(255,255,255,0.85)", bordercolor=style["color"],
+            borderwidth=1, borderpad=3,
+        )
+    fig.add_hline(
+        y=value,
+        line=dict(color=style["color"], dash=style["dash"], width=style["width"]),
+        annotation=annotation,
+        annotation_position=annotation_position,
+    )
+    return fig
+
+
+# ── 2. Gradient fills for area / bar charts ─────────────────────────────────
+# Matches the .athlete-card-v2 zone-gradient feel — top-tinted → fade
+
+def aspire_area_fill(trace, color: str = None, alpha_top: float = 0.30,
+                      alpha_bottom: float = 0.02):
+    """Apply an Aspire-branded vertical gradient fill to a Scatter trace.
+
+    Pass `color` as a hex (defaults to Aspire-600). Configures Plotly's
+    `fill='tozeroy'` + `fillcolor=<rgba>` for premium area-chart styling.
+
+    >>> fig.add_trace(go.Scatter(x=df.date, y=df.value, mode='lines',
+    ...                          line=dict(color=ASPIRE['600'], width=2)))
+    >>> aspire_area_fill(fig.data[-1])
+    """
+    color = color or ASPIRE["600"]
+    trace.update(
+        fill="tozeroy",
+        fillcolor=_hex_to_rgba(color, alpha_top),
+    )
+    return trace
+
+
+def aspire_bar_gradient(color: str = None) -> dict:
+    """Return a `marker=` dict for bar/waterfall traces with Aspire
+    gradient fill + slate-tinted edge.
+
+    >>> fig.add_trace(go.Bar(x=..., y=..., **aspire_bar_gradient()))
+    """
+    color = color or ASPIRE["600"]
+    return dict(
+        marker=dict(
+            color=color,
+            line=dict(color=_hex_to_rgba(color, 0.4), width=0),
+        ),
+        opacity=0.92,
+    )
+
+
+# ── 3. Drop-shadow trace (slate-tinted depth under main line) ───────────────
+
+def add_drop_shadow_trace(fig, trace_idx: int = 0, *, offset: float = 0.5):
+    """Insert a slate-tinted shadow trace UNDER an existing line trace.
+
+    Adds the same line shape, shifted down `offset` (chart Y units), at
+    8% slate alpha — subtle depth like Linear charts.
+
+    Note: Plotly's `Figure.data` is immutable-list-shaped (can only
+    reorder existing traces, not insert new ones). So we use
+    `fig.add_trace()` then re-order via `data` to put shadow first.
+
+    >>> add_drop_shadow_trace(fig, trace_idx=0)
+    """
+    if trace_idx >= len(fig.data):
+        return fig
+    src = fig.data[trace_idx]
+    if not hasattr(src, "y") or src.y is None:
+        return fig
+    shadow_y = [(v - offset) if v is not None else None for v in src.y]
+    import plotly.graph_objects as _go
+    fig.add_trace(_go.Scatter(
+        x=src.x, y=shadow_y, mode="lines",
+        line=dict(color=_hex_to_rgba(SLATE["800"], 0.08), width=3),
+        showlegend=False, hoverinfo="skip",
+        name="__shadow__",
+    ))
+    # Reorder so the shadow draws first (under the source)
+    n = len(fig.data)
+    order = list(range(n - 1))
+    order.insert(trace_idx, n - 1)   # shadow at trace_idx position
+    fig.data = tuple(fig.data[i] for i in order)
+    return fig
+
+
+# ── 4. Branded hover template ───────────────────────────────────────────────
+
+def aspire_hover_template(unit: str = "", title_key: str = "x",
+                           value_key: str = "y", precision: int = 1) -> str:
+    """Return a Plotly hovertemplate string with branded styling.
+
+    Uses HTML so the slate-700 hoverlabel bg renders proper line breaks
+    + bold metric name. Pass to `hovertemplate=` on any trace.
+
+    >>> fig.add_trace(go.Scatter(x=..., y=...,
+    ...     hovertemplate=aspire_hover_template(unit='ms')))
+    """
+    return (
+        f"<b>%{{{title_key}}}</b><br>"
+        f"%{{{value_key}:.{precision}f}}{unit}"
+        "<extra></extra>"
+    )

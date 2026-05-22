@@ -4,6 +4,49 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.28.0] — 2026-05-22
+
+### Added — Chart polish (lifts every figure portfolio-wide)
+
+**Premium hover labels.** Aspire template now ships with
+**slate-800 bg + white text + slate-900 border** (was white/grey).
+Linear/Stripe tooltip feel. Replaces stock Plotly white-on-white.
+Auto-applied to every chart in every app on next deploy.
+
+**Branded modebar.** When apps opt to show the modebar, the active
+icon is now Aspire-blue (was default blue).
+
+**4 new chart-polish helpers in `aspire_dash.charts`:**
+
+- **`add_reference_line(fig, value, kind, label)`** — branded
+  horizontal reference lines. `kind` ∈ `mean / target / threshold /
+  baseline` picks the colour/dash preset so every chart's reference
+  lines look identical. Mean = slate dotted, Target = aspire dashed,
+  Threshold = red dashdot.
+
+- **`aspire_area_fill(trace, color, alpha_top)`** — vertical gradient
+  fill for line/area charts. Matches the `.athlete-card-v2` zone-
+  gradient feel — top-tinted → fade to invisible at zero. Premium
+  Linear/Whoop area-chart styling without per-app math.
+
+- **`aspire_bar_gradient(color)`** — `marker=` dict for bar/waterfall
+  traces. Aspire colour + slate-tinted edge + 0.92 opacity for
+  premium bar styling.
+
+- **`add_drop_shadow_trace(fig, trace_idx, offset)`** — adds a
+  slate-tinted shadow line UNDER an existing trace for subtle depth.
+  Linear-style chart elevation.
+
+- **`aspire_hover_template(unit, precision)`** — HTML hovertemplate
+  string for the slate-800 bg. Bold title + value + unit on its own
+  line. Drop into any trace's `hovertemplate=`.
+
+### Migration
+
+Hover labels + modebar auto-apply via the Aspire Plotly template (no
+consumer code change). Reference lines / gradient fills / drop shadows
+are opt-in — add them where they lift a specific chart.
+
 ## [0.27.0] — 2026-05-22
 
 ### Added — `EXTERNAL_SCRIPTS` (Tailwind CDN, opt-in)
