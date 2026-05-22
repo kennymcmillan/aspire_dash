@@ -154,6 +154,7 @@ Avoid one-off `.kpi-tile-budget` — use composable modifiers.
 4. **Always sync `demo/assets/00_aspire_base.css`** after editing the source — `setup_app()` only copies once.
 5. **Always pin to a SHA in consumer apps** ([[feedback_rsconnect_use_app_id]]).
 6. **Test the sweep + pytest** before pushing.
+7. **For any Dash router callback** that dispatches on `dcc.Location.pathname` against a bare-key dict (e.g. `{"/athletes": …, "/medical": …}`), use `from aspire_dash import normalised_path` and call `normalised_path(pathname)`. Strips the Connect `/content/<GUID>/` prefix so dispatch matches. Bare paths work locally (prefix is "/") but on Connect every click falls back to the default page without this. Same root cause as the v0.10.1 sidebar bug. Documented in [[feedback_connect_relative_path_links]].
 
 ## Quick reference paths
 
