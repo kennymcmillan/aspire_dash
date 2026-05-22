@@ -1706,6 +1706,9 @@ html.dark .period-pills label:has(input:checked) {
 .status-pill.is-solid.status-warning { background: #d97706; color: white; }
 .status-pill.is-solid.status-danger  { background: #dc2626; color: white; }
 .status-pill.is-solid.status-info    { background: var(--aspire-600); color: white; }
+/* Hide pills that have no content — lets callbacks emit "" to dismiss
+   the pill without an extra style toggle. */
+.status-pill:empty { display: none; }
 
 
 /* ── 4. Athlete mini card (Whoop-style) ── */
