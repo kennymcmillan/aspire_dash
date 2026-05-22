@@ -4,6 +4,30 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.13.0] — 2026-05-22
+
+### Added — Whoop rings promoted from whoop_coach_dashboard
+
+- **`metric_ring(value, pct, label, tone, size, unit)`** in v12_helpers.
+  SVG donut with value-in-centre + percent arc. Six tones (good / warn
+  / danger / aspire / secondary / gold). Replaces the hand-rolled
+  `recovery_ring` / `value_ring` in whoop_coach_dashboard/components/
+  rings.py (~140 LOC of duplicated SVG math).
+
+- **`athlete_card_rings(name, rings, photo_url, meta, tone, href)`** —
+  Whoop-style card with photo + name + up to 4 inline metric rings.
+  `rings=[{value, pct, label, tone}]` — text values OR string values
+  ("7h12") supported. Pairs with `metric_ring` internally. Direct
+  port of whoop_coach_dashboard's components/athlete_card.py — the
+  one Kenny called out as wanting saved upstream.
+
+### Demo
+
+- `/v12` page gains a new "11 · metric_ring + athlete_card_rings"
+  section showing 4 standalone rings + 3 athlete cards (good / warn /
+  danger tones) with the same Mohammed/Khaled/Ali sample data the
+  whoop_coach_dashboard uses.
+
 ## [0.12.4] — 2026-05-22
 
 ### Fixed (CRITICAL — setup_app crashed on Connect)

@@ -9,7 +9,7 @@ from dash import html
 from aspire_dash.v12_helpers import (
     kpi_tile_v2, date_toolbar, status_pill_v2, athlete_card,
     aspire_grid_v2, aspire_loading, aspire_empty, sparkline_tile,
-    injury_card, asymmetry_bar,
+    injury_card, asymmetry_bar, metric_ring, athlete_card_rings,
 )
 
 from ._shared import section, example, code_block
@@ -233,6 +233,63 @@ def layout():
             "injury_card('L Hamstring', severity='severe', status='Out 4 wk',\n"
             "            detail='Grade II strain, mid-belly.',\n"
             "            onset_date='2026-05-15', days_out=7)"
+        ),
+
+        # 11. Metric ring + athlete_card_rings
+        section("11 · metric_ring + athlete_card_rings — Whoop-style"),
+        html.Div([
+            metric_ring(68, pct=68, label="Recovery", tone="good", size=100),
+            metric_ring("15.8", pct=75, label="Strain", tone="aspire", size=100),
+            metric_ring("7h12", pct=72, label="Sleep", tone="good", size=100),
+            metric_ring(38, pct=38, label="HRV", tone="warn", size=100, unit="ms"),
+        ], style={"display": "flex", "gap": "18px", "marginBottom": "16px"}),
+        code_block(
+            "from aspire_dash.v12_helpers import metric_ring\n\n"
+            'metric_ring(68, pct=68, label="Recovery", tone="good")\n'
+            'metric_ring("7h12", pct=72, label="Sleep", tone="good")\n'
+            '# tone: good | warn | danger | aspire | secondary | gold'
+        ),
+
+        html.Div([
+            athlete_card_rings(
+                "Ali Turki Owaida", meta="SENIOR · Fencing", tone="good",
+                rings=[
+                    {"value": 68,     "pct": 68, "label": "Recovery", "tone": "good"},
+                    {"value": "15.8", "pct": 75, "label": "Strain",   "tone": "aspire"},
+                    {"value": "7h12", "pct": 72, "label": "Sleep",    "tone": "good"},
+                ],
+            ),
+            athlete_card_rings(
+                "Mohammed AlHazaa", meta="SENIOR · Fencing", tone="warn",
+                rings=[
+                    {"value": 42,     "pct": 42, "label": "Recovery", "tone": "warn"},
+                    {"value": "18.6", "pct": 88, "label": "Strain",   "tone": "danger"},
+                    {"value": "5h48", "pct": 58, "label": "Sleep",    "tone": "warn"},
+                ],
+            ),
+            athlete_card_rings(
+                "Khaled Hussein", meta="SENIOR · Fencing", tone="danger",
+                rings=[
+                    {"value": 23,     "pct": 23, "label": "Recovery", "tone": "danger"},
+                    {"value": "20.3", "pct": 95, "label": "Strain",   "tone": "danger"},
+                    {"value": "4h32", "pct": 45, "label": "Sleep",    "tone": "danger"},
+                ],
+            ),
+        ], style={"display": "grid",
+                   "gridTemplateColumns": "repeat(3, 1fr)",
+                   "gap": "12px", "marginBottom": "12px"}),
+        code_block(
+            "from aspire_dash.v12_helpers import athlete_card_rings\n\n"
+            "athlete_card_rings(\n"
+            '    "Ali Turki Owaida",\n'
+            '    meta="SENIOR · Fencing",\n'
+            '    tone="good",\n'
+            '    rings=[\n'
+            '        {"value": 68,     "pct": 68, "label": "Recovery", "tone": "good"},\n'
+            '        {"value": "15.8", "pct": 75, "label": "Strain",   "tone": "aspire"},\n'
+            '        {"value": "7h12", "pct": 72, "label": "Sleep",    "tone": "good"},\n'
+            "    ],\n"
+            ")"
         ),
 
         # 10. Asymmetry bar

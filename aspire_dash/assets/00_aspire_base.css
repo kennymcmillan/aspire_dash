@@ -2021,3 +2021,13 @@ html.dark .period-pills label:has(input:checked) {
 }
 .asymmetry-bar .asym-left  { background: #0369a1; justify-content: flex-start; padding-left: 10px; }
 .asymmetry-bar .asym-right { background: #dc2626; justify-content: flex-end;   padding-right: 10px; }
+
+
+/* ── 11. Metric ring (Whoop-style SVG donut) ──
+   Inside athlete_card_rings, the inner dcc.Markdown that renders the SVG
+   has a default <p> wrapper that adds 16 px of bottom margin. Reset it
+   so the SVG sits flush. */
+.athlete-mini-card .amc-metrics .markdown-text p,
+.athlete-mini-card div[style*="position: relative"] .markdown-text p {
+    margin: 0;
+}

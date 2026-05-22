@@ -338,6 +338,157 @@ def injury_card(
     ], className=f"injury-card severity-{severity}")
 
 
+# ── 11. Metric ring (Whoop-style SVG donut) ────────────────────────────────
+
+_TONE_COLOURS = {
+    "good":      ("#16a34a", "#166534"),   # stroke, text
+    "warn":      ("#f59e0b", "#854d0e"),
+    "danger":    ("#dc2626", "#991b1b"),
+    "aspire":    ("#004185", "#003566"),
+    "secondary": ("#1876ab", "#0c4a6e"),
+    "gold":      ("#fbb800", "#92400e"),
+}
+
+
+def metric_ring(
+    value,
+    pct: float,
+    *,
+    label: str = "",
+    tone: str = "aspire",
+    size: int = 80,
+    unit: str = "",
+):
+    """SVG ring with value in the centre + percent arc on the ring.
+
+    Whoop-style. Pass the displayed `value` (any string) + the arc `pct`
+    (0-100) separately — they don't have to match (e.g. value="7h12"
+    while pct=72 if 7h12 of 10h goal).
+
+    >>> metric_ring(68, pct=68, label="Recovery", tone="good")
+    >>> metric_ring("7h12", pct=72, label="Sleep", tone="aspire")
+    """
+    import math
+    stroke, text_color = _TONE_COLOURS.get(tone, _TONE_COLOURS["aspire"])
+    pct = max(0, min(100, pct or 0))
+    sw = 6 if size <= 80 else 8
+    r = (size - sw) / 2
+    circ = 2 * math.pi * r
+    dash_offset = circ - (pct / 100) * circ
+    cx = size / 2
+
+    fs_value = "22px" if size >= 100 else "16px" if size >= 70 else "12px"
+    fs_label = "10px"
+
+    svg_inner = (
+        f'<svg width="{size}" height="{size}" '
+        f'style="transform:rotate(-90deg)" xmlns="http://www.w3.org/2000/svg">'
+        f'<circle cx="{cx}" cy="{cx}" r="{r}" fill="none" '
+        f'stroke="#e2e8f0" stroke-width="{sw}"/>'
+        f'<circle cx="{cx}" cy="{cx}" r="{r}" fill="none" '
+        f'stroke="{stroke}" stroke-width="{sw}" '
+        f'stroke-dasharray="{circ:.2f}" stroke-dashoffset="{dash_offset:.2f}" '
+        f'stroke-linecap="round" '
+        f'style="transition:stroke-dashoffset 0.5s ease-out"/>'
+        f'</svg>'
+    )
+
+    return html.Div([
+        html.Div([
+            # SVG ring rendered via dangerously_allow_html-style approach
+            # using DangerouslySetInnerHTML — Dash exposes this via
+            # iframe-srcdoc; instead use html.Div with dash_dangerously_set
+            # ... simpler: emit via dcc.Markdown which permits raw HTML
+            # with dangerously_allow_html=True.
+            dcc.Markdown(svg_inner, dangerously_allow_html=True,
+                          style={"position": "absolute", "inset": "0"}),
+            html.Div(
+                html.Span(f"{value}{unit}", style={
+                    "fontWeight": "700", "fontSize": fs_value,
+                    "color": text_color, "fontVariantNumeric": "tabular-nums",
+                }),
+                style={"position": "absolute", "inset": "0",
+                        "display": "flex", "alignItems": "center",
+                        "justifyContent": "center"},
+            ),
+        ], style={"position": "relative",
+                   "width": f"{size}px", "height": f"{size}px"}),
+        html.Div(label, style={
+            "marginTop": "4px", "fontSize": fs_label, "fontWeight": "600",
+            "textTransform": "uppercase", "letterSpacing": "0.05em",
+            "color": "#64748b", "textAlign": "center",
+        }) if label else None,
+    ], style={"display": "inline-flex", "flexDirection": "column",
+               "alignItems": "center"})
+
+
+def athlete_card_rings(
+    name: str,
+    rings: list[dict],
+    *,
+    photo_url: str | None = None,
+    meta: str = "",
+    tone: str = "aspire",
+    href: str | None = None,
+):
+    """Whoop-style card with photo + name + 3 metric rings inline.
+
+    `rings` is a list of dicts: `{value, pct, label, tone}`. Pass 2-4
+    rings depending on layout. Each renders via `metric_ring()`.
+
+    >>> athlete_card_rings(
+    ...     "Ali Turki Owaida",
+    ...     meta="SENIOR · Fencing",
+    ...     rings=[
+    ...         {"value": 68,     "pct": 68, "label": "Recovery", "tone": "good"},
+    ...         {"value": "15.8", "pct": 75, "label": "Strain",   "tone": "aspire"},
+    ...         {"value": "7h12", "pct": 72, "label": "Sleep",    "tone": "good"},
+    ...     ],
+    ... )
+    """
+    # Avatar — photo or initials
+    initials = "".join(p[0] for p in name.split()[:2]).upper()
+    if photo_url:
+        avatar = html.Img(src=photo_url, alt=name, style={
+            "width": "44px", "height": "44px", "borderRadius": "50%",
+            "objectFit": "cover", "border": "2px solid var(--slate-200)",
+            "background": "var(--slate-100)",
+        })
+    else:
+        avatar = html.Div(initials, style={
+            "width": "44px", "height": "44px", "borderRadius": "50%",
+            "background": "var(--aspire-600)", "color": "white",
+            "display": "inline-flex", "alignItems": "center",
+            "justifyContent": "center",
+            "fontWeight": 700, "fontSize": "14px",
+        })
+
+    children = [
+        html.Div([
+            avatar,
+            html.Div([
+                html.Div(name, className="amc-name"),
+                html.Div(meta, className="amc-meta") if meta else None,
+            ], style={"minWidth": "0", "flex": "1"}),
+        ], className="amc-header"),
+        html.Div([
+            metric_ring(r["value"], r["pct"],
+                        label=r.get("label", ""),
+                        tone=r.get("tone", "aspire"),
+                        size=r.get("size", 70))
+            for r in rings
+        ], style={"display": "flex", "gap": "12px",
+                   "justifyContent": "space-around",
+                   "marginTop": "8px"}),
+    ]
+
+    card = html.Div(children, className=f"athlete-mini-card tone-{tone}")
+    if href:
+        return html.A(card, href=href,
+                       style={"textDecoration": "none", "color": "inherit"})
+    return card
+
+
 # ── 10. Asymmetry bar (VALD) ────────────────────────────────────────────────
 
 def asymmetry_bar(left_pct: int, right_pct: int | None = None):
