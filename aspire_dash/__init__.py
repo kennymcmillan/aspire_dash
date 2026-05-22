@@ -71,7 +71,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.11.0"
+__version__ = "0.12.0"
 
 # ── External stylesheets every Aspire app should load ────────────────────────
 STYLESHEETS = [

@@ -1604,3 +1604,393 @@ html.dark .period-pills label:has(input:checked) {
 .athlete-avatar.is-target {
     border-color: var(--gold, #fbb800);
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v0.12.0 — components ported from tools/forge/ prototypes
+   Designed in Tailwind+DaisyUI first, then condensed to semantic classes.
+   See FORGE.md for the workflow.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ── 1. KPI tile delta arrows ── */
+.kpi-tile .kpi-delta {
+    font-size: 11px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--slate-500);
+}
+.kpi-tile .kpi-delta-up   { color: #16a34a; font-weight: 600; }
+.kpi-tile .kpi-delta-down { color: #dc2626; font-weight: 600; }
+.kpi-tile .kpi-delta-flat { color: var(--slate-400); font-weight: 500; }
+
+
+/* ── 2. Date picker toolbar ── unified [◀ date ▶ Today] control */
+.date-toolbar {
+    display: inline-flex;
+    align-items: stretch;
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-radius: 8px;
+    box-shadow: var(--elev-1);
+    overflow: hidden;
+    font-family: 'Poppins', sans-serif;
+}
+.date-toolbar .dt-btn {
+    background: white;
+    border: none;
+    color: var(--slate-500);
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.date-toolbar .dt-btn:hover {
+    background: var(--slate-50);
+    color: var(--aspire-600);
+}
+.date-toolbar .dt-display {
+    padding: 8px 14px;
+    border-left: 1px solid var(--slate-200);
+    border-right: 1px solid var(--slate-200);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--slate-700);
+    font-variant-numeric: tabular-nums;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.date-toolbar .dt-today {
+    border-left: 1px solid var(--slate-200);
+    color: var(--aspire-600);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 8px 14px;
+}
+.date-toolbar .dt-today:hover {
+    background: var(--aspire-50);
+}
+
+
+/* ── 3. Status pill with icon ── */
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.2px;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+.status-pill i {
+    font-size: 9px;
+}
+.status-pill.status-success { background: #dcfce7; color: #166534; }
+.status-pill.status-warning { background: #fef3c7; color: #92400e; }
+.status-pill.status-danger  { background: #fee2e2; color: #991b1b; }
+.status-pill.status-info    { background: var(--aspire-50); color: var(--aspire-600); }
+.status-pill.status-neutral { background: var(--slate-100); color: var(--slate-700); }
+/* Solid variants for high-emphasis */
+.status-pill.is-solid.status-success { background: #16a34a; color: white; }
+.status-pill.is-solid.status-warning { background: #d97706; color: white; }
+.status-pill.is-solid.status-danger  { background: #dc2626; color: white; }
+.status-pill.is-solid.status-info    { background: var(--aspire-600); color: white; }
+
+
+/* ── 4. Athlete mini card (Whoop-style) ── */
+.athlete-mini-card {
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-left: 4px solid var(--aspire-600);
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-shadow: var(--elev-1);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+}
+.athlete-mini-card:hover {
+    box-shadow: var(--elev-2);
+    transform: translateY(-1px);
+}
+.athlete-mini-card.tone-good   { border-left-color: #16a34a; }
+.athlete-mini-card.tone-warn   { border-left-color: #f59e0b; }
+.athlete-mini-card.tone-danger { border-left-color: #dc2626; }
+
+.athlete-mini-card .amc-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.athlete-mini-card .amc-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--slate-900);
+    line-height: 1.2;
+    margin: 0;
+}
+.athlete-mini-card .amc-meta {
+    font-size: 11px;
+    color: var(--slate-500);
+    margin-top: 1px;
+}
+.athlete-mini-card .amc-score {
+    margin-left: auto;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+.athlete-mini-card.tone-good   .amc-score { color: #16a34a; }
+.athlete-mini-card.tone-warn   .amc-score { color: #f59e0b; }
+.athlete-mini-card.tone-danger .amc-score { color: #dc2626; }
+.athlete-mini-card.tone-aspire .amc-score { color: var(--aspire-600); }
+
+.athlete-mini-card .amc-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    gap: 8px;
+    text-align: center;
+}
+.athlete-mini-card .amc-metric .amc-metric-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--slate-400);
+}
+.athlete-mini-card .amc-metric .amc-metric-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--slate-700);
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* ── 5. AG Grid Aspire theme overrides ── */
+.ag-theme-aspire,
+.ag-theme-quartz.aspire-themed,
+.ag-theme-alpine.aspire-themed {
+    --ag-font-family: 'Poppins', sans-serif;
+    --ag-font-size: 12px;
+    --ag-header-background-color: var(--aspire-600);
+    --ag-header-foreground-color: white;
+    --ag-header-cell-hover-background-color: var(--aspire-700);
+    --ag-row-border-color: var(--slate-100);
+    --ag-row-hover-color: var(--aspire-50);
+    --ag-selected-row-background-color: var(--aspire-100);
+    --ag-borders: solid 1px;
+    --ag-border-color: var(--slate-200);
+    --ag-cell-horizontal-padding: 12px;
+    --ag-grid-size: 6px;
+    --ag-list-item-height: 30px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--elev-1);
+}
+.ag-theme-aspire .ag-header-cell-text,
+.ag-theme-quartz.aspire-themed .ag-header-cell-text,
+.ag-theme-alpine.aspire-themed .ag-header-cell-text {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+
+/* ── 6. Aspire loading overlay ── */
+.aspire-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px 20px;
+    font-family: 'Poppins', sans-serif;
+}
+.aspire-loading-spinner {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 4px solid var(--slate-200);
+    border-top-color: var(--aspire-600);
+    animation: aspire-spin 0.9s linear infinite;
+}
+.aspire-loading-text {
+    font-size: 13px;
+    color: var(--slate-500);
+    font-weight: 500;
+}
+.aspire-loading-sub {
+    font-size: 11px;
+    color: var(--slate-400);
+}
+@keyframes aspire-spin {
+    to { transform: rotate(360deg); }
+}
+
+
+/* ── 7. Aspire empty state — branded ── */
+.aspire-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 36px 20px;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+}
+.aspire-empty-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--aspire-50);
+    color: var(--aspire-600);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+.aspire-empty-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--slate-700);
+}
+.aspire-empty-hint {
+    font-size: 12px;
+    color: var(--slate-500);
+    max-width: 360px;
+}
+
+
+/* ── 8. Sparkline tile ── inline mini-chart with KPI value */
+.sparkline-tile {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-radius: 8px;
+    box-shadow: var(--elev-1);
+    font-family: 'Poppins', sans-serif;
+}
+.sparkline-tile .spk-text { flex: 1; min-width: 0; }
+.sparkline-tile .spk-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--slate-500);
+}
+.sparkline-tile .spk-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--slate-900);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+.sparkline-tile .spk-delta {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+.sparkline-tile .spk-chart {
+    width: 100px;
+    height: 36px;
+    flex-shrink: 0;
+}
+
+
+/* ── 9. Injury card (medical) ── */
+.injury-card {
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-left: 4px solid #dc2626;
+    border-radius: 8px;
+    padding: 12px 14px;
+    box-shadow: var(--elev-1);
+    font-family: 'Poppins', sans-serif;
+    transition: box-shadow 0.15s, transform 0.15s;
+}
+.injury-card:hover {
+    box-shadow: var(--elev-2);
+    transform: translateY(-1px);
+}
+.injury-card.severity-mild   { border-left-color: #f59e0b; }
+.injury-card.severity-moderate { border-left-color: #ea580c; }
+.injury-card.severity-severe { border-left-color: #dc2626; }
+.injury-card.severity-resolved { border-left-color: #16a34a; }
+
+.injury-card .inj-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+.injury-card .inj-body-part {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--slate-900);
+}
+.injury-card .inj-status {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+.injury-card.severity-severe   .inj-status { color: #dc2626; }
+.injury-card.severity-moderate .inj-status { color: #ea580c; }
+.injury-card.severity-mild     .inj-status { color: #f59e0b; }
+.injury-card.severity-resolved .inj-status { color: #16a34a; }
+
+.injury-card .inj-detail {
+    font-size: 11px;
+    color: var(--slate-600);
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+.injury-card .inj-meta {
+    font-size: 10px;
+    color: var(--slate-400);
+    display: flex;
+    gap: 10px;
+}
+
+
+/* ── 10. Asymmetry bar (VALD-style) ── */
+.asymmetry-bar {
+    position: relative;
+    height: 28px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 2px solid #16a34a;   /* JS sets border based on deviation */
+    font-family: 'Poppins', sans-serif;
+}
+.asymmetry-bar.dev-warn   { border-color: #f59e0b; }
+.asymmetry-bar.dev-danger { border-color: #dc2626; }
+.asymmetry-bar .asym-left,
+.asymmetry-bar .asym-right {
+    height: 100%;
+    float: left;
+    display: flex;
+    align-items: center;
+    color: white;
+    font-weight: 700;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+.asymmetry-bar .asym-left  { background: #0369a1; justify-content: flex-start; padding-left: 10px; }
+.asymmetry-bar .asym-right { background: #dc2626; justify-content: flex-end;   padding-right: 10px; }

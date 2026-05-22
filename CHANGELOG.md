@@ -4,6 +4,59 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.12.0] — 2026-05-22
+
+10 new components ported from the `tools/forge/` Tailwind+DaisyUI
+prototypes. **Zero API breaks** — all additions live in the new
+`aspire_dash.v12_helpers` module + new CSS classes. Existing helpers
+unchanged.
+
+### Added (in `aspire_dash.v12_helpers`)
+
+1. **`kpi_tile_v2(label, value, delta, delta_direction, sub, accent)`**
+   — KPI tile with optional ▲▼ delta arrow + 6 accent-stripe colours
+   (aspire / secondary / gold / success / warning / danger).
+2. **`date_toolbar(prev_id, next_id, today_id, display_text)`**
+   — unified `[◀ date ▶ TODAY]` control. Replaces the visually
+   disjointed `dcc.DatePickerSingle + buttons + Today` pattern.
+3. **`status_pill_v2(label, tone, icon, solid)`** — pill with leading
+   icon + auto-icon-from-tone. 5 tones × subtle/solid = 10 variants.
+4. **`athlete_card(name, photo_url, meta, score, tone, sub_metrics)`**
+   — Whoop-style compact card: photo + name + meta + main score (tone-
+   coloured) + up to 4 inline sub-metrics in tabular-nums.
+5. **`aspire_grid_v2(grid_id, columnDefs, rowData, editable)`** —
+   AG Grid wrapped with the new `.ag-theme-quartz.aspire-themed` CSS
+   (uppercase aspire-blue header, slate borders, aspire-50 row hover).
+6. **`aspire_loading(text, sub)`** — branded full-area loading state
+   with the Aspire-blue ring spinner.
+7. **`aspire_empty(text, hint, icon)`** — empty state with Aspire-blue
+   tinted icon, friendly copy.
+8. **`sparkline_tile(label, value, series, delta, color)`** — KPI value
+   + inline mini-line-chart (Plotly), perfect for trend tiles.
+9. **`injury_card(body_part, severity, status, detail, ...)`** —
+   medical-domain card with severity-coloured left stripe.
+10. **`asymmetry_bar(left_pct, right_pct)`** — VALD-style left/right
+    split bar with deviation-coloured border (green <5%, amber 5-10%,
+    red >10%).
+
+### CSS additions in `00_aspire_base.css`
+
+- `.kpi-delta-up/down/flat` colours
+- `.date-toolbar` + `.dt-btn` + `.dt-display` + `.dt-today` (unified date control)
+- `.status-pill.status-<tone>` (5 tones × `.is-solid` variant)
+- `.athlete-mini-card` + `.tone-good/warn/danger/aspire` + `.amc-*` sub-elements
+- `.ag-theme-aspire` (also applied via `.aspire-themed` modifier on quartz/alpine)
+- `.aspire-loading-spinner` + `@keyframes aspire-spin`
+- `.aspire-empty` + `.aspire-empty-icon`
+- `.sparkline-tile` + `.spk-*`
+- `.injury-card.severity-mild/moderate/severe/resolved`
+- `.asymmetry-bar.dev-warn/danger`
+
+### Demo
+
+- New `/v12` page in the showcase — every new helper rendered with
+  copy-pasteable code snippets. Pinned to top of sidebar nav.
+
 ## [0.11.0] — 2026-05-22
 
 ### Brand correction
