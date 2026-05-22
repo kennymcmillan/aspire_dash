@@ -66,24 +66,34 @@ VALD_LAYOUT = dict(
 )
 
 
+# v0.30 — VALD_COLORS aligned to Aspire palette tokens.
+# Previously a parallel palette (Tailwind + Bootstrap hex mix from the
+# Next.js port). Now every entry maps to a theme constant or matches a
+# brand-approved gradient stop. ForceDecks visuals still pixel-match the
+# legacy app SHAPE; the COLOURS now sit inside the Aspire system.
+from .theme import (
+    ASPIRE as _ASPIRE, SLATE as _SLATE,
+    SUCCESS as _SUCCESS, WARNING as _WARNING, DANGER as _DANGER,
+)
+
 VALD_COLORS = {
-    "main_line":       "#004185",
-    "mean":            "#666666",
-    "sd_fill_inner":   "rgba(40, 167, 69, 0.25)",
-    "sd_fill_outer":   "rgba(255, 193, 7, 0.15)",
-    "sd_line":         "#28a745",
-    "sd_line_outer":   "#ffc107",
-    "ma_fill":         "rgba(219, 234, 254, 0.6)",
-    "ma_line":         "#1d4ed8",
-    "ma_band":         "#3b82f6",
-    "acute_fill":      "rgba(254, 243, 199, 0.6)",
-    "acute_line":      "#f59e0b",
-    "acute_rolling":   "#64748b",
-    "adaptive_fill":   "rgba(209, 250, 229, 0.6)",
-    "adaptive_line":   "#10b981",
-    "alert_red":       "#ef4444",
-    "alert_amber":     "#f59e0b",
-    "normal_dot":      "#004185",
+    "main_line":       _ASPIRE["600"],                   # #004185 — Aspire blue (was off-brand purple #667eea)
+    "mean":            _SLATE["500"],                    # #64748b (was #666666 mid-grey)
+    "sd_fill_inner":   "rgba(22, 163, 74, 0.20)",        # success @ 20% (was Bootstrap rgba 40,167,69)
+    "sd_fill_outer":   "rgba(217, 119, 6, 0.15)",        # warning @ 15% (was Bootstrap rgba 255,193,7)
+    "sd_line":         _SUCCESS,                         # #16a34a (was Bootstrap #28a745)
+    "sd_line_outer":   _WARNING,                         # #d97706 (was Bootstrap #ffc107)
+    "ma_fill":         "rgba(0, 65, 133, 0.10)",         # aspire-600 @ 10% (was lightblue rgba)
+    "ma_line":         _ASPIRE["700"],                   # #003566 (was Tailwind blue-700)
+    "ma_band":         _ASPIRE["500"],                   # #0059b3 (was Tailwind blue-500)
+    "acute_fill":      "rgba(217, 119, 6, 0.15)",        # warning @ 15% (was amber-100 rgba)
+    "acute_line":      _WARNING,                         # #d97706 (was Tailwind amber-500 #f59e0b)
+    "acute_rolling":   _SLATE["500"],                    # already slate-500
+    "adaptive_fill":   "rgba(22, 163, 74, 0.18)",        # success @ 18% (was emerald-200 rgba)
+    "adaptive_line":   _SUCCESS,                         # #16a34a (was Tailwind emerald-500 #10b981)
+    "alert_red":       _DANGER,                          # #dc2626 (was Tailwind red-500 #ef4444)
+    "alert_amber":     _WARNING,                         # #d97706 (was Tailwind amber-500 #f59e0b)
+    "normal_dot":      _ASPIRE["600"],                   # already Aspire blue
 }
 
 

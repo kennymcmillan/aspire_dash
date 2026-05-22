@@ -340,13 +340,18 @@ def injury_card(
 
 # ── 11. Metric ring (Whoop-style SVG donut) ────────────────────────────────
 
+# v0.30 — sourced from theme.SEMANTIC_PALETTE + theme constants instead
+# of hardcoded hex. One brand-swap touches every ring tone everywhere.
+from .theme import SEMANTIC_PALETTE as _SEM, ASPIRE as _A
+
 _TONE_COLOURS = {
-    "good":      ("#16a34a", "#166534"),   # stroke, text
-    "warn":      ("#f59e0b", "#854d0e"),
-    "danger":    ("#dc2626", "#991b1b"),
-    "aspire":    ("#004185", "#003566"),
-    "secondary": ("#1876ab", "#0c4a6e"),
-    "gold":      ("#fbb800", "#92400e"),
+    # (stroke for the SVG arc, text colour for the value label inside)
+    "good":      ("#16a34a", _SEM["success"]["text"]),
+    "warn":      ("#d97706", _SEM["warning"]["text"]),
+    "danger":    ("#dc2626", _SEM["danger"]["text"]),
+    "aspire":    (_A["600"], _A["700"]),
+    "secondary": ("#1876ab", _SEM["info"]["text"]),
+    "gold":      ("#fbb800", _SEM["gold"]["text"]),
 }
 
 

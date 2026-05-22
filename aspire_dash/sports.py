@@ -225,14 +225,23 @@ def nation_selector(selector_id="nation-selector", value="QAT", nations=None):
 # ── Stat Card (Gradient) ───────────────────────────────────────────────────
 
 # Color presets for gradient stat cards
+# v0.30 — derived from theme.SEMANTIC_PALETTE so a brand change in one
+# place cascades. Was a parallel hex universe; now reads from the single
+# semantic source. Old keys preserved for back-compat (blue→aspire,
+# green→success, red→danger, amber→warning, gray→neutral).
+from .theme import SEMANTIC_PALETTE as _SEM_
+
+def _grad_bg(light, mid):
+    return f"linear-gradient(135deg, {light}, {mid})"
+
 STAT_COLORS = {
-    "blue": {"bg": "linear-gradient(135deg, #eff6ff, #dbeafe)", "border": "#bfdbfe", "text": "#1e40af"},
-    "green": {"bg": "linear-gradient(135deg, #f0fdf4, #dcfce7)", "border": "#bbf7d0", "text": "#166534"},
-    "red": {"bg": "linear-gradient(135deg, #fef2f2, #fee2e2)", "border": "#fecaca", "text": "#991b1b"},
-    "amber": {"bg": "linear-gradient(135deg, #fffbeb, #fef3c7)", "border": "#fde68a", "text": "#92400e"},
-    "purple": {"bg": "linear-gradient(135deg, #faf5ff, #f3e8ff)", "border": "#e9d5ff", "text": "#6b21a8"},
-    "teal": {"bg": "linear-gradient(135deg, #f0fdfa, #ccfbf1)", "border": "#99f6e4", "text": "#115e59"},
-    "gray": {"bg": "linear-gradient(135deg, #f9fafb, #f3f4f6)", "border": "#e5e7eb", "text": "#374151"},
+    "blue":   {"bg": _grad_bg("#eff6ff", _SEM_["info"]["bg"]),    "border": _SEM_["info"]["border"],    "text": _SEM_["info"]["text"]},
+    "green":  {"bg": _grad_bg("#f0fdf4", _SEM_["success"]["bg"]), "border": _SEM_["success"]["border"], "text": _SEM_["success"]["text"]},
+    "red":    {"bg": _grad_bg("#fef2f2", _SEM_["danger"]["bg"]),  "border": _SEM_["danger"]["border"],  "text": _SEM_["danger"]["text"]},
+    "amber":  {"bg": _grad_bg("#fffbeb", _SEM_["warning"]["bg"]), "border": _SEM_["warning"]["border"], "text": _SEM_["warning"]["text"]},
+    "purple": {"bg": _grad_bg("#faf5ff", _SEM_["purple"]["bg"]),  "border": _SEM_["purple"]["border"],  "text": _SEM_["purple"]["text"]},
+    "teal":   {"bg": _grad_bg("#f0fdfa", _SEM_["teal"]["bg"]),    "border": _SEM_["teal"]["border"],    "text": _SEM_["teal"]["text"]},
+    "gray":   {"bg": _grad_bg("#f9fafb", _SEM_["neutral"]["bg"]), "border": _SEM_["neutral"]["border"], "text": _SEM_["neutral"]["text"]},
 }
 
 

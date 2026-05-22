@@ -4,6 +4,46 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.30.0] — 2026-05-22
+
+### Close the v0.29 honest gaps
+
+Three targeted edits — each routes a parallel-palette dict through the
+new v0.29 `SEMANTIC_PALETTE` / theme constants. Brand swap is now ONE
+file edit, not 50.
+
+**`vald.py` VALD_COLORS — Aspire-aligned.**
+17 colour entries were a Tailwind + Bootstrap parallel universe from
+the Next.js port. Now every entry maps to theme constants:
+- `main_line` → `ASPIRE["600"]` (was already Aspire blue from v0.23)
+- `mean` → `SLATE["500"]` (was `#666666` mid-grey)
+- `sd_line / sd_line_outer` → `SUCCESS / WARNING` (was Bootstrap 4 hex)
+- `ma_line / ma_band` → `ASPIRE["700"] / ASPIRE["500"]` (was Tailwind blue-700/500)
+- `acute_line` → `WARNING` (was Tailwind amber-500 `#f59e0b`)
+- `adaptive_line` → `SUCCESS` (was Tailwind emerald-500 `#10b981`)
+- `alert_red / alert_amber` → `DANGER / WARNING`
+- All `rgba(...)` band fills swapped to Aspire-RGB equivalents
+
+ForceDecks chart visuals still pixel-match the legacy Next.js SHAPE
+(SD bands, 4-pt MA, acute alerts, adaptive emerald) — only the
+COLOURS now sit inside the Aspire palette.
+
+**`v12_helpers._TONE_COLOURS` — sourced from SEMANTIC_PALETTE.**
+The ring tone table now reads `(stroke, text)` from theme constants
+instead of hardcoded hex. Every `metric_ring`, `athlete_card_rings`,
+`athlete_card_v2` ring across the portfolio updates on next deploy if
+SEMANTIC_PALETTE is ever changed — single source of truth.
+
+**`sports.STAT_COLORS` — derived from SEMANTIC_PALETTE.**
+The 7-key gradient stat-card palette (blue/green/red/amber/purple/teal/
+gray) now builds its `{bg, border, text}` from semantic-palette entries
+via a small `_grad_bg` helper. Same visual; cascade-aware.
+
+### Migration
+
+Zero consumer code change required. SHA bump → every chart, every ring,
+every stat-card gets the consolidated brand.
+
 ## [0.29.0] — 2026-05-22
 
 ### Cross-cutting polish (3 cascades, no consumer code change required)
