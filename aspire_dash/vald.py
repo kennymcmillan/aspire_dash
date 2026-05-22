@@ -67,7 +67,7 @@ VALD_LAYOUT = dict(
 
 
 VALD_COLORS = {
-    "main_line":       "#667eea",
+    "main_line":       "#004185",
     "mean":            "#666666",
     "sd_fill_inner":   "rgba(40, 167, 69, 0.25)",
     "sd_fill_outer":   "rgba(255, 193, 7, 0.15)",
@@ -83,7 +83,7 @@ VALD_COLORS = {
     "adaptive_line":   "#10b981",
     "alert_red":       "#ef4444",
     "alert_amber":     "#f59e0b",
-    "normal_dot":      "#667eea",
+    "normal_dot":      "#004185",
 }
 
 
@@ -110,7 +110,7 @@ def _sd_outliers(d, v, s):       return _build_sd_outlier_traces_base(d, v, s, c
 
 def analytics_chart(data_points, stats, *, mode: str = "sd_bands",
                      height: int = 384,
-                     color: str = "#667eea",
+                     color: str = "#004185",
                      metric_name: str = "", unit: str = ""):
     """Single large chart with mode-selectable overlay.
 
@@ -313,7 +313,7 @@ def group_heatmap(athletes_data, *, metric_name: str = "", unit: str = "",
 # ── 4. adaptive_chart — Bayesian LAR/UAR bands ────────────────────────────
 
 def adaptive_chart(data_points, adaptive_obs, *,
-                    color: str = "#667eea",
+                    color: str = "#004185",
                     height: int = 384, unit: str = ""):
     """Adaptive reference-range chart — emerald LAR/UAR band from R API.
     Falls back to `analytics_chart` (sd_bands) when no adaptive_obs given."""

@@ -4,6 +4,79 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.29.0] — 2026-05-22
+
+### Cross-cutting polish (3 cascades, no consumer code change required)
+
+Frontend-architect audit found foundations are S-tier but half the
+library doesn't consume its own tokens — ~210 of 677 hardcoded `#xxx`
+hits live in `sports.py` + `v12_helpers.py` + `vald.py`. v0.29 starts
+the cleanup with three cascades that lift every consumer app on the
+next SHA bump.
+
+### Cascade 1 — `theme.SEMANTIC_PALETTE` (consolidate ~50 hex duplicates)
+
+New dicts in `theme.py`:
+- `SEMANTIC_PALETTE` — `{tone: {bg, border, text}}` for badges/pills.
+  Replaces the duplicate hex pairs in `feedback.py:42`, `sports.py:319`,
+  `v12_helpers.py:32`, `firstbeat.py:32`.
+- `ZONE_BG_TONES` — `(green, yellow, red, aspire, neutral, gold)`.
+- `GRADIENT_BG_TONES` — opt-in CSS-string gradients for any card.
+- `semantic_tone(tone)` helper.
+
+### Cascade 2 — `.aspire-card` + modifier system
+
+New CSS rules — every card emits via composition:
+- `.aspire-card` — base (white, 8 px radius, slate-200 border, elev-1)
+- `.aspire-card--gradient` — white → slate-50 vertical wash
+- `.aspire-card--interactive` — hover lift -2 px + branded shadow
+- `.aspire-card--accent-{aspire,secondary,gold,success,warning,danger}`
+  — 4 px left stripe matching `kpi_tile_v2` accents
+
+### Cascade 3 — Universal `.zone-{...}` modifiers
+
+Lifted the v0.26 athlete-card-v2 zone gradient OUT of its scope into
+universal classes. Any card/tile/section can wear `zone-green`,
+`zone-yellow`, `zone-red`, `zone-aspire`, `zone-gold`, `zone-neutral`.
+
+The Whoop-style gradient bg is now portfolio-wide. 10 components
+benefit on next deploy:
+`firstbeat._metric_cell`, `firstbeat.training_card`, `kpi_tile`,
+`variance_card`, `utilisation_card`, `injury_card`, `placement_badge`,
+`freshness_banner`, `acwr_badge`, `metric_ring`.
+
+### CSS micro-polish (auto-apply)
+
+- **Badges/pills hover scale** 1.05× with spring ease — every badge
+  becomes interactive (was static)
+- **Toggle group active state** — gradient bg + inset shadow (Linear
+  / Stripe segmented control pattern)
+- **KPI tile gradient bg** — subtle white → slate-50 + 4→6 px stripe
+  widen on hover (tactile pressed feel)
+- **Graph card slate-50 wash** — charts no longer float invisibly on
+  white page bg
+- **Toast slide-in motion** — 200ms ease-out (Linear/Stripe feel)
+
+### Python helper upgrades (item 6, 7, 12, 13 from audit)
+
+- **`athlete_card_v2` re-exported from `aspire_dash.athlete`** — now
+  lives where callers expect (`from aspire_dash.athlete import
+  athlete_card_v2`). Same implementation as v0.26.
+- **`viz.py` ring track** `#e5e7eb` → `#e2e8f0` (slate-200 token).
+  Affects 5 ring/gauge sites.
+- **`vald.py` `#667eea` off-brand purple → `#004185` Aspire blue.**
+  17 chart traces fixed in one swap.
+- **`components/nav.py` topnav title** `#1e293b` → `SLATE["800"]`.
+
+### Migration
+
+Zero consumer code changes required. Bump aspire_dash SHA pin → every
+app inherits Cascades 1-3 + the CSS micro-polish + the 4 token swaps
+on next deploy.
+
+The new `athlete_card_v2` helper is OPT-IN — apps that want the
+Whoop-style card just `from aspire_dash.athlete import athlete_card_v2`.
+
 ## [0.28.0] — 2026-05-22
 
 ### Added — Chart polish (lifts every figure portfolio-wide)

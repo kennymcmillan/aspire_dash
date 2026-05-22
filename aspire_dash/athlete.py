@@ -32,6 +32,11 @@ def _initials(name: str | None) -> str:
     return (parts[0][0] + parts[-1][0]).upper()
 
 
+# v0.29 — re-export athlete_card_v2 from v12_helpers under aspire_dash.athlete
+# so it lives where callers expect ("athlete things go in athlete module").
+from .v12_helpers import athlete_card_v2     # noqa: F401  (public re-export)
+
+
 def athlete_avatar(
     photo_url: str | None = None,
     name: str | None = None,

@@ -25,7 +25,7 @@ def _require_svg():
         )
 
 
-def _svg_circle(cx, cy, r, stroke="#e5e7eb", stroke_width=5,
+def _svg_circle(cx, cy, r, stroke="#e2e8f0", stroke_width=5,
                 dasharray=None, dashoffset=None, animated=False, fill="none"):
     """SVG circle element with optional dash animation."""
     props = dict(
@@ -51,7 +51,7 @@ def progress_ring(
     size=80,
     stroke_width=6,
     color=None,
-    track_color="#e5e7eb",
+    track_color="#e2e8f0",
     label=None,
     display=None,
     unit="",

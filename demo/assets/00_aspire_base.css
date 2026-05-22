@@ -2499,6 +2499,153 @@ body {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   v0.29 — UNIVERSAL .zone-{...} modifiers (lifted out of .athlete-card-v2)
+   Now any card/tile/section can wear a zone-coloured gradient. The v0.26
+   athlete-card-v2 win generalised to the whole library.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.zone-green {
+    background: linear-gradient(135deg, rgba(22, 163, 74, 0.10) 0%,
+                                          rgba(255, 255, 255, 1) 60%) !important;
+    border-color: #bbf7d0 !important;
+}
+.zone-yellow {
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.12) 0%,
+                                          rgba(255, 255, 255, 1) 60%) !important;
+    border-color: #fde68a !important;
+}
+.zone-red {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.12) 0%,
+                                          rgba(255, 255, 255, 1) 60%) !important;
+    border-color: #fecaca !important;
+}
+.zone-aspire {
+    background: linear-gradient(135deg, rgba(0, 65, 133, 0.10) 0%,
+                                          rgba(255, 255, 255, 1) 60%) !important;
+    border-color: var(--aspire-200) !important;
+}
+.zone-gold {
+    background: linear-gradient(135deg, rgba(251, 184, 0, 0.12) 0%,
+                                          rgba(255, 255, 255, 1) 60%) !important;
+    border-color: #fde68a !important;
+}
+.zone-neutral {
+    background: linear-gradient(135deg, var(--slate-50) 0%,
+                                          rgba(255, 255, 255, 1) 60%) !important;
+    border-color: var(--slate-200) !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v0.29 — .aspire-card system (kills inline style={} in 20+ card sites)
+   Base + 4 modifiers (gradient / interactive / accent / left-stripe).
+   Use:
+     <div class="aspire-card aspire-card--interactive aspire-card--gradient">
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.aspire-card {
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-radius: 8px;
+    padding: 16px 20px;
+    box-shadow: var(--elev-1, 0 1px 2px rgba(15,23,42,0.04),
+                                0 1px 3px rgba(15,23,42,0.03));
+    transition: transform var(--duration-normal, 200ms) var(--ease-out, ease-out),
+                box-shadow  var(--duration-normal, 200ms) var(--ease-out, ease-out),
+                border-color var(--duration-fast, 150ms) var(--ease-out, ease-out);
+}
+
+.aspire-card--gradient {
+    background: linear-gradient(180deg, white 0%, var(--slate-50) 100%);
+}
+
+.aspire-card--interactive {
+    cursor: pointer;
+    will-change: transform;
+}
+.aspire-card--interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--elev-hover-card,
+                 0 8px 24px -8px rgba(0,65,133,0.18),
+                 0 4px 12px -4px rgba(15,23,42,0.08));
+    border-color: var(--aspire-200);
+}
+
+/* Accent stripes (left-border 4 px) — match v12_helpers.kpi_tile_v2 accents */
+.aspire-card--accent-aspire    { border-left: 4px solid var(--aspire-600); }
+.aspire-card--accent-secondary { border-left: 4px solid #1876ab; }
+.aspire-card--accent-gold      { border-left: 4px solid var(--gold, #fbb800); }
+.aspire-card--accent-success   { border-left: 4px solid #16a34a; }
+.aspire-card--accent-warning   { border-left: 4px solid #d97706; }
+.aspire-card--accent-danger    { border-left: 4px solid #dc2626; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v0.29 — Badge hover state (badges feel alive, not static)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.badge, .status-badge, .status-pill {
+    transition: transform var(--duration-fast, 150ms) var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+}
+.badge:hover, .status-badge:hover, .status-pill:hover {
+    transform: scale(1.05);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v0.29 — Toggle group: gradient on active (Linear/Stripe segmented pattern)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.toggle-btn.active,
+.toggle-btn[data-active="true"] {
+    background: linear-gradient(180deg, var(--aspire-600) 0%,
+                                         #003566 100%) !important;
+    color: white !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15),
+                0 1px 2px rgba(0, 65, 133, 0.30) !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v0.29 — KPI tile gradient bg (subtle depth on the most-rendered tile)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.kpi-tile {
+    background: linear-gradient(180deg, #ffffff 0%, var(--slate-50) 100%);
+}
+
+/* On hover: stripe widens 4px → 6px for a tactile "pressed" feel */
+.kpi-tile {
+    transition: transform var(--duration-normal, 200ms) var(--ease-out),
+                box-shadow var(--duration-normal, 200ms) var(--ease-out),
+                border-left-width var(--duration-fast, 150ms) var(--ease-out);
+}
+.kpi-tile:hover { border-left-width: 6px; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v0.29 — Graph card: slate-50 wash so charts don't float invisibly
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.graph-card, .chart-card {
+    background: linear-gradient(180deg, white 70%, var(--slate-50) 100%);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v0.29 — Toast slide-in (matches Linear/Stripe motion)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.aspire-toast, .toast-aspire {
+    animation: aspire-toast-slide var(--duration-normal, 200ms) var(--ease-out);
+}
+@keyframes aspire-toast-slide {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
    v0.26 — athlete_card_v2 (Whoop-style premium card)
    Zone-coloured gradient bg + larger photo (or initials fallback) + 3 rings.
    Usage:

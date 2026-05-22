@@ -84,6 +84,53 @@ EYEBROW_STYLE = {
 TRANSITION_FAST = f"all {MOTION.get('duration_fast', '150ms')} {MOTION.get('ease_out', 'ease-out')}"
 TRANSITION_NORMAL = f"all {MOTION.get('duration_normal', '200ms')} {MOTION.get('ease_out', 'ease-out')}"
 
+
+# ── v0.29 cascade — semantic palette unification ───────────────────────────
+# These three dicts kill ~50 hex-pair duplicates across feedback.py,
+# sports.py, v12_helpers.py, firstbeat.py. Every component now reads from
+# ONE source. Brand swap = 1-file change.
+#
+# Audit finding: 677 hardcoded "#xxxxxx" hits across 29 files. Of those,
+# ~210 were ring/badge/zone tone tables reinvented per-module. These dicts
+# consolidate them.
+
+#: Semantic tone → (bg, border, text) for badges/pills/chips
+SEMANTIC_PALETTE = {
+    "success":  {"bg": "#dcfce7", "border": "#bbf7d0", "text": "#166534"},
+    "warning":  {"bg": "#fef3c7", "border": "#fde68a", "text": "#92400e"},
+    "danger":   {"bg": "#fee2e2", "border": "#fecaca", "text": "#991b1b"},
+    "info":     {"bg": "#dbeafe", "border": "#bfdbfe", "text": "#1e40af"},
+    "aspire":   {"bg": "#eff6ff", "border": "#bfdbfe", "text": "#003566"},
+    "gold":     {"bg": "#fef3c7", "border": "#fde68a", "text": "#92400e"},
+    "neutral":  {"bg": "#f1f5f9", "border": "#e2e8f0", "text": "#475569"},
+    "purple":   {"bg": "#f3e8ff", "border": "#e9d5ff", "text": "#6b21a8"},
+    "teal":     {"bg": "#ccfbf1", "border": "#99f6e4", "text": "#115e59"},
+}
+
+#: Zone tone → CSS class name (apply via .zone-<key>) for the Whoop-style
+#: gradient bg (top-left tint → white). Now universal — any card can wear
+#: it, not just .athlete-card-v2.
+ZONE_BG_TONES = ("green", "yellow", "red", "aspire", "neutral", "gold")
+
+#: Gradient surface — for cards/tiles that want depth without zone-coding
+GRADIENT_BG_TONES = {
+    "white":   "linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%)",
+    "slate":   "linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)",
+    "aspire":  "linear-gradient(135deg, rgba(0,65,133,0.08) 0%, rgba(255,255,255,1) 60%)",
+    "gold":    "linear-gradient(135deg, rgba(251,184,0,0.10) 0%, rgba(255,255,255,1) 60%)",
+    "success": "linear-gradient(135deg, rgba(22,163,74,0.08) 0%, rgba(255,255,255,1) 60%)",
+    "warning": "linear-gradient(135deg, rgba(234,179,8,0.10) 0%, rgba(255,255,255,1) 60%)",
+    "danger":  "linear-gradient(135deg, rgba(220,38,38,0.10) 0%, rgba(255,255,255,1) 60%)",
+}
+
+
+def semantic_tone(tone: str) -> dict:
+    """Return `{bg, border, text}` for any semantic tone.
+    Pass into a Python style dict, or use the matching `.aspire-card--<tone>`
+    CSS class for the same result without inline styling."""
+    return SEMANTIC_PALETTE.get(tone, SEMANTIC_PALETTE["neutral"])
+TRANSITION_NORMAL = f"all {MOTION.get('duration_normal', '200ms')} {MOTION.get('ease_out', 'ease-out')}"
+
 # ── Sidebar ──────────────────────────────────────────────────────────────────
 SIDEBAR_WIDTH = BRAND["sidebar"]["width"]
 SIDEBAR_BG = BRAND["sidebar"]["bg"]

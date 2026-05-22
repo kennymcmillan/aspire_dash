@@ -106,7 +106,7 @@ def topnav(
             html.Img(src=logo_src, style={"height": "30px", "width": "auto"}) if logo_src else None,
             html.Span(title, style={
                 "fontWeight": "700", "fontSize": "15px",
-                "color": "#1e293b", "marginLeft": "10px" if logo_src else "0",
+                "color": SLATE["800"], "marginLeft": "10px" if logo_src else "0",
             }) if title else None,
         ],
         style={"display": "flex", "alignItems": "center", "flexShrink": "0"},
