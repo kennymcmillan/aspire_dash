@@ -4,6 +4,37 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.27.0] — 2026-05-22
+
+### Added — `EXTERNAL_SCRIPTS` (Tailwind CDN, opt-in)
+
+Inspired by the GCPQuantum/plotly-tailwind pattern. Tailwind CSS is
+now available via CDN to any consumer app that opts in. Use case:
+fast one-off layouts (grid / flex / spacing) without porting to
+semantic CSS first.
+
+```python
+from aspire_dash import setup_app, STYLESHEETS, EXTERNAL_SCRIPTS
+
+app = Dash(__name__,
+           external_stylesheets=STYLESHEETS,
+           external_scripts=EXTERNAL_SCRIPTS)   # NEW — opt-in Tailwind
+
+# Tailwind utilities now work in any className:
+html.Div(className="grid grid-cols-3 gap-4 p-6", children=[...])
+html.Div(className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg", ...)
+```
+
+**Pairs cleanly with semantic CSS** — use Aspire classes
+(`kpi-tile`, `athlete-card-v2`, `status-pill`, etc.) for repeated
+branded components, Tailwind utilities for page-level layout. Tailwind
+specificity is lower than our semantic rules so the brand always wins
+on owned components.
+
+**Trade-off:** adds a ~50 KB CDN script to every page load. Skip
+`EXTERNAL_SCRIPTS` if the app doesn't need utility classes — semantic
+CSS alone covers ~95% of use cases.
+
 ## [0.26.0] — 2026-05-22
 
 ### Added — `athlete_card_v2` (Whoop-style premium card, Forge-built)

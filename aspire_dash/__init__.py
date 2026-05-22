@@ -71,7 +71,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.26.0"
+__version__ = "0.27.0"
 
 
 def normalised_path(pathname: str | None) -> str:
@@ -115,6 +115,26 @@ STYLESHEETS = [
     dbc.themes.BOOTSTRAP,
     dbc.icons.FONT_AWESOME,
     # Inter font is loaded via @import in 00_aspire_base.css
+]
+
+# ── Optional Tailwind CSS via CDN (v0.27+) ───────────────────────────────────
+# Pass to Dash(__name__, external_scripts=EXTERNAL_SCRIPTS) to unlock
+# Tailwind utility classes in any consumer app:
+#
+#   from aspire_dash import setup_app, STYLESHEETS, EXTERNAL_SCRIPTS
+#   app = Dash(__name__, external_stylesheets=STYLESHEETS,
+#              external_scripts=EXTERNAL_SCRIPTS)
+#
+# Then write:
+#   html.Div(className="grid grid-cols-3 gap-4", children=[...])
+#   html.Div(className="card bg-white p-6 rounded-xl shadow-md", ...)
+#
+# Pairs cleanly with our semantic CSS — use Aspire classes for repeated
+# components (kpi-tile, athlete-card-v2, etc.) and Tailwind utilities
+# for one-off page layouts. Tailwind specificity is lower than our
+# semantic rules so the brand always wins on owned components.
+EXTERNAL_SCRIPTS = [
+    {"src": "https://cdn.tailwindcss.com"},
 ]
 
 # Path to this package's assets directory
