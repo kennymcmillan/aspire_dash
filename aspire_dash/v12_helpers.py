@@ -291,11 +291,20 @@ def sparkline_tile(
         xaxis=dict(visible=False), yaxis=dict(visible=False),
     )
     delta_color = {"up": "#16a34a", "down": "#dc2626"}.get(delta_direction, "var(--slate-400)")
-    delta_arrow = {"up": "▲", "down": "▼", "flat": "·"}.get(delta_direction, "·")
+    # v0.32 — flat-delta glyph was "·" (low bullet, off-baseline). Use en-dash.
+    delta_arrow = {"up": "▲", "down": "▼", "flat": "–"}.get(delta_direction, "–")
+
+    # v0.32 — guard floats so a stray 42.7142857 doesn't dump full repr
+    if isinstance(value, float):
+        value_str = f"{value:,.2f}"
+    elif isinstance(value, int):
+        value_str = f"{value:,}"
+    else:
+        value_str = str(value)
 
     text_block = [
         html.Div(label, className="spk-label"),
-        html.Div(str(value), className="spk-value"),
+        html.Div(value_str, className="spk-value"),
     ]
     if delta is not None:
         text_block.append(
@@ -440,14 +449,19 @@ def metric_ring(
                       style={"position": "absolute", "inset": "0",
                               "width": "100%", "height": "100%"},
                       alt=label),
+            # v0.32 — value text. lineHeight:1 prevents glyph descending
+            # below ring centre; width:100% + textAlign:center stops
+            # odd-width strings ("7h12") drifting right of geometric centre.
             html.Div(
                 html.Span(f"{value}{unit}", style={
                     "fontWeight": "700", "fontSize": fs_value,
+                    "lineHeight": "1",
                     "color": text_color, "fontVariantNumeric": "tabular-nums",
                 }),
                 style={"position": "absolute", "inset": "0",
                         "display": "flex", "alignItems": "center",
-                        "justifyContent": "center"},
+                        "justifyContent": "center",
+                        "width": "100%", "textAlign": "center"},
             ),
         ], style={"position": "relative",
                    "width": f"{size}px", "height": f"{size}px"}),

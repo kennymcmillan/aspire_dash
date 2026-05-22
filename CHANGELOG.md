@@ -4,6 +4,53 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.32.0] — 2026-05-22
+
+### Fine-grained polish pass (12 of 30 audit items shipped)
+
+Pure CSS + 1-line Python edits. No new components, no breaking change.
+All auto-apply on SHA bump.
+
+**Numbers + centering**
+- `metric_ring` value text now `width:100% + textAlign:center +
+  lineHeight:1` — odd-width strings like `7h12` were drifting ~0.5-1 px
+  off ring centre. Plus glyph was descending below centre on Chrome.
+- `kpi_tile` value gained `font-variant-numeric: tabular-nums` (class
+  hook wasn't firing because component uses inline style only).
+- `kpi_tile` value 0-check: `if value is not None` instead of
+  `if value` — zero counts now render "0", not "—".
+- `kpi_stat` value bumped 26 → 30 px so baselines align with `kpi_tile`
+  in the same grid.
+- `acwr_badge`, `feedback.badge`: added `font-variant-numeric:
+  tabular-nums` (no more width jitter on 1.10 → 1.85).
+- `sparkline_tile`: float values get `f"{v:,.2f}"` instead of raw repr.
+  Flat-delta glyph "·" → "–" (en-dash) for proper baseline.
+
+**Typography rhythm**
+- `.acv2-meta` 10.5 → 11 px (no more half-pixel fuzz)
+- `.acc-name` 13.5 → 13 px
+- `.acc-ring-label` 8.5 → 9 px (above WCAG-readable threshold)
+- `.acc-stat-label` 9 → 10, `.acc-stat-value` 11.5 → 12 px
+- `.spk-value` 22 → 24 px (matches kpi tile rhythm)
+- `.badge` font-weight 500 → 600 (matches every other pill)
+
+**Brand + token consolidation**
+- `info_box`: `#3b82f6 / #1e40af / #bfdbfe` → `ASPIRE[600] / [700] / [200]`
+- `placement_badge` else-branch: `#f9fafb / #6b7280` → `SLATE[100] / [500]`
+- `.athlete-mini-card.tone-aspire`: explicit border + score colour rules
+  (was falling back accidentally to base)
+
+**Layout / motion**
+- `.acv2-target-badge / .acc-target-badge`: now inherit card hover
+  lift via own `transform` transition (was static, created 2 px detach)
+- `.asymmetry-bar`: float → flex (kills 1 px subpixel gap)
+- `.toggle-btn`: child radius 8 → 6 (nested-pill look)
+- `.toggle-btn` font-family: drop Inter override (inherit body Poppins)
+- `.sidebar`: dedup'd transition declaration
+- `.header`: `slate-100` → `slate-200` border (now visible separator)
+- `freshness_banner`: per-chip `marginRight` → parent `gap` (no
+  trailing margin on last chip)
+
 ## [0.31.4] — 2026-05-22
 
 ### Added — `is_target` modifier + whoop-card-with-face demo

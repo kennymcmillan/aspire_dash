@@ -98,10 +98,14 @@ def kpi_tile(label, value, unit="", color=None, target=None, size="lg",
                  style={"textTransform": "uppercase",
                         "letterSpacing": "0.5px",
                         "fontSize": label_text_size}),
-        html.Div(f"{value:,.0f}" if value else "—",
+        # v0.32 — value is None handled separately (was "if value" which
+        # rendered "—" for legitimate 0 counts like "Injuries: 0").
+        # tabular-nums on the value so widths don't jitter on refresh.
+        html.Div(f"{value:,.0f}" if value is not None else "—",
                  style={"fontSize": value_text_size,
                         "fontWeight": "700",
-                        "color": accent, "lineHeight": "1.1"}),
+                        "color": accent, "lineHeight": "1.1",
+                        "fontVariantNumeric": "tabular-nums"}),
         sub,
         bar,
     ], style={"padding": padding,
@@ -220,7 +224,9 @@ def kpi_stat(label, value, sub: str = "", color: str | None = None, icon: str | 
             },
         ),
         html.Div(str(value), style={
-            "fontSize": "26px", "fontWeight": "700", "color": val_color,
+            # v0.32 — 26 -> 30 so baselines align with kpi_tile in the
+            # same grid (audit #15)
+            "fontSize": "30px", "fontWeight": "700", "color": val_color,
             "marginTop": "4px", "fontVariantNumeric": "tabular-nums",
             "lineHeight": "1.15",
         }),

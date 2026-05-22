@@ -340,7 +340,9 @@ def placement_badge(place, size="md"):
         bg, color = "#f0fdf4", "#166534"
         icon = None
     else:
-        bg, color = "#f9fafb", "#6b7280"
+        # v0.32 — Tailwind greys -> Aspire slate tokens (audit #25)
+        from .theme import SLATE as _SLATE
+        bg, color = _SLATE["100"], _SLATE["500"]
         icon = None
 
     font = "13px" if size == "md" else "11px"

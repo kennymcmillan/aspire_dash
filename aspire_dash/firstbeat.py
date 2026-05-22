@@ -79,6 +79,8 @@ def acwr_badge(acwr, show_value=True):
         "fontSize": "11px", "fontWeight": "600",
         "background": s["bg"], "color": s["text"],
         "whiteSpace": "nowrap",
+        # v0.32 — tabular-nums so "1.10" and "1.85" don't jitter width (#26)
+        "fontVariantNumeric": "tabular-nums",
     })
 
 

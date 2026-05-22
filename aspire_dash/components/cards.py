@@ -124,15 +124,17 @@ def graph_card(figure, config=None, title=None, style=None, **graph_kwargs):
 # ── Info Box ─────────────────────────────────────────────────────────────────
 
 def info_box(title, children, icon="fa-solid fa-circle-info"):
-    """Blue info/tip box (like the Budget app status guide)."""
+    """Aspire-branded info/tip box. v0.32 — was Tailwind blue-500/700;
+    now Aspire blue tokens so it sits in-brand."""
+    from ..theme import ASPIRE
     return html.Div([
         html.Div([
-            html.I(className=icon, style={"color": "#3b82f6", "marginRight": "8px"}),
-            html.Strong(title, style={"color": "#1e40af"}),
+            html.I(className=icon, style={"color": ASPIRE["600"], "marginRight": "8px"}),
+            html.Strong(title, style={"color": ASPIRE["700"]}),
         ], style={"display": "flex", "alignItems": "center", "marginBottom": "8px"}),
         html.Div(children),
     ], style={
-        "background": "#eff6ff", "border": "1px solid #bfdbfe",
+        "background": "#eff6ff", "border": f"1px solid {ASPIRE['200']}",
         "borderRadius": "8px", "padding": "12px 16px", "marginBottom": "16px",
     })
 

@@ -50,9 +50,11 @@ def badge(text, color="gray", pill=True):
     return html.Span(text, style={
         "display": "inline-flex", "alignItems": "center",
         "padding": "2px 10px",
-        "borderRadius": f"{RADIUS_FULL}px" if pill else "8px",   # v0.24: canonical
+        "borderRadius": f"{RADIUS_FULL}px" if pill else "8px",
         "fontSize": "11px", "fontWeight": "600",
         "background": c["bg"], "color": c["color"],
+        # v0.32 — tabular-nums for badge counts (audit #27)
+        "fontVariantNumeric": "tabular-nums",
     })
 
 
@@ -256,11 +258,12 @@ def freshness_banner(
                 txt = f"{r.get('label', '—')} · never"
             else:
                 txt = f"{r.get('label', '—')} · {int(days)}d ago"
+            # v0.32 — drop marginRight; parent uses gap (audit #13)
             chips.append(html.Div(txt, style={
                 "background": bg, "color": fg,
                 "padding": "4px 10px", "borderRadius": "999px",
                 "fontSize": "12px", "fontWeight": "600",
-                "marginRight": "8px", "display": "inline-block",
+                "display": "inline-block",
                 "fontVariantNumeric": "tabular-nums",
             }))
 
@@ -278,6 +281,7 @@ def freshness_banner(
         "padding": "10px 16px",
         "marginBottom": "16px",
         "display": "flex", "alignItems": "center", "flexWrap": "wrap",
+        "gap": "8px",                  # v0.32 — was per-chip marginRight (#13)
         "boxShadow": SHADOW_SM,
     })
 
