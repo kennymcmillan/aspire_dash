@@ -4,6 +4,28 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.22.2] — 2026-05-22
+
+### Fixed (CRITICAL — every app using normalised_path was 500-ing on every click)
+
+- **`normalised_path()` now handles already-bare paths.** Dash
+  automatically strips `requests_pathname_prefix` from `dcc.Location`
+  pathnames before passing them to callbacks. So a Connect URL like
+  `/content/<GUID>/whoop` arrives at the callback as just `/whoop`.
+  `dash.strip_relative_path()` then raised `UnsupportedRelativePath`
+  because the input no longer had the prefix it expected.
+
+  Result: every router callback wrapped with `normalised_path` 500'd
+  on every click. Whoop / Medical / GCC Games — all affected — none of
+  their pages opened. The traceback only showed in the Connect job
+  log, which is why it took a screen of "404 / blank page" reports
+  to surface.
+
+  Now catches `UnsupportedRelativePath` and treats already-bare
+  pathnames as a no-op (which is exactly what we want).
+
+  Every app inherits the fix on next SHA bump.
+
 ## [0.22.1] — 2026-05-22
 
 ### Fixed (CRITICAL — brand subdir assets not copied)

@@ -71,7 +71,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.22.1"
+__version__ = "0.22.2"
 
 
 def normalised_path(pathname: str | None) -> str:
@@ -96,7 +96,17 @@ def normalised_path(pathname: str | None) -> str:
     the root path.
     """
     import dash as _dash
-    relative = str(_dash.strip_relative_path(pathname or "/")) or ""
+    pathname = pathname or "/"
+    try:
+        relative = str(_dash.strip_relative_path(pathname)) or ""
+    except _dash.exceptions.UnsupportedRelativePath:
+        # Pathname is ALREADY bare — Dash auto-strips the
+        # requests_pathname_prefix from dcc.Location values before
+        # passing to callbacks, so /content/<GUID>/foo arrives as just
+        # /foo. strip_relative_path then raises because the input no
+        # longer has the prefix it expects. Treat already-bare paths
+        # as a no-op (which is what we want).
+        relative = pathname
     relative = relative.strip("/")
     return "/" + relative if relative else "/"
 
