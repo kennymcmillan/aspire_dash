@@ -258,7 +258,69 @@ def layout():
             "    ],\n"
             ")"
         ),
+
+        # ── radial_multi_track — concentric ring chart (v0.35) ──────────
+        section("radial_multi_track — concentric ring chart (v0.35)",
+                 "Three (or more) metrics stacked as concentric rings — "
+                 "outer/middle/inner. Apex-style. Packs multiple progress "
+                 "signals into one tile. Better than 3-ring row for "
+                 "small dashboard tiles."),
+        html.Div([
+            _radial_demo(),
+        ], style={"display": "grid",
+                   "gridTemplateColumns": "repeat(2, 1fr)",
+                   "gap": "16px", "marginBottom": "12px"}),
+        code_block(
+            "from aspire_dash.v12_helpers import radial_multi_track\n\n"
+            "radial_multi_track([\n"
+            '    {"value": "68%", "pct": 68, "label": "Recovery", "color": "#16a34a"},\n'
+            '    {"value": "75%", "pct": 75, "label": "Strain",   "color": "#004185"},\n'
+            '    {"value": "72%", "pct": 72, "label": "Sleep",    "color": "#fbb800"},\n'
+            "])"
+        ),
+
+        # ── progress_stack — stacked horizontal bar (v0.33) ─────────────
+        section("progress_stack — stacked horizontal bar (v0.33)",
+                 "Tremor 'Category Bar' pattern — proportional segments "
+                 "with inline labels + legend strip below. For budget "
+                 "allocations, athlete-readiness breakdowns, sport-medal "
+                 "splits."),
+        html.Div([
+            _progress_demo(),
+        ], style={"marginBottom": "12px"}),
+        code_block(
+            "from aspire_dash.v12_helpers import progress_stack\n\n"
+            "progress_stack(\n"
+            "    label='Squad readiness breakdown',\n"
+            "    items=[\n"
+            '        {"label": "Ready",   "value": 12, "color": "#16a34a"},\n'
+            '        {"label": "Caution", "value":  6, "color": "#d97706"},\n'
+            '        {"label": "Alert",   "value":  3, "color": "#dc2626"},\n'
+            "    ],\n"
+            ")"
+        ),
     ], style={"padding": "24px"})
+
+
+def _radial_demo():
+    from aspire_dash.v12_helpers import radial_multi_track
+    return radial_multi_track([
+        {"value": "68%", "pct": 68, "label": "Recovery", "color": "#16a34a"},
+        {"value": "75%", "pct": 75, "label": "Strain",   "color": "#004185"},
+        {"value": "72%", "pct": 72, "label": "Sleep",    "color": "#fbb800"},
+    ])
+
+
+def _progress_demo():
+    from aspire_dash.v12_helpers import progress_stack
+    return progress_stack(
+        label="Squad readiness breakdown",
+        items=[
+            {"label": "Ready",   "value": 12, "color": "#16a34a"},
+            {"label": "Caution", "value":  6, "color": "#d97706"},
+            {"label": "Alert",   "value":  3, "color": "#dc2626"},
+        ],
+    )
 
 
 def _card_v2(name, meta, zone, photo_url, rings, is_target=False):
