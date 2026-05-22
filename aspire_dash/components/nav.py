@@ -211,15 +211,22 @@ def sidebar(
         # get_relative_path so the link resolves correctly when the app
         # is mounted at a subpath (e.g. Posit Connect's /content/<GUID>/
         # root). Raw href="/skeletons" would bounce to the Connect root,
-        # not the app — clicks would silently 404. Matches topnav()'s
-        # wiring. Falls back to the raw href when called outside a Dash
-        # app context (unit tests, ad-hoc preview).
+        # not the app — clicks would silently 404. Falls back to the raw
+        # href when called outside a Dash app context (unit tests).
         try:
             link_href = dash.get_relative_path(item["href"])
         except Exception:
             link_href = item["href"]
+        # Use html.A (plain anchor) instead of dcc.Link for sidebar nav.
+        # dcc.Link does client-side routing via React Router, which has
+        # had intermittent issues with Connect subpaths + SSO + scrollable
+        # containers — sidebar items deep in the scroll area sometimes
+        # don't navigate on click. html.A does a full-page nav (~200 ms
+        # extra) but works in every Connect/proxy/SSO/cached-bundle
+        # scenario. Topnav can stay on dcc.Link because it sits above the
+        # fold and is always interactive.
         nav_children.append(
-            dcc.Link(
+            html.A(
                 [icon_el, item["label"]],
                 href=link_href,
                 className="sidebar-link",

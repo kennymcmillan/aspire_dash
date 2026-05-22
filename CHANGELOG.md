@@ -4,6 +4,30 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.12.1] — 2026-05-22
+
+### Fixed (CRITICAL — sidebar nav broken on Connect)
+
+- **Sidebar links now navigate correctly on Posit Connect.** Two-layer
+  fix because the bug surfaced again in the VALD app + showcase:
+
+  1. **`setup_app()` now reads `DASH_URL_BASE_PATHNAME` env var** (set by
+     Connect for Python apps) and applies it to `app.config` —
+     `requests_pathname_prefix` / `routes_pathname_prefix` /
+     `url_base_pathname`. Without this, `dash.get_relative_path()` at
+     module-load time always returned `"/foo"` instead of
+     `"/content/<GUID>/foo"`, so clicks 404'd. **Every consumer app
+     gets this fix for free on the next bump** — no app-side code change
+     needed. Documented in [[feedback_connect_relative_path_links]].
+
+  2. **Sidebar uses `html.A` instead of `dcc.Link`.** dcc.Link does
+     client-side React-Router routing which has intermittent issues
+     with Connect subpath + SSO + scrollable containers. html.A does a
+     full-page nav (~200 ms extra) but is bulletproof across every
+     Connect/proxy/SSO/cached-bundle scenario. Topnav stays on dcc.Link
+     (it sits above the fold + the prefix fix now makes the href
+     correct).
+
 ## [0.12.0] — 2026-05-22
 
 10 new components ported from the `tools/forge/` Tailwind+DaisyUI

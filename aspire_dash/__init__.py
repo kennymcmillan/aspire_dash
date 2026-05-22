@@ -71,7 +71,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.12.0"
+__version__ = "0.12.2"
 
 # ── External stylesheets every Aspire app should load ────────────────────────
 STYLESHEETS = [
@@ -117,3 +117,27 @@ def setup_app(app):
                 shutil.copy2(src, dst)
 
     # Sidebar toggle is handled by sidebar_toggle.js (no callback needed)
+
+    # ── Connect subpath fix ────────────────────────────────────────────
+    # Posit Connect serves apps at /content/<GUID>/. Dash defaults its
+    # requests_pathname_prefix to "/", so dash.get_relative_path() built
+    # at module-load time returns the WRONG href ("/whoop" instead of
+    # "/content/<GUID>/whoop"). Sidebar/topnav links built before the
+    # first request get baked with the wrong prefix → clicks 404.
+    #
+    # Connect sets DASH_URL_BASE_PATHNAME for Python apps. We honour it
+    # here so every aspire_dash consumer is automatically Connect-safe
+    # without any per-app config.
+    # (os is already imported at module top — re-importing here marked
+    # it as a local variable, triggering UnboundLocalError on line 108
+    # via Python's scoping rules.)
+    prefix = os.environ.get("DASH_URL_BASE_PATHNAME")
+    if prefix and prefix != "/":
+        # Ensure leading + trailing slash (Dash requirement)
+        if not prefix.startswith("/"): prefix = "/" + prefix
+        if not prefix.endswith("/"):   prefix = prefix + "/"
+        app.config.update({
+            "requests_pathname_prefix": prefix,
+            "routes_pathname_prefix":   prefix,
+            "url_base_pathname":         prefix,
+        })
