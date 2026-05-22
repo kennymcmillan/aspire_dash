@@ -71,7 +71,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.22.0"
+__version__ = "0.22.1"
 
 
 def normalised_path(pathname: str | None) -> str:
@@ -134,12 +134,18 @@ def setup_app(app):
 
     os.makedirs(app_assets, exist_ok=True)
 
-    # Copy each shared asset
-    for filename in os.listdir(_ASSETS_DIR):
-        src = os.path.join(_ASSETS_DIR, filename)
-        dst = os.path.join(app_assets, filename)
-        if os.path.isfile(src):
-            # Only overwrite if source is newer or file doesn't exist
+    # Copy every shared asset — INCLUDING subdirectories.
+    # v0.20 added brand/partners/ + brand/sports/ subdirs (Aspire logo +
+    # federation logos + sport heroes). Previous code did a flat listdir
+    # + isfile check that silently skipped subdirs, so consumer apps
+    # never received those files and the /assets/brand/... URLs 404'd.
+    for root, dirs, files in os.walk(_ASSETS_DIR):
+        rel = os.path.relpath(root, _ASSETS_DIR)
+        dst_dir = app_assets if rel == "." else os.path.join(app_assets, rel)
+        os.makedirs(dst_dir, exist_ok=True)
+        for f in files:
+            src = os.path.join(root, f)
+            dst = os.path.join(dst_dir, f)
             if not os.path.exists(dst) or os.path.getmtime(src) > os.path.getmtime(dst):
                 shutil.copy2(src, dst)
 

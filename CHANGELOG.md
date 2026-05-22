@@ -4,6 +4,21 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.22.1] — 2026-05-22
+
+### Fixed (CRITICAL — brand subdir assets not copied)
+
+- **`setup_app()` now recurses into asset subdirectories.** Previous
+  code did `for filename in os.listdir(_ASSETS_DIR): if os.path.isfile`
+  — which silently skipped the `brand/` subdirectory introduced in
+  v0.20. Result: consumer apps never received the federation logos /
+  sport heroes / Aspire SVG, and every `/assets/brand/...` URL 404'd.
+  Now uses `os.walk()` and copies the whole tree, preserving structure.
+
+  User report: "in brand assets, I can't see any of the logos" while
+  legacy `/assets/aspire-logo.png` (top-level file) rendered fine —
+  the exact symptom of the subdir-skip bug.
+
 ## [0.22.0] — 2026-05-22
 
 ### Added — `aspire_dash.vald` (exact ForceDecks compositions)
