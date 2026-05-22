@@ -4,6 +4,47 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.15.0] — 2026-05-22
+
+### Added — `aspire_dash.financial` module (scoped report style)
+
+Distinct visual register from the default athletic-modern look. Use
+this scope for monthly briefs, variance reports, quarterly KPI
+summaries, spend dashboards — anything where the reader expects
+"clean financial" not "premium analytics".
+
+**Scope class:** wrap your page in `className="financial-report"` to
+opt in. Inside the scope:
+- Heavier value type (28 px bold, tabular-nums)
+- 6 px left accent stripe (vs the athletic 4 px)
+- Slate-50 KPI backgrounds (vs pure white)
+- No card hover lift (read-only artefacts, not interactive)
+- More white space (16-20 px padding)
+- Softer H1/H2 (24 px / 16 px, no marketing letter-spacing)
+
+**Helpers:**
+
+- **`financial_kpi(label, value, sub, accent)`** — heavier KPI tile.
+  6 accent stripes (aspire / secondary / gold / success / warning / danger).
+- **`variance_cell(value, currency)`** — coloured ▲▼ delta cell. Red for
+  negative, green for positive. Currency-formatted via `fmt_currency`.
+- **`totals_row(label, value, currency)`** — bold totals strip with
+  slate-50 bg + 2 px top border.
+- **`financial_tab_bar(tabs, value, tab_id)`** — clean underline tabs
+  (vs the athletic chip toggle).
+- **`financial_table(records, columns, totals_filter, negative_columns,
+  right_align_columns, id)`** — wrapped `dash_table.DataTable` with the
+  budget-app SUMMARY_TABLE_STYLE pattern: aspire-blue header,
+  slate-50 TOTAL row when filter provided, red+bold negatives.
+
+Promoted from aspire-budget-dashboard. Outside the
+`.financial-report` scope the athletic style is unchanged — both
+visual registers coexist in the same app if needed.
+
+### Demo
+
+- `/financial` page in showcase — full BEFORE/AFTER inside the scope.
+
 ## [0.14.0] — 2026-05-22
 
 ### Added — `aspire_dash.medical` module (extracted from medical-dashboard)

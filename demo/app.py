@@ -69,6 +69,8 @@ nav = [
      "icon": "fa-solid fa-heart-pulse"},
     {"label": "Medical",            "href": "/medical",
      "icon": "fa-solid fa-stethoscope"},
+    {"label": "Financial reports",  "href": "/financial",
+     "icon": "fa-solid fa-money-bill-trend-up"},
 
     # Wearables / performance science
     {"label": "Whoop",              "href": "/whoop",

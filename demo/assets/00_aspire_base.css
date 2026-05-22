@@ -2031,3 +2031,117 @@ html.dark .period-pills label:has(input:checked) {
 .athlete-mini-card div[style*="position: relative"] .markdown-text p {
     margin: 0;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FINANCIAL REPORT — scoped variant for monthly briefs, variance reports,
+   spend dashboards. Heavier type, more white space, no hover lift.
+   Apply via:  html.Div([...], className="financial-report")
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.financial-report {
+    font-family: 'Poppins', sans-serif;
+    color: var(--slate-800);
+}
+/* No hover lift on financial cards — they're read-only artefacts */
+.financial-report .card:hover,
+.financial-report .budget-card:hover,
+.financial-report .fr-kpi:hover {
+    transform: none;
+    box-shadow: var(--elev-1);
+}
+
+/* Financial KPI tile — bigger, heavier */
+.financial-report .fr-kpi,
+.fr-kpi {
+    flex: 1;
+    min-width: 180px;
+    padding: 16px 20px;
+    margin: 4px;
+    background: #f7f9fc;
+    border-left: 6px solid var(--aspire-600);
+    border-radius: 6px;
+    transition: none;
+}
+.fr-kpi.accent-aspire    { border-left-color: var(--aspire-600); }
+.fr-kpi.accent-secondary { border-left-color: var(--aspire-secondary); }
+.fr-kpi.accent-gold      { border-left-color: var(--gold, #fbb800); }
+.fr-kpi.accent-success   { border-left-color: var(--success, #16a34a); }
+.fr-kpi.accent-warning   { border-left-color: var(--warning, #d97706); }
+.fr-kpi.accent-danger    { border-left-color: var(--danger,  #dc2626); }
+
+.fr-kpi-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--slate-600);
+    margin-bottom: 6px;
+}
+.fr-kpi-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--slate-900);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+.fr-kpi-sub {
+    font-size: 12px;
+    color: var(--slate-500);
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+/* Financial totals row */
+.fr-totals-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    margin-top: 6px;
+    background: var(--slate-50);
+    border-top: 2px solid var(--slate-700);
+    border-radius: 0 0 6px 6px;
+    font-size: 14px;
+}
+
+/* Financial tabs — clean underline, no chips */
+.financial-report .fr-tabs,
+.fr-tabs {
+    margin-bottom: 16px;
+}
+.fr-tab,
+.financial-report .fr-tab {
+    padding: 10px 18px !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--slate-500) !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    border-bottom: 2px solid transparent !important;
+    transition: color 0.15s, border-color 0.15s;
+}
+.fr-tab:hover {
+    color: var(--aspire-600) !important;
+}
+.fr-tab-selected,
+.financial-report .fr-tab-selected {
+    color: var(--aspire-600) !important;
+    border-bottom-color: var(--aspire-600) !important;
+    background: transparent !important;
+}
+
+/* Heading inside a financial report — softer than the marketing 5 px
+   letter-spacing, more "executive report" feel */
+.financial-report h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin: 0 0 6px 0;
+}
+.financial-report h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--slate-700);
+    margin: 24px 0 8px 0;
+    letter-spacing: -0.01em;
+}
