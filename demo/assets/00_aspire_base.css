@@ -1809,6 +1809,30 @@ html.dark .period-pills label:has(input:checked) {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    color: white !important;          /* high-contrast on aspire-blue bg */
+}
+/* Filter, sort, and menu icons in the header — force white so they
+   match the text and don't disappear into the dark blue background. */
+.ag-theme-aspire .ag-header-icon,
+.ag-theme-quartz.aspire-themed .ag-header-icon,
+.ag-theme-alpine.aspire-themed .ag-header-icon,
+.ag-theme-quartz.aspire-themed .ag-icon,
+.ag-theme-alpine.aspire-themed .ag-icon {
+    color: rgba(255,255,255,0.85);
+}
+.ag-theme-quartz.aspire-themed .ag-header-cell:hover .ag-icon,
+.ag-theme-alpine.aspire-themed .ag-header-cell:hover .ag-icon {
+    color: white;
+}
+/* Group header titles (Lesson / Fencing / etc.) — same white treatment */
+.ag-theme-aspire .ag-header-group-cell-label,
+.ag-theme-quartz.aspire-themed .ag-header-group-cell-label,
+.ag-theme-alpine.aspire-themed .ag-header-group-cell-label {
+    color: white !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 11px;
 }
 
 
