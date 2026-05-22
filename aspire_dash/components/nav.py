@@ -21,16 +21,29 @@ __all__ = ['topnav', 'register_topnav_active', 'sidebar', 'hamburger_button', 'r
 
 
 def _safe_relative(path: str) -> str:
-    """`dash.get_relative_path(path)` with a no-op fallback when called
-    outside a Dash app context (unit tests, ad-hoc preview).
+    """`dash.get_relative_path(path)` made IDEMPOTENT + safe outside a
+    Dash app context.
 
-    Used by sidebar/topnav for asset URLs + link hrefs so they resolve
-    under Connect's /content/<GUID>/ subpath when an app is running,
-    while staying importable in test fixtures."""
-    try:
-        return dash.get_relative_path(path)
-    except Exception:
+    Why idempotent: every older app pre-wraps its nav hrefs with
+    `dash.get_relative_path()` before passing to `sidebar()` (because
+    pre-v0.10.1 sidebar didn't wrap internally). Sidebar now wraps too
+    → double-prefix → /content/<GUID>/content/<GUID>/medals → 404.
+
+    Detection: if `path` already starts with the active prefix, it's
+    already correct — return as-is. Otherwise apply get_relative_path.
+
+    Also catches the no-app-context case (unit tests, ad-hoc preview)
+    and falls back to the raw path."""
+    if not path:
         return path
+    try:
+        prefix = dash.get_relative_path("/")
+    except Exception:
+        return path                       # no app context — pass through
+    # Already prefixed? Skip the second wrap.
+    if prefix != "/" and path.startswith(prefix):
+        return path
+    return dash.get_relative_path(path)
 
 
 # ── Top Nav ──────────────────────────────────────────────────────────────────
@@ -83,7 +96,7 @@ def topnav(
                     className="topnav-link",
                     id=item.get("id", ""),
                 ),
-                href=dash.get_relative_path(item["href"]),
+                href=_safe_relative(item["href"]),    # idempotent — see v0.22.3
                 style={"textDecoration": "none"},
             )
         )
@@ -227,10 +240,7 @@ def sidebar(
         # root). Raw href="/skeletons" would bounce to the Connect root,
         # not the app — clicks would silently 404. Falls back to the raw
         # href when called outside a Dash app context (unit tests).
-        try:
-            link_href = dash.get_relative_path(item["href"])
-        except Exception:
-            link_href = item["href"]
+        link_href = _safe_relative(item["href"])   # idempotent — see v0.22.3
         # Use html.A (plain anchor) instead of dcc.Link for sidebar nav.
         # dcc.Link does client-side routing via React Router, which has
         # had intermittent issues with Connect subpaths + SSO + scrollable

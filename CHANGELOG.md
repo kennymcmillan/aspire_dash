@@ -4,6 +4,26 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.22.3] — 2026-05-22
+
+### Fixed (CRITICAL — sidebar 404s on apps that pre-wrap hrefs)
+
+- **`_safe_relative()` is now idempotent.** Apps that were written
+  BEFORE v0.10.1 (when href-wrapping was pushed into the library)
+  still pre-wrap their nav hrefs with `dash.get_relative_path(...)`
+  before passing to `sidebar()` (defensive habit). v0.10.1+ then
+  wraps AGAIN → `/content/<GUID>/content/<GUID>/medals` → 404.
+
+  Demo + Whoop work because their nav_items use BARE paths. GCC,
+  Medical, Endurance all pre-wrap → all 404'd on sidebar clicks.
+
+  Fix: `_safe_relative()` now checks `path.startswith(prefix)`. If
+  the path is already prefixed, return as-is. Otherwise wrap once.
+  Topnav + sidebar both route through `_safe_relative()` now (topnav
+  was still calling `dash.get_relative_path` directly).
+
+  **Every app — pre-wrapping or not — works on next SHA bump.**
+
 ## [0.22.2] — 2026-05-22
 
 ### Fixed (CRITICAL — every app using normalised_path was 500-ing on every click)

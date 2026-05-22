@@ -106,3 +106,36 @@ def test_normalised_path_without_app_context():
     assert normalised_path("/whoop") == "/whoop"
     assert normalised_path("/")      == "/"
     assert normalised_path(None)     == "/"
+
+
+# ── 5. _safe_relative idempotence (v0.22.3 regression) ──────────────────────
+
+def test_safe_relative_idempotent_on_already_prefixed_paths():
+    """Apps written pre-v0.10.1 pre-wrap their nav hrefs with
+    dash.get_relative_path. The sidebar/topnav helpers then wrap again
+    internally. Without the idempotence check, every URL got
+    double-prefixed → 404 in production. This pins the contract."""
+    from aspire_dash.components.nav import _safe_relative
+    prefix = "/content/abc-def-123/"
+    a = dash.Dash(
+        __name__,
+        requests_pathname_prefix=prefix,
+        routes_pathname_prefix=prefix,
+        suppress_callback_exceptions=True,
+    )
+    # Bare path → prefixed
+    assert _safe_relative("/medals")  == f"{prefix}medals"
+    assert _safe_relative("/")        == prefix
+    # ALREADY prefixed path → returned as-is (no double-wrap)
+    already_wrapped = f"{prefix}medals"
+    assert _safe_relative(already_wrapped) == already_wrapped
+    assert _safe_relative(prefix)          == prefix
+    # The double-prefix nightmare that v0.22.3 fixes
+    assert not _safe_relative(already_wrapped).startswith(
+        f"{prefix}{prefix.lstrip('/')}"
+    ), "double-prefix bug returned!"
+
+
+# (No-app-context fallback for _safe_relative — implicitly covered by
+# test_normalised_path_without_app_context above. Dash's global app
+# CONFIG is hard to reset between tests; reliable check is "doesn't raise".)

@@ -71,7 +71,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.22.2"
+__version__ = "0.22.3"
 
 
 def normalised_path(pathname: str | None) -> str:
