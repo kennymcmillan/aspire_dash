@@ -4,6 +4,33 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.30.1] — 2026-05-22
+
+### Fixed (CRITICAL — whoop rings lost per-metric colour)
+
+User report: *"the whoop visuals look worse — they have lost their color
+per ring and percentage"* + *"the gradient was nicer"*.
+
+Two bugs in `athlete_card_v2` (v0.26) surfaced after whoop migration:
+
+1. **Per-ring colour was dropped.** `athlete_card_v2` called
+   `metric_ring(value, pct, label, size)` without passing the ring's
+   `color`, so every ring rendered in the default Aspire blue tone.
+   Recovery / Strain / Sleep all looked identical instead of green /
+   amber / red per metric.
+
+   Fix: `metric_ring(..., color="#hex")` parameter added. When provided,
+   it overrides the tone preset. `athlete_card_v2` now reads `r["color"]`
+   from each ring dict and plumbs it through.
+
+2. **Ring stroke was flat — original had a gradient.** Restored:
+   each ring now has an inline `<linearGradient>` going from
+   `stroke` (light, 85% opacity at top-left) to `_darken(stroke, 0.70)`
+   (rich, 100% opacity at bottom-right). Premium Whoop-style sheen
+   per ring.
+
+Both fixes auto-apply via SHA bump — no consumer code change.
+
 ## [0.30.0] — 2026-05-22
 
 ### Close the v0.29 honest gaps

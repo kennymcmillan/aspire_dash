@@ -361,6 +361,7 @@ def metric_ring(
     *,
     label: str = "",
     tone: str = "aspire",
+    color: str | None = None,    # v0.30.1 — overrides tone when given
     size: int = 80,
     unit: str = "",
 ):
@@ -370,11 +371,33 @@ def metric_ring(
     (0-100) separately — they don't have to match (e.g. value="7h12"
     while pct=72 if 7h12 of 10h goal).
 
+    `color` (v0.30.1+): pass an explicit hex (e.g. ``"#16a34a"``) to
+    override the tone preset. Used by `athlete_card_v2` to honour
+    per-ring colours (recovery green/amber/red varies by score, can't
+    be expressed as a single tone).
+
     >>> metric_ring(68, pct=68, label="Recovery", tone="good")
-    >>> metric_ring("7h12", pct=72, label="Sleep", tone="aspire")
+    >>> metric_ring(82, pct=82, label="Recovery", color="#16a34a")  # explicit
     """
     import math
-    stroke, text_color = _TONE_COLOURS.get(tone, _TONE_COLOURS["aspire"])
+    import uuid
+    if color:
+        stroke = color
+        # derive a darker text colour from the stroke (just darken slightly)
+        text_color = color
+    else:
+        stroke, text_color = _TONE_COLOURS.get(tone, _TONE_COLOURS["aspire"])
+
+    # v0.30.1 — light → mid → dark gradient stroke (was flat colour).
+    # Derive a darker stop by reducing each RGB channel by ~25%.
+    def _darken(hex_, factor=0.75):
+        h = hex_.lstrip("#")
+        if len(h) == 3: h = "".join(c*2 for c in h)
+        r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+        return f"#{int(r*factor):02x}{int(g*factor):02x}{int(b*factor):02x}"
+
+    grad_id = f"g{uuid.uuid4().hex[:8]}"
+    stroke_dark = _darken(stroke, 0.70)
     pct = max(0, min(100, pct or 0))
     sw = 6 if size <= 80 else 8
     r = (size - sw) / 2
@@ -385,13 +408,21 @@ def metric_ring(
     fs_value = "22px" if size >= 100 else "16px" if size >= 70 else "12px"
     fs_label = "10px"
 
+    # v0.30.1 — gradient stroke (was flat) via inline <linearGradient>.
+    # Light tint at the top of the arc → richer colour at the end.
     svg_inner = (
         f'<svg width="{size}" height="{size}" '
         f'style="transform:rotate(-90deg)" xmlns="http://www.w3.org/2000/svg">'
+        f'<defs>'
+        f'<linearGradient id="{grad_id}" x1="0%" y1="0%" x2="100%" y2="100%">'
+        f'<stop offset="0%" stop-color="{stroke}" stop-opacity="0.85"/>'
+        f'<stop offset="100%" stop-color="{stroke_dark}" stop-opacity="1"/>'
+        f'</linearGradient>'
+        f'</defs>'
         f'<circle cx="{cx}" cy="{cx}" r="{r}" fill="none" '
         f'stroke="#e2e8f0" stroke-width="{sw}"/>'
         f'<circle cx="{cx}" cy="{cx}" r="{r}" fill="none" '
-        f'stroke="{stroke}" stroke-width="{sw}" '
+        f'stroke="url(#{grad_id})" stroke-width="{sw}" '
         f'stroke-dasharray="{circ:.2f}" stroke-dashoffset="{dash_offset:.2f}" '
         f'stroke-linecap="round" '
         f'style="transition:stroke-dashoffset 0.5s ease-out"/>'
@@ -579,12 +610,17 @@ def athlete_card_v2(
     ], className="acv2-header")
 
     # Ring row — 3 rings via metric_ring()
+    # v0.30.1 — honour per-ring `color` (hex) OR `tone` (preset) instead
+    # of defaulting everything to aspire blue (Whoop: each metric has its
+    # own dynamic colour from get_recovery_color / get_strain_color etc.)
     ring_blocks = []
     for r in rings:
         ring_blocks.append(html.Div([
             metric_ring(
                 r["value"], r["pct"],
-                label="",                      # label rendered below SVG
+                label="",                       # label rendered below SVG
+                color=r.get("color"),           # explicit hex wins
+                tone=r.get("tone", "aspire"),   # tone preset fallback
                 size=58,
             ),
             html.Div(r.get("label", ""), className="acv2-ring-label"),
