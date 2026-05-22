@@ -67,14 +67,14 @@ def macro_tile(label: str, value: float, target: float | None = None, *,
                 "width": f"{min(100, pct)}%",
                 "height": "100%",
                 "background": bar_color,
-                "borderRadius": "3px",
+                "borderRadius": "4px",   # v0.24: on-scale (was 3)
                 "transition": "width 0.3s ease-out",
             }),
         ], style={
             "marginTop": "8px",
             "height": "5px",
             "background": SLATE["100"],
-            "borderRadius": "3px",
+            "borderRadius": "4px",   # v0.24: on-scale (was 3)
             "overflow": "hidden",
         }))
 

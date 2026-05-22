@@ -262,7 +262,7 @@ def rollup_chips(items: list[dict], formatter=None):
             "background": "white",
             "border": f"1px solid {SLATE['200']}",
             "borderLeft": f"3px solid {color}",
-            "borderRadius": "6px",
+            "borderRadius": "8px",   # v0.24: canonical (was 6)
             "marginRight": "8px", "marginBottom": "8px",
             "display": "inline-block",
         }))

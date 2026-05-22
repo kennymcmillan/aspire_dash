@@ -115,7 +115,7 @@ def skel_metric_tiles(n: int = 4, size: str = "lg"):
         ], style={"padding": "12px 16px" if size == "lg" else "8px 12px",
                   "background": "white",
                   "border": "1px solid #e2e8f0",
-                  "borderRadius": "8px" if size == "lg" else "6px",
+                  "borderRadius": "8px",   # v0.24: canonical (was 6/8 split)
                   "height": height}),
                 md=int(12 / n) if n else 3, className="mb-2")
         for _ in range(n)

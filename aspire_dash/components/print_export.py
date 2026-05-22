@@ -105,12 +105,12 @@ def a4_report_shell(
                 "Print / Save PDF",
             ], id=print_button_id, n_clicks=0,
                style={"background": "#004185", "color": "white",
-                       "border": "none", "borderRadius": "5px",
-                       "padding": "8px 14px", "fontSize": "13px",
+                       "border": "none", "borderRadius": "8px",   # v0.24: canonical
+                       "padding": "8px 16px", "fontSize": "13px", # v0.24: on-scale
                        "cursor": "pointer"}),
         ], className="no-print",
            style={"display": "flex", "alignItems": "center",
-                   "padding": "10px 20px", "background": "#f8fafc",
+                   "padding": "12px 20px", "background": "#f7f9fc",  # v0.24: on-scale + BG_PAGE
                    "borderBottom": "1px solid #e2e8f0"}),
 
         # A4 page
@@ -120,8 +120,8 @@ def a4_report_shell(
                 html.Div([
                     html.I(className="fa-solid fa-medal",
                            style={"color": "white", "fontSize": "14px"}),
-                ], style={"background": "#004185", "padding": "6px 8px",
-                           "borderRadius": "6px",
+                ], style={"background": "#004185", "padding": "8px",   # v0.24: on-scale
+                           "borderRadius": "8px",                       # v0.24: canonical
                            "display": "inline-flex",
                            "alignItems": "center"}),
                 html.Div([

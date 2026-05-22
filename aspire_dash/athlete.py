@@ -17,7 +17,7 @@ import dash
 from dash import (Input, Output, State, callback_context, dcc, html, no_update)
 import dash_bootstrap_components as dbc
 
-from .theme import ASPIRE, SLATE, GOLD, ASPIRE_NAVY, RADIUS_LG, SHADOW_SM
+from .theme import ASPIRE, SLATE, GOLD, ASPIRE_NAVY, RADIUS_LG, SHADOW_SM, BG_PAGE
 
 
 # ── Avatar ─────────────────────────────────────────────────────────────────
@@ -186,7 +186,7 @@ def _picker_trigger_button():
             "backgroundColor": ASPIRE_NAVY,
             "color": "#ffffff",
             "border": "none",
-            "padding": "9px 18px",
+            "padding": "8px 16px",   # v0.24: on 4/8 scale (was 9/18)
             "fontSize": "0.92rem",
             "fontWeight": "600",
             "borderRadius": "8px",
@@ -216,7 +216,7 @@ def _picker_selected_chip(athlete: dict):
     if is_target:
         sub_bits.append(html.Span("TARGET", style={
             "backgroundColor": GOLD, "color": ASPIRE_NAVY,
-            "padding": "1px 6px", "borderRadius": "3px",
+            "padding": "2px 6px", "borderRadius": "4px",   # v0.24: on-scale
             "fontSize": "0.65rem", "fontWeight": "700",
             "marginLeft": "6px", "letterSpacing": "0.4px",
         }))
@@ -248,8 +248,8 @@ def _picker_selected_chip(athlete: dict):
                   "alignItems": "flex-end"}),
     ], style={
         "width": "280px", "padding": "8px 12px",
-        "border": f"1px solid {SLATE['200']}", "borderRadius": "10px",
-        "backgroundColor": "#f8fafc",
+        "border": f"1px solid {SLATE['200']}", "borderRadius": "8px",   # v0.24: canonical
+        "backgroundColor": BG_PAGE,                                      # v0.24: theme token
         "display": "grid",
         "gridTemplateColumns": "44px 1fr auto",
         "gap": "10px", "alignItems": "center",

@@ -190,7 +190,7 @@ def athlete_snapshot_card(
                    "borderBottom": f"1px solid {SLATE['100']}"}))
     return html.Div([
         html.Div(title, style={
-            "padding": "10px 16px", "background": ASPIRE["900"],
+            "padding": "12px 16px", "background": ASPIRE["900"],   # v0.24: on-scale
             "color": "white", "fontSize": "11px", "fontWeight": 600,
             "textTransform": "uppercase", "letterSpacing": "0.5px",
         }),
@@ -229,7 +229,7 @@ def limb_symmetry_bar(label: str, left: float, right: float, *,
                 "background": ASPIRE["600"], "color": "white",
                 "padding": "3px 6px", "fontSize": "10px",
                 "fontWeight": 600,
-                "borderRadius": "3px 0 0 3px",
+                "borderRadius": "4px 0 0 4px",   # v0.24: on-scale
             }),
             # Right bar (slate)
             html.Div(f"{right:.1f} R", style={
@@ -237,9 +237,9 @@ def limb_symmetry_bar(label: str, left: float, right: float, *,
                 "background": SLATE["500"], "color": "white",
                 "padding": "3px 6px", "fontSize": "10px",
                 "fontWeight": 600, "textAlign": "right",
-                "borderRadius": "0 3px 3px 0",
+                "borderRadius": "0 4px 4px 0",   # v0.24: on-scale
             }),
-        ], style={"display": "flex", "borderRadius": "3px",
+        ], style={"display": "flex", "borderRadius": "4px",   # v0.24: on-scale
                    "overflow": "hidden",
                    "border": f"1px solid {color}"}),
-    ], style={"marginBottom": "10px"})
+    ], style={"marginBottom": "12px"})    # v0.24: on-scale (was 10)

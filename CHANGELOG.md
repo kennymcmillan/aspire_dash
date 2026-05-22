@@ -4,6 +4,67 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.24.0] — 2026-05-22
+
+### Brand polish — density + premium micro-interactions
+
+**Off-scale spacing cleanup** (~12 inline radii / paddings that were on
+3/5/6/9/10/12 collapsed to canonical 4/8/12/16/20/24):
+
+- `athlete.py` chip radius 10 → 8, padding 9/18 → 8/16, label `#f8fafc`
+  → `BG_PAGE`, badge radius 3 → 4
+- `sports.py` sport-card radius 10 → 8, source badge 10px → 9999px
+  (proper pill), shadow rgba 0,0,0 → slate-tinted
+- `anthropometric.py` limb-symmetry bar radii 3 → 4, padding 10 → 12
+- `nutrition.py` macro progress 3 → 4
+- `budget.py` rollup chip radius 6 → 8
+- `components/inputs.py` toggle radius 6 → 8, padding 4/10 → 4/12
+- `components/feedback.py` badge non-pill radius 6 → 8
+- `components/print_export.py` button radius 5 → 8, header padding 10
+  → 12, bg `#f8fafc` → `#f7f9fc`
+- `skeletons.py` size-sm radius 6 → 8 (canonical only)
+- `export.py` button radii 6 → 8
+
+**brand.yml — design-system rhythm tokens (NEW classes):**
+
+- **`spacing`** — 4/8/12/16/20/24/32 px scale (xs/sm/md/lg/xl/xxl/xxxl)
+- **`motion`** — ease curves (`ease_out` Stripe-style, `ease_in_out`,
+  `ease_spring`) + duration tokens (fast/normal/slow)
+- **`z_index`** — explicit dropdown/sticky/fixed/modal/popover/tooltip/toast
+- **`borders`** — thin/medium/thick (1/2/4 px, no ambiguous 3)
+- **`tracking`** — letter-spacing scale (tight/normal/wide/wider/widest)
+- **`density`** — compact/comfortable/spacious multipliers
+- **`gold-scale`** — full 10-step gold ramp (was just 2 shades)
+
+Exposed as `theme.SPACING / MOTION / Z_INDEX / BORDERS / TRACKING /
+DENSITY / GOLD_SCALE / EYEBROW_STYLE / TRANSITION_FAST /
+TRANSITION_NORMAL`. Use these everywhere instead of magic strings.
+
+**00_aspire_base.css — premium micro-interactions** (the Linear/Stripe
+feel, applied portfolio-wide via CSS — no per-app code changes):
+
+- **Cards** — brand-tinted hover shadow + 2 px directional lift, opt-out
+  in `.financial-report` scope (read-only artefacts shouldn't bounce)
+- **Buttons** — gradient bg, hover lift, gold-tinted focus ring
+- **Inputs** — `--glow-aspire` focus ring (4 px aspire-600 at 10% alpha)
+  replacing the default Bootstrap blue rectangle
+- **Status pills** — gentle scale on hover (1.03x with spring ease)
+- **Sidebar links** — slide-in from left + brand-tinted bg + 3 px
+  aspire-400 marker on hover; gold marker on active
+- **Topnav links** — branded underline grows from center on hover
+- **Section titles** — fade-up entry animation
+- **AG Grid rows** — aspire-50 hover tint
+- **Header backdrop** — glass effect (blur 14 px + saturate 180%)
+- **Body bg** — subtle slate gradient (depth instead of flat)
+- **`.pulse-gold` class** — opt-in achievement pulse (2s)
+- **`.badge-new` class** — golden shimmer pill for new features
+- **a11y** — full `prefers-reduced-motion` honour
+
+### Migration
+
+No code changes required. Bump SHA pin → every app inherits the polish.
+Forge-tier and legacy modules now look the same.
+
 ## [0.23.0] — 2026-05-22
 
 ### Brand-audit polish pass (B → A across the portfolio)

@@ -293,8 +293,8 @@ def stat_card(label, value, sub=None, icon=None, color="blue"):
         }) if sub else None,
     ], style={
         "background": c["bg"], "border": f"1px solid {c['border']}",
-        "borderRadius": "10px", "padding": "16px",
-        "transition": "transform 0.15s, box-shadow 0.15s",
+        "borderRadius": "8px", "padding": "16px",       # v0.24: canonical 8 px
+        "transition": "transform 0.2s, box-shadow 0.2s, border-color 0.2s",
     })
 
 
@@ -653,7 +653,7 @@ def gradient_stat_card(label, value, emoji="", bg="linear-gradient(135deg, #dbea
         }),
     ], style={
         "padding": "16px", "background": bg,
-        "borderRadius": "12px", "border": "1px solid rgba(0,0,0,0.05)",
+        "borderRadius": "8px", "border": "1px solid rgba(15,23,42,0.05)",   # v0.24: canonical + slate-tinted
     })
 
 
@@ -826,7 +826,7 @@ def source_badge(label, *, federation=None):
     bg, fg = SOURCE_BADGE_COLORS.get(key, SOURCE_BADGE_COLORS["default"])
     return html.Span(label, style={
         "display": "inline-flex", "alignItems": "center",
-        "padding": "2px 8px", "borderRadius": "10px",
+        "padding": "2px 8px", "borderRadius": "9999px",   # v0.24: pill (was off-scale 10px)
         "fontSize": "10.5px", "fontWeight": 700,
         "letterSpacing": "0.4px", "textTransform": "uppercase",
         "background": bg, "color": fg,

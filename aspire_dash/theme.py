@@ -38,6 +38,34 @@ FONT_MONO = BRAND["fonts"]["mono"]
 # Page background — v0.23 token (was hardcoded as #f7f9fc / #f8fafc in 6 modules)
 BG_PAGE = BRAND.get("bg_page", "#f7f9fc")
 
+# ── v0.24 — design-system rhythm tokens ─────────────────────────────────────
+# Each is a dict so you can import the WHOLE table or pick a single key.
+# Encourage: use these everywhere instead of magic strings.
+
+SPACING  = BRAND.get("spacing",  {"xs": 4, "sm": 8, "md": 12, "lg": 16,
+                                    "xl": 20, "xxl": 24, "xxxl": 32})
+MOTION   = BRAND.get("motion",   {})
+Z_INDEX  = BRAND.get("z_index",  {})
+BORDERS  = BRAND.get("borders",  {"thin": "1px", "medium": "2px", "thick": "4px"})
+TRACKING = BRAND.get("tracking", {"normal": "0", "wider": "0.5px"})
+DENSITY  = BRAND.get("density",  {"comfortable": 1.0})
+GOLD_SCALE = {k.split("-")[1]: v for k, v in COLORS.items()
+              if k.startswith("gold-scale-")} or BRAND.get("gold-scale", {})
+
+# Convenience — every component picks the same canonical eyebrow style
+EYEBROW_STYLE = {
+    "fontSize":       "11px",
+    "fontWeight":     600,
+    "color":          SLATE.get("600", "#475569"),
+    "textTransform":  "uppercase",
+    "letterSpacing":  TRACKING.get("wider", "0.5px"),
+    "fontFamily":     FONT_HEADING,
+}
+
+# Convenience — canonical transition
+TRANSITION_FAST = f"all {MOTION.get('duration_fast', '150ms')} {MOTION.get('ease_out', 'ease-out')}"
+TRANSITION_NORMAL = f"all {MOTION.get('duration_normal', '200ms')} {MOTION.get('ease_out', 'ease-out')}"
+
 # ── Sidebar ──────────────────────────────────────────────────────────────────
 SIDEBAR_WIDTH = BRAND["sidebar"]["width"]
 SIDEBAR_BG = BRAND["sidebar"]["bg"]

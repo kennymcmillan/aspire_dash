@@ -58,7 +58,7 @@ def excel_export_button(
             style={
                 "padding": "8px 16px", "cursor": "pointer",
                 "background": bg, "color": "white",
-                "border": "none", "borderRadius": "6px",
+                "border": "none", "borderRadius": "8px",
                 "fontWeight": "600", "fontSize": "13px",
             },
         ),
@@ -85,7 +85,7 @@ def pdf_download_button(
             style={
                 "padding": "8px 16px", "cursor": "pointer",
                 "background": bg, "color": "white",
-                "border": "none", "borderRadius": "6px",
+                "border": "none", "borderRadius": "8px",
                 "fontWeight": "600", "fontSize": "13px",
             },
         ),

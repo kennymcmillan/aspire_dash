@@ -84,7 +84,7 @@ def toggle_group(toggle_id, options, value=None):
             n_clicks=0,
             className=f"toggle-btn {'active' if is_active else ''}",
             style={
-                "padding": "4px 10px", "borderRadius": "6px",
+                "padding": "4px 12px", "borderRadius": "8px",   # v0.24: on-scale
                 "fontSize": "12px", "fontWeight": "600",
                 "color": ACCENT if is_active else SLATE["500"],
                 "background": "white" if is_active else "transparent",

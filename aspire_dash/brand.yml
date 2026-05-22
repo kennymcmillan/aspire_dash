@@ -105,6 +105,75 @@ shadows:
 # Use via theme.BG_PAGE in Python; --aspire-bg-page in CSS
 bg_page: "#f7f9fc"
 
+# ── v0.24 — design-system rhythm tokens ────────────────────────────────────
+# What separates a polished system from "off-the-shelf Dash": every visual
+# rhythm (spacing, motion, depth, type) lives in tokens so every component
+# inherits the same beat. Without these, every component re-invents 8/12/16
+# and the system drifts.
+
+# Spacing scale (px) — the 4/8 grid. No 5/7/9/10/14 randoms.
+spacing:
+  xs:  4    # gap between icon + label, tiny insets
+  sm:  8    # row-gap inside compact components
+  md:  12   # default card-inner gap
+  lg:  16   # default card padding, section gap
+  xl:  20   # large card padding, page padding mobile
+  xxl: 24   # page padding desktop, section-to-section
+  xxxl: 32  # hero margin, ultrawide page padding
+
+# Motion — every transition uses these eases. Match Linear/Stripe feel.
+motion:
+  ease_out:     "cubic-bezier(0.16, 1, 0.3, 1)"     # snappy entry (Stripe pattern)
+  ease_in_out:  "cubic-bezier(0.4, 0, 0.2, 1)"      # default material-ish
+  ease_spring:  "cubic-bezier(0.34, 1.56, 0.64, 1)" # subtle overshoot for buttons
+  duration_fast:   "150ms"   # hover state changes
+  duration_normal: "200ms"   # default
+  duration_slow:   "400ms"   # collapse/expand panels
+
+# Z-index scale — explicit layers, no magic numbers
+z_index:
+  dropdown:    1000
+  sticky:      1020
+  fixed:       1030
+  modal_bg:    1040
+  modal:       1050
+  popover:     1060
+  tooltip:     1070
+  toast:       1080
+
+# Border widths — opinionated 1/2/4 only (skip 3, ambiguous at small sizes)
+borders:
+  thin:   "1px"   # default hairlines (slate-100/200)
+  medium: "2px"   # active tab underline, focus ring outer
+  thick:  "4px"   # left-accent bars on KPI tiles, financial scope
+
+# Letter-spacing scale — uppercase eyebrow labels need 0.4-0.5 px
+tracking:
+  tight:   "-0.02em"   # large display headings
+  normal:  "0"
+  wide:    "0.04em"    # subhead emphasis
+  wider:   "0.5px"     # uppercase eyebrows, status pills
+  widest:  "1.4px"     # section titles (CSS .section-title-v2)
+
+# Density tiers (multiplies spacing — apps can opt in to compact)
+density:
+  compact:     0.75    # data tables, dense list views
+  comfortable: 1.0     # default
+  spacious:   1.25     # marketing/landing pages, financial reports
+
+# Gold accent — full scale so "achievement / target met" gets variants
+# beyond the original 2 shades
+gold-scale:
+  900: "#92400e"   # text on gold bg
+  700: "#a16207"
+  600: "#ca8a04"
+  500: "#eab308"
+  400: "#fbb800"   # PRIMARY gold (from aspire.qa --yellow)
+  300: "#fcd34d"
+  200: "#fde68a"
+  100: "#fef3c7"   # gold-light surface
+  50:  "#fffbeb"   # gold-wash bg
+
 # Logo
 logo:
   filename: "aspire-logo.png"

@@ -50,7 +50,7 @@ def badge(text, color="gray", pill=True):
     return html.Span(text, style={
         "display": "inline-flex", "alignItems": "center",
         "padding": "2px 10px",
-        "borderRadius": f"{RADIUS_FULL}px" if pill else "6px",
+        "borderRadius": f"{RADIUS_FULL}px" if pill else "8px",   # v0.24: canonical
         "fontSize": "11px", "fontWeight": "600",
         "background": c["bg"], "color": c["color"],
     })
