@@ -5,4 +5,4 @@ plotly>=5.18.0
 pandas>=2.0.0
 # aspire_dash itself — pinned to the v0.10.0 SHA so the deployed demo
 # always reflects exactly the published library version.
-aspire_dash @ git+https://github.com/kennymcmillan/aspire_dash.git@cb1430d6088fa9d80598d8f78a007094e4463ace
+aspire_dash @ git+https://github.com/kennymcmillan/aspire_dash.git@e9a760191007cd80261865e85fb86e075b5c1b5a
