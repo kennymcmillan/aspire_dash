@@ -30,7 +30,7 @@ def layout():
         html.Div([
             html.Div([
                 html.Div([
-                    html.Img(src="/assets/aspire-logo.png",
+                    html.Img(src=dash.get_relative_path("/assets/aspire-logo.png"),
                               style={"height": "60px"}),
                 ], style={"padding": "16px",
                            "background": "white",
@@ -43,7 +43,7 @@ def layout():
             ], style={"flex": 1}),
             html.Div([
                 html.Div([
-                    html.Img(src="/assets/aspire-logo.png",
+                    html.Img(src=dash.get_relative_path("/assets/aspire-logo.png"),
                               style={"height": "60px"}),
                 ], style={"padding": "16px",
                            "background": "#001d3d",
@@ -56,7 +56,7 @@ def layout():
             ], style={"flex": 1}),
             html.Div([
                 html.Div([
-                    html.Img(src="/assets/aspire-logo.png",
+                    html.Img(src=dash.get_relative_path("/assets/aspire-logo.png"),
                               style={"height": "60px"}),
                 ], style={"padding": "16px",
                            "background": "#004185",

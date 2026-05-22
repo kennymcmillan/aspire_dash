@@ -4,6 +4,42 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.20.0] — 2026-05-22
+
+### Added — `aspire_dash.brand_logos` (Aspire + Qatar federation library)
+
+Sniffed from www.aspire.qa partner section. Bundles 14 Qatar
+federations + 2 ministries + 2 international partners + 1 award badge
++ the official Aspire SVG mark + 14 sport hero photos.
+
+**Files** ship in `assets/brand/partners/` and `assets/brand/sports/`,
+auto-copied by `setup_app()`.
+
+**Helpers:**
+
+- `partner_logo(slug)` — returns Connect-safe asset URL.
+- `partner_logo_img(slug, height)` — `html.Img` with auto-prefixed src.
+- `partners_strip(slugs, height)` — horizontal logo row (footer use).
+- `sport_hero(sport, index)` — sport hero photo URL.
+- `sport_hero_img(sport, index, height, width)` — `html.Img` page banner.
+
+**Slugs available:**
+
+- Aspire: `aspire`
+- Ministries: `moe`, `mos`
+- Multi-sport: `oly`, `sc`
+- Federations: `athletics`, `tt`, `squash`, `fencing`, `gymnastics`,
+  `swimming`, `shooting`, `golf`, `motor`
+- International: `kas_eupen`, `leonesa`, `inspirational_leader`
+
+**Sport heroes:** `athletics`, `fencing`, `squash`, `table_tennis`,
+`facility` (3 shots each, 5 for facility — football excluded per
+portfolio scope).
+
+### Demo
+
+- `/brand` page in the showcase — every logo + sport hero + usage code.
+
 ## [0.19.1] — 2026-05-22
 
 ### Fixed (CRITICAL — visible across every connected app)
