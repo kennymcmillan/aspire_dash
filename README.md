@@ -182,6 +182,42 @@ python -m aspire_dash new my_dashboard
 python -m aspire_dash new my_report --port 8060 --title "Q2 Variance"
 ```
 
+## Sidebar & routing — no per-app wrapping (v0.22.3+)
+
+Pass **bare paths** to `sidebar()` / `topnav()`. The library wraps them with `dash.get_relative_path()` internally via an idempotent helper, so the same code works on local AND under Connect's `/content/<GUID>/` subpath:
+
+```python
+NAV = [
+    {"label": "Overview", "href": "/",          "icon": "fa-solid fa-house"},
+    {"label": "Medals",   "href": "/medals",    "icon": "fa-solid fa-medal"},
+    {"label": "Athletes", "href": "/athletes",  "icon": "fa-solid fa-user"},
+]
+sidebar(title="My App", nav_items=NAV)   # just works everywhere
+```
+
+For pathname-dispatch router callbacks:
+
+```python
+from aspire_dash import normalised_path
+
+@callback(Output("page-content", "children"), Input("url", "pathname"))
+def render_page(pathname):
+    return PAGES.get(normalised_path(pathname), default_page)
+```
+
+Pinned by `tests/test_normalised_path.py` — 18 regression tests cover bare / prefixed / no-context across local + Connect prefixes.
+
+## Building a new app — ask Claude
+
+When you want a new app, tell Claude `new aspire dash app` (or invoke the `aspire-dash` skill) and it walks through:
+
+1. **Layout** — sidebar / topnav / single-page
+2. **Domain** — athlete / sport reporting / financial / nutrition / generic
+3. **Data sources** — SAMS / Sports DB / HANA / Aiven / none
+4. **Pages** — overview / athlete picker / data table / trend charts / PDF report
+
+You get an `app.py` with every import pre-wired for your choices + bare-path nav + `.rscignore` + manifest. No generic boilerplate to trim.
+
 ## Used by
 
 - **aspire-nutrition** — clinical diary capture + analysis
