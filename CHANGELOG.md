@@ -4,6 +4,45 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.12.3] — 2026-05-22
+
+### Added
+
+- **`aspire_dash.normalised_path(pathname)`** — canonical helper for any
+  router callback that dispatches on `dcc.Location` pathname. Wraps
+  `dash.strip_relative_path()` and normalises to a bare leading-slash
+  path so dispatch dicts can use bare keys like `"/athletes"`.
+
+  ```python
+  from aspire_dash import normalised_path
+
+  @callback(Output("page-content", "children"), Input("url", "pathname"))
+  def route(pathname):
+      return PAGES.get(normalised_path(pathname), default_page)
+  ```
+
+  **Why:** Connect serves apps under `/content/<GUID>/`. Without
+  stripping the prefix, `pathname` is the full URL and bare-key
+  dispatch dicts always miss → every click falls back to the default
+  page. Caught in the DASH_VALD upgrade where bumping to 0.12.1 fixed
+  the hrefs but the app's own router dict had bare keys like
+  `"/athletes"` that didn't match the prefixed pathname.
+
+  The pattern lives inside `aspire_dash.athlete._picker_visibility`
+  already — promoted here so every router callback can call one helper.
+
+## [0.12.2] — 2026-05-22
+
+### Fixed (CRITICAL — setup_app crashed every consumer app)
+
+- **`setup_app()` no longer raises `UnboundLocalError: os`.** The 0.12.1
+  fix added a redundant `import os` inside the function body. Python's
+  parser flags that as a local binding for the whole function, so the
+  earlier `os.makedirs(app_assets)` call on line 108 threw
+  `UnboundLocalError`. Removed the duplicate import — `os` is already
+  imported at module top. Caught when VALD's pytest suite started
+  failing with the import error after pulling 0.12.1.
+
 ## [0.12.1] — 2026-05-22
 
 ### Fixed (CRITICAL — sidebar nav broken on Connect)

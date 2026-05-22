@@ -71,7 +71,34 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.12.2"
+__version__ = "0.12.3"
+
+
+def normalised_path(pathname: str | None) -> str:
+    """Strip the Posit Connect subpath prefix from a Dash pathname so
+    router callbacks can dispatch on bare paths like ``"/athletes"``.
+
+    **Why:** Connect serves apps at ``/content/<GUID>/``. A `dcc.Location`
+    callback receives the full URL — ``/content/<GUID>/athletes`` — but
+    router dispatch dicts use bare keys like ``"/athletes"``. Without
+    stripping the prefix, every click falls back to the default page on
+    Connect (works fine locally because the prefix is "/").
+
+    Canonical fix used inside ``aspire_dash.athlete``. Promote here so
+    every router callback can call one helper:
+
+        @callback(Output("page-content", "children"), Input("url", "pathname"))
+        def route(pathname):
+            path = normalised_path(pathname)
+            return PAGES.get(path, default_page)
+
+    Returns a string starting with "/" (no trailing slash), or "/" for
+    the root path.
+    """
+    import dash as _dash
+    relative = str(_dash.strip_relative_path(pathname or "/")) or ""
+    relative = relative.strip("/")
+    return "/" + relative if relative else "/"
 
 # ── External stylesheets every Aspire app should load ────────────────────────
 STYLESHEETS = [
