@@ -4,6 +4,104 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.37.0] — 2026-05-25
+
+### Added — 5 patterns promoted from aspire-nutrition
+
+Single-session haul of 5 components that emerged twice (or more) inside
+aspire-nutrition's diary + consultation flows. All purely additive —
+shared definitions land here, the original helpers in nutrition will be
+replaced by these in a follow-up.
+
+- **`linear_step_card_collapse(*, step, title, body, collapse_id=None,
+  summary_id=None, initial_open=False, header_type="linear-step-header")`**
+  in `aspire_dash.components.cards`.
+  Numbered, collapsible step card with click-the-header toggle, summary
+  span filled by consumer's state callback, and a chevron that rotates
+  when open. Replaces the duplicate `_step_card` (diary.py) +
+  `_section_card` (consultation.py) helpers in aspire-nutrition.
+  Supports two integration modes:
+    - **Mode A — string `collapse_id`**: consumer owns the toggle
+      callback (diary-style, custom open/close policy).
+    - **Mode B — pattern-matched (default)**: pair with
+      `register_linear_step_toggle(app)` for one-call click-to-toggle.
+
+- **`register_linear_step_toggle(app, *, header_type="linear-step-header")`**
+  in `aspire_dash.components.cards`. The MATCH-pattern callback wiring
+  helper for mode B. Call once per `header_type`. The consultation page
+  pattern (`{"type": "consultation-section-header", "n": N}` →
+  `{"type": "consultation-section-collapse", "n": N}`) is now one line:
+  `register_linear_step_toggle(app, header_type="consultation-section-header")`.
+
+- **`selected_athlete_banner(store_id="athlete-store",
+  banner_id="selected-athlete-banner")`** + **`register_athlete_banner(app,
+  *, store_id="athlete-store", banner_id=...,
+  on_missing_mrn_warn=True)`** in `aspire_dash.athlete`.
+  Persistent page-top athlete card that lives OUTSIDE any step collapse
+  so the athlete stays visible after the picker step auto-collapses.
+  Gates on `player_id`, NOT `mrn` (SAMS can return players whose MRN
+  isn't linked yet), and surfaces a missing-MRN warning inline when
+  `on_missing_mrn_warn=True`. Re-uses the existing `athlete_card`
+  helper for visual consistency. Also re-exported from
+  `aspire_dash.components` for symmetry with the other v0.37 helpers.
+
+- **`meta_inline_bar(items, *, notes=None, title="Metadata",
+  fluid=False)`** in `aspire_dash.components.cards`.
+  Compact label:value horizontal bar wrapped in a small card. Replaces
+  the `dbc.Row` + md-column grids that wrapped a Notes cell to a second
+  row even when empty. Promoted from the diary period-metadata card.
+  `fluid=True` drops the card wrapper.
+
+- **`history_table(rows, *, columns, summary_chips=None,
+  status_column=None, status_palette=None,
+  empty_message="...")`** in `aspire_dash.components.cards`.
+  Compact striped table with optional summary chips above and a
+  status-badge column driven by row data. Genericises the
+  `_render_injury_history` pattern so VALD test history, training-load
+  weeks, attendance logs, supplement history etc. share one look.
+  Per-column `format` callable supported (date formatters, etc.).
+
+- **`ranked_dropdown(*, label, items, toggle_color="secondary",
+  size="sm", empty_label="—")`** in `aspire_dash.components.cards`.
+  Bootstrap DropdownMenu where each item carries a dict id (for
+  pattern-matched callbacks) and renders a bold primary label + an
+  optional tone-coloured sublabel. Replaces the inline `outline-light`
+  chip pattern that suffered white-text-on-white-card in the diary
+  alternates cell.
+
+### CSS
+
+- **NEW**: `.linear-step-card` / `.linear-step-header` / `.linear-step-badge`
+  / `.linear-step-title` / `.linear-step-summary` / `.linear-step-chevron`
+  added to `assets/00_aspire_base.css` under a `=== linear-step-card ===`
+  section.
+
+- **ALIASED, not renamed**: the older `.capture-step-*` classes (which
+  aspire-nutrition currently ships in its own `10_capture_flow.css`)
+  are kept as aliases in the same rule selectors. This is the safe
+  rename — existing apps that still mount the local capture-flow CSS
+  continue to render unchanged. Once those apps drop their local CSS
+  and pin v0.37+, the aliases can be removed. **Action for downstream
+  apps using `.capture-step-*` directly**: either start emitting
+  `.linear-step-*` class names alongside, or rely on the upstream
+  alias and remove your local copy of `10_capture_flow.css` once you've
+  switched to `linear_step_card_collapse()`.
+
+### Demo
+
+Three new demo pages added under `aspire_dash/demo/pages/`:
+- `linear_steps.py` — covers `linear_step_card_collapse` (mode A + B +
+  custom header_type) and `register_linear_step_toggle`.
+- `meta_history.py` — covers `meta_inline_bar` (card + fluid forms) and
+  `history_table` (with + without summary chips, with + without status
+  column, empty state).
+- `ranked_picker.py` — covers `ranked_dropdown` (ranked alternates,
+  empty state, neutral picker).
+
+Nav entries wired in `demo/app.py`. The default and `demo-secondary`
+header types for `linear_step_card_collapse` are registered there so
+the demo page's headers are click-toggleable out of the box.
+
 ## [0.36.0] — 2026-05-25
 
 ### Added — body composition, skinfold silhouette, z-score engine

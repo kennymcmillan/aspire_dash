@@ -12,7 +12,10 @@ from dash import Dash, html, dcc
 
 import aspire_dash
 from aspire_dash import setup_app, STYLESHEETS
-from aspire_dash.components import sidebar, header, dark_mode_toggle
+from aspire_dash.components import (
+    sidebar, header, dark_mode_toggle,
+    register_linear_step_toggle,
+)
 from aspire_dash.layouts import page_layout
 
 
@@ -25,6 +28,13 @@ app = Dash(
 server = app.server
 
 setup_app(app)
+
+# v0.37 — wire the linear-step-card click-to-toggle for the default
+# header_type used by the /linear-steps demo page. A second registration
+# below covers the alternate header_type used in that page's "second
+# strip" example.
+register_linear_step_toggle(app)
+register_linear_step_toggle(app, header_type="demo-secondary")
 
 # Sidebar nav — grouped by what it IS, not when it shipped.
 nav = [
@@ -61,6 +71,13 @@ nav = [
      "icon": "fa-solid fa-print"},
     {"label": "Athlete cards + rings", "href": "/v12",
      "icon": "fa-solid fa-id-card"},
+    # v0.37 — patterns promoted from aspire-nutrition
+    {"label": "Linear steps",       "href": "/linear-steps",
+     "icon": "fa-solid fa-list-ol"},
+    {"label": "Meta + history",     "href": "/meta-history",
+     "icon": "fa-solid fa-clipboard-list"},
+    {"label": "Ranked dropdown",    "href": "/ranked-dropdown",
+     "icon": "fa-solid fa-arrow-down-wide-short"},
 
     # Athlete / performance domain
     {"label": "Athlete",            "href": "/athlete",
