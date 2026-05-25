@@ -6,6 +6,31 @@ additive minors, breaking changes get a major bump when we get there.
 
 ## [0.37.0] — 2026-05-25
 
+### Added — `athlete_id_card` (promoted from DASH_Anthro)
+
+**New in `aspire_dash.athlete`:**
+
+- `athlete_id_card(data)` — picker-confirmation identity strip for the
+  top of any capture / single-athlete page. Photo + name + optional
+  TARGET badge + 2 rows of pills (sport/event categorical above,
+  dob/mrn/sams identity below) + decimal age under the photo. Gold ring
+  + amber accent on Target-pathway athletes (`is_target=True` or
+  `pathway=="Target"`), sky-blue otherwise. Empty payload renders the
+  amber "no athlete picked" prompt. Pure data → component, no callbacks.
+
+**New in `aspire_dash/assets/00_aspire_base.css`:**
+
+- `.athlete-id-card` + `.is-target` / `.is-empty` modifiers + `__photo`
+  / `__photo-fallback` / `__age` / `__name` / `__target-badge` /
+  `__pills-row` / `__pill.pill-{sport,event,identity}` BEM children.
+  Brand: sky-200/400 ring + sky→white gradient default, amber-300/500
+  ring + amber→white gradient for target athletes. Designed in the
+  forge sandbox (`tools/forge/index.html#athlete-identity`).
+
+Replaces ~150 lines of inline-styled chip code in DASH_Anthro 1.x.
+Drop-in for any picker-driven app — nutrition / medical / squash
+dashboard / VBT / squad readiness all benefit.
+
 ### Added — 5 patterns promoted from aspire-nutrition
 
 Single-session haul of 5 components that emerged twice (or more) inside

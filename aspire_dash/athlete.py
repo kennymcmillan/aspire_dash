@@ -153,6 +153,149 @@ def athlete_profile_header(
     })
 
 
+# ── Athlete Identity Card — v0.37 (promoted from DASH_Anthro) ─────────────
+#
+# "Did I pick the right person?" — sits at the top of any capture /
+# single-athlete page after a picker selection. Shows photo + name +
+# optional TARGET badge + 2 rows of pills (sport/event categorical,
+# dob/mrn/sams identity) + decimal age. Gold accent + ring for Target-
+# pathway athletes.
+#
+# Pure data → component (no callbacks). Consumes any picker-store dict
+# with the standard keys; everything is gated on truthiness so partial
+# data renders without empty pills.
+#
+# Styling lives in 00_aspire_base.css under .athlete-id-card — keep
+# this helper free of inline styles so the brand can evolve via CSS
+# without code changes.
+
+from datetime import date as _date
+
+
+def _athlete_id_card_fractional_age(dob_iso: str | None) -> float | None:
+    """Decimal years between dob and today (e.g. 16.1). Returns None if
+    dob is missing or unparseable. Display-only — Oracle / SAMS keep the
+    integer age. Helper isolated so consumers can override without a
+    full re-render."""
+    if not dob_iso:
+        return None
+    try:
+        dob = _date.fromisoformat(str(dob_iso)[:10])
+    except (TypeError, ValueError):
+        return None
+    return round((_date.today() - dob).days / 365.25, 1)
+
+
+def athlete_id_card(data: dict | None) -> html.Div:
+    """Picker-confirmation identity card.
+
+    Parameters
+    ----------
+    data : dict | None
+        Picker-store payload. Recognised keys (all optional except
+        ``player_id`` which gates the empty-state):
+
+        ============   ===========================================
+        ``player_id``  SAMS player ID (gates empty state)
+        ``full_name``  Display name
+        ``photo_url``  Photo (FA user icon falls back if missing)
+        ``sport``      e.g. "Athletics" (blue SPORT pill)
+        ``target_event``  e.g. "100m" (amber EVENT pill)
+        ``date_of_birth`` ISO date — drives DOB pill + age badge
+        ``mrn``        SAMS MRN (slate identity pill)
+        ``is_target``  bool — gold ring + TARGET badge
+        ``pathway``    "Target" also triggers TARGET styling
+        ============   ===========================================
+
+    Returns
+    -------
+    html.Div
+        Ready-to-render component. Empty/None payload returns the
+        amber "no athlete picked" prompt.
+
+    Notes
+    -----
+    Styling: all rules live in ``.athlete-id-card`` + variants in
+    ``aspire_dash/assets/00_aspire_base.css``. Override via your app's
+    own assets file rather than editing this helper.
+    """
+    if not data or not data.get("player_id"):
+        return html.Div(
+            [html.I(className="fa-solid fa-user-plus me-2"),
+             "No athlete picked. Use the picker (top-right) to choose a "
+             "sport, then an athlete."],
+            className="athlete-id-card is-empty",
+        )
+
+    name      = data.get("full_name") or "?"
+    photo     = data.get("photo_url")
+    sport     = data.get("sport")
+    target    = data.get("target_event")
+    dob       = data.get("date_of_birth")
+    mrn       = data.get("mrn")
+    sams_id   = data.get("player_id")
+    is_target = bool(data.get("is_target")) or (data.get("pathway") == "Target")
+    frac_age  = _athlete_id_card_fractional_age(dob)
+
+    # Photo (or FA user fallback) — class-driven; ring colour switches via .is-target
+    photo_node = (
+        html.Img(src=photo, alt=name, className="athlete-id-card__photo")
+        if photo
+        else html.Div(html.I(className="fa-solid fa-user"),
+                      className="athlete-id-card__photo-fallback")
+    )
+    photo_stack = [photo_node]
+    if frac_age is not None:
+        photo_stack.append(html.Div(
+            f"{frac_age:.1f} yrs",
+            className="athlete-id-card__age",
+            title=f"Age computed from DOB ({dob})" if dob else None,
+        ))
+
+    name_row: list = [html.Span(name, className="athlete-id-card__name")]
+    if is_target:
+        name_row.append(html.Span(
+            [html.I(className="fa-solid fa-star",
+                    style={"fontSize": "9px"}),
+             "TARGET"],
+            className="athlete-id-card__target-badge",
+            title="Target pathway athlete",
+        ))
+
+    def _pill(label: str, value, kind: str):
+        return html.Span(
+            [html.B(label), str(value)],
+            className=f"athlete-id-card__pill pill-{kind}",
+        )
+
+    top_pills: list = []
+    if sport:  top_pills.append(_pill("SPORT", sport,  "sport"))
+    if target: top_pills.append(_pill("EVENT", target, "event"))
+
+    id_pills: list = []
+    if dob:     id_pills.append(_pill("DOB",     dob,     "identity"))
+    if mrn:     id_pills.append(_pill("MRN",     mrn,     "identity"))
+    if sams_id: id_pills.append(_pill("SAMS ID", sams_id, "identity"))
+
+    pill_rows = []
+    if top_pills:
+        pill_rows.append(html.Div(top_pills, className="athlete-id-card__pills-row"))
+    if id_pills:
+        pill_rows.append(html.Div(id_pills, className="athlete-id-card__pills-row"))
+
+    return html.Div(
+        [
+            html.Div(photo_stack, className="athlete-id-card__photo-stack"),
+            html.Div(
+                [html.Div(name_row, className="athlete-id-card__name-row"),
+                 *pill_rows],
+                className="athlete-id-card__body",
+            ),
+        ],
+        className=f"athlete-id-card{' is-target' if is_target else ''}",
+    )
+
+
 # ── Picker Widget ──────────────────────────────────────────────────────────
 
 #: Component IDs used by athlete_picker / register_athlete_picker. Exposed

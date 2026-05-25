@@ -3513,3 +3513,150 @@ body {
     transform: rotate(180deg);
 }
 
+
+
+/* ────────────────────────────────────────────────────────────────────────
+   === athlete-id-card ===  (v0.37 — promoted from DASH_Anthro)
+   "Did I pick the right person?" — picker-confirmation identity strip
+   that sits at the top of any capture / single-athlete page after a
+   selection. Photo + name + optional TARGET badge + 2 rows of pills
+   (sport/event categorical, dob/mrn/sams identity) + decimal age under
+   photo. Gold ring + accent for Target-pathway athletes (.is-target).
+
+   Use via aspire_dash.athlete.athlete_id_card(payload).
+   ──────────────────────────────────────────────────────────────────── */
+
+.athlete-id-card {
+    display: flex;
+    align-items: stretch;
+    gap: 16px;
+    padding: 16px 18px;
+    background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 40%);
+    border: 1px solid #bae6fd;          /* sky-200 */
+    border-left: 4px solid #38bdf8;     /* sky-400 */
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.athlete-id-card.is-target {
+    background: linear-gradient(180deg, #fffbeb 0%, #ffffff 35%);
+    border-color: #fcd34d;              /* amber-300 */
+    border-left-color: #f59e0b;         /* amber-500 */
+}
+
+.athlete-id-card.is-empty {
+    background: #fef3c7;                /* amber-100 */
+    border: 1px dashed #f59e0b;
+    color: #92400e;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 14px 18px;
+    align-items: center;
+}
+
+.athlete-id-card__photo-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.athlete-id-card__photo,
+.athlete-id-card__photo-fallback {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #e2e8f0;
+    border: 3px solid #38bdf8;          /* sky-400 — matches accent */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.athlete-id-card__photo-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 22px;
+}
+
+.athlete-id-card.is-target .athlete-id-card__photo,
+.athlete-id-card.is-target .athlete-id-card__photo-fallback {
+    border-color: #f59e0b;              /* amber-500 */
+}
+
+.athlete-id-card__age {
+    margin-top: 6px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: #d1fae5;                /* emerald-100 */
+    color: #065f46;                     /* emerald-800 */
+    border: 1px solid #6ee7b7;          /* emerald-300 */
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.athlete-id-card__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.athlete-id-card__name-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.athlete-id-card__name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+}
+
+.athlete-id-card__target-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #92400e;
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+}
+
+.athlete-id-card__pills-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.athlete-id-card__pills-row + .athlete-id-card__pills-row {
+    margin-top: 4px;
+}
+
+.athlete-id-card__pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+}
+
+.athlete-id-card__pill b {
+    opacity: 0.7;
+    margin-right: 2px;
+}
+
+.athlete-id-card__pill.pill-sport    { background: #dbeafe; color: #1e40af; }
+.athlete-id-card__pill.pill-event    { background: #fef3c7; color: #92400e; }
+.athlete-id-card__pill.pill-identity { background: #f1f5f9; color: #334155; }

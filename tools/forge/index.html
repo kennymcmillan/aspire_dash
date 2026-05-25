@@ -432,6 +432,154 @@
   </section>
 
 
+  <!-- ═══ ATHLETE IDENTITY CARD — picker confirmation strip ═══ -->
+  <section id="athlete-identity" class="mb-12">
+    <h2 class="text-lg font-semibold mb-1 text-slate-800">Athlete Identity Card</h2>
+    <p class="text-xs text-slate-500 mb-4">
+      "Did I pick the right person?" — sits at the top of every capture / single-athlete page after a picker selection.
+      Promote-target: <code class="text-[11px] bg-slate-100 px-1 rounded">aspire_dash.athlete.athlete_id_card(payload)</code>.
+      Photo + name + TARGET badge if applicable + sport/event pills + identity pills + decimal age. Gold accent + gold ring on Target-pathway athletes.
+    </p>
+
+    <div class="space-y-4">
+      <!-- Variant A — TARGET athlete (Adham Eldeeb case) -->
+      <div class="rounded-xl border border-amber-300 border-l-4 border-l-amber-500 shadow-sm"
+           style="background: linear-gradient(180deg, #fffbeb 0%, #ffffff 35%);">
+        <div class="flex items-stretch gap-4 p-4">
+          <!-- Photo + age stack -->
+          <div class="flex flex-col items-center shrink-0">
+            <div class="w-16 h-16 rounded-full bg-slate-200 flex items-center justify-center text-slate-400 border-[3px] border-amber-500 shadow-[0_2px_6px_rgba(0,0,0,0.08)]">
+              <i class="fa-solid fa-user text-xl"></i>
+            </div>
+            <div class="mt-2 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300 text-[11px] font-bold whitespace-nowrap">
+              16.1 yrs
+            </div>
+          </div>
+          <!-- Identity column -->
+          <div class="flex-1 min-w-0 flex flex-col justify-center">
+            <div class="flex items-center gap-3 mb-2.5">
+              <span class="text-[16px] font-bold text-slate-900 tracking-tight">Adham Eldeeb</span>
+              <span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-300 rounded-full px-2 py-0.5 tracking-[0.04em]">
+                <i class="fa-solid fa-star text-[9px]"></i> TARGET
+              </span>
+            </div>
+            <!-- Pills row 1: categorical -->
+            <div class="flex flex-wrap gap-1.5 mb-1">
+              <span class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 bg-blue-100 text-blue-800"><b class="font-bold opacity-70 mr-0.5">SPORT</b> Athletics</span>
+              <span class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 bg-amber-100 text-amber-800"><b class="font-bold opacity-70 mr-0.5">EVENT</b> 100m</span>
+            </div>
+            <!-- Pills row 2: identity -->
+            <div class="flex flex-wrap gap-1.5">
+              <span class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 bg-slate-100 text-slate-700"><b class="font-bold opacity-70 mr-0.5">DOB</b> 2010-01-21</span>
+              <span class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 bg-slate-100 text-slate-700"><b class="font-bold opacity-70 mr-0.5">MRN</b> 20025105</span>
+              <span class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 bg-slate-100 text-slate-700"><b class="font-bold opacity-70 mr-0.5">SAMS ID</b> 2940</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Variant B — non-target athlete (sky-blue accent, no TARGET badge) -->
+      <div class="rounded-xl border border-sky-200 border-l-4 border-l-sky-400 shadow-sm"
+           style="background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 40%);">
+        <div class="flex items-stretch gap-4 p-4">
+          <div class="flex flex-col items-center shrink-0">
+            <div class="w-16 h-16 rounded-full bg-slate-200 flex items-center justify-center text-slate-400 border-[3px] border-sky-300 shadow-[0_2px_6px_rgba(0,0,0,0.08)]">
+              <i class="fa-solid fa-user text-xl"></i>
+            </div>
+            <div class="mt-2 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300 text-[11px] font-bold whitespace-nowrap">
+              19.4 yrs
+            </div>
+          </div>
+          <div class="flex-1 min-w-0 flex flex-col justify-center">
+            <div class="flex items-center gap-3 mb-2.5">
+              <span class="text-[16px] font-bold text-slate-900 tracking-tight">Mohammed AlHazaa</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-1">
+              <span class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 bg-blue-100 text-blue-800"><b class="font-bold opacity-70 mr-0.5">SPORT</b> Fencing</span>
+              <span class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 bg-amber-100 text-amber-800"><b class="font-bold opacity-70 mr-0.5">EVENT</b> Epee</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 bg-slate-100 text-slate-700"><b class="font-bold opacity-70 mr-0.5">DOB</b> 2006-08-14</span>
+              <span class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 bg-slate-100 text-slate-700"><b class="font-bold opacity-70 mr-0.5">MRN</b> 20060814</span>
+              <span class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 bg-slate-100 text-slate-700"><b class="font-bold opacity-70 mr-0.5">SAMS ID</b> 1124</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Variant C — minimal data (only sport known) -->
+      <div class="rounded-xl border border-sky-200 border-l-4 border-l-sky-400 shadow-sm"
+           style="background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 40%);">
+        <div class="flex items-stretch gap-4 p-4">
+          <div class="flex flex-col items-center shrink-0">
+            <div class="w-16 h-16 rounded-full bg-slate-200 flex items-center justify-center text-slate-400 border-[3px] border-sky-300 shadow-[0_2px_6px_rgba(0,0,0,0.08)]">
+              <i class="fa-solid fa-user text-xl"></i>
+            </div>
+          </div>
+          <div class="flex-1 min-w-0 flex flex-col justify-center">
+            <div class="text-[16px] font-bold text-slate-900 tracking-tight mb-2.5">Solo Athlete</div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 bg-blue-100 text-blue-800"><b class="font-bold opacity-70 mr-0.5">SPORT</b> Padel</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Variant D — empty state (no athlete picked) -->
+      <div class="rounded-xl border border-dashed border-amber-400 bg-amber-50 px-4 py-4 text-amber-800 text-[13px] font-medium flex items-center gap-2">
+        <i class="fa-solid fa-user-plus opacity-70"></i>
+        No athlete picked. Use the picker (top-right) to choose a sport, then an athlete.
+      </div>
+    </div>
+
+    <details class="mt-4 text-xs text-slate-600">
+      <summary class="cursor-pointer font-medium">CSS rule preview (port target)</summary>
+      <pre class="mt-2 p-3 bg-slate-50 border border-slate-200 rounded text-[11px] overflow-x-auto"><code>/* aspire_dash/assets/00_aspire_base.css */
+.athlete-id-card {
+  display: flex; align-items: stretch; gap: 16px;
+  padding: 16px 18px;
+  background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 40%);
+  border: 1px solid #bae6fd;
+  border-left: 4px solid #38bdf8;          /* sky-400 */
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+}
+.athlete-id-card.is-target {
+  background: linear-gradient(180deg, #fffbeb 0%, #ffffff 35%);
+  border-color: #fcd34d;                   /* amber-300 */
+  border-left-color: #f59e0b;              /* amber-500 */
+}
+.athlete-id-card__photo {
+  width: 56px; height: 56px; border-radius: 50%; object-fit: cover;
+  background: #e2e8f0; border: 3px solid #38bdf8;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+.athlete-id-card.is-target .athlete-id-card__photo { border-color: #f59e0b; }
+.athlete-id-card__age {
+  margin-top: 6px; padding: 2px 10px; border-radius: 999px;
+  background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7;
+  font-size: 11px; font-weight: 700; white-space: nowrap;
+}
+.athlete-id-card__name { font-size: 16px; font-weight: 700; color: #0f172a;
+                         letter-spacing: -0.01em; }
+.athlete-id-card__target-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 700; color: #92400e;
+  background: #fef3c7; border: 1px solid #fcd34d;
+  padding: 2px 8px; border-radius: 999px; letter-spacing: 0.04em;
+}
+.athlete-id-card__pill {
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 999px; white-space: nowrap;
+}
+.athlete-id-card__pill.pill-sport { background: #dbeafe; color: #1e40af; }
+.athlete-id-card__pill.pill-event { background: #fef3c7; color: #92400e; }
+.athlete-id-card__pill.pill-identity { background: #f1f5f9; color: #334155; }
+</code></pre>
+    </details>
+  </section>
+
+
   <!-- Notes -->
   <section class="mt-16 p-6 bg-slate-50 border border-slate-200 rounded-lg">
     <h2 class="text-base font-semibold mb-2 text-slate-800">How this gets into aspire_dash</h2>
