@@ -590,3 +590,134 @@ def athlete_options_with_recency(
         label = f"{name} ({_fmt(d)})" if d else name
         out.append({"label": label, "value": p.get(id_field)})
     return out
+
+
+# ── Selected athlete banner — v0.37 ───────────────────────────────────────
+#
+# A persistent page-top banner that re-renders the picked athlete OUTSIDE
+# any step-card collapse, so picking an athlete (and the picker step
+# auto-collapsing) still leaves the athlete card visible. The banner is
+# an empty div that the registered callback fills from the chosen store.
+#
+# Promoted from aspire-nutrition's athlete_picker.selected_athlete_banner
+# + _render_athlete_banner + _selected_chip (with missing-MRN warning).
+
+BANNER_ID = "selected-athlete-banner"
+
+
+def selected_athlete_banner(
+    store_id: str = "athlete-store",
+    banner_id: str = BANNER_ID,
+) -> html.Div:
+    """Empty div that auto-fills with an ``aspire_dash.athlete_card``
+    whenever the bound store contains a real athlete (gated on
+    ``player_id``, NOT on ``mrn`` — SAMS can return players whose MRN
+    hasn't been linked yet, and we still want the card visible so the
+    missing-MRN warning surfaces inline).
+
+    Mount this near the top of any page driving off ``athlete-store``.
+    Wire the fill callback ONCE per app via :func:`register_athlete_banner`.
+
+    Parameters
+    ----------
+    store_id : str
+        ``dcc.Store`` id holding the selected athlete dict. The store
+        itself must be mounted elsewhere (typically at app level so it
+        survives page navigation).
+    banner_id : str
+        ``html.Div`` id — the callback writes ``children`` here.
+
+    Example::
+
+        from aspire_dash.athlete import (
+            selected_athlete_banner, register_athlete_banner,
+        )
+
+        # In layout — near the page top:
+        layout = html.Div([
+            selected_athlete_banner(),
+            ...rest of page...,
+        ])
+
+        # Once after Dash() is created:
+        register_athlete_banner(app)
+    """
+    return html.Div(id=banner_id, className="mb-3")
+
+
+def register_athlete_banner(
+    app,
+    *,
+    store_id: str = "athlete-store",
+    banner_id: str = BANNER_ID,
+    on_missing_mrn_warn: bool = True,
+) -> None:
+    """Wire the callback that fills :func:`selected_athlete_banner`.
+
+    Idempotent enough to call once per app even if multiple pages mount
+    the banner div — the callback writes the same banner from one store
+    so the data is consistent across the app.
+
+    Parameters
+    ----------
+    app : dash.Dash
+        The app instance.
+    store_id : str
+        ``dcc.Store`` id holding the selected athlete dict.
+    banner_id : str
+        ``html.Div`` id mounted by ``selected_athlete_banner``.
+    on_missing_mrn_warn : bool
+        If True (default), append a warning Alert beneath the card when
+        the athlete has a ``player_id`` but no ``mrn`` (a known SAMS
+        edge case — capture flows that need an MRN can't bind without
+        one).
+    """
+    from .v12_helpers import athlete_card as _athlete_card
+
+    @app.callback(
+        Output(banner_id, "children"),
+        Input(store_id, "data"),
+    )
+    def _render_athlete_banner(athlete):
+        # Gate on player_id, not mrn — SAMS may return an athlete with
+        # no MRN linked yet, and we still want the card visible (the
+        # warning surfaces the missing-MRN state inline so the user
+        # knows why downstream saves are disabled).
+        if (not athlete or not isinstance(athlete, dict)
+                or not athlete.get("player_id")):
+            return None
+
+        name      = athlete.get("full_name") or athlete.get("name") or "—"
+        photo     = athlete.get("photo_url") or athlete.get("imageUrl")
+        sport     = (athlete.get("sport") or "").upper()
+        age       = athlete.get("age")
+        is_target = bool(athlete.get("is_target"))
+        has_mrn   = bool(athlete.get("mrn"))
+
+        meta_parts = []
+        if sport:
+            meta_parts.append(sport)
+        if age:
+            meta_parts.append(f"age {age}")
+        if is_target:
+            meta_parts.append("TARGET")
+        meta = " · ".join(meta_parts) if meta_parts else "Aspire athlete"
+
+        children = [
+            _athlete_card(
+                name,
+                photo_url=photo,
+                meta=meta,
+                tone="good" if is_target else "aspire",
+            ),
+        ]
+        if on_missing_mrn_warn and not has_mrn:
+            children.append(dbc.Alert(
+                [html.I(className="fa-solid fa-triangle-exclamation me-2"),
+                 html.Strong("No MRN registered in SAMS. "),
+                 "Capture & save are blocked until SAMS links an MRN to "
+                 "this athlete. Analysis-only views still work."],
+                color="warning", className="mt-2 mb-0 py-2",
+                style={"fontSize": "0.82rem"},
+            ))
+        return html.Div(children, style={"maxWidth": "420px"})

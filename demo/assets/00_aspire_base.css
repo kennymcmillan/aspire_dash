@@ -3427,3 +3427,89 @@ body {
     color: var(--slate-500);
     text-align: center;
 }
+
+
+/* ────────────────────────────────────────────────────────────────────────
+   === linear-step-card ===  (v0.37)
+   Collapsible numbered step card used by linear capture flows
+   (nutrition diary, consultation, target-setup wizards, onboarding).
+   Header is always visible — numbered badge + title + summary span +
+   chevron — and the whole header is clickable to toggle the collapse.
+   The summary span is filled by the consumer's state callback so the
+   user can scan top-to-bottom and see what's done at a glance.
+
+   Aliases the older .capture-step-* classes that were promoted from
+   aspire-nutrition. Both sets of class names are kept so existing apps
+   that still ship a local .capture-step-* CSS continue to render.
+   ──────────────────────────────────────────────────────────────────── */
+
+.linear-step-card,
+.capture-step-card {
+    border: 1px solid var(--slate-200);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.linear-step-header,
+.capture-step-header {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    gap: 0.75rem;
+    user-select: none;
+    background-color: #ffffff;
+    transition: background-color 0.15s ease;
+}
+.linear-step-header:hover,
+.capture-step-header:hover {
+    background-color: var(--slate-50);
+}
+
+.linear-step-badge,
+.capture-step-badge {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #001d3d;  /* Aspire navy */
+    color: #fbb800;              /* Aspire gold */
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.linear-step-title,
+.capture-step-title {
+    color: #001d3d;  /* Aspire navy */
+    font-size: 1rem;
+}
+
+.linear-step-summary,
+.capture-step-summary {
+    flex: 1;
+    color: var(--slate-500);
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-left: 0.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.linear-step-chevron,
+.capture-step-chevron {
+    color: var(--slate-400);
+    font-size: 0.85rem;
+    transition: transform 0.25s ease;
+}
+
+/* :has(.collapse.show) flips the chevron up when the dbc.Collapse below
+   is open. Bootstrap adds .show to dbc.Collapse when is_open=True. */
+.linear-step-card:has(.collapse.show) .linear-step-chevron,
+.capture-step-card:has(.collapse.show) .capture-step-chevron {
+    transform: rotate(180deg);
+}
+

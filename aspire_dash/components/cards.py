@@ -1,11 +1,13 @@
-"""Cards: card, summary_card (deprecated), graph_card, info_box, file_upload_card, connect_user_chip, linear_step_card.
+"""Cards: card, summary_card (deprecated), graph_card, info_box,
+file_upload_card, connect_user_chip, linear_step_card,
+linear_step_card_collapse, meta_inline_bar, history_table, ranked_dropdown.
 
 Auto-split from the legacy single-file components.py during the
 0.8 → 1.0 refactor. Backwards-compatible: `from aspire_dash.components
 import X` keeps working via the package __init__.
 """
 import dash
-from dash import html, dcc, clientside_callback, Input, Output, State
+from dash import html, dcc, clientside_callback, Input, Output, State, MATCH
 import dash_bootstrap_components as dbc
 
 from ..theme import (
@@ -17,7 +19,16 @@ from ..theme import (
 )
 
 
-__all__ = ['card', 'summary_card', 'graph_card', 'info_box', 'file_upload_card', 'connect_user_chip', 'linear_step_card']
+__all__ = [
+    'card', 'summary_card', 'graph_card', 'info_box',
+    'file_upload_card', 'connect_user_chip',
+    'linear_step_card',
+    # v0.37 — patterns promoted from aspire-nutrition
+    'linear_step_card_collapse', 'register_linear_step_toggle',
+    'meta_inline_bar',
+    'history_table',
+    'ranked_dropdown',
+]
 
 # ── Cards ────────────────────────────────────────────────────────────────────
 
@@ -306,3 +317,460 @@ def linear_step_card(
         "marginBottom": "12px",
         "opacity": "0.65" if state == "pending" else "1",
     })
+
+
+
+# ── Linear step card (collapsible w/ summary header) — v0.37 ─────────────
+
+def linear_step_card_collapse(
+    *,
+    step: int,
+    title: str,
+    body,
+    collapse_id=None,
+    summary_id: str | None = None,
+    initial_open: bool = False,
+    header_type: str = "linear-step-header",
+):
+    """Numbered step card with a click-the-header-to-toggle collapsible body.
+
+    The header is always visible and renders:
+
+        [step]  Title          summary-span (filled by callback)        v
+
+    Clicking the header anywhere toggles the collapse beneath. The
+    ``summary_id`` span is empty by default — consumers wire a state
+    callback that writes a short one-liner ("4-day  ·  Burke standard",
+    "Test Athlete  ·  ATHLETICS", "8 entries  ·  all matched", etc.) so the
+    page can be scanned top-to-bottom and the user sees what's done at a
+    glance.
+
+    Promoted from the duplicate ``_step_card`` (diary.py) and
+    ``_section_card`` (consultation.py) helpers in aspire-nutrition —
+    same shape, same CSS, one upstream definition.
+
+    Two integration modes are supported:
+
+    **Mode A — string ``collapse_id`` (diary-style, custom toggle policy).**
+    Pass a plain string ``collapse_id`` (e.g. ``"step-3-collapse"``). The
+    consumer writes its own callback that reads
+    ``Input({"type": header_type, "step": ALL}, "n_clicks")`` and writes
+    ``Output("step-3-collapse", "is_open")`` — typically the same callback
+    that also computes step summaries and auto-opens the next step on
+    completion. Do **not** call :func:`register_linear_step_toggle` in this
+    mode (the consumer owns is_open writes).
+
+    **Mode B — pattern-matched collapse (consultation-style, plain toggle).**
+    Pass ``collapse_id=None`` (default). The helper assigns a dict id
+    ``{"type": header_type + "-collapse", "step": N}`` to the collapse and
+    you wire one MATCH callback via :func:`register_linear_step_toggle`.
+    Suited for "N independent sections, click to toggle each" pages.
+
+    Parameters
+    ----------
+    step : int
+        Number rendered in the badge.
+    title : str
+        Bold heading text next to the badge.
+    body : object
+        Body content inside the collapse (form, picker, table, ...).
+    collapse_id : str | dict | None
+        Collapse id. ``None`` (default) → auto-generated dict id wired by
+        :func:`register_linear_step_toggle`. A string → mode A: consumer
+        owns the toggle callback. A dict → bring-your-own pattern id.
+    summary_id : str | None
+        Optional string id for the summary span. If supplied, the
+        consumer's state callback writes ``children`` here.
+    initial_open : bool
+        Whether the collapse starts open. Default False (closed).
+    header_type : str
+        Dict-id ``type`` field for the clickable header. Pattern-matched
+        by :func:`register_linear_step_toggle`. Use a unique value per
+        independent step strip (e.g. ``"consultation-section-header"``)
+        when a page mounts multiple independent strips.
+
+    Example (mode B — recommended for new code)::
+
+        from aspire_dash.components import (
+            linear_step_card_collapse, register_linear_step_toggle,
+        )
+
+        layout = html.Div([
+            linear_step_card_collapse(
+                step=1, title="Demographics",
+                summary_id="sec-1-summary",
+                initial_open=True,
+                body=demographics_form(),
+            ),
+            linear_step_card_collapse(
+                step=2, title="Context",
+                body=context_form(),
+            ),
+            # ... more sections
+        ])
+
+        # Wire the click-to-toggle behaviour once after the Dash() instance:
+        register_linear_step_toggle(app)
+    """
+    header_children = [
+        html.Span(str(step), className="linear-step-badge capture-step-badge"),
+        html.Strong(title, className="linear-step-title capture-step-title"),
+    ]
+    if summary_id:
+        header_children.append(html.Span(
+            id=summary_id,
+            className="linear-step-summary capture-step-summary",
+        ))
+    else:
+        header_children.append(html.Span(
+            className="linear-step-summary capture-step-summary",
+        ))
+    header_children.append(html.I(
+        className="fa-solid fa-chevron-down linear-step-chevron capture-step-chevron",
+    ))
+
+    if collapse_id is None:
+        resolved_collapse_id = {"type": f"{header_type}-collapse", "step": int(step)}
+    else:
+        resolved_collapse_id = collapse_id
+
+    return dbc.Card(
+        [
+            html.Div(
+                header_children,
+                id={"type": header_type, "step": int(step)},
+                className="linear-step-header capture-step-header",
+                n_clicks=0,
+            ),
+            dbc.Collapse(
+                dbc.CardBody(body, className="pt-2"),
+                id=resolved_collapse_id,
+                is_open=bool(initial_open),
+            ),
+        ],
+        className="mb-2 shadow-sm linear-step-card capture-step-card",
+    )
+
+
+def register_linear_step_toggle(app, *, header_type: str = "linear-step-header"):
+    """Wire the pattern-matched click-to-toggle callback for a step strip.
+
+    Mode B helper — call exactly once per ``header_type`` after the
+    ``Dash()`` instance is created. Flips ``is_open`` on the collapse
+    whose dict id matches the clicked header (header
+    ``{"type": header_type, "step": N}`` toggles collapse
+    ``{"type": header_type + "-collapse", "step": N}``).
+
+    Skip this helper when consumers pass a string ``collapse_id`` to
+    :func:`linear_step_card_collapse` — they own the toggle in that mode.
+
+    Parameters
+    ----------
+    app : dash.Dash
+        The app instance.
+    header_type : str
+        Must match the ``header_type=`` argument passed to
+        ``linear_step_card_collapse`` when the cards were built.
+    """
+    @app.callback(
+        Output({"type": f"{header_type}-collapse", "step": MATCH}, "is_open"),
+        Input({"type": header_type, "step": MATCH}, "n_clicks"),
+        State({"type": f"{header_type}-collapse", "step": MATCH}, "is_open"),
+        prevent_initial_call=True,
+    )
+    def _toggle(_n_clicks, is_open):
+        return not is_open
+
+
+# ── Period / metadata one-line bar — v0.37 ────────────────────────────────
+
+def meta_inline_bar(
+    items,
+    *,
+    notes: str | None = None,
+    title: str = "Metadata",
+    fluid: bool = False,
+):
+    """Compact horizontal label:value bar wrapped in a small Card.
+
+    Replaces the ``dbc.Row`` + md-column grids that wrapped a Notes cell
+    to a second row even when empty. One row of label:value chips, plus
+    an optional second row for ``notes`` when supplied. Promoted from
+    aspire-nutrition's diary period-metadata card.
+
+    Parameters
+    ----------
+    items : list[tuple[str, str | None]]
+        ``[(label, value), ...]`` pairs. ``None`` / empty values render
+        as a muted em-dash.
+    notes : str | None
+        Optional second-row free text. The notes row is omitted entirely
+        when ``None`` / empty.
+    title : str
+        Card header text. Defaults to "Metadata".
+    fluid : bool
+        If True, drop the Card wrapper and just return the inline bar
+        (useful when the bar lives inside an existing card body).
+
+    Example::
+
+        meta_inline_bar(
+            [
+                ("Period",  "4-day"),
+                ("Athlete", "Test Athlete"),
+                ("MRN",     "12345"),
+                ("Sport",   "Athletics"),
+                ("Dates",   "2026-05-01 -> 2026-05-04"),
+            ],
+            notes="First diary after training-camp return.",
+            title="Period metadata",
+        )
+    """
+    chips = []
+    for label, value in items:
+        chips.append(html.Span([
+            html.Span(label, className="text-muted small text-uppercase me-1",
+                      style={"letterSpacing": "0.4px"}),
+            html.Span(str(value) if value else "—",
+                      className="fw-semibold me-4",
+                      style={"color": "#001d3d"}),
+        ]))
+
+    rows = [html.Div(chips, className="d-flex flex-wrap align-items-center")]
+    if notes:
+        rows.append(html.Div([
+            html.Span("NOTES", className="text-muted small text-uppercase me-2"),
+            html.Span(notes, className="fw-semibold"),
+        ], className="mt-2"))
+
+    if fluid:
+        return html.Div(rows)
+
+    return dbc.Card([
+        dbc.CardHeader(html.Strong(title)),
+        dbc.CardBody(rows, className="py-2"),
+    ], className="mb-3 shadow-sm")
+
+
+# ── Generic history table — v0.37 ─────────────────────────────────────────
+
+def history_table(
+    rows,
+    *,
+    columns,
+    summary_chips=None,
+    status_column: str | None = None,
+    status_palette: dict | None = None,
+    empty_message: str = "No records to show.",
+):
+    """Compact striped table with optional summary chips above and a
+    status-badge column driven by row data.
+
+    Genericises aspire-nutrition's ``_render_injury_history`` pattern so
+    VALD test history, training-load weeks, attendance logs, supplement
+    history, etc. all share the same look + shape.
+
+    Parameters
+    ----------
+    rows : list[dict]
+        One dict per record. Keys reference ``columns[*]["key"]``.
+    columns : list[dict]
+        Column specs. Each: ``{"key": str, "label": str, "format": fn?}``.
+        - ``key`` — dict key on each row.
+        - ``label`` — column header.
+        - ``format`` — optional callable applied to the cell value before
+          rendering (e.g. date formatter). Default: ``str(value) or "—"``.
+    summary_chips : list[tuple[str, str, str]] | None
+        Optional summary strip above the table. Each tuple is
+        ``(value, label, tone)`` where tone ∈ ``{"primary", "muted",
+        "success", "warning", "danger"}``.
+    status_column : str | None
+        Optional column key whose value drives a Bootstrap-coloured
+        ``.badge bg-…`` chip via ``status_palette``.
+    status_palette : dict | None
+        Mapping ``{value: bootstrap_color}`` for the status column. Eg.
+        ``{"Available": "success", "Out": "danger", "Modified": "warning"}``.
+    empty_message : str
+        Shown when ``rows`` is empty.
+
+    Example::
+
+        history_table(
+            injuries,
+            columns=[
+                {"key": "date_of_injury", "label": "Date"},
+                {"key": "region",         "label": "Region"},
+                {"key": "diagnosis",      "label": "Diagnosis"},
+                {"key": "availability",   "label": "Status"},
+                {"key": "days_lost",      "label": "Days lost"},
+            ],
+            summary_chips=[
+                (str(len(injuries)),    "injuries",      "primary"),
+                (str(total_days_lost),  "days lost",     "muted"),
+                (str(currently_out),    "currently out",
+                 "danger" if currently_out else "muted"),
+            ],
+            status_column="availability",
+            status_palette={"Available": "success", "Out": "danger",
+                             "Modified": "warning"},
+        )
+    """
+    if not rows:
+        return html.Div(html.Em(empty_message, className="text-muted small"))
+
+    summary_node = None
+    if summary_chips:
+        tone_classes = {
+            "primary": "fw-semibold me-3",
+            "success": "text-success fw-semibold me-3",
+            "warning": "text-warning fw-semibold me-3",
+            "danger":  "text-danger fw-semibold me-3",
+            "muted":   "text-muted me-3",
+        }
+        chip_spans = []
+        for value, label, tone in summary_chips:
+            cls = tone_classes.get(tone, tone_classes["muted"])
+            style = {"color": "#001d3d"} if tone == "primary" else None
+            chip_spans.append(html.Span(
+                f"{value} {label}",
+                className=cls,
+                style=style,
+            ))
+        summary_node = html.Div(chip_spans, className="mb-2 small")
+
+    status_palette = status_palette or {}
+
+    head = html.Thead(html.Tr([html.Th(c.get("label", c["key"])) for c in columns]))
+    body_rows = []
+    for row in rows:
+        cells = []
+        for c in columns:
+            key = c["key"]
+            value = row.get(key)
+            fmt = c.get("format")
+            if status_column and key == status_column:
+                color = status_palette.get(value, "secondary")
+                label = value if value is not None else "—"
+                cells.append(html.Td(html.Span(str(label), className=f"badge bg-{color}")))
+                continue
+            if fmt:
+                try:
+                    rendered = fmt(value)
+                except Exception:
+                    rendered = "—" if value is None else str(value)
+            else:
+                rendered = "—" if value is None else str(value)
+            cells.append(html.Td(
+                rendered,
+                style={"whiteSpace": "nowrap"} if isinstance(value, (int, float)) else None,
+            ))
+        body_rows.append(html.Tr(cells))
+
+    table = dbc.Table(
+        [head, html.Tbody(body_rows)],
+        bordered=False, hover=True, striped=True,
+        responsive=True, size="sm", className="mb-0",
+    )
+
+    children = []
+    if summary_node is not None:
+        children.append(summary_node)
+    children.append(table)
+    return html.Div(children)
+
+
+# ── Ranked dropdown — v0.37 ───────────────────────────────────────────────
+
+def ranked_dropdown(
+    *,
+    label: str,
+    items,
+    toggle_color: str = "secondary",
+    size: str = "sm",
+    empty_label: str = "—",
+):
+    """Bootstrap ``DropdownMenu`` where each item carries a dict id (for
+    pattern-matched callbacks) and renders a bold primary label + an
+    optional tone-coloured sublabel beneath.
+
+    Replaces the inline ``outline-light`` chip pattern that suffered
+    white-text-on-white-card. Promoted from aspire-nutrition's diary
+    "alternates" cell where the user picks a different food match per
+    diary row.
+
+    Parameters
+    ----------
+    label : str
+        Dropdown toggle text (e.g. ``"Change (4 alts)"``).
+    items : list[dict]
+        Each item:
+            ``{"label": str, "sublabel": str | None, "tone": str,
+               "id_kwargs": dict}``
+        - ``label`` — primary line, navy + bold.
+        - ``sublabel`` — optional muted line beneath, coloured by ``tone``.
+        - ``tone`` — Bootstrap colour token (``"success"`` / ``"warning"`` /
+          ``"danger"`` / ``"secondary"`` / ...). Drives the sublabel
+          ``text-{tone}`` class.
+        - ``id_kwargs`` — dict merged into the item's pattern id. The
+          ``type`` key falls back to ``"ranked-dropdown-pick"`` if the
+          caller omits it; callers normally pass their own
+          (e.g. ``{"type": "diary-pick-alt", "i": 7, "food_id": 42}``).
+    toggle_color : str
+        Bootstrap colour for the dropdown toggle button.
+    size : str
+        Bootstrap size (``"sm"`` / ``"md"`` / ``"lg"``).
+    empty_label : str
+        Rendered (as muted italic) when ``items`` is empty so the
+        cell never collapses to zero width.
+
+    Returns ``dbc.DropdownMenu`` when there are items, otherwise an
+    ``html.Em`` placeholder.
+
+    Example::
+
+        ranked_dropdown(
+            label=f"Change ({len(alts)} alts)",
+            items=[
+                {
+                    "label": alt["name"],
+                    "sublabel": f"{strength}  ·  {alt['brand']}",
+                    "tone": tone_color,
+                    "id_kwargs": {"type": "diary-pick-alt",
+                                   "i": row_idx, "food_id": alt["food_id"]},
+                }
+                for alt, strength, tone_color in ranked
+            ],
+        )
+    """
+    if not items:
+        return html.Em(empty_label, className="text-muted small")
+
+    menu_items = []
+    for it in items:
+        item_label = it.get("label") or "—"
+        sublabel = it.get("sublabel")
+        tone = it.get("tone") or "secondary"
+        id_kwargs = dict(it.get("id_kwargs") or {})
+        id_kwargs.setdefault("type", "ranked-dropdown-pick")
+        children = [html.Div(
+            item_label,
+            className="fw-semibold",
+            style={"color": "#001d3d", "whiteSpace": "normal"},
+        )]
+        if sublabel:
+            children.append(html.Div(sublabel, className=f"small text-{tone}"))
+        menu_items.append(dbc.DropdownMenuItem(
+            children,
+            id=id_kwargs,
+            n_clicks=0,
+        ))
+
+    return dbc.DropdownMenu(
+        label=label,
+        children=menu_items,
+        size=size,
+        color=toggle_color,
+        toggleClassName="py-0 px-2",
+        style={"fontSize": "0.78rem"},
+        in_navbar=False,
+    )
