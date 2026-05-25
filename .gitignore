@@ -15,7 +15,8 @@ Thumbs.db
 .idea/
 .claude/settings.local.json
 
-# The demo app's deployment lock file is environment-specific
+# rsconnect-python deploy state (per-laptop absolute paths; not portable)
+rsconnect-python/
 demo/rsconnect-python/
 demo/demo_skeletons.png
 demo/screenshots/

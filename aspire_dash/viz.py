@@ -5,6 +5,7 @@ All colours default to the Aspire theme but can be overridden.
 """
 
 import math
+from typing import Tuple
 from dash import html
 
 try:
@@ -361,3 +362,163 @@ def metric_spark(label, value, unit="", trend_values=None, color=None):
         "borderRadius": "8px", "border": f"1px solid {SLATE['200']}",
         "boxShadow": "0 1px 2px rgba(0,0,0,0.04)",
     })
+
+
+# ── Body Fat Gauge (semicircle, green→amber→red) ─────────────────────────────
+#
+# Pure SVG semicircle gauge with gradient arc, tick labels (5/10/15/20/25/30),
+# zone labels (Athletic/Fit/Average/Above/High), needle dot, tabular numeric
+# centre value. Ported byte-for-byte from the DASH_Anthro app so any Aspire
+# anthro / body-comp dashboard can drop it in with no extra deps (no Plotly,
+# no dash-svg — emits SVG markup inside an html.Iframe).
+
+# Geometry constants — keep in sync with the source TSX gauge.
+_BFG_CX = 100
+_BFG_CY = 105
+_BFG_R_OUTER = 80
+_BFG_R_INNER = 64
+_BFG_STROKE_W = _BFG_R_OUTER - _BFG_R_INNER
+_BFG_R_MID = (_BFG_R_OUTER + _BFG_R_INNER) / 2
+_BFG_MAX = 30
+
+_BFG_ZONES = [
+    {"start": 5,  "end": 10, "label": "Athletic"},
+    {"start": 10, "end": 15, "label": "Fit"},
+    {"start": 15, "end": 20, "label": "Average"},
+    {"start": 20, "end": 25, "label": "Above"},
+    {"start": 25, "end": 30, "label": "High"},
+]
+
+_BFG_TICKS = [5, 10, 15, 20, 25, 30]
+
+
+def _bfg_to_angle(bf: float) -> float:
+    return (max(0.0, min(bf, _BFG_MAX)) / _BFG_MAX) * 180.0
+
+
+def _bfg_polar(angle_deg: float, r: float) -> Tuple[float, float]:
+    rad = (180.0 - angle_deg) * math.pi / 180.0
+    return _BFG_CX + r * math.cos(rad), _BFG_CY - r * math.sin(rad)
+
+
+def _bfg_arc_path(start_deg: float, end_deg: float, r: float) -> str:
+    if abs(end_deg - start_deg) < 0.1:
+        return ""
+    p1 = _bfg_polar(start_deg, r)
+    p2 = _bfg_polar(end_deg, r)
+    large = 1 if (end_deg - start_deg) > 180 else 0
+    return f"M {p1[0]:.3f},{p1[1]:.3f} A {r},{r} 0 {large} 1 {p2[0]:.3f},{p2[1]:.3f}"
+
+
+def body_fat_gauge_svg(value: float) -> str:
+    """Return the raw SVG markup string for a body-fat semicircle gauge.
+
+    Use this when you need to embed the SVG yourself (e.g. inside an HTML
+    report, a custom iframe, or a Pandoc render). Otherwise prefer
+    ``body_fat_gauge`` which wraps it in a Dash component.
+
+    Parameters
+    ----------
+    value : float
+        Body fat percentage. Clamped to ``[0, 30]``. ``None`` / falsy
+        values render as 0.0% with no foreground arc.
+    """
+    target = _bfg_to_angle(float(value or 0))
+
+    parts = [
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 130" '
+        'style="width:100%;max-width:320px;height:auto;font-family:Inter,system-ui,sans-serif;">',
+        '<defs><linearGradient id="bf-gauge-grad" x1="0" y1="0" x2="1" y2="0">'
+        '<stop offset="0%" stop-color="#10b981"/>'
+        '<stop offset="45%" stop-color="#f59e0b"/>'
+        '<stop offset="100%" stop-color="#ef4444"/>'
+        '</linearGradient></defs>',
+        # Background arc
+        f'<path d="{_bfg_arc_path(0, 180, _BFG_R_MID)}" fill="none" stroke="#e2e8f0" '
+        f'stroke-width="{_BFG_STROKE_W}" stroke-linecap="round" />',
+    ]
+
+    # Foreground arc
+    if target > 0.5:
+        parts.append(
+            f'<path d="{_bfg_arc_path(0, target, _BFG_R_MID)}" fill="none" '
+            f'stroke="url(#bf-gauge-grad)" stroke-width="{_BFG_STROKE_W}" stroke-linecap="round" />'
+        )
+
+    # Ticks
+    for tick in _BFG_TICKS:
+        a = _bfg_to_angle(tick)
+        ox, oy = _bfg_polar(a, _BFG_R_OUTER + 2)
+        ix, iy = _bfg_polar(a, _BFG_R_OUTER + 8)
+        lx, ly = _bfg_polar(a, _BFG_R_OUTER + 16)
+        parts.append(
+            f'<line x1="{ox:.2f}" y1="{oy:.2f}" x2="{ix:.2f}" y2="{iy:.2f}" '
+            'stroke="#94a3b8" stroke-width="1" />'
+        )
+        parts.append(
+            f'<text x="{lx:.2f}" y="{ly:.2f}" text-anchor="middle" '
+            'dominant-baseline="central" font-size="8" fill="#94a3b8" font-weight="500">'
+            f'{tick}</text>'
+        )
+
+    # Zone labels
+    for z in _BFG_ZONES:
+        mid_a = _bfg_to_angle((z["start"] + z["end"]) / 2)
+        zx, zy = _bfg_polar(mid_a, _BFG_R_INNER - 12)
+        parts.append(
+            f'<text x="{zx:.2f}" y="{zy:.2f}" text-anchor="middle" '
+            'dominant-baseline="central" font-size="7" fill="#94a3b8" font-weight="500">'
+            f'{z["label"]}</text>'
+        )
+
+    # Needle indicator
+    nx, ny = _bfg_polar(target, _BFG_R_INNER - 2)
+    parts.append(
+        f'<circle cx="{nx:.2f}" cy="{ny:.2f}" r="3" fill="#001d3d" '
+        'stroke="white" stroke-width="1.5" />'
+    )
+
+    # Center value
+    parts.append(
+        f'<text x="{_BFG_CX}" y="{_BFG_CY - 6}" text-anchor="middle" font-size="26" '
+        'font-weight="700" fill="#001d3d" style="font-variant-numeric:tabular-nums;">'
+        f'{float(value or 0):.1f}</text>'
+    )
+    parts.append(
+        f'<text x="{_BFG_CX}" y="{_BFG_CY + 10}" text-anchor="middle" font-size="9" '
+        'fill="#94a3b8" font-weight="500">% Body Fat</text>'
+    )
+    parts.append('</svg>')
+    return "".join(parts)
+
+
+def body_fat_gauge(value: float):
+    """Body-fat semicircle gauge as a Dash component.
+
+    Wraps ``body_fat_gauge_svg`` in an ``html.Iframe`` so the inline SVG
+    renders correctly on Posit Connect (where ``dcc.Markdown`` with
+    ``dangerously_allow_html`` has been flaky for raw SVG). No extra
+    Python deps beyond Dash.
+
+    Parameters
+    ----------
+    value : float
+        Body fat percentage. Clamped to ``[0, 30]``.
+
+    Examples
+    --------
+    >>> from aspire_dash.viz import body_fat_gauge
+    >>> body_fat_gauge(12.3)
+    """
+    svg = body_fat_gauge_svg(value)
+    doc = (
+        '<!doctype html><html><head><meta charset="utf-8">'
+        '<style>html,body{margin:0;padding:0;background:transparent;'
+        'display:flex;justify-content:center;align-items:center;}</style>'
+        '</head><body>' + svg + '</body></html>'
+    )
+    return html.Iframe(
+        srcDoc=doc,
+        style={"border": 0, "width": "100%", "maxWidth": 340, "height": 220,
+               "background": "transparent"},
+    )

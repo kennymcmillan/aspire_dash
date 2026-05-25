@@ -4,6 +4,57 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.36.0] — 2026-05-25
+
+### Added — body composition, skinfold silhouette, z-score engine
+
+Promoted from the `DASH_Anthro` Connect app — all reusable across any
+Aspire app touching body composition, anthropometry, or squad z-score
+analysis.
+
+**New in `aspire_dash.viz`:**
+- `body_fat_gauge(value)` / `body_fat_gauge_svg(value)` — semicircle
+  SVG gauge with green→amber→red gradient arc, ticks at 5/10/15/20/25/30,
+  zone labels (Athletic/Fit/Average/Above/High), needle dot, tabular
+  centre value. Static render, no draw-in animation. Sits alongside the
+  existing `progress_ring` / `status_ring` family.
+
+**New in `aspire_dash.anthropometric`:**
+- `skinfold_silhouette(sites)` / `skinfold_silhouette_svg(sites)` —
+  front-view male anatomical outline with 8 ISAK skinfold-site dots
+  tinted blue→amber by relative magnitude, hover tooltips, low/high
+  gradient legend. Distinct from `medical.body_silhouette` (which
+  colours injury *regions*) — these complement each other.
+- `zscore_heatmap(athletes, measures, matrix, raw_values, stats)` —
+  squad-vs-population matrix as a Dash `html.Table` with 7-bucket
+  colour scale, group-banded headers, mean / SD columns.
+- `zscore_radar_figure(athlete_name, z_items)` — per-athlete polar
+  radar, ±3 clamp with the loop closed for a clean profile shape.
+
+**New module `aspire_dash.zscores`:**
+- `compute_squad_z_scores(athletes, measurement_keys)` — pure-math
+  engine. Returns matrix + per-key {mean, sd, n} stats + auto-generated
+  insights (best/worst on signature measures, CV variability).
+- `z_score_color(z, inverted=False)` — 7-bucket (bg, text) hex pair
+  matching the heatmap colour scale.
+- `is_inverted(key)` / `INVERTED_MEASURES` — handles "lower-is-better"
+  measures (skinfolds, %BF, fat mass) so the colour scale flips
+  appropriately.
+- `Z_SCORE_MEASURES` — anthropometry-default measure list, grouped by
+  section. Optional — apps can pass their own.
+- `z_score(value, mu, sigma)` — atomic helper; returns `None` when
+  `sigma < 0.01` (no variance).
+
+### Migration notes
+
+- DASH_Anthro 1f8dd53+ consumes all of the above directly; its local
+  copies of these components / lib/z_scores.py have been removed.
+- The somatochart already lived in `aspire_dash.anthropometric.somatochart`
+  since 0.x — DASH_Anthro now uses that one too instead of its byte-port.
+- `medical.body_silhouette` is unchanged; it colours injury *regions*
+  via SVG element IDs and is independent of the new
+  `anthropometric.skinfold_silhouette`.
+
 ## [0.35.0] — 2026-05-22
 
 ### Added — sports-science module + Freefrontend extras
