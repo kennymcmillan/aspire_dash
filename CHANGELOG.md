@@ -6,6 +6,36 @@ additive minors, breaking changes get a major bump when we get there.
 
 ## [0.38.0] — 2026-05-26
 
+### Polish — `athlete_id_card` v2
+
+User feedback after the v0.37 launch: card looked squashed when placed in
+a constrained-width container, and the photo / body / age columns didn't
+line up cleanly. Iteration via the forge sandbox.
+
+Changes to `.athlete-id-card` CSS in `assets/00_aspire_base.css`:
+
+- `align-items: stretch` → `flex-start`. Photo, body, and any future
+  right-side actions now top-align to a predictable baseline rather
+  than stretching unevenly.
+- Padding 16/18 → **20/24**; min-height **96px** floor so short content
+  (one sport pill only) doesn't collapse.
+- Photo bumped 56 → **64px** with stronger shadow for visual weight.
+- Photo-stack column locked to **72px** width so the age badge under
+  the photo stays centred regardless of pill row width.
+- Body uses `gap: 10px` for even rhythm (was `margin-bottom: 8px` then
+  inconsistent row gaps). Removed `justify-content: center` — content
+  flows naturally top-down.
+- Name bumped 16 → **17px**; pill rows gap 4 → 6px; pill internal
+  padding 3/10 → 4/11.
+- Age badge softened (emerald-50 / 200 instead of 100 / 300) so the
+  name remains the visual hero. Tabular-nums for stable width.
+- Target athletes get a slightly stronger photo shadow (gold tint).
+- New `@media (max-width: 520px)` rule — photo + age stack horizontally
+  with body wrapping below, for narrow containers.
+
+No Python API changes. Apps consuming v0.37 pick up the polish on next
+SHA bump with zero code edits.
+
 ### Added — `register_athlete_banner(extra_actions=...)`
 
 - `register_athlete_banner`: new `extra_actions=` slot (Component OR
