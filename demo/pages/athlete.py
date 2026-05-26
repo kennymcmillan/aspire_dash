@@ -1,16 +1,90 @@
-"""Athlete components — avatar + profile header."""
+"""Athlete components — avatar + profile header + banner with actions."""
 import dash
-from dash import html
+from dash import dcc, html
+import dash_bootstrap_components as dbc
 
-from aspire_dash.athlete import athlete_avatar, athlete_profile_header
+from aspire_dash.athlete import (
+    athlete_avatar, athlete_profile_header,
+    selected_athlete_banner, register_athlete_banner,
+)
 
-from ._shared import section, example
+from ._shared import section, example, code_block
 
 dash.register_page(__name__, path="/athlete", title="Athlete", name="Athlete")
 
 
 _SAMPLE_PHOTO = ("https://aspirepictures.blob.core.windows.net/"
                   "shared/aspire-academy-logo.png")  # SAMS-style public URL
+
+
+# v0.38 — wire two demo banners against two distinct stores so the page
+# can show both the static-actions and the per-athlete-callable shapes
+# side-by-side. Each banner mounts an `html.Div(id=...)` and the
+# upstream callback fills it from the bound store's data.
+_DEMO_STORE_STATIC = "demo-athlete-store-static"
+_DEMO_BANNER_STATIC = "demo-athlete-banner-static"
+_DEMO_STORE_CALL = "demo-athlete-store-call"
+_DEMO_BANNER_CALL = "demo-athlete-banner-call"
+
+_DEMO_ATHLETE = {
+    "player_id": 1234,
+    "full_name": "Mohammed AlHazaa",
+    "sport": "Fencing",
+    "age": 17,
+    "mrn": "MRN-9001",
+    "is_target": True,
+}
+
+
+def _demo_actions(_athlete):
+    """Per-athlete callable shape — Change / Clear pair."""
+    return [
+        dbc.Button(
+            [html.I(className="fa-solid fa-pen-to-square me-1"), "Change"],
+            id="demo-banner-change", color="link", size="sm",
+            n_clicks=0,
+            className="p-0 text-decoration-none me-3",
+            style={"color": "#004185", "fontSize": "0.8rem",
+                   "fontWeight": "500"},
+        ),
+        dbc.Button(
+            [html.I(className="fa-solid fa-xmark me-1"), "Clear"],
+            id="demo-banner-clear", color="link", size="sm",
+            n_clicks=0,
+            className="p-0 text-decoration-none text-secondary",
+            title="Clear selection",
+            style={"fontSize": "0.8rem"},
+        ),
+    ]
+
+
+# Register both banner callbacks once at import. The demo app calls
+# `setup_app` before pages register, so this fires during page
+# discovery — same pattern any consumer would use after `Dash(...)`.
+try:
+    _app = dash.get_app()
+    register_athlete_banner(
+        _app,
+        store_id=_DEMO_STORE_STATIC,
+        banner_id=_DEMO_BANNER_STATIC,
+        extra_actions=dbc.Button(
+            [html.I(className="fa-solid fa-rotate me-1"), "Reload"],
+            id="demo-banner-reload", color="link", size="sm",
+            n_clicks=0,
+            className="p-0 text-decoration-none",
+            style={"color": "#004185", "fontSize": "0.8rem"},
+        ),
+    )
+    register_athlete_banner(
+        _app,
+        store_id=_DEMO_STORE_CALL,
+        banner_id=_DEMO_BANNER_CALL,
+        extra_actions=_demo_actions,
+    )
+except Exception:  # noqa: BLE001
+    # If page imports outside a Dash app context (sweep test, docs build,
+    # etc), the demo just renders without live banner data.
+    pass
 
 
 def layout():
@@ -93,4 +167,48 @@ def layout():
             '    badges=[html.Span("Captain", ...)],\n'
             ')',
         ),
+
+        # v0.38 — selected_athlete_banner + register_athlete_banner with
+        # the new extra_actions slot.
+        section("selected_athlete_banner + register_athlete_banner",
+                 "v0.38 — persistent page-top banner driven by an "
+                 "athlete-store. New extra_actions= slot lets consumers "
+                 "add buttons (Change / Clear / Reload) beneath the card."),
+
+        # Mock the two stores with a pre-filled athlete dict so the
+        # banners render without a real picker on this demo page.
+        dcc.Store(id=_DEMO_STORE_STATIC, data=_DEMO_ATHLETE),
+        dcc.Store(id=_DEMO_STORE_CALL, data=_DEMO_ATHLETE),
+
+        example(
+            "Static actions — single reusable component",
+            html.Div([selected_athlete_banner(
+                store_id=_DEMO_STORE_STATIC,
+                banner_id=_DEMO_BANNER_STATIC,
+            )]),
+            "register_athlete_banner(\n"
+            "    app,\n"
+            "    store_id='athlete-store',\n"
+            "    extra_actions=dbc.Button('Reload', id='reload-athlete',\n"
+            "                              color='link', size='sm'),\n"
+            ")",
+        ),
+        example(
+            "Per-athlete callable — Change + Clear pair",
+            html.Div([selected_athlete_banner(
+                store_id=_DEMO_STORE_CALL,
+                banner_id=_DEMO_BANNER_CALL,
+            )]),
+            "def _actions(athlete):\n"
+            "    return [\n"
+            "        dbc.Button('Change', id='picker-trigger', ...),\n"
+            "        dbc.Button('Clear',  id={'type': 'athlete-clear',\n"
+            "                                  'k': 0}, ...),\n"
+            "    ]\n\n"
+            "register_athlete_banner(app, extra_actions=_actions)",
+        ),
+        html.P("Pass `extra_actions=None` (default) to keep v0.37 behaviour "
+                "exactly — no action row, identical DOM.",
+                style={"color": "#64748b", "fontSize": "13px",
+                       "marginTop": "8px"}),
     ], style={"padding": "24px"})
