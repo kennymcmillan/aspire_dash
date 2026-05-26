@@ -794,6 +794,7 @@ def register_athlete_banner(
     store_id: str = "athlete-store",
     banner_id: str = BANNER_ID,
     on_missing_mrn_warn: bool = True,
+    extra_actions=None,
 ) -> None:
     """Wire the callback that fills :func:`selected_athlete_banner`.
 
@@ -814,6 +815,48 @@ def register_athlete_banner(
         the athlete has a ``player_id`` but no ``mrn`` (a known SAMS
         edge case — capture flows that need an MRN can't bind without
         one).
+    extra_actions : Component | callable(athlete) -> Component | list | None
+        Optional consumer-supplied action buttons rendered BENEATH the
+        card and BENEATH the missing-MRN warning. Two supported shapes:
+
+        - **Component / list of components** — static; same actions for
+          every athlete. Good for "Change / Clear" pairs whose ids are
+          fixed.
+        - **Callable** — ``fn(athlete: dict) -> Component | list`` —
+          called per render so actions can be MRN-aware or athlete-
+          specific (e.g. show Clear only when an athlete is picked).
+
+        The result is wrapped in
+        ``html.Div(className="d-flex align-items-center mt-2")`` so
+        consumers don't have to repeat the row styling. Pass ``None``
+        (default) to omit the actions row entirely — backwards-
+        compatible with v0.37 callers.
+
+    Examples
+    --------
+    Static actions::
+
+        from dash import html
+        import dash_bootstrap_components as dbc
+
+        register_athlete_banner(
+            app,
+            extra_actions=dbc.Button("Reload", id="reload-athlete",
+                                     color="link", size="sm"),
+        )
+
+    Per-athlete callable (the Change + Clear pattern used by
+    aspire-nutrition)::
+
+        def _actions(athlete):
+            return [
+                dbc.Button("Change", id="picker-trigger",
+                           color="link", size="sm", className="me-3"),
+                dbc.Button("Clear",  id={"type": "athlete-clear", "k": 0},
+                           color="link", size="sm"),
+            ]
+
+        register_athlete_banner(app, extra_actions=_actions)
     """
     from .v12_helpers import athlete_card as _athlete_card
 
@@ -863,4 +906,16 @@ def register_athlete_banner(
                 color="warning", className="mt-2 mb-0 py-2",
                 style={"fontSize": "0.82rem"},
             ))
+
+        # v0.38 — optional consumer action row beneath the card. Skipped
+        # entirely when extra_actions is None so the DOM is identical to
+        # v0.37 for existing callers.
+        if extra_actions is not None:
+            actions = (extra_actions(athlete) if callable(extra_actions)
+                       else extra_actions)
+            if actions is not None:
+                children.append(html.Div(
+                    actions,
+                    className="d-flex align-items-center mt-2",
+                ))
         return html.Div(children, style={"maxWidth": "420px"})

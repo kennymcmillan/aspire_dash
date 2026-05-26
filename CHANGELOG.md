@@ -4,6 +4,19 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.38.0] — 2026-05-26
+
+### Added — `register_athlete_banner(extra_actions=...)`
+
+- `register_athlete_banner`: new `extra_actions=` slot (Component OR
+  callable returning Component) for consumer action buttons (Change /
+  Clear pattern in aspire-nutrition). Rendered beneath the card and
+  beneath the missing-MRN warning, wrapped in a flex row so consumers
+  don't repeat the styling. Defaults to `None` — backwards-compatible
+  with v0.37 callers (DOM unchanged).
+- Demo: `/athlete` page now shows a static-actions and a per-athlete
+  callable example with a mock store + banner.
+
 ## [0.37.0] — 2026-05-25
 
 ### Added — `athlete_id_card` (promoted from DASH_Anthro)
