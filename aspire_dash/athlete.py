@@ -187,7 +187,13 @@ def _athlete_id_card_fractional_age(dob_iso: str | None) -> float | None:
 
 
 def athlete_id_card(data: dict | None) -> html.Div:
-    """Picker-confirmation identity card.
+    """Picker-confirmation identity card (v0.39 "C-style" redesign).
+
+    Photo with corner-star badge for target athletes, Aspire-navy name,
+    one combined Sport · Event pill, and a single identity line with
+    DOB, SAMS ID, and decimal age. No MRN, no inline "TARGET" text —
+    target status is conveyed visually by the gold ring + corner star +
+    warm gradient background.
 
     Parameters
     ----------
@@ -195,29 +201,26 @@ def athlete_id_card(data: dict | None) -> html.Div:
         Picker-store payload. Recognised keys (all optional except
         ``player_id`` which gates the empty-state):
 
-        ============   ===========================================
-        ``player_id``  SAMS player ID (gates empty state)
-        ``full_name``  Display name
-        ``photo_url``  Photo (FA user icon falls back if missing)
-        ``sport``      e.g. "Athletics" (blue SPORT pill)
-        ``target_event``  e.g. "100m" (amber EVENT pill)
-        ``date_of_birth`` ISO date — drives DOB pill + age badge
-        ``mrn``        SAMS MRN (slate identity pill)
-        ``is_target``  bool — gold ring + TARGET badge
-        ``pathway``    "Target" also triggers TARGET styling
-        ============   ===========================================
+        ============     ===========================================
+        ``player_id``    SAMS player ID (gates empty state, shown
+                         as SAMS in the identity line)
+        ``full_name``    Display name
+        ``photo_url``    Photo URL (FA user icon falls back if missing)
+        ``sport``        e.g. "Athletics"
+        ``target_event`` e.g. "100m" (combined with sport in one pill)
+        ``date_of_birth`` ISO date — drives DOB + decimal age
+        ``is_target``    bool — gold ring + corner star
+        ``pathway``      "Target" also triggers target styling
+        ============     ===========================================
+
+        ``mrn`` is no longer rendered (SAMS player_id is the durable
+        identifier). The data may still contain it; it's ignored.
 
     Returns
     -------
     html.Div
         Ready-to-render component. Empty/None payload returns the
         amber "no athlete picked" prompt.
-
-    Notes
-    -----
-    Styling: all rules live in ``.athlete-id-card`` + variants in
-    ``aspire_dash/assets/00_aspire_base.css``. Override via your app's
-    own assets file rather than editing this helper.
     """
     if not data or not data.get("player_id"):
         return html.Div(
@@ -232,66 +235,72 @@ def athlete_id_card(data: dict | None) -> html.Div:
     sport     = data.get("sport")
     target    = data.get("target_event")
     dob       = data.get("date_of_birth")
-    mrn       = data.get("mrn")
     sams_id   = data.get("player_id")
     is_target = bool(data.get("is_target")) or (data.get("pathway") == "Target")
     frac_age  = _athlete_id_card_fractional_age(dob)
 
-    # Photo (or FA user fallback) — class-driven; ring colour switches via .is-target
+    # Photo (or FA user fallback) — ring colour flips via .is-target.
+    # Target athletes get a corner-star badge overlay.
     photo_node = (
         html.Img(src=photo, alt=name, className="athlete-id-card__photo")
         if photo
         else html.Div(html.I(className="fa-solid fa-user"),
                       className="athlete-id-card__photo-fallback")
     )
-    photo_stack = [photo_node]
+    photo_wrap_children = [photo_node]
+    if is_target:
+        photo_wrap_children.append(html.Div(
+            html.I(className="fa-solid fa-star"),
+            className="athlete-id-card__target-star",
+            title="Target pathway athlete",
+        ))
+    photo_wrap = html.Div(photo_wrap_children,
+                          className="athlete-id-card__photo-wrap")
+
+    # Name row — Aspire-navy name + optional combined Sport · Event pill
+    name_row: list = [html.Span(name, className="athlete-id-card__name")]
+    sport_event_parts = [p for p in (sport, target) if p]
+    if sport_event_parts:
+        name_row.append(html.Span(
+            " · ".join(sport_event_parts),
+            className="athlete-id-card__sport-pill",
+        ))
+
+    # Identity line — slate text with label spans + age in emerald
+    identity_bits: list = []
+
+    def _sep():
+        return html.Span("·", className="athlete-id-card__identity-sep")
+
+    if dob:
+        identity_bits.append(html.Span([
+            html.Span("DOB", className="athlete-id-card__identity-label"),
+            str(dob),
+        ]))
+    if sams_id:
+        if identity_bits:
+            identity_bits.append(_sep())
+        identity_bits.append(html.Span([
+            html.Span("SAMS", className="athlete-id-card__identity-label"),
+            str(sams_id),
+        ]))
     if frac_age is not None:
-        photo_stack.append(html.Div(
+        if identity_bits:
+            identity_bits.append(_sep())
+        identity_bits.append(html.Span(
             f"{frac_age:.1f} yrs",
-            className="athlete-id-card__age",
+            className="athlete-id-card__identity-age",
             title=f"Age computed from DOB ({dob})" if dob else None,
         ))
 
-    name_row: list = [html.Span(name, className="athlete-id-card__name")]
-    if is_target:
-        name_row.append(html.Span(
-            [html.I(className="fa-solid fa-star",
-                    style={"fontSize": "9px"}),
-             "TARGET"],
-            className="athlete-id-card__target-badge",
-            title="Target pathway athlete",
-        ))
-
-    def _pill(label: str, value, kind: str):
-        return html.Span(
-            [html.B(label), str(value)],
-            className=f"athlete-id-card__pill pill-{kind}",
-        )
-
-    top_pills: list = []
-    if sport:  top_pills.append(_pill("SPORT", sport,  "sport"))
-    if target: top_pills.append(_pill("EVENT", target, "event"))
-
-    id_pills: list = []
-    if dob:     id_pills.append(_pill("DOB",     dob,     "identity"))
-    if mrn:     id_pills.append(_pill("MRN",     mrn,     "identity"))
-    if sams_id: id_pills.append(_pill("SAMS ID", sams_id, "identity"))
-
-    pill_rows = []
-    if top_pills:
-        pill_rows.append(html.Div(top_pills, className="athlete-id-card__pills-row"))
-    if id_pills:
-        pill_rows.append(html.Div(id_pills, className="athlete-id-card__pills-row"))
+    body_children = [html.Div(name_row, className="athlete-id-card__name-row")]
+    if identity_bits:
+        body_children.append(html.Div(identity_bits,
+                                      className="athlete-id-card__identity"))
 
     return html.Div(
-        [
-            html.Div(photo_stack, className="athlete-id-card__photo-stack"),
-            html.Div(
-                [html.Div(name_row, className="athlete-id-card__name-row"),
-                 *pill_rows],
-                className="athlete-id-card__body",
-            ),
-        ],
+        [photo_wrap,
+         html.Div(body_children, className="athlete-id-card__body")],
         className=f"athlete-id-card{' is-target' if is_target else ''}",
     )
 

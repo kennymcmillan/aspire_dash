@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Athlete ID Card — design exploration</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f7f9fc; color: #0f172a; }
+  h1, h2, h3 { font-family: 'Poppins', sans-serif; }
+  .label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #64748b; }
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  /* Variant E — colour overlay attempt */
+  .vE-bg-target {
+    background: radial-gradient(ellipse at top left, #fef3c7 0%, #ffffff 70%);
+  }
+  .vE-bg-default {
+    background: radial-gradient(ellipse at top left, #dbeafe 0%, #ffffff 70%);
+  }
+</style>
+</head>
+<body class="max-w-[1100px] mx-auto p-10 space-y-12">
+
+<header>
+  <h1 class="text-2xl font-bold mb-1">Athlete ID Card — 3 directions</h1>
+  <p class="text-slate-600 max-w-2xl">
+    Three genuinely different design directions for the picker-confirmation card.
+    Each shown with a TARGET athlete (Adham Eldeeb) and a standard athlete
+    (Mohammed AlHazaa). Pick a direction, then we'll iterate within it.
+  </p>
+</header>
+
+<!-- ─── DIRECTION A — Editorial / Whoop-style ─────────────────────── -->
+<section>
+  <div class="flex items-baseline gap-3 mb-4">
+    <h2 class="text-lg font-semibold">A — Editorial</h2>
+    <span class="text-sm text-slate-500">Hero photo, generous whitespace, typography-led. No identity pills — they sit as small tabular text.</span>
+  </div>
+
+  <div class="space-y-4">
+    <!-- TARGET athlete -->
+    <div class="bg-white rounded-2xl border border-amber-200 border-l-[6px] border-l-amber-500 shadow-sm">
+      <div class="flex gap-7 p-7">
+        <div class="shrink-0">
+          <div class="w-20 h-20 rounded-full bg-slate-200 border-[3px] border-amber-500 shadow-[0_6px_18px_rgba(245,158,11,0.18)] flex items-center justify-center text-slate-500">
+            <i class="fa-solid fa-user text-2xl"></i>
+          </div>
+        </div>
+        <div class="flex-1 flex flex-col justify-center">
+          <div class="flex items-center gap-2 mb-1">
+            <h3 class="text-[22px] font-bold text-slate-900 tracking-tight leading-tight">Adham Eldeeb</h3>
+            </div>
+          <div class="text-[14px] text-slate-600 font-medium mb-3">
+            Athletics · 100m
+          </div>
+          <div class="grid grid-cols-4 gap-4 text-[12px] pt-3 border-t border-slate-100">
+            <div>
+              <div class="label">Date of Birth</div>
+              <div class="font-semibold text-slate-700 tabular mt-0.5">2010-01-21</div>
+            </div>
+            <div>
+              <div class="label">Age</div>
+              <div class="font-semibold text-slate-700 tabular mt-0.5">16.1 years</div>
+            </div>
+            
+            <div>
+              <div class="label">SAMS ID</div>
+              <div class="font-semibold text-slate-700 tabular mt-0.5">2940</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STANDARD athlete -->
+    <div class="bg-white rounded-2xl border border-slate-200 border-l-[6px] border-l-sky-400 shadow-sm">
+      <div class="flex gap-7 p-7">
+        <div class="shrink-0">
+          <div class="w-20 h-20 rounded-full bg-slate-200 border-[3px] border-sky-300 shadow-[0_4px_12px_rgba(15,23,42,0.08)] flex items-center justify-center text-slate-500">
+            <i class="fa-solid fa-user text-2xl"></i>
+          </div>
+        </div>
+        <div class="flex-1 flex flex-col justify-center">
+          <h3 class="text-[22px] font-bold text-slate-900 tracking-tight leading-tight mb-1">Mohammed AlHazaa</h3>
+          <div class="text-[14px] text-slate-600 font-medium mb-3">Fencing · Epee</div>
+          <div class="grid grid-cols-4 gap-4 text-[12px] pt-3 border-t border-slate-100">
+            <div><div class="label">Date of Birth</div><div class="font-semibold text-slate-700 tabular mt-0.5">2006-08-14</div></div>
+            <div><div class="label">Age</div><div class="font-semibold text-slate-700 tabular mt-0.5">19.4 years</div></div>
+            
+            <div><div class="label">SAMS ID</div><div class="font-semibold text-slate-700 tabular mt-0.5">1124</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── DIRECTION B — Dashboard row / Linear-style ─────────────────── -->
+<section>
+  <div class="flex items-baseline gap-3 mb-4">
+    <h2 class="text-lg font-semibold">B — Dashboard row</h2>
+    <span class="text-sm text-slate-500">Single horizontal row, vertical dividers between fields, very dense. Linear / Stripe row aesthetic.</span>
+  </div>
+
+  <div class="space-y-3">
+    <!-- TARGET athlete -->
+    <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+      <div class="flex items-center divide-x divide-slate-100 text-[13px]">
+        <div class="flex items-center gap-3 p-3.5 pr-5">
+          <div class="w-12 h-12 rounded-full bg-slate-200 border-2 border-amber-500 flex items-center justify-center text-slate-500 shrink-0">
+            <i class="fa-solid fa-user text-base"></i>
+          </div>
+          <div>
+            <div class="font-bold text-slate-900 leading-tight flex items-center gap-1.5">
+              Adham Eldeeb
+              <i class="fa-solid fa-star text-amber-500 text-[10px]"></i>
+            </div>
+            <div class="text-[11px] text-slate-500 mt-0.5">SAMS 2940</div>
+          </div>
+        </div>
+        <div class="px-5 py-3.5 min-w-[110px]">
+          <div class="label">Sport</div>
+          <div class="font-semibold text-slate-800 mt-0.5">Athletics</div>
+        </div>
+        <div class="px-5 py-3.5 min-w-[100px]">
+          <div class="label">Event</div>
+          <div class="font-semibold text-slate-800 mt-0.5">100m</div>
+        </div>
+        <div class="px-5 py-3.5 min-w-[120px]">
+          <div class="label">DOB</div>
+          <div class="font-semibold text-slate-800 tabular mt-0.5">2010-01-21</div>
+        </div>
+        <div class="px-5 py-3.5 min-w-[80px]">
+          <div class="label">Age</div>
+          <div class="font-semibold text-slate-800 tabular mt-0.5">16.1</div>
+        </div>
+        <div class="px-5 py-3.5 min-w-[110px]">
+          <div class="label">MRN</div>
+          <div class="font-semibold text-slate-800 tabular mt-0.5">20025105</div>
+        </div>
+        <div class="ml-auto px-5 py-3.5">
+          </div>
+      </div>
+    </div>
+
+    <!-- STANDARD athlete -->
+    <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+      <div class="flex items-center divide-x divide-slate-100 text-[13px]">
+        <div class="flex items-center gap-3 p-3.5 pr-5">
+          <div class="w-12 h-12 rounded-full bg-slate-200 border-2 border-sky-300 flex items-center justify-center text-slate-500 shrink-0">
+            <i class="fa-solid fa-user text-base"></i>
+          </div>
+          <div>
+            <div class="font-bold text-slate-900 leading-tight">Mohammed AlHazaa</div>
+            <div class="text-[11px] text-slate-500 mt-0.5">SAMS 1124</div>
+          </div>
+        </div>
+        <div class="px-5 py-3.5 min-w-[110px]"><div class="label">Sport</div><div class="font-semibold text-slate-800 mt-0.5">Fencing</div></div>
+        <div class="px-5 py-3.5 min-w-[100px]"><div class="label">Event</div><div class="font-semibold text-slate-800 mt-0.5">Epee</div></div>
+        <div class="px-5 py-3.5 min-w-[120px]"><div class="label">DOB</div><div class="font-semibold text-slate-800 tabular mt-0.5">2006-08-14</div></div>
+        <div class="px-5 py-3.5 min-w-[80px]"><div class="label">Age</div><div class="font-semibold text-slate-800 tabular mt-0.5">19.4</div></div>
+        <div class="px-5 py-3.5 min-w-[110px]"><div class="label">MRN</div><div class="font-semibold text-slate-800 tabular mt-0.5">20060814</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── DIRECTION B — MORE VARIANTS ────────────────────────────────── -->
+<section>
+  <div class="flex items-baseline gap-3 mb-4">
+    <h2 class="text-lg font-semibold">B — more dashboard-row variants</h2>
+    <span class="text-sm text-slate-500">Same row idea, different rhythm. Pick a sub-variant or mix.</span>
+  </div>
+
+  <!-- B1 — Ultra-compact with no dividers, just gap -->
+  <div class="mb-2 text-[12px] font-semibold text-slate-500">B1 — gapped (no dividers, lighter)</div>
+  <div class="space-y-3 mb-8">
+    <div class="bg-white rounded-lg border border-slate-200 shadow-sm">
+      <div class="flex items-center gap-6 px-4 py-3 text-[13px]">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-11 h-11 rounded-full bg-slate-200 border-2 border-amber-500 flex items-center justify-center text-slate-500 shrink-0 relative">
+            <i class="fa-solid fa-user text-sm"></i>
+            <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-amber-500 border border-white flex items-center justify-center"><i class="fa-solid fa-star text-white text-[6px]"></i></span>
+          </div>
+          <div class="min-w-0">
+            <div class="font-bold text-slate-900 leading-tight truncate">Adham Eldeeb</div>
+            <div class="text-[11px] text-slate-500 mt-0.5 tabular">SAMS 2940</div>
+          </div>
+        </div>
+        <div class="hidden md:block">
+          <div class="label">Sport</div>
+          <div class="font-semibold text-slate-800">Athletics</div>
+        </div>
+        <div class="hidden md:block">
+          <div class="label">Event</div>
+          <div class="font-semibold text-slate-800">100m</div>
+        </div>
+        <div class="hidden md:block">
+          <div class="label">DOB</div>
+          <div class="font-semibold text-slate-800 tabular">2010-01-21</div>
+        </div>
+        <div class="ml-auto">
+          <div class="text-[10px] text-slate-400 font-bold tracking-[0.08em] uppercase">Age</div>
+          <div class="text-[18px] font-bold tabular text-emerald-700 leading-none">16.1</div>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg border border-slate-200 shadow-sm">
+      <div class="flex items-center gap-6 px-4 py-3 text-[13px]">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-11 h-11 rounded-full bg-slate-200 border-2 border-sky-300 flex items-center justify-center text-slate-500 shrink-0">
+            <i class="fa-solid fa-user text-sm"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="font-bold text-slate-900 leading-tight truncate">Mohammed AlHazaa</div>
+            <div class="text-[11px] text-slate-500 mt-0.5 tabular">SAMS 1124</div>
+          </div>
+        </div>
+        <div class="hidden md:block"><div class="label">Sport</div><div class="font-semibold text-slate-800">Fencing</div></div>
+        <div class="hidden md:block"><div class="label">Event</div><div class="font-semibold text-slate-800">Epee</div></div>
+        <div class="hidden md:block"><div class="label">DOB</div><div class="font-semibold text-slate-800 tabular">2006-08-14</div></div>
+        <div class="ml-auto">
+          <div class="text-[10px] text-slate-400 font-bold tracking-[0.08em] uppercase">Age</div>
+          <div class="text-[18px] font-bold tabular text-emerald-700 leading-none">19.4</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B2 — Aspire-navy header strip on left -->
+  <div class="mb-2 text-[12px] font-semibold text-slate-500">B2 — navy left header (sport+event vertical), data right</div>
+  <div class="space-y-3 mb-8">
+    <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden flex">
+      <div class="w-[140px] text-white p-3 flex flex-col justify-center" style="background: linear-gradient(135deg, #004185 0%, #003566 100%);">
+        <div class="text-[10px] uppercase tracking-[0.08em] font-bold opacity-80">Athletics</div>
+        <div class="text-[18px] font-bold leading-tight">100m</div>
+        </div>
+      <div class="flex items-center gap-4 px-5 py-3 flex-1">
+        <div class="w-12 h-12 rounded-full bg-slate-200 border-2 border-amber-500 flex items-center justify-center text-slate-500 shrink-0">
+          <i class="fa-solid fa-user text-base"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-bold text-[16px] text-slate-900 leading-tight">Adham Eldeeb</div>
+          <div class="text-[11px] text-slate-500 mt-1 tabular flex gap-3">
+            <span><span class="text-slate-400">DOB</span> 2010-01-21</span>
+            <span><span class="text-slate-400">SAMS</span> 2940</span>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-[10px] uppercase tracking-[0.08em] font-bold text-slate-400">Age</div>
+          <div class="text-[20px] font-bold tabular text-emerald-700 leading-none">16.1</div>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden flex">
+      <div class="w-[140px] text-white p-3 flex flex-col justify-center" style="background: linear-gradient(135deg, #1876ab 0%, #004185 100%);">
+        <div class="text-[10px] uppercase tracking-[0.08em] font-bold opacity-80">Fencing</div>
+        <div class="text-[18px] font-bold leading-tight">Epee</div>
+      </div>
+      <div class="flex items-center gap-4 px-5 py-3 flex-1">
+        <div class="w-12 h-12 rounded-full bg-slate-200 border-2 border-sky-300 flex items-center justify-center text-slate-500 shrink-0">
+          <i class="fa-solid fa-user text-base"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-bold text-[16px] text-slate-900 leading-tight">Mohammed AlHazaa</div>
+          <div class="text-[11px] text-slate-500 mt-1 tabular flex gap-3">
+            <span><span class="text-slate-400">DOB</span> 2006-08-14</span>
+            <span><span class="text-slate-400">SAMS</span> 1124</span>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-[10px] uppercase tracking-[0.08em] font-bold text-slate-400">Age</div>
+          <div class="text-[20px] font-bold tabular text-emerald-700 leading-none">19.4</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B3 — Banner-style, all on one line, sport+event as colored chip on left -->
+  <div class="mb-2 text-[12px] font-semibold text-slate-500">B3 — single-line banner (most space-efficient)</div>
+  <div class="space-y-2 mb-8">
+    <div class="bg-white rounded-lg border border-slate-200 shadow-sm">
+      <div class="flex items-center gap-4 px-4 py-2.5 text-[13px]">
+        <div class="w-10 h-10 rounded-full bg-slate-200 border-2 border-amber-500 flex items-center justify-center text-slate-500 shrink-0 relative">
+          <i class="fa-solid fa-user text-xs"></i>
+          <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-amber-500 border border-white flex items-center justify-center"><i class="fa-solid fa-star text-white text-[5px]"></i></span>
+        </div>
+        <div class="font-bold text-slate-900 leading-none">Adham Eldeeb</div>
+        <span class="text-[11px] font-bold rounded-full px-2 py-0.5 bg-blue-100 text-blue-800">Athletics · 100m</span>
+        <span class="text-slate-300">·</span>
+        <span class="tabular text-slate-600"><span class="text-slate-400">DOB</span> 2010-01-21</span>
+        <span class="text-slate-300">·</span>
+        <span class="tabular text-slate-600"><span class="text-slate-400">SAMS</span> 2940</span>
+        <span class="ml-auto text-[12px] font-bold tabular text-emerald-700">16.1 yrs</span>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg border border-slate-200 shadow-sm">
+      <div class="flex items-center gap-4 px-4 py-2.5 text-[13px]">
+        <div class="w-10 h-10 rounded-full bg-slate-200 border-2 border-sky-300 flex items-center justify-center text-slate-500 shrink-0">
+          <i class="fa-solid fa-user text-xs"></i>
+        </div>
+        <div class="font-bold text-slate-900 leading-none">Mohammed AlHazaa</div>
+        <span class="text-[11px] font-bold rounded-full px-2 py-0.5 bg-blue-100 text-blue-800">Fencing · Epee</span>
+        <span class="text-slate-300">·</span>
+        <span class="tabular text-slate-600"><span class="text-slate-400">DOB</span> 2006-08-14</span>
+        <span class="text-slate-300">·</span>
+        <span class="tabular text-slate-600"><span class="text-slate-400">SAMS</span> 1124</span>
+        <span class="ml-auto text-[12px] font-bold tabular text-emerald-700">19.4 yrs</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- B4 — split with avatar tile on left, two-line right -->
+  <div class="mb-2 text-[12px] font-semibold text-slate-500">B4 — avatar tile + two-line info</div>
+  <div class="space-y-3">
+    <div class="bg-white rounded-lg border border-slate-200 shadow-sm flex overflow-hidden">
+      <div class="bg-amber-50 border-r border-amber-200 p-3 flex items-center gap-3">
+        <div class="w-14 h-14 rounded-full bg-slate-200 border-[3px] border-amber-500 flex items-center justify-center text-slate-500 shrink-0">
+          <i class="fa-solid fa-user text-base"></i>
+        </div>
+        <div>
+          <div class="font-bold text-slate-900 text-[15px] leading-tight">Adham Eldeeb</div>
+          <div class="text-[10px] uppercase tracking-[0.06em] font-bold text-amber-800 mt-1">ATHLETICS</div>
+        </div>
+      </div>
+      <div class="flex items-center flex-1 px-5 text-[12px] gap-6 tabular">
+        <div><div class="label">Event</div><div class="font-semibold text-slate-800 mt-0.5">100m</div></div>
+        <div><div class="label">DOB</div><div class="font-semibold text-slate-800 mt-0.5">2010-01-21</div></div>
+        <div><div class="label">Age</div><div class="font-semibold text-emerald-700 mt-0.5">16.1</div></div>
+        
+        <div><div class="label">SAMS</div><div class="font-semibold text-slate-800 mt-0.5">2940</div></div>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg border border-slate-200 shadow-sm flex overflow-hidden">
+      <div class="bg-sky-50 border-r border-sky-200 p-3 flex items-center gap-3">
+        <div class="w-14 h-14 rounded-full bg-slate-200 border-[3px] border-sky-300 flex items-center justify-center text-slate-500 shrink-0">
+          <i class="fa-solid fa-user text-base"></i>
+        </div>
+        <div>
+          <div class="font-bold text-slate-900 text-[15px] leading-tight">Mohammed AlHazaa</div>
+          <div class="text-[10px] uppercase tracking-[0.06em] font-bold text-sky-800 mt-1">FENCING</div>
+        </div>
+      </div>
+      <div class="flex items-center flex-1 px-5 text-[12px] gap-6 tabular">
+        <div><div class="label">Event</div><div class="font-semibold text-slate-800 mt-0.5">Epee</div></div>
+        <div><div class="label">DOB</div><div class="font-semibold text-slate-800 mt-0.5">2006-08-14</div></div>
+        <div><div class="label">Age</div><div class="font-semibold text-emerald-700 mt-0.5">19.4</div></div>
+        
+        <div><div class="label">SAMS</div><div class="font-semibold text-slate-800 mt-0.5">1124</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── DIRECTION C — Glass / Premium ─────────────────────────────── -->
+<section>
+  <div class="flex items-baseline gap-3 mb-4">
+    <h2 class="text-lg font-semibold">C — Premium glass</h2>
+    <span class="text-sm text-slate-500">Tinted background, larger photo, name + status pulled to hero. Identity tucked as muted tabular block. Aspire-navy heading colour.</span>
+  </div>
+
+  <div class="space-y-4">
+    <!-- TARGET athlete -->
+    <div class="vE-bg-target rounded-2xl border border-amber-200 shadow-[0_2px_24px_rgba(245,158,11,0.08)] overflow-hidden">
+      <div class="flex gap-6 p-6">
+        <div class="shrink-0">
+          <div class="relative">
+            <div class="w-[88px] h-[88px] rounded-full bg-slate-200 border-[3px] border-amber-500 shadow-[0_8px_24px_rgba(245,158,11,0.22)] flex items-center justify-center text-slate-500">
+              <i class="fa-solid fa-user text-3xl"></i>
+            </div>
+            <div class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-amber-500 border-2 border-white flex items-center justify-center text-white shadow-md" title="Target athlete">
+              <i class="fa-solid fa-star text-[11px]"></i>
+            </div>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <div class="text-[11px] uppercase tracking-[0.08em] font-bold text-amber-700 mb-1">Target athlete · Athletics</div>
+              <h3 class="text-[24px] font-bold tracking-tight leading-tight" style="color: #004185;">Adham Eldeeb</h3>
+              <div class="text-[13px] text-slate-600 mt-0.5 font-medium">100m · 16.1 years old</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[10px] font-bold text-slate-500 tracking-[0.08em]">SAMS</div>
+              <div class="text-[18px] font-bold tabular" style="color: #004185;">2940</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 mt-4 pt-4 border-t border-amber-200/60 text-[12px]">
+            <div class="flex justify-between">
+              <span class="text-slate-500 font-medium">Date of Birth</span>
+              <span class="text-slate-800 font-semibold tabular">2010-01-21</span>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STANDARD athlete -->
+    <div class="vE-bg-default rounded-2xl border border-sky-200 shadow-sm overflow-hidden">
+      <div class="flex gap-6 p-6">
+        <div class="shrink-0">
+          <div class="w-[88px] h-[88px] rounded-full bg-slate-200 border-[3px] border-sky-300 shadow-[0_6px_18px_rgba(15,23,42,0.08)] flex items-center justify-center text-slate-500">
+            <i class="fa-solid fa-user text-3xl"></i>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <div class="text-[11px] uppercase tracking-[0.08em] font-bold text-sky-700 mb-1">Athlete · Fencing</div>
+              <h3 class="text-[24px] font-bold tracking-tight leading-tight" style="color: #004185;">Mohammed AlHazaa</h3>
+              <div class="text-[13px] text-slate-600 mt-0.5 font-medium">Epee · 19.4 years old</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[10px] font-bold text-slate-500 tracking-[0.08em]">SAMS</div>
+              <div class="text-[18px] font-bold tabular" style="color: #004185;">1124</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 mt-4 pt-4 border-t border-sky-200/60 text-[12px]">
+            <div class="flex justify-between">
+              <span class="text-slate-500 font-medium">Date of Birth</span>
+              <span class="text-slate-800 font-semibold tabular">2006-08-14</span>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── DIRECTION C — COMPACT REVISIONS ────────────────────────────── -->
+<section>
+  <div class="flex items-baseline gap-3 mb-4">
+    <h2 class="text-lg font-semibold">C — compact iterations</h2>
+    <span class="text-sm text-slate-500">Same premium-glass vibe, less vertical real estate. Pick the tightest one that still feels good.</span>
+  </div>
+
+  <!-- C1 — One-line strip -->
+  <div class="mb-2 text-[12px] font-semibold text-slate-500">C1 — single-row strip (most compact)</div>
+  <div class="space-y-3 mb-8">
+    <!-- TARGET athlete -->
+    <div class="vE-bg-target rounded-xl border border-amber-200 shadow-[0_1px_8px_rgba(245,158,11,0.06)] overflow-hidden">
+      <div class="flex items-center gap-4 px-5 py-3">
+        <div class="shrink-0 relative">
+          <div class="w-12 h-12 rounded-full bg-slate-200 border-2 border-amber-500 shadow-[0_2px_8px_rgba(245,158,11,0.18)] flex items-center justify-center text-slate-500">
+            <i class="fa-solid fa-user text-base"></i>
+          </div>
+          <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-amber-500 border-[1.5px] border-white flex items-center justify-center text-white" title="Target athlete">
+            <i class="fa-solid fa-star text-[7px]"></i>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-baseline gap-3 flex-wrap">
+            <h3 class="text-[16px] font-bold tracking-tight leading-tight" style="color: #004185;">Adham Eldeeb</h3>
+            <span class="text-[12px] text-slate-600 font-medium">Athletics · 100m</span>
+            <span class="text-[12px] text-slate-500">·</span>
+            <span class="text-[12px] text-slate-600 font-medium tabular">2010-01-21 (16.1 yrs)</span>
+          </div>
+          <div class="text-[11px] text-slate-500 mt-0.5 tabular">SAMS 2940</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STANDARD athlete -->
+    <div class="vE-bg-default rounded-xl border border-sky-200 shadow-sm overflow-hidden">
+      <div class="flex items-center gap-4 px-5 py-3">
+        <div class="shrink-0">
+          <div class="w-12 h-12 rounded-full bg-slate-200 border-2 border-sky-300 shadow-[0_2px_6px_rgba(15,23,42,0.06)] flex items-center justify-center text-slate-500">
+            <i class="fa-solid fa-user text-base"></i>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-baseline gap-3 flex-wrap">
+            <h3 class="text-[16px] font-bold tracking-tight leading-tight" style="color: #004185;">Mohammed AlHazaa</h3>
+            <span class="text-[12px] text-slate-600 font-medium">Fencing · Epee</span>
+            <span class="text-[12px] text-slate-500">·</span>
+            <span class="text-[12px] text-slate-600 font-medium tabular">2006-08-14 (19.4 yrs)</span>
+          </div>
+          <div class="text-[11px] text-slate-500 mt-0.5 tabular">SAMS 1124</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C2 — Two-line, photo flush, no identity grid -->
+  <div class="mb-2 text-[12px] font-semibold text-slate-500">C2 — two lines, navy name, sport+event pill (recommended balance)</div>
+  <div class="space-y-3 mb-8">
+    <!-- TARGET -->
+    <div class="vE-bg-target rounded-xl border border-amber-200 shadow-[0_1px_10px_rgba(245,158,11,0.08)] overflow-hidden">
+      <div class="flex items-center gap-4 px-5 py-4">
+        <div class="shrink-0 relative">
+          <div class="w-16 h-16 rounded-full bg-slate-200 border-[3px] border-amber-500 shadow-[0_4px_12px_rgba(245,158,11,0.20)] flex items-center justify-center text-slate-500">
+            <i class="fa-solid fa-user text-xl"></i>
+          </div>
+          <div class="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-amber-500 border-2 border-white flex items-center justify-center text-white" title="Target athlete">
+            <i class="fa-solid fa-star text-[9px]"></i>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2.5 mb-1">
+            <h3 class="text-[18px] font-bold tracking-tight leading-tight" style="color: #004185;">Adham Eldeeb</h3>
+            <span class="text-[11px] font-bold rounded-full px-2 py-0.5 bg-blue-100 text-blue-800">Athletics · 100m</span>
+          </div>
+          <div class="text-[12px] text-slate-600 tabular flex items-center gap-2 flex-wrap">
+            <span><span class="text-slate-400 font-medium">DOB</span> 2010-01-21 <span class="text-slate-400">(16.1 yrs)</span></span>
+            <span class="text-slate-300">·</span>
+            <span><span class="text-slate-400 font-medium">SAMS</span> 2940</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STANDARD -->
+    <div class="vE-bg-default rounded-xl border border-sky-200 shadow-sm overflow-hidden">
+      <div class="flex items-center gap-4 px-5 py-4">
+        <div class="shrink-0">
+          <div class="w-16 h-16 rounded-full bg-slate-200 border-[3px] border-sky-300 shadow-[0_4px_10px_rgba(15,23,42,0.08)] flex items-center justify-center text-slate-500">
+            <i class="fa-solid fa-user text-xl"></i>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2.5 mb-1">
+            <h3 class="text-[18px] font-bold tracking-tight leading-tight" style="color: #004185;">Mohammed AlHazaa</h3>
+            <span class="text-[11px] font-bold rounded-full px-2 py-0.5 bg-blue-100 text-blue-800">Fencing · Epee</span>
+          </div>
+          <div class="text-[12px] text-slate-600 tabular flex items-center gap-2 flex-wrap">
+            <span><span class="text-slate-400 font-medium">DOB</span> 2006-08-14 <span class="text-slate-400">(19.4 yrs)</span></span>
+            <span class="text-slate-300">·</span>
+            <span><span class="text-slate-400 font-medium">SAMS</span> 1124</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C3 — Inline-block, doesn't fill width -->
+  <div class="mb-2 text-[12px] font-semibold text-slate-500">C3 — inline width (only as wide as content needs)</div>
+  <div class="space-y-3">
+    <!-- TARGET -->
+    <div class="inline-block vE-bg-target rounded-xl border border-amber-200 shadow-[0_1px_10px_rgba(245,158,11,0.08)] overflow-hidden">
+      <div class="flex items-center gap-4 px-5 py-4">
+        <div class="shrink-0 relative">
+          <div class="w-16 h-16 rounded-full bg-slate-200 border-[3px] border-amber-500 shadow-[0_4px_12px_rgba(245,158,11,0.20)] flex items-center justify-center text-slate-500">
+            <i class="fa-solid fa-user text-xl"></i>
+          </div>
+          <div class="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-amber-500 border-2 border-white flex items-center justify-center text-white">
+            <i class="fa-solid fa-star text-[9px]"></i>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0 pr-2">
+          <div class="flex items-center gap-2.5 mb-1">
+            <h3 class="text-[18px] font-bold tracking-tight leading-tight whitespace-nowrap" style="color: #004185;">Adham Eldeeb</h3>
+            <span class="text-[11px] font-bold rounded-full px-2 py-0.5 bg-blue-100 text-blue-800 whitespace-nowrap">Athletics · 100m</span>
+          </div>
+          <div class="text-[12px] text-slate-600 tabular whitespace-nowrap">
+            <span class="text-slate-400 font-medium">DOB</span> 2010-01-21 <span class="text-slate-400">·</span>
+            <span class="text-slate-400 font-medium">SAMS</span> 2940 <span class="text-slate-400">·</span>
+            <span class="text-emerald-700 font-semibold">16.1 yrs</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
+    <!-- STANDARD -->
+    <div class="inline-block vE-bg-default rounded-xl border border-sky-200 shadow-sm overflow-hidden">
+      <div class="flex items-center gap-4 px-5 py-4">
+        <div class="shrink-0">
+          <div class="w-16 h-16 rounded-full bg-slate-200 border-[3px] border-sky-300 shadow-[0_4px_10px_rgba(15,23,42,0.08)] flex items-center justify-center text-slate-500">
+            <i class="fa-solid fa-user text-xl"></i>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0 pr-2">
+          <div class="flex items-center gap-2.5 mb-1">
+            <h3 class="text-[18px] font-bold tracking-tight leading-tight whitespace-nowrap" style="color: #004185;">Mohammed AlHazaa</h3>
+            <span class="text-[11px] font-bold rounded-full px-2 py-0.5 bg-blue-100 text-blue-800 whitespace-nowrap">Fencing · Epee</span>
+          </div>
+          <div class="text-[12px] text-slate-600 tabular whitespace-nowrap">
+            <span class="text-slate-400 font-medium">DOB</span> 2006-08-14 <span class="text-slate-400">·</span>
+            <span class="text-slate-400 font-medium">SAMS</span> 1124 <span class="text-slate-400">·</span>
+            <span class="text-emerald-700 font-semibold">19.4 yrs</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="mt-12 pt-6 border-t border-slate-200 text-sm text-slate-600">
+  <p><strong>How this works:</strong> tell me <em>A</em>, <em>B</em>, or <em>C</em>
+  (or "mix A photo with B layout", etc). I'll port the winner into
+  <code class="bg-slate-100 px-1 rounded">aspire_dash/assets/00_aspire_base.css</code>
+  + update the Python helper + push v0.39 + redeploy DASH_Anthro.</p>
+  <p class="mt-2 text-xs text-slate-500">
+  All three render the same data contract. No new fields needed.
+  Tailwind utility classes only — no aspire_dash code referenced — so what you see here is exactly what will end up in production.
+  </p>
+</footer>
+
+</body>
+</html>

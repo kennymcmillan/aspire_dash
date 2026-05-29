@@ -4,6 +4,53 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.39.0] — 2026-05-29
+
+### Redesigned — `athlete_id_card` (C-style premium glass)
+
+User feedback after v0.37 / v0.38: the multi-pill layout felt squashed
+and the inline "TARGET" text duplicated the visual gold-ring cue.
+Iterated through 3 design directions + sub-variants in
+`tools/forge/athlete_card_v2.html`. Locked in direction C (premium
+glass) with refinements.
+
+**Markup changes:**
+- Photo gets a **corner star badge** for target athletes (gold circle
+  with white star). Replaces the inline "TARGET" text badge entirely.
+- **One combined Sport · Event pill** (blue) instead of two separate
+  SPORT / EVENT pills.
+- Identity line is now **text, not pills** — `DOB 2010-01-21 · SAMS
+  2940 · 16.1 yrs` in slate-600 with subtle label spans and an emerald
+  age span. Tabular-nums for stable width.
+- **MRN dropped** — SAMS player_id is the durable identifier across
+  Aspire systems; MRN was redundant on this card.
+- Name colour changed to **Aspire navy** (`#004185`) — was slate-900.
+- Background is now a **radial gradient** tinted sky-blue (default) or
+  amber (target), recedes to white. Matches the premium-glass
+  aesthetic prototyped in the forge.
+
+**CSS** in `aspire_dash/assets/00_aspire_base.css`:
+- `.athlete-id-card`, `.is-target`, `.is-empty` — see above.
+- New BEM children: `__photo-wrap`, `__target-star`,
+  `__sport-pill`, `__identity`, `__identity-label`, `__identity-sep`,
+  `__identity-age`.
+- Removed: `__photo-stack`, `__age`, `__target-badge`,
+  `__pills-row`, `__pill.pill-{sport,event,identity}`.
+
+**Python API** in `aspire_dash.athlete.athlete_id_card(data)`:
+- Same input contract — `data` dict with `player_id`, `full_name`,
+  `photo_url`, `sport`, `target_event`, `date_of_birth`, `is_target`,
+  `pathway`.
+- `mrn` is now ignored (was rendered in v0.37/0.38).
+
+**Tests:** 22 covering full payload, empty state, target/non-target
+styling, pathway fallback, sport-pill behaviour (combined / sport-only
+/ absent), photo fallback, decimal age, fractional-age robustness.
+
+Apps consuming v0.37/0.38 should pull v0.39 to pick up the redesign —
+breaking only if they relied on `.pill-event` / `.pill-identity`
+class names or the inline TARGET badge in custom CSS.
+
 ## [0.38.0] — 2026-05-26
 
 ### Polish — `athlete_id_card` v2

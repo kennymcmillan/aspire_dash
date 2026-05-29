@@ -130,13 +130,20 @@ def _full_payload() -> dict:
 
 
 def test_athlete_id_card_renders_full_payload():
+    """v0.39 redesign: one combined Sport · Event pill, identity line
+    (DOB + SAMS + age) — no MRN, no inline TARGET text."""
     from aspire_dash.athlete import athlete_id_card
     card = athlete_id_card(_full_payload())
     rep = repr(card)
     for needle in ["Mahmoud Tarek", "Athletics", "100m", "2008-04-15",
-                   "MRN-99", "12345", "TARGET", "is-target", "yrs",
-                   "athlete-id-card__pill"]:
+                   "12345", "is-target", "yrs",
+                   "athlete-id-card__sport-pill",
+                   "athlete-id-card__identity",
+                   "athlete-id-card__target-star"]:
         assert needle in rep, f"missing {needle!r}"
+    # Removed in v0.39:
+    assert "TARGET" not in rep, "inline TARGET text should be gone (ring + star are the cue)"
+    assert "MRN" not in rep, "MRN no longer rendered — SAMS ID is the identifier"
 
 
 def test_athlete_id_card_empty_state():
@@ -153,8 +160,8 @@ def test_athlete_id_card_non_target_omits_target_styling():
     p["is_target"] = False
     p["pathway"] = "Development"
     rep = repr(athlete_id_card(p))
-    assert "TARGET" not in rep
     assert "is-target" not in rep
+    assert "target-star" not in rep, "no corner star for non-target athletes"
 
 
 def test_athlete_id_card_pathway_target_triggers_styling():
@@ -165,22 +172,37 @@ def test_athlete_id_card_pathway_target_triggers_styling():
     p["pathway"] = "Target"
     rep = repr(athlete_id_card(p))
     assert "is-target" in rep
-    assert "TARGET" in rep
+    assert "target-star" in rep
 
 
-def test_athlete_id_card_skips_missing_pills():
-    """Only fields actually present should render. SAMS ID is the only
-    identity pill that's guaranteed (player_id gates the empty state)."""
+def test_athlete_id_card_sport_pill_combines_sport_and_event():
+    """v0.39: one pill shows 'Sport · Event' instead of two separate pills."""
+    from aspire_dash.athlete import athlete_id_card
+    rep = repr(athlete_id_card(_full_payload()))
+    assert "Athletics · 100m" in rep, "expected combined Sport · Event pill"
+
+
+def test_athlete_id_card_sport_pill_handles_missing_event():
+    """Sport-only athlete: pill should still render with just the sport."""
     from aspire_dash.athlete import athlete_id_card
     rep = repr(athlete_id_card({
         "player_id": 99, "full_name": "Solo", "sport": "Padel",
     }))
     assert "Padel" in rep
-    assert "pill-sport" in rep
-    assert "pill-event" not in rep
-    assert "DOB" not in rep
-    assert "MRN" not in rep
-    assert "SAMS ID" in rep  # always rendered — player_id is present
+    assert "athlete-id-card__sport-pill" in rep
+    assert "DOB" not in rep                            # no dob → no DOB label
+    assert "MRN" not in rep                            # never rendered now
+    assert "SAMS" in rep                               # always (player_id gates)
+
+
+def test_athlete_id_card_no_pill_when_no_sport_or_event():
+    """If the athlete has neither sport nor event, no sport pill renders."""
+    from aspire_dash.athlete import athlete_id_card
+    rep = repr(athlete_id_card({
+        "player_id": 42, "full_name": "Plain", "date_of_birth": "2005-01-01",
+    }))
+    assert "Plain" in rep
+    assert "athlete-id-card__sport-pill" not in rep
 
 
 def test_athlete_id_card_photo_fallback():
@@ -199,6 +221,7 @@ def test_athlete_id_card_age_decimal():
     expected = _athlete_id_card_fractional_age(p["date_of_birth"])
     assert expected is not None
     assert f"{expected:.1f} yrs" in rep
+    assert "athlete-id-card__identity-age" in rep      # emerald age span
 
 
 def test_athlete_id_card_fractional_age_robust():
