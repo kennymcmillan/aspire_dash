@@ -248,6 +248,23 @@ def pdf_export(
                                       textColor=colors.HexColor("#1e40af"), leading=10)
     callout_item_st = ParagraphStyle("co_item", parent=styles["Normal"], fontSize=9,
                                      textColor=SLATE_TXT, leading=12, leftIndent=8)
+    # Cell styles — cells are Paragraphs so long values (Arabic names, somatotype
+    # strings, long event labels) WRAP within the column instead of clipping.
+    from reportlab.lib.enums import TA_CENTER, TA_LEFT
+    from xml.sax.saxutils import escape as _xesc
+    cell_l = ParagraphStyle("cl", parent=styles["Normal"], fontSize=8.5, leading=10.5,
+                            textColor=SLATE_TXT, alignment=TA_LEFT)
+    cell_lb = ParagraphStyle("clb", parent=cell_l, fontName="Helvetica-Bold")
+    cell_c = ParagraphStyle("cc", parent=cell_l, alignment=TA_CENTER)
+    cell_emph = ParagraphStyle("ce", parent=cell_c, fontName="Helvetica-Bold",
+                               textColor=GREEN)
+    cell_th = ParagraphStyle("cth", parent=cell_c, fontName="Helvetica-Bold",
+                             textColor=colors.white, fontSize=8)
+    cell_tot = ParagraphStyle("ct", parent=cell_c, fontName="Helvetica-Bold",
+                              textColor=colors.white)
+
+    def _cell(v, st):
+        return Paragraph(_xesc("" if v is None else str(v)), st)
 
     # ── section flowable builders ──────────────────────────────────────────
     def _table_flowable(section, avail_cm):
@@ -255,9 +272,27 @@ def pdf_export(
         if df is None or len(df) == 0:
             return Paragraph("<i>No data.</i>", body)
         columns = [str(c) for c in df.columns]
-        rows = [columns]
-        for _, r in df.iterrows():
-            rows.append([("" if v is None else str(v)) for v in r.tolist()])
+        n_cols = len(columns)
+        emph = bool(section.get("emphasize_last_col")) and n_cols > 1
+        raw_values = [r.tolist() for _, r in df.iterrows()]
+        highlight = section.get("highlight")
+
+        # Header row (Paragraphs → wraps; white bold on the blue band)
+        rows = [[_cell(c, cell_th) for c in columns]]
+        highlight_idx = []
+        for ri, vals in enumerate(raw_values, start=1):
+            cells = []
+            for ci, v in enumerate(vals):
+                if ci == 0:
+                    cells.append(_cell(v, cell_lb))
+                elif emph and ci == n_cols - 1:
+                    cells.append(_cell(v, cell_emph))
+                else:
+                    cells.append(_cell(v, cell_c))
+            rows.append(cells)
+            if highlight is not None and vals and str(vals[0]) == str(highlight):
+                highlight_idx.append(ri)
+
         totals_row = None
         if section.get("totals_row"):
             totals = ["Total"]
@@ -267,9 +302,8 @@ def pdf_export(
                 except Exception:
                     totals.append("")
             totals_row = totals
-            rows.append(totals)
+            rows.append([_cell(v, cell_tot) for v in totals])
 
-        n_cols = len(columns)
         first_w = (3.4 if n_cols > 4 else 4.6) * cm
         first_w = min(first_w, avail_cm * cm * 0.42)
         rest_w = (avail_cm * cm - first_w) / max(1, n_cols - 1)
@@ -278,13 +312,7 @@ def pdf_export(
         tbl = Table(rows, colWidths=col_widths, repeatRows=1)
         style = TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), BLUE),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
             ("LINEBELOW", (0, 0), (-1, 0), 1.2, GOLD_C),   # gold rule under header
-            ("FONTSIZE", (0, 0), (-1, -1), 8.5),
-            ("ALIGN", (1, 0), (-1, -1), "CENTER"),
-            ("ALIGN", (0, 0), (0, -1), "LEFT"),
-            ("FONTNAME", (0, 1), (0, -1), "Helvetica-Bold"),
             ("GRID", (0, 0), (-1, -1), 0.3, SLATE_LINE),
             ("ROWBACKGROUNDS", (0, 1), (-1, -2 if totals_row else -1),
              [SLATE_BG, colors.white]),
@@ -293,20 +321,11 @@ def pdf_export(
             ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
             ("LEFTPADDING", (0, 0), (0, -1), 8),
         ])
-        if section.get("emphasize_last_col") and n_cols > 1:
-            style.add("FONTNAME", (-1, 1), (-1, -1), "Helvetica-Bold")
-            style.add("TEXTCOLOR", (-1, 1), (-1, -2 if totals_row else -1), GREEN)
         if totals_row:
             style.add("BACKGROUND", (0, -1), (-1, -1), NAVY)
-            style.add("TEXTCOLOR", (0, -1), (-1, -1), colors.white)
-            style.add("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold")
             style.add("LINEABOVE", (0, -1), (-1, -1), 0.8, NAVY)
-        highlight = section.get("highlight")
-        if highlight:
-            for i, row in enumerate(rows[1:], start=1):
-                if row and row[0] == highlight and row is not totals_row:
-                    style.add("BACKGROUND", (0, i), (-1, i),
-                              colors.HexColor("#fff8e1"))
+        for ri in highlight_idx:
+            style.add("BACKGROUND", (0, ri), (-1, ri), colors.HexColor("#fff8e1"))
         tbl.setStyle(style)
         return tbl
 

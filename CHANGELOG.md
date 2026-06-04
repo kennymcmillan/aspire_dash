@@ -4,6 +4,22 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.41.0] — 2026-06-04
+
+### Hardened — `export.pdf_export` table rendering (printing robustness)
+
+- **Cells now wrap.** Table cells are rendered as `Paragraph`s, so long values
+  (full measurement labels, long event names, multi-part somatotype strings)
+  **wrap within the column instead of clipping/overlapping** — the main
+  "reports printing" failure mode.
+- **XML-safe.** Cell text is escaped, so a value containing `<`, `>` or `&` (an
+  athlete name, a note) no longer raises a reportlab parse error mid-render.
+- Header (white bold on blue + gold underline), zebra rows, first-column bold,
+  `emphasize_last_col` (green), `totals_row` (navy) and `highlight` (cream) are
+  all preserved — moved onto paragraph styles where needed.
+- Known limitation: Arabic/RTL glyphs still render as boxes (Helvetica has no
+  Arabic coverage) — registering a Noto Sans Arabic TTF is a future enhancement.
+
 ## [0.40.0] — 2026-06-04
 
 ### Upgraded — `export.pdf_export` (exceptional PDFs, all additive)
