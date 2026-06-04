@@ -122,12 +122,28 @@ def pdf_export(
             {"heading": "Lunch",
              "table": pandas.DataFrame,   # required for a table section
              "totals_row": True,           # add a navy totals row at the bottom
-             "highlight": "Athletics"}      # gold highlight on this row label
+             "highlight": "Athletics",      # gold highlight on this row label
+             "emphasize_last_col": True}    # bold navy last column (e.g. "Result")
 
         or::
 
             {"heading": "Notes",
              "paragraphs": ["Free-text paragraph 1", "..."]}
+
+        or a **KPI band** (a row of metric cards, navy left-rule)::
+
+            {"kpis": [{"label": "Body Mass", "value": "72.4",
+                       "unit": "kg", "sub": "Stature 181 cm"}, ...]}
+
+        or a **callout / insight box** (tinted, blue left-border)::
+
+            {"callout": {"label": "Key Insights",
+                         "items": ["BMI 22.1 — healthy range", "..."]}}
+
+        or **side-by-side** sections (two tables across the page width)::
+
+            {"columns": [{"heading": "Snapshot", "table": df_a},
+                         {"heading": "Bilateral", "table": df_b}]}
     period_label : str or None
         Rendered under the title (e.g. ``"Sun 17 – Sat 23 May 2026"``).
     meta : dict or None
@@ -149,6 +165,7 @@ def pdf_export(
     from reportlab.lib.pagesizes import A4, landscape
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib.units import cm
+    from reportlab.pdfgen import canvas as _rl_canvas
     from reportlab.platypus import (
         SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image,
     )
@@ -159,15 +176,54 @@ def pdf_export(
     SLATE_LINE = colors.HexColor(SLATE["200"])
     SLATE_BG = colors.HexColor(SLATE["100"])
     SLATE_TXT = colors.HexColor(SLATE["800"])
+    SLATE_MUTED = colors.HexColor(SLATE["400"])
+    GREEN = colors.HexColor("#059669")
 
     page_size = landscape(A4) if orientation == "landscape" else A4
     usable_w_cm = 27.3 if orientation == "landscape" else 18.0
+
+    ftxt = footer_text or (
+        f"Generated {datetime.now().strftime('%d %b %Y %H:%M')} · Aspire Academy"
+    )
+
+    # Page-numbered canvas — draws a gold rule + footer text + "Page X of Y" on
+    # EVERY page (two-pass so the total is known). This is the headline polish
+    # that lifts the report from "a stack of tables" to a finished document.
+    class _NumberedCanvas(_rl_canvas.Canvas):
+        def __init__(self, *a, **k):
+            super().__init__(*a, **k)
+            self._saved = []
+
+        def showPage(self):
+            self._saved.append(dict(self.__dict__))
+            self._startPage()
+
+        def save(self):
+            total = len(self._saved)
+            for state in self._saved:
+                self.__dict__.update(state)
+                self._draw_footer(total)
+                super().showPage()
+            super().save()
+
+        def _draw_footer(self, total):
+            w, _h = page_size
+            self.saveState()
+            self.setStrokeColor(GOLD_C)
+            self.setLineWidth(0.6)
+            self.line(1.2 * cm, 1.0 * cm, w - 1.2 * cm, 1.0 * cm)
+            self.setFont("Helvetica", 7)
+            self.setFillColor(SLATE_MUTED)
+            self.drawString(1.2 * cm, 0.65 * cm, ftxt)
+            self.drawRightString(w - 1.2 * cm, 0.65 * cm,
+                                 f"Page {self._pageNumber} of {total}")
+            self.restoreState()
 
     buf = io.BytesIO()
     doc = SimpleDocTemplate(
         buf, pagesize=page_size,
         leftMargin=1.2 * cm, rightMargin=1.2 * cm,
-        topMargin=1.2 * cm, bottomMargin=1.2 * cm,
+        topMargin=1.2 * cm, bottomMargin=1.5 * cm,
         title=title,
     )
     styles = getSampleStyleSheet()
@@ -179,74 +235,29 @@ def pdf_export(
                         textColor=NAVY, spaceAfter=3, spaceBefore=8)
     body = ParagraphStyle("body", parent=styles["Normal"], fontSize=10,
                           textColor=SLATE_TXT, spaceAfter=4)
-    footer = ParagraphStyle("footer", parent=styles["Normal"], fontSize=7,
-                            textColor=colors.HexColor(SLATE["400"]),
-                            alignment=2, spaceBefore=6)
+    kpi_label_st = ParagraphStyle("kpi_label", parent=styles["Normal"],
+                                  fontSize=6.8, textColor=colors.HexColor(SLATE["500"]),
+                                  fontName="Helvetica-Bold", leading=8)
+    kpi_value_st = ParagraphStyle("kpi_value", parent=styles["Normal"],
+                                  fontSize=15, textColor=NAVY,
+                                  fontName="Helvetica-Bold", leading=17)
+    kpi_sub_st = ParagraphStyle("kpi_sub", parent=styles["Normal"], fontSize=6.8,
+                                textColor=colors.HexColor(SLATE["500"]), leading=8)
+    callout_label_st = ParagraphStyle("co_label", parent=styles["Normal"],
+                                      fontSize=7.5, fontName="Helvetica-Bold",
+                                      textColor=colors.HexColor("#1e40af"), leading=10)
+    callout_item_st = ParagraphStyle("co_item", parent=styles["Normal"], fontSize=9,
+                                     textColor=SLATE_TXT, leading=12, leftIndent=8)
 
-    story = []
-
-    # Header row: title left, logo right
-    logo = None
-    lp = logo_path or DEFAULT_LOGO_PATH
-    if os.path.exists(lp):
-        logo = Image(lp, width=2.0 * cm, height=2.0 * cm)
-
-    if logo is not None:
-        header_tbl = Table([[Paragraph(title, h1), logo]],
-                           colWidths=[(usable_w_cm - 2.5) * cm, 2.5 * cm])
-        header_tbl.setStyle(TableStyle([
-            ("VALIGN", (0, 0), (0, 0), "MIDDLE"),
-            ("VALIGN", (1, 0), (1, 0), "TOP"),
-            ("ALIGN", (1, 0), (1, 0), "RIGHT"),
-            ("LEFTPADDING", (0, 0), (-1, -1), 0),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-            ("TOPPADDING", (0, 0), (-1, -1), 0),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
-        ]))
-        story.append(header_tbl)
-    else:
-        story.append(Paragraph(title, h1))
-
-    # Period + meta line
-    if period_label or meta:
-        bits = []
-        if period_label:
-            bits.append(f"<b>Period:</b> {period_label}")
-        if meta:
-            for k, v in meta.items():
-                bits.append(f"<b>{k}:</b> {v}")
-        story.append(Paragraph(" &nbsp; &nbsp; ".join(bits), meta_style))
-
-    # Gold rule under the header strip
-    rule = Table([[" "]], colWidths=[usable_w_cm * cm], rowHeights=[0.05 * cm])
-    rule.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), GOLD_C)]))
-    story.append(rule)
-    story.append(Spacer(1, 0.3 * cm))
-
-    # Sections
-    for section in sections:
-        heading = section.get("heading")
-        if heading:
-            story.append(Paragraph(heading, h2))
-
-        if "paragraphs" in section:
-            for p in section["paragraphs"]:
-                story.append(Paragraph(str(p), body))
-            story.append(Spacer(1, 0.3 * cm))
-            continue
-
+    # ── section flowable builders ──────────────────────────────────────────
+    def _table_flowable(section, avail_cm):
         df = section.get("table")
         if df is None or len(df) == 0:
-            story.append(Paragraph("<i>No data.</i>", body))
-            story.append(Spacer(1, 0.3 * cm))
-            continue
-
+            return Paragraph("<i>No data.</i>", body)
         columns = [str(c) for c in df.columns]
         rows = [columns]
         for _, r in df.iterrows():
-            rows.append([
-                ("" if v is None else str(v)) for v in r.tolist()
-            ])
+            rows.append([("" if v is None else str(v)) for v in r.tolist()])
         totals_row = None
         if section.get("totals_row"):
             totals = ["Total"]
@@ -259,16 +270,17 @@ def pdf_export(
             rows.append(totals)
 
         n_cols = len(columns)
-        first_w = 3.8 * cm if n_cols > 4 else 5.0 * cm
-        rest_w = (usable_w_cm * cm - first_w) / max(1, n_cols - 1)
+        first_w = (3.4 if n_cols > 4 else 4.6) * cm
+        first_w = min(first_w, avail_cm * cm * 0.42)
+        rest_w = (avail_cm * cm - first_w) / max(1, n_cols - 1)
         col_widths = [first_w] + [rest_w] * (n_cols - 1)
 
         tbl = Table(rows, colWidths=col_widths, repeatRows=1)
         style = TableStyle([
-            # Header
             ("BACKGROUND", (0, 0), (-1, 0), BLUE),
             ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
             ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("LINEBELOW", (0, 0), (-1, 0), 1.2, GOLD_C),   # gold rule under header
             ("FONTSIZE", (0, 0), (-1, -1), 8.5),
             ("ALIGN", (1, 0), (-1, -1), "CENTER"),
             ("ALIGN", (0, 0), (0, -1), "LEFT"),
@@ -281,12 +293,14 @@ def pdf_export(
             ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
             ("LEFTPADDING", (0, 0), (0, -1), 8),
         ])
+        if section.get("emphasize_last_col") and n_cols > 1:
+            style.add("FONTNAME", (-1, 1), (-1, -1), "Helvetica-Bold")
+            style.add("TEXTCOLOR", (-1, 1), (-1, -2 if totals_row else -1), GREEN)
         if totals_row:
             style.add("BACKGROUND", (0, -1), (-1, -1), NAVY)
             style.add("TEXTCOLOR", (0, -1), (-1, -1), colors.white)
             style.add("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold")
             style.add("LINEABOVE", (0, -1), (-1, -1), 0.8, NAVY)
-        # Highlight specific first-column value
         highlight = section.get("highlight")
         if highlight:
             for i, row in enumerate(rows[1:], start=1):
@@ -294,17 +308,132 @@ def pdf_export(
                     style.add("BACKGROUND", (0, i), (-1, i),
                               colors.HexColor("#fff8e1"))
         tbl.setStyle(style)
-        story.append(tbl)
+        return tbl
+
+    def _section_flowables(section, avail_cm):
+        out = []
+        if section.get("heading"):
+            out.append(Paragraph(section["heading"], h2))
+        if "paragraphs" in section:
+            out += [Paragraph(str(p), body) for p in section["paragraphs"]]
+        else:
+            out.append(_table_flowable(section, avail_cm))
+        return out
+
+    def _kpi_band(items):
+        cells, n = [], len(items)
+        for it in items:
+            unit = (f" <font size=8 color='{SLATE['400']}'>{it['unit']}</font>"
+                    if it.get("unit") else "")
+            stack = [Paragraph(str(it.get("label", "")).upper(), kpi_label_st),
+                     Paragraph(f"{it.get('value', '')}{unit}", kpi_value_st)]
+            if it.get("sub"):
+                stack.append(Paragraph(str(it["sub"]), kpi_sub_st))
+            cells.append(stack)
+        col_w = usable_w_cm * cm / max(1, n)
+        tbl = Table([cells], colWidths=[col_w] * n)
+        st = TableStyle([
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("BOX", (0, 0), (-1, -1), 0.4, SLATE_LINE),
+            ("INNERGRID", (0, 0), (-1, -1), 0.4, colors.white),
+            ("TOPPADDING", (0, 0), (-1, -1), 6),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            ("LEFTPADDING", (0, 0), (-1, -1), 9),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ])
+        for i in range(n):                       # navy left-rule per card
+            st.add("LINEBEFORE", (i, 0), (i, 0), 2.2, NAVY)
+        tbl.setStyle(st)
+        return tbl
+
+    def _callout(c):
+        label = c.get("label", "Insights") if isinstance(c, dict) else "Insights"
+        items = c.get("items", []) if isinstance(c, dict) else list(c)
+        inner = [Paragraph(label.upper(), callout_label_st)]
+        inner += [Paragraph(f"•&nbsp; {i}", callout_item_st) for i in items]
+        tbl = Table([[inner]], colWidths=[usable_w_cm * cm])
+        tbl.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#eff6ff")),
+            ("LINEBEFORE", (0, 0), (0, -1), 3, colors.HexColor("#3b82f6")),
+            ("BOX", (0, 0), (-1, -1), 0.4, colors.HexColor("#dbeafe")),
+            ("TOPPADDING", (0, 0), (-1, -1), 7),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+            ("LEFTPADDING", (0, 0), (-1, -1), 11),
+        ]))
+        return tbl
+
+    story = []
+
+    # Header row: title + period/meta left, logo right
+    head_left = [Paragraph(title, h1)]
+    if period_label or meta:
+        bits = []
+        if period_label:
+            bits.append(f"<b>Period:</b> {period_label}")
+        if meta:
+            for k, v in meta.items():
+                bits.append(f"<b>{k}:</b> {v}")
+        head_left.append(Paragraph(" &nbsp; &nbsp; ".join(bits), meta_style))
+
+    logo = None
+    lp = logo_path or DEFAULT_LOGO_PATH
+    if os.path.exists(lp):
+        logo = Image(lp, width=2.0 * cm, height=2.0 * cm)
+    if logo is not None:
+        header_tbl = Table([[head_left, logo]],
+                           colWidths=[(usable_w_cm - 2.5) * cm, 2.5 * cm])
+        header_tbl.setStyle(TableStyle([
+            ("VALIGN", (0, 0), (0, 0), "MIDDLE"),
+            ("VALIGN", (1, 0), (1, 0), "TOP"),
+            ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("TOPPADDING", (0, 0), (-1, -1), 0),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ]))
+        story.append(header_tbl)
+    else:
+        story += head_left
+
+    # Gold rule under the header strip
+    rule = Table([[" "]], colWidths=[usable_w_cm * cm], rowHeights=[0.06 * cm])
+    rule.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), GOLD_C)]))
+    story.append(rule)
+    story.append(Spacer(1, 0.3 * cm))
+
+    # Sections
+    for section in sections:
+        if "kpis" in section:
+            if section.get("heading"):
+                story.append(Paragraph(section["heading"], h2))
+            story.append(_kpi_band(section["kpis"]))
+            story.append(Spacer(1, 0.35 * cm))
+            continue
+        if "callout" in section:
+            if section.get("heading"):
+                story.append(Paragraph(section["heading"], h2))
+            story.append(_callout(section["callout"]))
+            story.append(Spacer(1, 0.35 * cm))
+            continue
+        if "columns" in section:
+            subs = section["columns"]
+            col_cm = (usable_w_cm - 0.6) / max(1, len(subs))
+            cells = [_section_flowables(s, col_cm) for s in subs]
+            grid = Table([cells], colWidths=[(col_cm + 0.6 / len(subs)) * cm] * len(subs))
+            grid.setStyle(TableStyle([
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (0, -1), 0),
+                ("RIGHTPADDING", (-1, 0), (-1, -1), 0),
+            ]))
+            story.append(grid)
+            story.append(Spacer(1, 0.4 * cm))
+            continue
+        # plain table / paragraphs section
+        for fl in _section_flowables(section, usable_w_cm):
+            story.append(fl)
         story.append(Spacer(1, 0.4 * cm))
 
-    # Footer
-    ftxt = footer_text or (
-        f"Generated {datetime.now().strftime('%d %b %Y %H:%M')} · "
-        f"Aspire Academy"
-    )
-    story.append(Paragraph(ftxt, footer))
-
-    doc.build(story)
+    doc.build(story, canvasmaker=_NumberedCanvas)
     return buf.getvalue()
 
 

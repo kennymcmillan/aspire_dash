@@ -4,6 +4,33 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.40.0] — 2026-06-04
+
+### Upgraded — `export.pdf_export` (exceptional PDFs, all additive)
+
+The branded reportlab PDF builder gained four new, backward-compatible section
+types plus per-page polish — every app's PDFs level up just by bumping the lib.
+Existing `{heading, table, paragraphs, totals_row, highlight}` sections are
+unchanged.
+
+- **KPI band** — `{"kpis": [{"label","value","unit","sub"}, ...]}` renders a row
+  of metric cards (navy left-rule, big navy value, unit + sub) matching the
+  on-screen KPI strip.
+- **Callout / insight box** — `{"callout": {"label","items":[...]}}` (or a bare
+  list) → tinted blue box with a blue left-border.
+- **Side-by-side columns** — `{"columns": [section_a, section_b]}` lays two
+  table/paragraph sections across the page width (great on landscape; also used
+  for Snapshot+Bilateral).
+- **`emphasize_last_col`** on a table section → bold green last column (e.g. a
+  "Result" column).
+- **Page-numbered footer on every page** — gold rule + generated stamp +
+  `Page X of Y` via a two-pass `NumberedCanvas`.
+- **Gold underline** under every table's blue header row.
+
+First consumer: `DASH_Anthro` (Individual / Longitudinal / Squad / Ruwwad
+reports). Requires `reportlab` in the app's `requirements.txt` (unchanged —
+still an optional extra of `aspire_dash`).
+
 ## [0.39.0] — 2026-05-29
 
 ### Redesigned — `athlete_id_card` (C-style premium glass)
