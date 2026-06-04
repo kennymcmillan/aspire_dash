@@ -4,6 +4,23 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.42.0] — 2026-06-04
+
+### Added — wearable recall panels (pair with aspire_data 0.4.0)
+
+Promoted from the `aspire-nutrition` consultation module. Pure renderers that
+take a summary dict (so the UI lib stays data-source-agnostic):
+
+- `aspire_dash.whoop.recovery_panel(whoop_summary)` — WHOOP recovery ring +
+  today KPIs + 7-day sparkline trends + 14-day recovery-zone tracker + sleep
+  stages. `recovery_zone_color()` helper.
+- `aspire_dash.firstbeat.load_recall_panel(firstbeat_summary)` — last-7-day
+  sessions / duration / energy / TRIMP load / aerobic-TE intensity / ACWR
+  + 14-day load sparkline (complements the existing session-level
+  `training_card` / `acwr_badge` / `zone_bars`).
+
+Feed both from `aspire_data.whoop.whoop_summary` / `firstbeat.firstbeat_summary`.
+
 ## [0.41.0] — 2026-06-04
 
 ### Hardened — `export.pdf_export` table rendering (printing robustness)

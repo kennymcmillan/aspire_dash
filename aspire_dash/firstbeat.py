@@ -376,3 +376,68 @@ def add_acwr_zones(fig, opacity=0.5):
             line_width=0, layer="below",
         )
     return fig
+
+
+def load_recall_panel(summary, *, note=True):
+    """Render a Firstbeat training-load recall from a `firstbeat_summary` dict
+    (see `aspire_data.firstbeat.firstbeat_summary`): last-7-day sessions,
+    duration, estimated energy (kcal), TRIMP load, aerobic-TE intensity, ACWR
+    + a 14-day daily-load sparkline. Pure renderer (no data fetch)."""
+    import dash_bootstrap_components as dbc
+    from .v12_helpers import kpi_with_sparkline, stat_with_trend
+
+    def _f(v, fmt="{:.0f}", dash="—"):
+        try:
+            return fmt.format(float(v))
+        except (TypeError, ValueError):
+            return dash
+
+    def _acwr_accent(a):
+        if a is None:
+            return "neutral"
+        if 0.8 <= a <= 1.3:
+            return "green"
+        if a > 1.5 or a < 0.5:
+            return "red"
+        return "gold"
+
+    s = summary or {}
+    head = html.Div([
+        html.I(className="fa-solid fa-circle-info me-2 text-muted"),
+        html.Span("Recall only — Firstbeat training load.",
+                  className="text-muted small"),
+    ], className="mb-2") if note else None
+
+    if not s.get("matched"):
+        return html.Div([head, dbc.Alert(
+            "No Firstbeat profile mapped for this athlete.",
+            color="secondary", className="py-2 mb-0 small")])
+    if not s.get("has_data"):
+        return html.Div([head, dbc.Alert(
+            f"Firstbeat profile mapped ({s.get('name')}) but no recent sessions.",
+            color="secondary", className="py-2 mb-0 small")])
+
+    w = s.get("last7") or {}
+    acwr = s.get("acwr")
+    tiles = dbc.Row([
+        dbc.Col(stat_with_trend("Sessions · 7d", _f(w.get("n"))), md=2, sm=4),
+        dbc.Col(stat_with_trend("Duration · 7d", f"{_f(w.get('minutes'))} min"), md=2, sm=4),
+        dbc.Col(stat_with_trend("Energy · 7d", f"{_f(w.get('kcal'))} kcal"), md=2, sm=4),
+        dbc.Col(stat_with_trend("Load · 7d", _f(w.get("load")), sub="TRIMP"), md=2, sm=4),
+        dbc.Col(stat_with_trend("Intensity", _f(w.get("intensity"), "{:.1f}"),
+                                sub="aerobic TE"), md=2, sm=4),
+        dbc.Col(stat_with_trend("ACWR", _f(acwr, "{:.2f}"),
+                                accent=_acwr_accent(acwr), sub="acute:chronic"),
+                md=2, sm=4),
+    ], className="g-2")
+
+    spark = kpi_with_sparkline(
+        "Daily training load · 14d", _f((s.get("last28") or {}).get("load")),
+        s.get("load_series") or [], accent="aspire", sub="TRIMP/day")
+
+    foot = html.Div(
+        f"Firstbeat · {s.get('name')} · {(s.get('last28') or {}).get('n')} sessions / 28d "
+        f"· last {s.get('latest_date')}",
+        className="text-muted mt-2", style={"fontSize": "0.72rem"})
+
+    return html.Div([head, tiles, html.Div(spark, className="mt-3"), foot])
