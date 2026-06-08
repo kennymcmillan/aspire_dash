@@ -4,6 +4,23 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.43.0] — 2026-06-08
+
+### Added — nutrition macro chips + summary (promoted from aspire-nutrition)
+
+In `aspire_dash.nutrition` (alongside `macro_tile` / `macro_strip`):
+
+- `macro_chips(carbs, protein, fat, kcal=None, *, per="100 g", empty=...)` —
+  coloured C / P / F pills + kcal as an `html.Div` flex row, for showing a
+  food's macro shape inline (a match-picker option, a diary row, a supplement
+  panel). Chip colours match the analysis macro palette (carbs amber / protein
+  blue / fat red) so a macro means the same colour everywhere.
+- `macro_summary(carbs, protein, fat, kcal=None)` — compact
+  `'C28 P7 F1 · 365 kcal'` string; skips unknown macros.
+
+Both are pure (take explicit numbers, not a row dict) so they're data-source
+agnostic. First consumer: the aspire-nutrition 24h-recall match picker.
+
 ## [0.42.0] — 2026-06-04
 
 ### Added — wearable recall panels (pair with aspire_data 0.4.0)

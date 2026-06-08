@@ -119,3 +119,68 @@ def macro_strip(macros: dict, targets: dict | None = None,
         "gap": "10px",
         "flexWrap": "wrap",
     })
+
+
+# ── Macro chips + summary ──────────────────────────────────────────────────
+# Promoted from aspire-nutrition's 24h-recall match picker. Use these wherever
+# you need to show a food's macro shape inline (a match option, a diary row, a
+# supplement panel). The three chip colours match the analysis macro palette so
+# a macro means the same colour everywhere: carbs amber / protein blue / fat red.
+_CHIP = {"carbs": "#f59e0b", "protein": "#0059b3", "fat": "#dc2626"}
+
+
+def macro_summary(carbs=None, protein=None, fat=None, kcal=None) -> str:
+    """Compact 'C28 P7 F1 · 365 kcal' line for a food/serving. Skips any macro
+    that's None; returns '' when nothing is known.
+
+        >>> macro_summary(carbs=28, protein=7, fat=1, kcal=365)
+        'C28 P7 F1 · 365 kcal'
+    """
+    bits = []
+    for v, letter in ((carbs, "C"), (protein, "P"), (fat, "F")):
+        try:
+            if v is not None:
+                bits.append(f"{letter}{float(v):.0f}")
+        except (TypeError, ValueError):
+            pass
+    s = " ".join(bits)
+    try:
+        if kcal is not None:
+            s = (s + " · " if s else "") + f"{float(kcal):.0f} kcal"
+    except (TypeError, ValueError):
+        pass
+    return s
+
+
+def macro_chips(carbs=None, protein=None, fat=None, kcal=None, *,
+                per: str | None = "100 g", empty: str = "no macros"):
+    """Coloured C / P / F pills + kcal for a food/serving — returns an html.Div
+    (flex row). `per` appends a faint basis hint ('/100 g') when set; `empty`
+    is shown (muted) when no macro is known.
+
+        >>> macro_chips(carbs=28, protein=7, fat=1, kcal=365)   # -> html.Div(...)
+    """
+    pills = []
+    for v, letter, key in ((carbs, "C", "carbs"), (protein, "P", "protein"),
+                           (fat, "F", "fat")):
+        try:
+            if v is not None:
+                pills.append(html.Span(f"{letter} {float(v):.0f}", style={
+                    "background": _CHIP[key], "color": "#fff",
+                    "borderRadius": "4px", "padding": "1px 6px",
+                    "fontSize": "0.7rem", "fontWeight": 600}))
+        except (TypeError, ValueError):
+            pass
+    if not pills:
+        return html.Span(empty, style={"fontSize": "0.7rem", "color": SLATE["400"]})
+    try:
+        if kcal is not None:
+            pills.append(html.Span(f"{float(kcal):.0f} kcal",
+                                   style={"fontSize": "0.7rem", "color": SLATE["500"]}))
+    except (TypeError, ValueError):
+        pass
+    if per:
+        pills.append(html.Span(f"/{per}",
+                               style={"fontSize": "0.65rem", "color": SLATE["400"]}))
+    return html.Div(pills, style={"display": "flex", "alignItems": "center",
+                                  "gap": "4px", "flexWrap": "wrap"})
