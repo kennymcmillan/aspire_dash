@@ -156,14 +156,14 @@ sidebar:
   link-hover-bg: "#002855"
   link-active-bg: "#004185"
 
-# Radius scale (px) — 8 px canonical (v0.23 polish pass)
-# All three tiers collapse to 8 px per the brand audit. Was 6/8/12 — the
-# 12 was the worst offender (every "card" looked too rounded vs the CSS
-# layer's 8 px discipline). Use radius.full for pills/avatars only.
+# Radius scale (px) — cards are 12 px (Kenny, 2026-06-10 design review)
+# Mirrors the CSS layer exactly: --radius-sm/md = 8, --radius-lg = 12.
+# The v0.23 collapse-to-8 here was never matched by the CSS and the 12 px
+# card look won the review. Use radius.full for pills/avatars only.
 radius:
   sm: 8
   md: 8
-  lg: 8
+  lg: 12
   full: 9999
 
 # Shadow scale (slate-tinted for premium feel — v0.23 polish pass)
