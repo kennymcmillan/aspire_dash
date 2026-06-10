@@ -4442,3 +4442,114 @@ html.dark .ranked-bars__track { background: #273449; }
     min-width: 44px;
     font-variant-numeric: tabular-nums;
 }
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   v0.48 — v12_helpers residual glow-up (forge loop, slice 4 of 4)
+   The module was already class-first; this ports the stragglers:
+   the duplicated avatar pattern, card-link wrappers, metric_ring,
+   and the rings row. Data-driven colours/sizes stay inline.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Generic card link wrapper (athlete cards, competition cards…) ── */
+.card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+/* ── Mini-card avatar (photo or initials), shared by athlete_card +
+      athlete_card_rings ─────────────────────────────────────────────── */
+.amc-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.amc-avatar--md {
+    width: 44px;
+    height: 44px;
+}
+
+img.amc-avatar {
+    object-fit: cover;
+    border: 2px solid var(--slate-200);
+    background: var(--slate-100);
+}
+
+.amc-avatar--initials {
+    background: #004185;                /* aspire-600 */
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.amc-avatar--md.amc-avatar--initials { font-size: 14px; }
+
+/* ── Mini-card body (name + meta column) + rings row ─────────────── */
+.amc-body {
+    min-width: 0;
+    flex: 1;
+}
+
+.amc-rings {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-around;
+    margin-top: 8px;
+}
+
+/* ── Metric ring (Whoop-style SVG ring + centre value) ───────────── */
+.metric-ring {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.metric-ring__box { position: relative; }
+
+.metric-ring__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.metric-ring__centre {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+}
+
+/* lineHeight 1 keeps glyphs from descending below ring centre */
+.metric-ring__value {
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.metric-ring__label {
+    margin-top: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--slate-500);
+    text-align: center;
+}
+
+/* ── Date toolbar calendar icon (was inline) ──────────────────────── */
+.dt-display > i.fa-calendar,
+.dt-display > .fa-solid.fa-calendar {
+    color: #004185;                     /* aspire-600 */
+    font-size: 12px;
+}

@@ -45,7 +45,7 @@ def layout():
                           delta_direction="flat", sub="unchanged",
                           accent="gold"),
         ], style={"display": "grid",
-                   "gridTemplateColumns": "repeat(4, 1fr)",
+                   "gridTemplateColumns": "repeat(auto-fit, minmax(220px, 1fr))",
                    "gap": "12px", "marginBottom": "12px"}),
         code_block(
             "from aspire_dash.v12_helpers import kpi_tile_v2\n\n"
@@ -124,7 +124,7 @@ def layout():
                 ],
             ),
         ], style={"display": "grid",
-                   "gridTemplateColumns": "repeat(3, 1fr)",
+                   "gridTemplateColumns": "repeat(auto-fit, minmax(220px, 1fr))",
                    "gap": "12px", "marginBottom": "12px"}),
         code_block(
             "from aspire_dash.v12_helpers import athlete_card\n\n"
@@ -141,7 +141,7 @@ def layout():
 
         # 5. AG Grid Aspire theme
         section("5 · aspire_grid_v2 — branded AG Grid (uppercase blue header)"),
-        aspire_grid_v2(
+        html.Div(aspire_grid_v2(
             "v12-grid",
             columnDefs=[
                 {"field": "fencer", "headerName": "Fencer", "pinned": "left"},
@@ -155,7 +155,7 @@ def layout():
                 {"fencer": "Omar Deif", "ag": "U17",    "sessions": 397, "min": 10845},
             ],
             height="180px",
-        ),
+        ), style={"overflowX": "auto", "maxWidth": "100%"}),
         code_block(
             "from aspire_dash.v12_helpers import aspire_grid_v2\n\n"
             "aspire_grid_v2('my-grid', columnDefs=[...], rowData=[...])"
@@ -199,7 +199,7 @@ def layout():
                             delta="+0.2", delta_direction="up",
                             color="#0369a1"),
         ], style={"display": "grid",
-                   "gridTemplateColumns": "repeat(3, 1fr)",
+                   "gridTemplateColumns": "repeat(auto-fit, minmax(220px, 1fr))",
                    "gap": "12px", "marginBottom": "12px"}),
         code_block(
             "from aspire_dash.v12_helpers import sparkline_tile\n\n"
@@ -226,7 +226,7 @@ def layout():
                          detail="Strain recovered. Full training Mon.",
                          onset_date="2026-04-08", days_out=42),
         ], style={"display": "grid",
-                   "gridTemplateColumns": "repeat(2, 1fr)",
+                   "gridTemplateColumns": "repeat(auto-fit, minmax(220px, 1fr))",
                    "gap": "12px", "marginBottom": "12px"}),
         code_block(
             "from aspire_dash.v12_helpers import injury_card\n\n"
@@ -242,7 +242,8 @@ def layout():
             metric_ring("15.8", pct=75, label="Strain", tone="aspire", size=100),
             metric_ring("7h12", pct=72, label="Sleep", tone="good", size=100),
             metric_ring(38, pct=38, label="HRV", tone="warn", size=100, unit="ms"),
-        ], style={"display": "flex", "gap": "18px", "marginBottom": "16px"}),
+        ], style={"display": "flex", "flexWrap": "wrap", "gap": "18px",
+                   "marginBottom": "16px"}),
         code_block(
             "from aspire_dash.v12_helpers import metric_ring\n\n"
             'metric_ring(68, pct=68, label="Recovery", tone="good")\n'
@@ -276,7 +277,7 @@ def layout():
                 ],
             ),
         ], style={"display": "grid",
-                   "gridTemplateColumns": "repeat(3, 1fr)",
+                   "gridTemplateColumns": "repeat(auto-fit, minmax(220px, 1fr))",
                    "gap": "12px", "marginBottom": "12px"}),
         code_block(
             "from aspire_dash.v12_helpers import athlete_card_rings\n\n"

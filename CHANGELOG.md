@@ -4,6 +4,40 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.48.0] — 2026-06-10
+
+### Changed — v12_helpers residual glow-up (forge loop, slice 4 of 4 — DONE)
+
+The module was already class-first; this ports the stragglers. APIs
+unchanged. Completes the 4-module legacy inline-style sweep
+(sports → viz → anthropometric → v12_helpers).
+
+- **`.card-link`** — one generic link-wrapper class replaces 4 copies of
+  `{"textDecoration": "none", "color": "inherit"}` across athlete_card /
+  athlete_card_rings / athlete_card_v2 / athlete_card_compact.
+- **`.amc-avatar`** (+`--md`, `--initials`) — the photo-or-initials avatar
+  was duplicated verbatim in two cards (40px / 44px); now one family.
+- **`metric_ring`** — `.metric-ring__*` structure; ring size + tone-driven
+  value colour stay inline. `.amc-body` / `.amc-rings` for the card layout.
+- `date_toolbar` calendar icon styled via `.dt-display i` rule.
+- 4 new class-contract tests (tests/test_v12_glowup.py).
+
+Genuinely data-driven inline styles are KEPT by design throughout the
+module: delta/trend colours, progress-stack segment widths, tracker cell
+colours, graph heights, asymmetry bar widths, glass-card padding.
+
+### Fixed
+
+- `.amc-rings` now wraps (`flex-wrap`) — ring rows no longer overflow
+  athlete cards on narrow screens.
+- Demo `/v12` page: fixed `repeat(N, 1fr)` grids → `repeat(auto-fit,
+  minmax(220px, 1fr))`; standalone metric_ring row wraps; AG Grid example
+  wrapped in an overflow-x container; repaired mojibake in section headers.
+- KNOWN (pre-existing, demo-only): AG Grid's absolutely-positioned header
+  containers still inflate `document.scrollWidth` by ~112px at a 390px
+  viewport on `/v12`. Grid scrolls correctly inside its own box; needs its
+  own investigation before any blanket `.ag-*` CSS (16 consumer apps).
+
 ## [0.47.0] — 2026-06-10
 
 ### Changed — anthropometric.py glow-up (forge loop, slice 3 of 4)

@@ -114,8 +114,7 @@ def date_toolbar(
                     id=prev_id, n_clicks=0, className="dt-btn",
                     **{"aria-label": "Previous day"}),
         html.Div([
-            html.I(className="fa-solid fa-calendar",
-                   style={"color": "var(--aspire-600)", "fontSize": "12px"}),
+            html.I(className="fa-solid fa-calendar"),
             html.Span(display_text, **display_kwargs),
         ], className="dt-display"),
         html.Button(html.I(className="fa-solid fa-chevron-right"),
@@ -188,19 +187,10 @@ def athlete_card(
     # Avatar — photo or initials
     initials = "".join(p[0] for p in name.split()[:2]).upper()
     if photo_url:
-        avatar = html.Img(src=photo_url, alt=name, style={
-            "width": "40px", "height": "40px", "borderRadius": "50%",
-            "objectFit": "cover", "border": "2px solid var(--slate-200)",
-            "background": "var(--slate-100)",
-        })
+        avatar = html.Img(src=photo_url, alt=name, className="amc-avatar")
     else:
-        avatar = html.Div(initials, style={
-            "width": "40px", "height": "40px", "borderRadius": "50%",
-            "background": "var(--aspire-600)", "color": "white",
-            "display": "inline-flex", "alignItems": "center",
-            "justifyContent": "center",
-            "fontWeight": 700, "fontSize": "13px",
-        })
+        avatar = html.Div(initials,
+                          className="amc-avatar amc-avatar--initials")
 
     children = [
         html.Div([
@@ -208,7 +198,7 @@ def athlete_card(
             html.Div([
                 html.Div(name, className="amc-name"),
                 html.Div(meta, className="amc-meta") if meta else None,
-            ], style={"minWidth": "0", "flex": "1"}),
+            ], className="amc-body"),
             html.Div(str(score) if score is not None else "—",
                       className="amc-score") if score is not None else None,
         ], className="amc-header"),
@@ -223,8 +213,7 @@ def athlete_card(
 
     card = html.Div(children, className=f"athlete-mini-card tone-{tone}")
     if href:
-        return html.A(card, href=href,
-                       style={"textDecoration": "none", "color": "inherit"})
+        return html.A(card, href=href, className="card-link")
     return card
 
 
@@ -445,7 +434,6 @@ def metric_ring(
     cx = size / 2
 
     fs_value = "22px" if size >= 100 else "16px" if size >= 70 else "12px"
-    fs_label = "10px"
 
     # v0.30.1 — gradient stroke (was flat) via inline <linearGradient>.
     # Light tint at the top of the arc → richer colour at the end.
@@ -473,35 +461,20 @@ def metric_ring(
     # on Connect's deployed runtime in v0.13–v0.18.
     import base64
     svg_b64 = base64.b64encode(svg_inner.encode("utf-8")).decode("ascii")
+    # font size scales with ring size; text colour follows tone — stay inline
     return html.Div([
         html.Div([
             html.Img(src=f"data:image/svg+xml;base64,{svg_b64}",
-                      style={"position": "absolute", "inset": "0",
-                              "width": "100%", "height": "100%"},
-                      alt=label),
-            # v0.32 — value text. lineHeight:1 prevents glyph descending
-            # below ring centre; width:100% + textAlign:center stops
-            # odd-width strings ("7h12") drifting right of geometric centre.
+                      className="metric-ring__img", alt=label),
             html.Div(
-                html.Span(f"{value}{unit}", style={
-                    "fontWeight": "700", "fontSize": fs_value,
-                    "lineHeight": "1",
-                    "color": text_color, "fontVariantNumeric": "tabular-nums",
-                }),
-                style={"position": "absolute", "inset": "0",
-                        "display": "flex", "alignItems": "center",
-                        "justifyContent": "center",
-                        "width": "100%", "textAlign": "center"},
+                html.Span(f"{value}{unit}", className="metric-ring__value",
+                          style={"fontSize": fs_value, "color": text_color}),
+                className="metric-ring__centre",
             ),
-        ], style={"position": "relative",
-                   "width": f"{size}px", "height": f"{size}px"}),
-        html.Div(label, style={
-            "marginTop": "4px", "fontSize": fs_label, "fontWeight": "600",
-            "textTransform": "uppercase", "letterSpacing": "0.05em",
-            "color": "#64748b", "textAlign": "center",
-        }) if label else None,
-    ], style={"display": "inline-flex", "flexDirection": "column",
-               "alignItems": "center"})
+        ], className="metric-ring__box",
+           style={"width": f"{size}px", "height": f"{size}px"}),
+        html.Div(label, className="metric-ring__label") if label else None,
+    ], className="metric-ring")
 
 
 def athlete_card_rings(
@@ -531,19 +504,12 @@ def athlete_card_rings(
     # Avatar — photo or initials
     initials = "".join(p[0] for p in name.split()[:2]).upper()
     if photo_url:
-        avatar = html.Img(src=photo_url, alt=name, style={
-            "width": "44px", "height": "44px", "borderRadius": "50%",
-            "objectFit": "cover", "border": "2px solid var(--slate-200)",
-            "background": "var(--slate-100)",
-        })
+        avatar = html.Img(src=photo_url, alt=name,
+                          className="amc-avatar amc-avatar--md")
     else:
-        avatar = html.Div(initials, style={
-            "width": "44px", "height": "44px", "borderRadius": "50%",
-            "background": "var(--aspire-600)", "color": "white",
-            "display": "inline-flex", "alignItems": "center",
-            "justifyContent": "center",
-            "fontWeight": 700, "fontSize": "14px",
-        })
+        avatar = html.Div(
+            initials,
+            className="amc-avatar amc-avatar--md amc-avatar--initials")
 
     children = [
         html.Div([
@@ -551,7 +517,7 @@ def athlete_card_rings(
             html.Div([
                 html.Div(name, className="amc-name"),
                 html.Div(meta, className="amc-meta") if meta else None,
-            ], style={"minWidth": "0", "flex": "1"}),
+            ], className="amc-body"),
         ], className="amc-header"),
         html.Div([
             metric_ring(r["value"], r["pct"],
@@ -559,15 +525,12 @@ def athlete_card_rings(
                         tone=r.get("tone", "aspire"),
                         size=r.get("size", 70))
             for r in rings
-        ], style={"display": "flex", "gap": "12px",
-                   "justifyContent": "space-around",
-                   "marginTop": "8px"}),
+        ], className="amc-rings"),
     ]
 
     card = html.Div(children, className=f"athlete-mini-card tone-{tone}")
     if href:
-        return html.A(card, href=href,
-                       style={"textDecoration": "none", "color": "inherit"})
+        return html.A(card, href=href, className="card-link")
     return card
 
 
@@ -684,9 +647,7 @@ def athlete_card_v2(
     card = html.Div([header, ring_row], className=card_class)
 
     if href:
-        return html.A(card, href=href,
-                       style={"textDecoration": "none", "color": "inherit",
-                              "display": "block"})
+        return html.A(card, href=href, className="card-link")
     return card
 
 
@@ -804,9 +765,7 @@ def athlete_card_compact(
     card = html.Div(children, className=card_class)
 
     if href:
-        return html.A(card, href=href,
-                       style={"textDecoration": "none", "color": "inherit",
-                              "display": "block"})
+        return html.A(card, href=href, className="card-link")
     return card
 
 
