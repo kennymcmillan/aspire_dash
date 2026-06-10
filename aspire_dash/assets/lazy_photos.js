@@ -36,4 +36,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }).observe(document.body, { childList: true, subtree: true });
 
     observeAll(document);
+
+    // Printing must include every photo — force-load anything still deferred
+    window.addEventListener('beforeprint', function() {
+        document.querySelectorAll('img[data-src]').forEach(function(img) {
+            img.src = img.getAttribute('data-src');
+            img.removeAttribute('data-src');
+            io.unobserve(img);
+        });
+    });
 });

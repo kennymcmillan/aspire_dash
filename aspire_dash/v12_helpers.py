@@ -187,7 +187,7 @@ def athlete_card(
     # Avatar — photo or initials
     initials = "".join(p[0] for p in name.split()[:2]).upper()
     if photo_url:
-        avatar = html.Img(src=photo_url, alt=name, className="amc-avatar")
+        avatar = lazy_img(photo_url, alt=name, className="amc-avatar")
     else:
         avatar = html.Div(initials,
                           className="amc-avatar amc-avatar--initials")
@@ -504,7 +504,7 @@ def athlete_card_rings(
     # Avatar — photo or initials
     initials = "".join(p[0] for p in name.split()[:2]).upper()
     if photo_url:
-        avatar = html.Img(src=photo_url, alt=name,
+        avatar = lazy_img(photo_url, alt=name,
                           className="amc-avatar amc-avatar--md")
     else:
         avatar = html.Div(
@@ -598,10 +598,7 @@ def athlete_card_v2(
     """
     # Avatar — photo or initials
     if photo_url:
-        avatar = html.Img(
-            src=photo_url, alt=name,
-            className="acv2-avatar",
-        )
+        avatar = lazy_img(photo_url, alt=name, className="acv2-avatar")
     else:
         avatar = html.Div(
             _initials(name),
@@ -696,10 +693,7 @@ def athlete_card_compact(
     """
     # Avatar — 40 px photo or initials
     if photo_url:
-        avatar = html.Img(
-            src=photo_url, alt=name,
-            className="acc-avatar",
-        )
+        avatar = lazy_img(photo_url, alt=name, className="acc-avatar")
     else:
         avatar = html.Div(_initials(name), className="acc-avatar-initials")
 

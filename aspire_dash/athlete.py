@@ -86,8 +86,9 @@ def athlete_avatar(
     }
 
     if photo_url:
-        return html.Img(
-            src=photo_url,
+        from .v12_helpers import lazy_img
+        return lazy_img(
+            photo_url,
             alt=name or "athlete",
             className="athlete-avatar" + (" is-target" if is_target else ""),
             style={**common_style, "objectFit": "cover"},

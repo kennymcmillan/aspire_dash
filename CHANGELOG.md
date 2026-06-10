@@ -4,6 +4,20 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.51.0] — 2026-06-11
+
+### Changed — all library athlete-card photos lazy-load by default
+
+The five photo-rendering avatars (`athlete_card`, `athlete_card_rings`,
+`athlete_card_v2`, `athlete_card_compact` in v12_helpers + `athlete_avatar`
+in athlete.py) now render via `lazy_img` — every app using library cards
+gets viewport-deferred SAMS photo loading with ZERO app changes.
+WHOOP-dashboard validated the pattern (v0.50.0) before this default flip.
+
+- `lazy_photos.js` gains a `beforeprint` handler: printing force-loads any
+  still-deferred photos so print/PDF output never shows placeholders.
+- Initials fallbacks unchanged; only the photo path defers.
+
 ## [0.50.0] — 2026-06-10
 
 ### Added — lazy_img: lazy-loading athlete photos
