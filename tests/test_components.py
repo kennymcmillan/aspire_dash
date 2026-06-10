@@ -40,6 +40,39 @@ def test_summary_card():
     assert is_dash_component(out)
 
 
+def test_ranked_bars_returns_component():
+    from aspire_dash.viz import ranked_bars
+    assert is_dash_component(ranked_bars([("Protein", 22), ("Creatine", 8)]))
+
+
+def test_ranked_bars_dicts_sort_cap():
+    from aspire_dash.viz import ranked_bars
+    out = ranked_bars(
+        [{"label": "A", "value": 1}, {"label": "B", "value": 9, "color": "#abc"}],
+        sort=True, max_rows=1, unit="kg")
+    assert is_dash_component(out)
+
+
+def test_ranked_bars_empty():
+    from aspire_dash.viz import ranked_bars
+    assert is_dash_component(ranked_bars([]))
+
+
+def test_diff_rows_update_delete_add():
+    from aspire_dash.tables import diff_rows
+    original = [{"id": 1, "qty": "5", "note": "a"}, {"id": 2, "qty": "3"}]
+    current = [{"id": 1, "qty": "7", "note": "a"}, {"id": None, "qty": "1"}]
+    d = diff_rows(original, current)
+    assert d["updated"] == [(1, {"qty": "7"})]
+    assert d["deleted"] == [2]
+    assert d["added"] == [{"id": None, "qty": "1"}]
+
+
+def test_diff_rows_string_equality():
+    from aspire_dash.tables import diff_rows
+    assert diff_rows([{"id": 1, "qty": 5}], [{"id": 1, "qty": "5"}])["updated"] == []
+
+
 def test_graph_card_with_figure():
     import plotly.graph_objects as go
     from aspire_dash.components import graph_card

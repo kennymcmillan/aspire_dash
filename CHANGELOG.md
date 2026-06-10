@@ -4,6 +4,27 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.44.0] — 2026-06-10
+
+### Added — ranked bars + editable-table diff (promoted from aspire-supplements)
+
+- `viz.ranked_bars(items, *, color=None, unit="", max_label=34, max_rows=None,
+  sort=False, height=14, value_fmt=None)` — a branded horizontal "top-N by
+  value" leaderboard (label · rounded track · actual value), pure HTML/CSS, no
+  Plotly. Fills the gap between `horizontal_bar` (single bar, % only, clamped
+  label) and `progress_stack` (one segmented bar). Takes `(label, value)`
+  tuples or dicts with an optional per-row `color`; can sort + cap. Generic —
+  top products, athletes by load, spend by sport, etc.
+- `tables.diff_rows(original, current, *, id_key="id", fields=None)` — diff the
+  rows an editable table started with against the rows it holds now; returns
+  `{updated: [(id, {field: val})], deleted: [id], added: [row]}`. Handles
+  in-place edits, deleted rows (`row_deletable=True`), and new rows; compares as
+  strings so `5 == "5"`. Pure (no Dash/AG-Grid dep) — collapses the repeated
+  "compare-and-save edits" boilerplate every editable-grid app writes.
+
+First consumer: the aspire-supplements dashboard (Top products / Assignments-by-
+sport / Stock-by-category bars) and its products/receipts/assignments save flows.
+
 ## [0.43.0] — 2026-06-08
 
 ### Added — nutrition macro chips + summary (promoted from aspire-nutrition)

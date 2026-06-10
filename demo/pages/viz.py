@@ -6,7 +6,7 @@ from aspire_dash.components import card
 from aspire_dash.theme import SLATE, ACCENT, SUCCESS, WARNING, DANGER, GOLD
 from aspire_dash.viz import (
     progress_ring, status_ring, ring_row,
-    sparkline, horizontal_bar, status_dot, metric_spark,
+    sparkline, horizontal_bar, status_dot, metric_spark, ranked_bars,
 )
 
 dash.register_page(__name__, path="/viz", title="Viz Components", name="Viz Components")
@@ -17,6 +17,21 @@ def layout(**kwargs):
         html.H2("Viz Components", className="section-title", style={"marginTop": "0"}),
         html.P("Reusable SVG visualisations from aspire_dash.viz — rings, sparklines, bars, metrics.",
                style={"fontSize": "13px", "color": SLATE["500"], "marginBottom": "24px"}),
+
+        # ── Ranked Bars ──
+        html.H3("Ranked Bars (leaderboard)", style={"fontSize": "15px", "fontWeight": "600", "marginBottom": "12px"}),
+        card([
+            html.Div("ranked_bars() — label · track · value; sort, cap, per-row colour. "
+                     "Top-N by value (top products, athletes by load, spend by sport).",
+                     style={"fontSize": "12px", "color": SLATE["500"], "marginBottom": "12px"}),
+            ranked_bars([
+                ("PAS Whey Protein (Chocolate)", 17),
+                ("Creatine Monohydrate", 12),
+                ("Electrolytes (Fruit Punch)", 9),
+                ("Game Ready Shot", 6),
+                ("Vitamin D3", 3),
+            ], sort=True, unit="units"),
+        ]),
 
         # ── Progress Rings ──
         html.H3("Progress Rings", style={"fontSize": "15px", "fontWeight": "600", "marginBottom": "12px"}),
@@ -130,7 +145,7 @@ def layout(**kwargs):
         card([
             html.Pre("""from aspire_dash.viz import (
     progress_ring, status_ring, ring_row,
-    sparkline, horizontal_bar, status_dot, metric_spark,
+    sparkline, horizontal_bar, status_dot, metric_spark, ranked_bars,
 )
 
 # Basic ring

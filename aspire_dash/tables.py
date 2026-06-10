@@ -15,6 +15,61 @@ from dash import dcc, html, Input, Output, State
 from .theme import ASPIRE_BLUE, ASPIRE_NAVY, SLATE  # noqa: F401
 
 
+def diff_rows(original, current, *, id_key="id", fields=None):
+    """Diff two lists of table rows by ``id_key`` — for editable-table saves.
+
+    Compares the rows a table started with (``original``) against the rows it
+    holds now (``current``) and reports what changed. Handles in-place edits,
+    rows the user deleted (DataTable ``row_deletable=True``), and newly-typed
+    rows. Pure — no Dash / AG-Grid dependency, works for ``dash_table.DataTable``
+    or any list-of-dicts grid.
+
+    Values are compared as strings (DataTable returns strings) so ``5`` and
+    ``"5"`` count as equal.
+
+    Parameters
+    ----------
+    original, current : list[dict]
+        Row dicts, each identified by ``id_key``.
+    id_key : str
+        Identity column (default ``"id"``).
+    fields : list[str] or None
+        Columns to check for edits. Default: every key in a current row except
+        ``id_key``.
+
+    Returns
+    -------
+    dict
+        ``updated`` — list of ``(id, {field: new_value})`` for changed rows;
+        ``deleted`` — ids present in ``original`` but gone from ``current``;
+        ``added``   — current rows with no/unknown id (new entries).
+    """
+    def _s(v):
+        return "" if v is None else str(v)
+
+    orig_by = {str(o.get(id_key)): o for o in (original or [])}
+    seen, updated, deleted, added = set(), [], [], []
+
+    for r in current or []:
+        rid = r.get(id_key)
+        key = str(rid)
+        if rid is None or rid == "" or key not in orig_by:
+            added.append(r)
+            continue
+        seen.add(key)
+        o = orig_by[key]
+        cmp_fields = fields if fields is not None else [k for k in r if k != id_key]
+        changed = {f: r.get(f) for f in cmp_fields if _s(r.get(f)) != _s(o.get(f))}
+        if changed:
+            updated.append((rid, changed))
+
+    for key, o in orig_by.items():
+        if key not in seen:
+            deleted.append(o.get(id_key))
+
+    return {"updated": updated, "deleted": deleted, "added": added}
+
+
 def _import_dag():
     import dash_ag_grid as dag
     return dag

@@ -285,6 +285,98 @@ def horizontal_bar(value, max_val=100, color=None, height=8, label=None, show_pc
     })
 
 
+# ── Ranked Bars (leaderboard) ─────────────────────────────────────────────────
+
+def ranked_bars(items, *, color=None, unit="", max_label=34, max_rows=None,
+                sort=False, height=14, value_fmt=None):
+    """Horizontal ranked bars — label · track · value. Pure HTML/CSS (no Plotly).
+
+    A clean "top-N by value" leaderboard (top products, athletes by load, spend
+    by sport…). Unlike ``horizontal_bar`` (single bar, % only) every row shows
+    its actual value; unlike ``progress_stack`` (one segmented bar) each item
+    gets its own track.
+
+    Parameters
+    ----------
+    items : list
+        Either ``(label, value)`` tuples, or dicts with ``label`` / ``value``
+        and an optional per-row ``color``.
+    color : str
+        Default bar colour (Aspire accent if None); a row's own ``color`` wins.
+    unit : str
+        Appended after each value (e.g. ``"kg"``, ``"units"``).
+    max_label : int
+        Truncate labels longer than this (full text stays in the tooltip).
+    max_rows : int or None
+        Keep only the first N rows (after the optional sort).
+    sort : bool
+        Sort descending by value before rendering.
+    height : int
+        Track height in px.
+    value_fmt : callable or None
+        ``value -> str`` override for the right-hand value text.
+    """
+    norm = []
+    for it in items or []:
+        if isinstance(it, dict):
+            norm.append((it.get("label"), it.get("value") or 0, it.get("color")))
+        else:
+            label, value = it
+            norm.append((label, value or 0, None))
+    if sort:
+        norm.sort(key=lambda r: r[1], reverse=True)
+    if max_rows is not None:
+        norm = norm[:max_rows]
+    if not norm:
+        return html.Div("No data", style={
+            "fontSize": "13px", "color": SLATE["400"], "padding": "8px"})
+
+    default = color or ACCENT
+    mx = max((v for _, v, _ in norm), default=0) or 1
+    radius = f"{height // 2}px"
+
+    def _fmt(v):
+        if value_fmt:
+            return value_fmt(v)
+        try:
+            f = float(v)
+            s = str(int(f)) if f == int(f) else f"{f:,.1f}"
+        except (TypeError, ValueError):
+            s = str(v)
+        return f"{s}{(' ' + unit) if unit else ''}"
+
+    def _trunc(s):
+        s = "" if s is None else str(s)
+        return s if len(s) <= max_label else s[:max_label - 1] + "…"
+
+    rows = []
+    for label, value, c in norm:
+        try:
+            pct = max(3.0, min(100.0, float(value) / mx * 100))
+        except (TypeError, ValueError):
+            pct = 3.0
+        rows.append(html.Div([
+            html.Div(_trunc(label), title=("" if label is None else str(label)), style={
+                "width": "42%", "fontSize": "13px", "fontWeight": "500",
+                "color": SLATE["700"], "whiteSpace": "nowrap",
+                "overflow": "hidden", "textOverflow": "ellipsis",
+            }),
+            html.Div(html.Div(style={
+                "width": f"{pct:.1f}%", "height": "100%",
+                "backgroundColor": c or default, "borderRadius": radius,
+            }), style={
+                "flex": "1", "height": f"{height}px", "backgroundColor": SLATE["100"],
+                "borderRadius": radius, "overflow": "hidden", "margin": "0 10px",
+            }),
+            html.Div(_fmt(value), style={
+                "minWidth": "58px", "textAlign": "right", "fontSize": "13px",
+                "fontWeight": "700", "color": SLATE["800"],
+                "fontVariantNumeric": "tabular-nums",
+            }),
+        ], style={"display": "flex", "alignItems": "center", "marginBottom": "11px"}))
+    return html.Div(rows, className="ranked-bars", style={"paddingTop": "4px"})
+
+
 # ── Status Dot ───────────────────────────────────────────────────────────────
 
 def status_dot(status="green", size=8, pulse=False):
