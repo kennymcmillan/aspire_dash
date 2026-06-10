@@ -10,7 +10,7 @@
    Inter is kept for data-dense surfaces where its tabular-nums and
    variable-axis features shine — opt-in via .font-data class or the
    `data` brand.yml token. */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:opsz,wght@14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:opsz,wght@14..32,100..900&family=Source+Serif+Pro:wght@400;600;700&display=swap');
 
 /* ── CSS Custom Properties (Tailwind Slate + semantic colours) ── */
 :root {
@@ -200,6 +200,7 @@ body {
 .main-area {
     margin-left: 220px;
     flex: 1;
+    min-width: 0; /* flex item must be allowed to shrink, else wide tables/charts overflow the page on narrow screens */
     min-height: 100vh;
     transition: margin-left 0.3s ease;
 }
@@ -337,12 +338,9 @@ body {
     transition: box-shadow 0.15s ease, transform 0.15s ease,
                 border-color 0.15s ease;
 }
-.card:hover,
-.budget-card:hover,
-.athlete-card:hover {
-    box-shadow: var(--elev-2);
-    transform: translateY(-1px);
-}
+/* Card hover is owned by ONE block (v0.24 polish, search
+   "elev-hover-card") — earlier per-version hover rules were removed
+   to stop last-rule-wins drift. */
 /* Some cards live inside <a> (clickable). Keep the lift behaviour but
    don't double-apply. */
 a > .card,
@@ -1054,18 +1052,9 @@ table.aspire-table tbody tr:last-child td {
     animation: tooltipFade 0.15s ease-in;
 }
 
-/* Plotly hover tooltip overrides */
-.js-plotly-plot .plotly .hoverlayer .hovertext rect {
-    fill: white !important;
-    stroke: var(--slate-200) !important;
-    rx: 6 !important;
-    ry: 6 !important;
-}
-.js-plotly-plot .plotly .hoverlayer .hovertext text,
-.js-plotly-plot .plotly .hoverlayer .hovertext tspan {
-    fill: var(--slate-800) !important;
-    font-family: 'Inter', sans-serif !important;
-}
+/* Plotly hover tooltips are styled by the central "aspire" template
+   (charts.py hoverlabel) — the old CSS !important override here killed
+   the branded dark tooltip on every chart. Single owner: charts.py. */
 
 /* Bootstrap tooltip overrides */
 .tooltip-inner {
@@ -2173,21 +2162,16 @@ html.dark .period-pills label:has(input:checked) {
 }
 .section-title-v2:first-child { margin-top: 0; }
 
-/* Hover lift — bump 1→2 px so the lift registers as intentional
-   (matches Linear / Stripe). Plus subtle border tint. */
-.card:hover,
-.budget-card:hover,
-.athlete-card:hover,
-.kpi-tile:hover {
-    box-shadow: var(--elev-2);
-    transform: translateY(-2px);
-    border-color: var(--aspire-200);
-}
+/* (v0.19 hover-lift block removed — the v0.24 "elev-hover-card"
+   block below is the single owner of card hover.) */
 
-/* KPI rhythm — narrow the 22→32 px gap to a two-step scale */
+/* KPI rhythm — two-step token scale. --kpi-value is the standard
+   big-number size; --kpi-value-hero the feature-tile size. Compact
+   tiles (budget-card, sparkline-tile) deliberately sit below it. */
+:root { --kpi-value: 30px; --kpi-value-hero: 32px; }
 .budget-card .card-value { font-size: 26px; }
-.kpi-tile .kpi-value     { font-size: 30px; }
-.fr-kpi-value            { font-size: 30px; }
+.kpi-tile .kpi-value     { font-size: var(--kpi-value); }
+.fr-kpi-value            { font-size: var(--kpi-value); }
 
 /* Tabular nums + lining figures across every numeric surface */
 .kpi-value, .card-value, .fr-kpi-value, .amc-metric-value, .amc-score,
@@ -2244,8 +2228,9 @@ table.aspire-table tbody tr:hover {
     color: var(--slate-500);
 }
 
-/* Financial scope serif option — opt-in via .financial-report.serif */
-@import url('https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;600;700&display=swap');
+/* Financial scope serif option — opt-in via .financial-report.serif.
+   Source Serif Pro loads from the TOP @import (line 13) — a mid-file
+   @import is ignored by the CSS spec, which silently broke this mode. */
 .financial-report.serif {
     font-family: 'Source Serif Pro', 'Charter', Georgia, serif;
     font-size: 15px;
@@ -2286,8 +2271,12 @@ table.aspire-table tbody tr:hover {
     --glow-danger:     0 0 0 4px rgba(220, 38, 38,  0.12);
 }
 
-/* Smooth EVERYTHING — universal transition baseline */
-* {
+/* Smooth interactive surfaces — SCOPED, not universal. The old
+   `* { transition: ... }` taxed style-recalc on every AG Grid cell and
+   Plotly SVG node, and made zone-class swaps cross-fade unexpectedly. */
+.card, .aspire-card, .kpi-tile, .badge, .status-pill, .btn,
+.sidebar-link, .topnav-link, .toggle-btn, .filter-pill,
+a, button, input, select {
     transition: background-color var(--duration-fast) var(--ease-out),
                 border-color     var(--duration-fast) var(--ease-out),
                 color            var(--duration-fast) var(--ease-out);
@@ -2374,11 +2363,8 @@ textarea:focus,
     transition: transform var(--duration-fast) var(--ease-spring),
                 background-color var(--duration-fast) var(--ease-out);
 }
-.status-pill:hover,
-.status-badge:hover,
-.badge:hover {
-    transform: scale(1.03);
-}
+/* (badge hover owned by the scale(1.05) block further down —
+   duplicate scale(1.03) rule removed.) */
 
 /* Sidebar links — slide-in + brand tint + gold active marker.
    SCOPED to .sidebar-nav (aspire_dash sidebar() helper) so apps that
@@ -2872,7 +2858,7 @@ body {
     color: var(--slate-500);
 }
 .kpi-with-sparkline .kws-value {
-    font-size: 28px; font-weight: 700;
+    font-size: var(--kpi-value); font-weight: 700;
     line-height: 1.1; color: var(--slate-900);
     font-variant-numeric: tabular-nums;
     margin-top: 2px;
@@ -2943,7 +2929,7 @@ body {
     border-left: 4px solid var(--aspire-600);
 }
 .stat-with-trend:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);   /* match the portfolio-wide card lift */
     box-shadow: var(--elev-2);
 }
 .stat-with-trend.swt-accent-success { border-left-color: #16a34a; }
@@ -2956,7 +2942,7 @@ body {
     color: var(--slate-500);
 }
 .stat-with-trend .swt-value {
-    font-size: 30px; font-weight: 700;
+    font-size: var(--kpi-value); font-weight: 700;
     line-height: 1.1; color: var(--slate-900);
     font-variant-numeric: tabular-nums;
     margin-top: 2px;
@@ -3117,7 +3103,7 @@ body {
     margin-top: 2px;
 }
 .stat-card-mega .scm-value {
-    font-size: 32px; font-weight: 700; line-height: 1.1;
+    font-size: var(--kpi-value-hero); font-weight: 700; line-height: 1.1;
     color: var(--slate-900);
     font-variant-numeric: tabular-nums;
 }
@@ -3678,3 +3664,370 @@ body {
         padding: 14px 16px;
     }
 }
+
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   v0.45 â€” sports module glow-up (forge loop)
+   sports.py inline styles â†’ semantic classes. Data-driven colours
+   (source/colour badges, custom gradients) stay inline by design â€”
+   only structure + branded variants live here.
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+
+/* â”€â”€ Flag chip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.flag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.flag-chip__img {
+    object-fit: cover;
+    border-radius: 2px;
+    border: 1px solid var(--slate-200);
+    display: block;
+}
+
+.flag-chip--sm .flag-chip__img { width: 16px; height: 12px; }
+.flag-chip--md .flag-chip__img { width: 20px; height: 15px; }
+.flag-chip--lg .flag-chip__img { width: 24px; height: 18px; }
+
+.flag-chip__code {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--slate-700);
+    letter-spacing: 0.02em;
+}
+
+/* Neutral-athlete fallback (AIN) â€” no flag exists */
+.flag-chip__ain {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 8px;
+    border-radius: 9999px;
+    background: var(--slate-200);
+    color: var(--slate-700);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* â”€â”€ Flag + athlete name row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.flag-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.flag-name__label.is-highlight {
+    font-weight: 600;
+    color: #004185;                     /* Aspire primary */
+}
+
+/* â”€â”€ Placement badge â€” medal treatment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.placement-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.placement-badge--sm {
+    padding: 2px 8px;
+    font-size: 11px;
+}
+
+.placement-badge i {
+    font-size: 10px;
+    margin-right: 4px;
+}
+
+.placement-badge.place-gold {
+    background: linear-gradient(135deg, #fef9c3, #fde68a);
+    color: #92400e;                     /* amber-800 */
+    box-shadow: inset 0 0 0 1px rgba(217, 119, 6, 0.25);
+}
+
+.placement-badge.place-silver {
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    color: #475569;                     /* slate-600 */
+    box-shadow: inset 0 0 0 1px rgba(100, 116, 139, 0.25);
+}
+
+.placement-badge.place-bronze {
+    background: linear-gradient(135deg, #ffedd5, #fed7aa);
+    color: #9a3412;                     /* orange-800 â€” true bronze, was red-tinted */
+    box-shadow: inset 0 0 0 1px rgba(194, 65, 12, 0.25);
+}
+
+.placement-badge.place-top8  { background: #dbeafe; color: #1e40af; }
+.placement-badge.place-top16 { background: #f0fdf4; color: #166534; }
+.placement-badge.place-rest  { background: var(--slate-100); color: var(--slate-500); }
+
+/* â”€â”€ Rank change indicator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.rank-change {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.rank-change i {
+    margin-right: 3px;
+    font-size: 12px;
+}
+
+.rank-change.rc-up   { color: #16a34a; }   /* green-600 */
+.rank-change.rc-down { color: #dc2626; }   /* red-600 */
+.rank-change.rc-flat { color: var(--slate-400); }
+
+.rank-change__new {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--slate-400);
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--slate-100);
+}
+
+/* â”€â”€ Badge row (competition / category badge groups) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.badge-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* â”€â”€ Data grid row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.aspire-data-row {
+    display: flex;
+    background: #ffffff;
+    border-bottom: 1px solid var(--slate-200);
+    transition: background 0.15s ease;
+}
+
+.aspire-data-row:hover:not(.is-header) {
+    background: var(--slate-50);
+}
+
+.aspire-data-row.is-header {
+    background: var(--slate-100);
+}
+
+.aspire-data-row.is-highlight {
+    background: #eff6ff;                /* blue-50 â€” focus nation */
+}
+
+.aspire-data-row__cell {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--slate-700);
+    border-right: 1px solid var(--slate-200);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.aspire-data-row__cell:last-child {
+    border-right: none;
+}
+
+.aspire-data-row.is-header .aspire-data-row__cell {
+    font-weight: 600;
+    color: var(--slate-800);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* â”€â”€ Trend arrow â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.trend-arrow {
+    display: inline-flex;
+    align-items: center;
+}
+
+.trend-arrow i { font-size: 13px; }
+.trend-arrow.ta-up i   { color: #16a34a; }   /* green-600 */
+.trend-arrow.ta-down i { color: #dc2626; }   /* red-600 */
+.trend-arrow.ta-flat i { color: var(--slate-400); }
+
+.trend-arrow__label {
+    font-size: 11px;
+    color: var(--slate-500);
+    margin-right: 4px;
+}
+
+/* â”€â”€ Gradient stat (bg/colour stay caller-supplied inline) â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.gradient-stat {
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(15, 23, 42, 0.05);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.gradient-stat:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.gradient-stat__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.gradient-stat__value {
+    font-size: 28px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+
+.gradient-stat__emoji {
+    font-size: 24px;
+    opacity: 0.3;
+}
+
+.gradient-stat__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+}
+
+/* â”€â”€ Mini stat / header stat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.mini-stat__label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--slate-400);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.mini-stat__value {
+    font-size: 18px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.header-stat { text-align: center; }
+
+.header-stat__value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--slate-800);
+    font-variant-numeric: tabular-nums;
+}
+
+.header-stat__label {
+    font-size: 11px;
+    color: var(--slate-400);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* â”€â”€ Pill badge (colour_badge / source_badge structure) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.pill-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+
+.pill-badge--source {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    font-family: Poppins, sans-serif;
+}
+
+/* â”€â”€ Competition card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.competition-card {
+    padding: 12px 14px;
+    font-family: Poppins, sans-serif;
+}
+
+.competition-card__category {
+    margin-left: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.competition-card__title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-900);
+    line-height: 1.3;
+}
+
+.competition-card__meta {
+    font-size: 11px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    color: var(--slate-500);
+}
+
+.competition-card__meta i {
+    font-size: 10px;
+    color: var(--slate-400);
+    margin-right: 4px;
+}
+
+.competition-card__meta-sep {
+    color: var(--slate-300);
+    margin: 0 4px;
+}
+
+.competition-card__result {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--slate-100);
+    font-size: 12px;
+}
+
+.competition-card__result-text {
+    color: var(--slate-700);
+    font-weight: 600;
+}
+
+.competition-card__placement {
+    font-weight: 700;
+    margin-right: 8px;
+    font-variant-numeric: tabular-nums;
+}
+
+.competition-card__placement.place-1 { color: #fbb800; }   /* gold */
+.competition-card__placement.place-2 { color: #94a3b8; }   /* slate-400 silver */
+.competition-card__placement.place-3 { color: #a16207; }   /* yellow-700 bronze */
+.competition-card__placement.place-n { color: #004185; }   /* Aspire primary */
+
+.competition-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+/* â”€â”€ Dark mode for the section above â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+html.dark .aspire-data-row { background: #1e293b; }
+html.dark .aspire-data-row:hover:not(.is-header) { background: #273449; }
+html.dark .aspire-data-row.is-header { background: #0f172a; }
+html.dark .aspire-data-row.is-highlight { background: #1e3a5f; }
+html.dark .aspire-data-row__cell { color: #cbd5e1; border-color: #334155; }
+html.dark .competition-card__title { color: #f1f5f9; }
+html.dark .header-stat__value { color: #f1f5f9; }
+

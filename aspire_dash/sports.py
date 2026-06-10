@@ -139,32 +139,20 @@ def country_flag(ioc_code, size="md", show_text=False):
 
     # Special: AIN / _AI (Individual Neutral Athletes — various source formats)
     if code in ("AIN", "_AIN", "AIN_", "_AI"):
-        return html.Span("AIN", style={
-            "display": "inline-flex", "alignItems": "center",
-            "padding": "1px 8px", "borderRadius": "9999px",
-            "backgroundColor": SLATE["200"], "color": SLATE["700"],
-            "fontSize": "11px", "fontWeight": "600",
-        })
+        return html.Span("AIN", className="flag-chip__ain")
 
     sizes = {"sm": 16, "md": 20, "lg": 24}
     px = sizes.get(size, 20)
+    size_mod = size if size in sizes else "md"
     url = country_flag_url(code, size=max(40, px * 2))  # 2x for retina
 
     children = [
-        html.Img(src=url, style={
-            "width": f"{px}px", "height": f"{int(px * 0.75)}px",
-            "objectFit": "cover", "borderRadius": "2px",
-            "border": f"1px solid {SLATE['200']}",
-        }, title=code),
+        html.Img(src=url, className="flag-chip__img", title=code),
     ]
     if show_text:
-        children.append(html.Span(code, style={
-            "fontSize": "12px", "fontWeight": "500", "color": SLATE["700"],
-        }))
+        children.append(html.Span(code, className="flag-chip__code"))
 
-    return html.Span(children, style={
-        "display": "inline-flex", "alignItems": "center", "gap": "4px",
-    })
+    return html.Span(children, className=f"flag-chip flag-chip--{size_mod}")
 
 
 def flag_with_name(nationality, name, highlight_nation=None):
@@ -184,12 +172,12 @@ def flag_with_name(nationality, name, highlight_nation=None):
         and nationality
         and nationality.upper() == highlight_nation.upper()
     )
-    name_style = {"fontWeight": "600", "color": ACCENT} if is_highlighted else {}
+    name_cls = "flag-name__label is-highlight" if is_highlighted else "flag-name__label"
 
     return html.Div([
         country_flag(nationality, size="md"),
-        html.Span(name, style=name_style),
-    ], style={"display": "flex", "alignItems": "center", "gap": "6px"})
+        html.Span(name, className=name_cls),
+    ], className="flag-name")
 
 
 # ── Default Nation Selector ────────────────────────────────────────────────
@@ -325,42 +313,28 @@ def placement_badge(place, size="md"):
         p = 999
 
     if p == 1:
-        bg, color = "#fef3c7", "#92400e"
-        icon = "fa-solid fa-trophy"
+        tone, icon = "place-gold", "fa-solid fa-trophy"
     elif p == 2:
-        bg, color = "#f3f4f6", "#374151"
-        icon = "fa-solid fa-medal"
+        tone, icon = "place-silver", "fa-solid fa-medal"
     elif p == 3:
-        bg, color = "#fef2f2", "#92400e"
-        icon = "fa-solid fa-medal"
+        tone, icon = "place-bronze", "fa-solid fa-medal"
     elif p <= 8:
-        bg, color = "#dbeafe", "#1e40af"
-        icon = None
+        tone, icon = "place-top8", None
     elif p <= 16:
-        bg, color = "#f0fdf4", "#166534"
-        icon = None
+        tone, icon = "place-top16", None
     else:
-        # v0.32 — Tailwind greys -> Aspire slate tokens (audit #25)
-        from .theme import SLATE as _SLATE
-        bg, color = _SLATE["100"], _SLATE["500"]
-        icon = None
+        tone, icon = "place-rest", None
 
-    font = "13px" if size == "md" else "11px"
-    pad = "3px 10px" if size == "md" else "2px 8px"
+    cls = f"placement-badge {tone}"
+    if size != "md":
+        cls += " placement-badge--sm"
 
     children = []
     if icon:
-        children.append(html.I(className=icon, style={
-            "fontSize": "10px", "marginRight": "4px",
-        }))
+        children.append(html.I(className=icon))
     children.append(str(place))
 
-    return html.Span(children, style={
-        "display": "inline-flex", "alignItems": "center",
-        "padding": pad, "borderRadius": "9999px",
-        "fontSize": font, "fontWeight": "700",
-        "backgroundColor": bg, "color": color,
-    })
+    return html.Span(children, className=cls)
 
 
 # ── Rank Change Indicator ──────────────────────────────────────────────────
@@ -376,27 +350,20 @@ def rank_change(current, previous):
         Previous rank.
     """
     if current is None or previous is None:
-        return html.Span("NEW", style={
-            "fontSize": "10px", "fontWeight": "600", "color": SLATE["400"],
-            "padding": "1px 6px", "borderRadius": "4px",
-            "backgroundColor": SLATE["100"],
-        })
+        return html.Span("NEW", className="rank-change__new")
 
     diff = previous - current  # positive = improved
     if diff > 0:
-        icon, color, text = "fa-solid fa-caret-up", SUCCESS, f"+{diff}"
+        icon, tone, text = "fa-solid fa-caret-up", "rc-up", f"+{diff}"
     elif diff < 0:
-        icon, color, text = "fa-solid fa-caret-down", DANGER, str(diff)
+        icon, tone, text = "fa-solid fa-caret-down", "rc-down", str(diff)
     else:
-        icon, color, text = "fa-solid fa-minus", SLATE["400"], "="
+        icon, tone, text = "fa-solid fa-minus", "rc-flat", "="
 
     return html.Span([
-        html.I(className=icon, style={"marginRight": "3px", "fontSize": "12px"}),
+        html.I(className=icon),
         text,
-    ], style={
-        "display": "inline-flex", "alignItems": "center",
-        "fontSize": "11px", "fontWeight": "600", "color": color,
-    })
+    ], className=f"rank-change {tone}")
 
 
 # ── Competition Hierarchy ──────────────────────────────────────────────────
@@ -436,9 +403,7 @@ def competition_badge(tier, source=None):
         }
         children.append(badge(source.upper(), color=source_colors.get(source.lower(), "gray")))
 
-    return html.Span(children, style={
-        "display": "inline-flex", "gap": "4px", "alignItems": "center",
-    })
+    return html.Span(children, className="badge-row")
 
 
 # ── Category Badge ─────────────────────────────────────────────────────────
@@ -492,9 +457,7 @@ def category_badge(category, weapon=None, gender=None):
         elif g in ("F", "W", "WOMEN", "FEMALE"):
             children.append(badge("Women", color="red"))
 
-    return html.Span(children, style={
-        "display": "inline-flex", "gap": "4px", "alignItems": "center",
-    })
+    return html.Span(children, className="badge-row")
 
 
 # ── Season Utilities ───────────────────────────────────────────────────────
@@ -536,23 +499,15 @@ def data_row(cells, header=False, highlight=False):
     highlight : bool
         Highlight row (light blue background, for focus nation).
     """
-    bg = SLATE["100"] if header else ("#eff6ff" if highlight else "white")
-    weight = "600" if header else "400"
-    border = f"1px solid {SLATE['200']}"
+    cls = "aspire-data-row"
+    if header:
+        cls += " is-header"
+    elif highlight:
+        cls += " is-highlight"
 
     return html.Div(
-        [html.Div(c, style={
-            "flex": "1", "padding": "8px 12px",
-            "fontSize": "13px", "fontWeight": weight,
-            "color": SLATE["800"] if header else SLATE["700"],
-            "borderRight": border,
-            "overflow": "hidden", "textOverflow": "ellipsis",
-            "whiteSpace": "nowrap",
-        }) for c in cells],
-        style={
-            "display": "flex", "backgroundColor": bg,
-            "borderBottom": border,
-        },
+        [html.Div(c, className="aspire-data-row__cell") for c in cells],
+        className=cls,
     )
 
 
@@ -573,22 +528,18 @@ def trend_arrow(values, label=None):
 
     first, last = values[0], values[-1]
     if last > first:
-        icon, color = "fa-solid fa-arrow-trend-up", SUCCESS
+        icon, tone = "fa-solid fa-arrow-trend-up", "ta-up"
     elif last < first:
-        icon, color = "fa-solid fa-arrow-trend-down", DANGER
+        icon, tone = "fa-solid fa-arrow-trend-down", "ta-down"
     else:
-        icon, color = "fa-solid fa-minus", SLATE["400"]
+        icon, tone = "fa-solid fa-minus", "ta-flat"
 
     children = []
     if label:
-        children.append(html.Span(label, style={
-            "fontSize": "11px", "color": SLATE["500"], "marginRight": "4px",
-        }))
-    children.append(html.I(className=icon, style={"fontSize": "13px", "color": color}))
+        children.append(html.Span(label, className="trend-arrow__label"))
+    children.append(html.I(className=icon))
 
-    return html.Span(children, style={
-        "display": "inline-flex", "alignItems": "center",
-    })
+    return html.Span(children, className=f"trend-arrow {tone}")
 
 
 # ── Fencing Round Ordering ─────────────────────────────────────────────────
@@ -650,22 +601,15 @@ def gradient_stat_card(label, value, emoji="", bg="linear-gradient(135deg, #dbea
     color : str
         Text color for the value.
     """
+    # bg + value colour are caller-supplied (data-driven) — stay inline
     return html.Div([
         html.Div([
-            html.Div(str(value), style={
-                "fontSize": "28px", "fontWeight": "800", "color": color,
-                "fontVariantNumeric": "tabular-nums",
-            }),
-            html.Span(emoji, style={"fontSize": "24px", "opacity": "0.3"}) if emoji else None,
-        ], style={"display": "flex", "justifyContent": "space-between", "alignItems": "center"}),
-        html.Div(label, style={
-            "fontSize": "12px", "fontWeight": "600", "color": SLATE["500"],
-            "textTransform": "uppercase", "letterSpacing": "0.05em", "marginTop": "4px",
-        }),
-    ], style={
-        "padding": "16px", "background": bg,
-        "borderRadius": "8px", "border": "1px solid rgba(15,23,42,0.05)",   # v0.24: canonical + slate-tinted
-    })
+            html.Div(str(value), className="gradient-stat__value",
+                     style={"color": color}),
+            html.Span(emoji, className="gradient-stat__emoji") if emoji else None,
+        ], className="gradient-stat__top"),
+        html.Div(label, className="gradient-stat__label"),
+    ], className="gradient-stat", style={"background": bg})
 
 
 # ── Mini Stat ─────────────────────────────────────────────────────────────
@@ -683,11 +627,9 @@ def mini_stat(label, value, color="#1e40af"):
         Value text color.
     """
     return html.Div([
-        html.Div(label, style={"fontSize": "10px", "fontWeight": "600", "color": SLATE["400"],
-                                "textTransform": "uppercase"}),
-        html.Div(str(value), style={"fontSize": "18px", "fontWeight": "800", "color": color,
-                                      "fontVariantNumeric": "tabular-nums"}),
-    ])
+        html.Div(label, className="mini-stat__label"),
+        html.Div(str(value), className="mini-stat__value", style={"color": color}),
+    ], className="mini-stat")
 
 
 # ── Header Stat ───────────────────────────────────────────────────────────
@@ -703,10 +645,9 @@ def header_stat(label, value):
         Stat value.
     """
     return html.Div([
-        html.Div(str(value), style={"fontSize": "20px", "fontWeight": "700", "color": SLATE["800"],
-                                      "fontVariantNumeric": "tabular-nums"}),
-        html.Div(label, style={"fontSize": "11px", "color": SLATE["400"], "textTransform": "uppercase"}),
-    ], style={"textAlign": "center"})
+        html.Div(str(value), className="header-stat__value"),
+        html.Div(label, className="header-stat__label"),
+    ], className="header-stat")
 
 
 # ── Color Badge ───────────────────────────────────────────────────────────
@@ -726,13 +667,9 @@ def color_badge(text, bg="#f3f4f6", color="#374151"):
     color : str
         Text color (hex).
     """
-    return html.Span(text, style={
-        "display": "inline-flex", "alignItems": "center",
-        "padding": "2px 8px", "borderRadius": "9999px",
-        "fontSize": "11px", "fontWeight": "600",
-        "backgroundColor": bg, "color": color,
-        "whiteSpace": "nowrap",
-    })
+    # bg + text colour are caller-supplied (data-driven) — stay inline
+    return html.Span(text, className="pill-badge",
+                     style={"backgroundColor": bg, "color": color})
 
 
 # ── Sport dropdown ─────────────────────────────────────────────────────────
@@ -835,14 +772,9 @@ def source_badge(label, *, federation=None):
     from dash import html
     key = (federation or label or "").lower()
     bg, fg = SOURCE_BADGE_COLORS.get(key, SOURCE_BADGE_COLORS["default"])
-    return html.Span(label, style={
-        "display": "inline-flex", "alignItems": "center",
-        "padding": "2px 8px", "borderRadius": "9999px",   # v0.24: pill (was off-scale 10px)
-        "fontSize": "10.5px", "fontWeight": 700,
-        "letterSpacing": "0.4px", "textTransform": "uppercase",
-        "background": bg, "color": fg,
-        "fontFamily": "Poppins, sans-serif", "lineHeight": "1.4",
-    })
+    # federation colours are data-driven (SOURCE_BADGE_COLORS) — stay inline
+    return html.Span(label, className="pill-badge pill-badge--source",
+                     style={"background": bg, "color": fg})
 
 
 def competition_card(event, *, date=None, location=None, result=None,
@@ -854,59 +786,37 @@ def competition_card(event, *, date=None, location=None, result=None,
     if federation:
         header.append(source_badge(federation, federation=federation))
     if category:
-        header.append(html.Span(category, style={
-            "marginLeft": "6px", "fontSize": "10px", "fontWeight": 600,
-            "color": SLATE["500"], "textTransform": "uppercase",
-            "letterSpacing": "0.4px",
-        }))
+        header.append(html.Span(category, className="competition-card__category"))
     body = []
     if header:
         body.append(html.Div(header, style={"marginBottom": "4px"}))
-    body.append(html.Div(event, style={"fontSize": "14px", "fontWeight": 700,
-                                          "color": SLATE["900"],
-                                          "lineHeight": "1.3"}))
+    body.append(html.Div(event, className="competition-card__title"))
     meta = []
     if date:
-        meta.append(html.I(className="fa-solid fa-calendar",
-                            style={"fontSize": "10px",
-                                    "color": SLATE["400"],
-                                    "marginRight": "4px"}))
-        meta.append(html.Span(date, style={"color": SLATE["500"]}))
+        meta.append(html.I(className="fa-solid fa-calendar"))
+        meta.append(html.Span(date))
     if location:
         if date:
-            meta.append(html.Span(" · ", style={"color": SLATE["300"],
-                                                   "margin": "0 4px"}))
-        meta.append(html.I(className="fa-solid fa-location-dot",
-                            style={"fontSize": "10px",
-                                    "color": SLATE["400"],
-                                    "marginRight": "4px"}))
-        meta.append(html.Span(location, style={"color": SLATE["500"]}))
+            meta.append(html.Span(" · ", className="competition-card__meta-sep"))
+        meta.append(html.I(className="fa-solid fa-location-dot"))
+        meta.append(html.Span(location))
     if meta:
-        body.append(html.Div(meta, style={"fontSize": "11px",
-                                            "marginTop": "4px",
-                                            "display": "flex",
-                                            "alignItems": "center"}))
+        body.append(html.Div(meta, className="competition-card__meta"))
     if result or placement is not None:
-        result_color = ("#fbb800" if placement == 1
-                        else "#94a3b8" if placement == 2
-                        else "#a16207" if placement == 3
-                        else "#004185")
+        place_tone = (
+            "place-1" if placement == 1
+            else "place-2" if placement == 2
+            else "place-3" if placement == 3
+            else "place-n"
+        )
         body.append(html.Div([
             html.Span(f"#{placement}" if placement else "",
-                       style={"fontWeight": 700, "color": result_color,
-                              "marginRight": "8px",
-                              "fontVariantNumeric": "tabular-nums"}),
-            html.Span(result or "", style={"color": SLATE["700"],
-                                              "fontWeight": 600}),
-        ], style={"marginTop": "6px", "paddingTop": "6px",
-                   "borderTop": f"1px solid {SLATE['100']}",
-                   "fontSize": "12px"}))
-    card = html.Div(body, className="card",
-                     style={"padding": "12px 14px",
-                            "fontFamily": "Poppins, sans-serif"})
+                      className=f"competition-card__placement {place_tone}"),
+            html.Span(result or "", className="competition-card__result-text"),
+        ], className="competition-card__result"))
+    card = html.Div(body, className="card competition-card")
     if href:
-        return html.A(card, href=href,
-                       style={"textDecoration": "none", "color": "inherit"})
+        return html.A(card, href=href, className="competition-card-link")
     return card
 
 

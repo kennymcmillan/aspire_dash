@@ -5,7 +5,8 @@ from dash import html
 from aspire_dash.sports import (
     country_flag, flag_with_name, placement_badge, rank_change,
     competition_badge, category_badge, format_season, gradient_stat_card,
-    stat_card,
+    stat_card, source_badge, competition_card, data_row, mini_stat,
+    header_stat, trend_arrow,
 )
 
 from ._shared import section, example
@@ -95,6 +96,60 @@ def layout():
                                          bg="linear-gradient(135deg, #dbeafe, #bfdbfe)"),
                  ], style={"display": "flex", "gap": "12px"}),
                  "stat_card('Medals', '47', sub='2026 season', icon='medal')"),
+
+        section("source_badge",
+                 "Federation pill — colour auto-resolved per federation."),
+        example("Federations",
+                 html.Div([
+                     source_badge("FIE", federation="fie"),
+                     source_badge("PSA", federation="psa"),
+                     source_badge("WTT", federation="wtt"),
+                     source_badge("WA", federation="wa"),
+                     source_badge("FIP", federation="fip"),
+                 ], style={"display": "flex", "gap": "8px",
+                            "alignItems": "center"}),
+                 "source_badge('PSA', federation='psa')"),
+
+        section("competition_card",
+                 "Event card — federation / title / meta / result chain "
+                 "(v0.45: hover lift + medal-toned placement)."),
+        example("Events",
+                 html.Div([
+                     competition_card("Fencing Grand Prix Doha",
+                                       date="2026-03-01", location="Doha",
+                                       result="Gold medal", placement=1,
+                                       federation="fie", category="Senior"),
+                     competition_card("PSA World Championships",
+                                       date="2026-05-12", location="Cairo",
+                                       result="Quarter-final", placement=6,
+                                       federation="psa"),
+                 ], style={"display": "grid",
+                            "gridTemplateColumns": "repeat(2, minmax(0, 280px))",
+                            "gap": "12px"}),
+                 "competition_card('GP Doha', placement=1, federation='fie')"),
+
+        section("data_row + stats",
+                 "Data grid rows (hover tint, header caps) + dense stats."),
+        example("Rows",
+                 html.Div([
+                     data_row(["Rank", "Athlete", "Nation", "Points"],
+                               header=True),
+                     data_row(["1", "Ali Turki Owaida", "QAT", "152"],
+                               highlight=True),
+                     data_row(["2", "Mohamed Hosny", "EGY", "147"]),
+                     data_row(["3", "Kim Min-jun", "KOR", "139"]),
+                 ]),
+                 "data_row([...], header=True) / data_row([...], highlight=True)"),
+        example("Dense stats",
+                 html.Div([
+                     mini_stat("W/M", "4/6"),
+                     mini_stat("Win%", "67%", color="#16a34a"),
+                     header_stat("Competitions", 105),
+                     header_stat("Pool Bouts", 174),
+                     trend_arrow([42, 27, 11], label="World rank"),
+                 ], style={"display": "flex", "gap": "24px",
+                            "alignItems": "center"}),
+                 "mini_stat('Win%', '67%') · header_stat('Bouts', 174) · trend_arrow([...])"),
 
         section("format_season",
                  "Season-string normaliser."),

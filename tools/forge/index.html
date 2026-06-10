@@ -580,6 +580,36 @@
   </section>
 
 
+  <!-- v0.45 — sports module glow-up: placement badges + competition card -->
+  <section id="sports-glowup" class="mb-12">
+    <h2 class="text-lg font-bold text-slate-800 mb-1">sports.py glow-up (v0.45)</h2>
+    <p class="text-sm text-slate-500 mb-4">Inline styles → semantic classes. Medal badges get gradient + inset ring;
+      bronze corrected from red-tint to true bronze; data rows get hover tint + caps headers; competition cards lift on hover.</p>
+
+    <div class="grid grid-cols-2 gap-8">
+      <div>
+        <div class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Before — flat fills</div>
+        <div class="flex gap-2 items-center">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-bold" style="background:#fef3c7;color:#92400e">🏆 1</span>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-bold" style="background:#f3f4f6;color:#374151">2</span>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-bold" style="background:#fef2f2;color:#92400e">3</span>
+        </div>
+      </div>
+      <div>
+        <div class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">After — medal gradients + ring</div>
+        <div class="flex gap-2 items-center">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-bold"
+                style="background:linear-gradient(135deg,#fef9c3,#fde68a);color:#92400e;box-shadow:inset 0 0 0 1px rgba(217,119,6,.25)">🏆 1</span>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-bold"
+                style="background:linear-gradient(135deg,#f8fafc,#e2e8f0);color:#475569;box-shadow:inset 0 0 0 1px rgba(100,116,139,.25)">2</span>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-bold"
+                style="background:linear-gradient(135deg,#ffedd5,#fed7aa);color:#9a3412;box-shadow:inset 0 0 0 1px rgba(194,65,12,.25)">3</span>
+        </div>
+        <p class="text-xs text-slate-400 mt-2">Ported as <code class="bg-white px-1 rounded">.placement-badge .place-gold/silver/bronze/top8/top16/rest</code></p>
+      </div>
+    </div>
+  </section>
+
   <!-- Notes -->
   <section class="mt-16 p-6 bg-slate-50 border border-slate-200 rounded-lg">
     <h2 class="text-base font-semibold mb-2 text-slate-800">How this gets into aspire_dash</h2>

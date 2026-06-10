@@ -35,6 +35,71 @@ def test_format_season_round_trip():
     assert format_season("2025-2026") == "2025-2026"
 
 
+# ── v0.45 sports glow-up: inline styles → semantic classes ─────────────────
+# Pin the class contract so the CSS port can't silently regress.
+
+def test_placement_badge_emits_tone_classes():
+    from aspire_dash.sports import placement_badge
+    assert "placement-badge" in placement_badge(1).className
+    assert "place-gold" in placement_badge(1).className
+    assert "place-silver" in placement_badge(2).className
+    assert "place-bronze" in placement_badge(3).className
+    assert "place-top8" in placement_badge(5).className
+    assert "place-rest" in placement_badge(40).className
+    assert "placement-badge--sm" in placement_badge(1, size="sm").className
+
+
+def test_rank_change_emits_tone_classes():
+    from aspire_dash.sports import rank_change
+    assert "rc-up" in rank_change(3, 7).className
+    assert "rc-down" in rank_change(9, 4).className
+    assert "rc-flat" in rank_change(5, 5).className
+    assert rank_change(None, None).className == "rank-change__new"
+
+
+def test_country_flag_emits_flag_chip():
+    from aspire_dash.sports import country_flag
+    out = country_flag("QAT", size="lg", show_text=True)
+    assert "flag-chip" in out.className
+    assert "flag-chip--lg" in out.className
+    assert country_flag("AIN").className == "flag-chip__ain"
+
+
+def test_data_row_header_and_highlight_classes():
+    from aspire_dash.sports import data_row
+    assert "is-header" in data_row(["A", "B"], header=True).className
+    assert "is-highlight" in data_row(["A", "B"], highlight=True).className
+    assert data_row(["A", "B"]).className == "aspire-data-row"
+
+
+def test_dynamic_colour_badges_keep_inline_colour():
+    from aspire_dash.sports import color_badge, source_badge
+    cb = color_badge("FIE", "#e0e7ff", "#3730a3")
+    assert "pill-badge" in cb.className
+    assert cb.style["backgroundColor"] == "#e0e7ff"
+    sb = source_badge("PSA", federation="psa")
+    assert "pill-badge--source" in sb.className
+    assert "background" in sb.style
+
+
+def test_competition_card_classes_and_link():
+    from aspire_dash.sports import competition_card
+    card = competition_card("World Cup Doha", date="2026-03-01",
+                            location="Doha", result="Gold", placement=1)
+    assert "competition-card" in card.className
+    linked = competition_card("GP Paris", href="/events/1")
+    assert linked.className == "competition-card-link"
+
+
+def test_gradient_stat_card_structure_class():
+    from aspire_dash.sports import gradient_stat_card, mini_stat, header_stat
+    gs = gradient_stat_card("Total", 12, emoji="🤺")
+    assert gs.className == "gradient-stat"
+    assert "background" in gs.style
+    assert mini_stat("W/M", "4/6").className == "mini-stat"
+    assert header_stat("Bouts", 174).className == "header-stat"
+
+
 # ── viz ────────────────────────────────────────────────────────────────────
 
 def test_sparkline_empty_renders_placeholder():
