@@ -138,10 +138,12 @@ def layout():
                             href="#",
                             style={"fontSize": "11px", "color": "#0369a1"}),
                 ], style={"marginTop": "8px"}),
-            ], style={"flex": 1, "padding": "16px",
+            ], style={"flex": "1 1 320px", "minWidth": "0",
+                       "padding": "16px",
                        "border": "1px solid #e2e8f0",
                        "borderRadius": "6px",
-                       "background": "white"}),
+                       "background": "white",
+                       "overflow": "hidden"}),
 
             html.Div([
                 html.H3("Topnav layout",
@@ -166,11 +168,13 @@ def layout():
                             target="_blank",
                             style={"fontSize": "11px", "color": "#0369a1"}),
                 ], style={"marginTop": "8px"}),
-            ], style={"flex": 1, "padding": "16px",
+            ], style={"flex": "1 1 320px", "minWidth": "0",
+                       "padding": "16px",
                        "border": "1px solid #e2e8f0",
                        "borderRadius": "6px",
-                       "background": "white"}),
-        ], style={"display": "flex", "gap": "16px",
+                       "background": "white",
+                       "overflow": "hidden"}),
+        ], style={"display": "flex", "flexWrap": "wrap", "gap": "16px",
                    "marginBottom": "24px"}),
 
         # Code samples

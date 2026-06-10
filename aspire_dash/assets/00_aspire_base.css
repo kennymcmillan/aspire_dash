@@ -1288,8 +1288,6 @@ a:focus:not(:focus-visible) {
    RESPONSIVE — Tailwind breakpoints
    ═══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
-    .sidebar { display: none; }
-    .main-area { margin-left: 0 !important; }
     .card-grid { grid-template-columns: 1fr; }
     .stats-grid { grid-template-columns: 1fr 1fr; }
     .controls-bar { flex-direction: column; align-items: stretch; }
@@ -4553,3 +4551,58 @@ img.amc-avatar {
     color: #004185;                     /* aspire-600 */
     font-size: 12px;
 }
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   v0.49 — responsive sidebar: off-canvas drawer below 1024px
+   Phones + iPad portrait get a hamburger-opened overlay drawer with
+   backdrop; iPad landscape / desktop (>=1024px) keep the fixed sidebar
+   and the existing collapse toggle. Driven by sidebar_toggle.js.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 1023px) {
+    .sidebar {
+        transform: translateX(-100%);
+        width: 220px;               /* keep drawer width while off-canvas */
+        box-shadow: none;
+    }
+
+    .sidebar.sidebar-mobile-open {
+        transform: translateX(0);
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.35);
+        z-index: 101;
+    }
+
+    /* the desktop collapse class must not zero the drawer's width */
+    .sidebar.sidebar-collapsed {
+        width: 220px;
+        overflow-y: auto;
+    }
+
+    .main-area { margin-left: 0 !important; }
+
+    .sidebar-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 100;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+    }
+
+    .sidebar-backdrop.is-visible {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+@media (min-width: 1024px) {
+    .sidebar-backdrop { display: none; }
+}
+
+/* Code blocks scroll inside their own box — never widen the page */
+.page-content pre {
+    max-width: 100%;
+    overflow-x: auto;
+}
+

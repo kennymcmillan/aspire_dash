@@ -25,12 +25,13 @@ def layout(**kwargs):
                style={"fontSize": "13px", "color": SLATE["500"], "marginBottom": "12px"}),
 
         html.Div([
-            html.Div(summary_card("Total Budget", "QAR 12,450,000", sub="FY 2026", icon="fa-solid fa-wallet"), style={"flex": "1"}),
-            html.Div(summary_card("Paid", "QAR 8,200,000", sub="65.9%", icon="fa-solid fa-check-circle", color_class="paid"), style={"flex": "1"}),
-            html.Div(summary_card("Encumbered", "QAR 1,850,000", sub="14.9%", icon="fa-solid fa-clock", color_class="encumbered"), style={"flex": "1"}),
-            html.Div(summary_card("Planned", "QAR 900,000", sub="7.2%", icon="fa-solid fa-calendar", color_class="planned"), style={"flex": "1"}),
-            html.Div(summary_card("Remaining", "QAR 1,500,000", sub="12.0%", icon="fa-solid fa-piggy-bank"), style={"flex": "1"}),
-        ], style={"display": "flex", "gap": "12px", "marginBottom": "24px"}),
+            html.Div(summary_card("Total Budget", "QAR 12,450,000", sub="FY 2026", icon="fa-solid fa-wallet"), style={"flex": "1 1 200px", "minWidth": "0"}),
+            html.Div(summary_card("Paid", "QAR 8,200,000", sub="65.9%", icon="fa-solid fa-check-circle", color_class="paid"), style={"flex": "1 1 200px", "minWidth": "0"}),
+            html.Div(summary_card("Encumbered", "QAR 1,850,000", sub="14.9%", icon="fa-solid fa-clock", color_class="encumbered"), style={"flex": "1 1 200px", "minWidth": "0"}),
+            html.Div(summary_card("Planned", "QAR 900,000", sub="7.2%", icon="fa-solid fa-calendar", color_class="planned"), style={"flex": "1 1 200px", "minWidth": "0"}),
+            html.Div(summary_card("Remaining", "QAR 1,500,000", sub="12.0%", icon="fa-solid fa-piggy-bank"), style={"flex": "1 1 200px", "minWidth": "0"}),
+        ], style={"display": "flex", "flexWrap": "wrap", "gap": "12px",
+                   "marginBottom": "24px"}),
 
         # ── Section: Badges ──
         html.H2("Badges", className="section-title"),
@@ -94,13 +95,13 @@ def layout(**kwargs):
             html.Div([
                 html.Div([
                     html.Div(style={"width": "45%", "backgroundColor": ACCENT}),
-                ], className="mini-progress", style={"flex": "1"}),
+                ], className="mini-progress", style={"flex": "1 1 200px", "minWidth": "0"}),
                 html.Div([
                     html.Div(style={"width": "72%", "backgroundColor": SUCCESS}),
-                ], className="mini-progress", style={"flex": "1"}),
+                ], className="mini-progress", style={"flex": "1 1 200px", "minWidth": "0"}),
                 html.Div([
                     html.Div(style={"width": "95%", "backgroundColor": WARNING}),
-                ], className="mini-progress", style={"flex": "1"}),
+                ], className="mini-progress", style={"flex": "1 1 200px", "minWidth": "0"}),
             ], style={"display": "flex", "gap": "12px"}),
         ]),
 
@@ -204,7 +205,7 @@ def layout(**kwargs):
                     html.Span("Recovery: ", style={"fontSize": "11px", "color": SLATE["400"]}),
                     html.Span("87%", style={"fontSize": "11px", "fontWeight": "700", "color": "#22c55e"}),
                 ]),
-            ], className="athlete-card card-green", style={"flex": "1"}),
+            ], className="athlete-card card-green", style={"flex": "1 1 200px", "minWidth": "0"}),
 
             html.Div([
                 html.Div([
@@ -220,7 +221,7 @@ def layout(**kwargs):
                     html.Span("Recovery: ", style={"fontSize": "11px", "color": SLATE["400"]}),
                     html.Span("52%", style={"fontSize": "11px", "fontWeight": "700", "color": "#eab308"}),
                 ]),
-            ], className="athlete-card card-yellow", style={"flex": "1"}),
+            ], className="athlete-card card-yellow", style={"flex": "1 1 200px", "minWidth": "0"}),
 
             html.Div([
                 html.Div([
@@ -236,7 +237,7 @@ def layout(**kwargs):
                     html.Span("Recovery: ", style={"fontSize": "11px", "color": SLATE["400"]}),
                     html.Span("28%", style={"fontSize": "11px", "fontWeight": "700", "color": "#ef4444"}),
                 ]),
-            ], className="athlete-card card-red", style={"flex": "1"}),
+            ], className="athlete-card card-red", style={"flex": "1 1 200px", "minWidth": "0"}),
         ], style={"display": "flex", "gap": "12px", "marginBottom": "24px"}),
 
         # ── Section: Toast Demo ──
@@ -258,21 +259,21 @@ def layout(**kwargs):
                     "height": "60px", "background": "white", "borderRadius": "12px",
                     "boxShadow": SHADOW_SM,
                 }),
-            ], style={"flex": "1"}),
+            ], style={"flex": "1 1 200px", "minWidth": "0"}),
             html.Div([
                 html.Div("shadow-md", style={"fontSize": "12px", "color": SLATE["500"], "marginBottom": "4px"}),
                 html.Div(style={
                     "height": "60px", "background": "white", "borderRadius": "12px",
                     "boxShadow": SHADOW_MD,
                 }),
-            ], style={"flex": "1"}),
+            ], style={"flex": "1 1 200px", "minWidth": "0"}),
             html.Div([
                 html.Div("shadow-lg", style={"fontSize": "12px", "color": SLATE["500"], "marginBottom": "4px"}),
                 html.Div(style={
                     "height": "60px", "background": "white", "borderRadius": "12px",
                     "boxShadow": SHADOW_LG,
                 }),
-            ], style={"flex": "1"}),
+            ], style={"flex": "1 1 200px", "minWidth": "0"}),
         ], style={"display": "flex", "gap": "16px", "marginBottom": "24px"}),
 
         # ── Section: Skeleton Loader ──

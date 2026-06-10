@@ -4,6 +4,30 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.49.0] — 2026-06-10
+
+### Added — responsive sidebar: off-canvas drawer below 1024px (phones + iPads)
+
+Sidebar apps finally work on phones and iPad portrait. Breakpoint design:
+**≥1024px** (desktop + iPad landscape) keeps the fixed sidebar and the
+existing collapse toggle, unchanged. **<1024px** (phones + iPad portrait)
+the sidebar becomes an off-canvas drawer: hamburger opens it OVER the
+content with a dimmed backdrop; backdrop tap / nav-link tap / Escape /
+rotating past the breakpoint all close it.
+
+- Was: `display:none` under 768px — **no navigation at all on phones**;
+  iPad portrait lost 220px of an 810px screen to the fixed bar.
+- `sidebar_toggle.js` grew a `matchMedia('(max-width:1023px)')` branch;
+  the backdrop element is JS-injected — zero consumer-app changes needed,
+  `setup_app()` ships both files on next redeploy.
+- New classes: `.sidebar-mobile-open`, `.sidebar-backdrop` (+ `.is-visible`).
+- `.page-content pre { max-width:100%; overflow-x:auto }` — code blocks
+  scroll in their own box instead of widening the page.
+- Demo home + layouts pages made wrap-friendly at phone widths.
+- R4 smoke (390 / 810 / 1280): drawer open/close via hamburger, backdrop,
+  nav-tap and Escape verified; desktop collapse regression-checked; zero
+  horizontal overflow on the smoke path.
+
 ## [0.48.1] — 2026-06-10
 
 ### Fixed — pandas/numpy declared as runtime deps
