@@ -209,29 +209,14 @@ def athlete_snapshot_card(
     rows = []
     for m in measurements:
         rows.append(html.Div([
-            html.Span(m["label"], style={"flex": "1",
-                                           "color": SLATE["600"],
-                                           "fontSize": "13px"}),
-            html.Span(str(m["value"]), style={"fontWeight": 700,
-                                                "color": SLATE["900"],
-                                                "fontSize": "14px",
-                                                "fontVariantNumeric": "tabular-nums",
-                                                "marginRight": "4px"}),
-            html.Span(m.get("unit", ""),
-                       style={"fontSize": "10px",
-                              "color": SLATE["400"],
-                              "fontWeight": 500}),
-        ], style={"display": "flex", "alignItems": "baseline",
-                   "padding": "8px 0",
-                   "borderBottom": f"1px solid {SLATE['100']}"}))
+            html.Span(m["label"], className="snapshot-card__label"),
+            html.Span(str(m["value"]), className="snapshot-card__value"),
+            html.Span(m.get("unit", ""), className="snapshot-card__unit"),
+        ], className="snapshot-card__row"))
     return html.Div([
-        html.Div(title, style={
-            "padding": "12px 16px", "background": ASPIRE["900"],   # v0.24: on-scale
-            "color": "white", "fontSize": "11px", "fontWeight": 600,
-            "textTransform": "uppercase", "letterSpacing": "0.5px",
-        }),
-        html.Div(rows, style={"padding": "8px 16px"}),
-    ], className=f"card accent-{accent}")
+        html.Div(title, className="snapshot-card__header"),
+        html.Div(rows, className="snapshot-card__body"),
+    ], className=f"card snapshot-card accent-{accent}")
 
 
 # ── 4. Limb symmetry bar ───────────────────────────────────────────────────
@@ -245,40 +230,21 @@ def limb_symmetry_bar(label: str, left: float, right: float, *,
     """
     max_value = max_value or max(abs(left), abs(right)) * 1.1
     sym_pct = 100 * (1 - abs(left - right) / max(left, right, 1e-9))
-    color = ("#16a34a" if sym_pct >= 97 else
-             "#f59e0b" if sym_pct >= 92 else "#dc2626")
+    tone = ("sym-good" if sym_pct >= 97 else
+            "sym-warn" if sym_pct >= 92 else "sym-danger")
     return html.Div([
         html.Div([
-            html.Span(label, style={"fontSize": "11px",
-                                       "fontWeight": 600,
-                                       "color": SLATE["700"]}),
-            html.Span(f"{sym_pct:.1f}%",
-                       style={"marginLeft": "auto",
-                              "fontWeight": 700, "color": color,
-                              "fontVariantNumeric": "tabular-nums",
-                              "fontSize": "11px"}),
-        ], style={"display": "flex", "marginBottom": "3px"}),
+            html.Span(label, className="limb-sym__name"),
+            html.Span(f"{sym_pct:.1f}%", className="limb-sym__pct"),
+        ], className="limb-sym__head"),
         html.Div([
-            # Left bar (blue)
-            html.Div(f"L {left:.1f}", style={
-                "width": f"{100 * left / max_value:.1f}%",
-                "background": ASPIRE["600"], "color": "white",
-                "padding": "3px 6px", "fontSize": "10px",
-                "fontWeight": 600,
-                "borderRadius": "4px 0 0 4px",   # v0.24: on-scale
-            }),
-            # Right bar (slate)
-            html.Div(f"{right:.1f} R", style={
-                "width": f"{100 * right / max_value:.1f}%",
-                "background": SLATE["500"], "color": "white",
-                "padding": "3px 6px", "fontSize": "10px",
-                "fontWeight": 600, "textAlign": "right",
-                "borderRadius": "0 4px 4px 0",   # v0.24: on-scale
-            }),
-        ], style={"display": "flex", "borderRadius": "4px",   # v0.24: on-scale
-                   "overflow": "hidden",
-                   "border": f"1px solid {color}"}),
-    ], style={"marginBottom": "12px"})    # v0.24: on-scale (was 10)
+            # bar widths are data-driven — stay inline
+            html.Div(f"L {left:.1f}", className="limb-sym__left",
+                     style={"width": f"{100 * left / max_value:.1f}%"}),
+            html.Div(f"{right:.1f} R", className="limb-sym__right",
+                     style={"width": f"{100 * right / max_value:.1f}%"}),
+        ], className="limb-sym__track"),
+    ], className=f"limb-sym {tone}")
 
 
 # ── 5. Skinfold silhouette ─────────────────────────────────────────────────
@@ -592,50 +558,38 @@ def zscore_heatmap(athletes, measures, matrix, raw_values, stats):
 
     legend_stops = ["#991b1b", "#fee2e2", "#f8fafc", "#d1fae5", "#065f46"]
     legend = html.Div([
-        html.Span("Below avg", style={"fontSize": 11, "color": "#64748b", "fontWeight": 500}),
-        html.Div([html.Div(style={"flex": 1, "backgroundColor": c}) for c in legend_stops],
-                 style={"display": "flex", "width": 200, "height": 14, "borderRadius": 4,
-                        "overflow": "hidden", "marginLeft": 8, "marginRight": 8}),
-        html.Span("Above avg", style={"fontSize": 11, "color": "#64748b", "fontWeight": 500}),
-        html.Span(" (inverted for skinfolds/fat)", style={"fontSize": 10, "color": "#94a3b8", "marginLeft": 8}),
-    ], style={"display": "flex", "alignItems": "center", "justifyContent": "center", "padding": "8px 0"})
+        html.Span("Below avg", className="zscore-heatmap__legend-label"),
+        html.Div([html.Div(style={"backgroundColor": c}) for c in legend_stops],
+                 className="zscore-heatmap__legend-bar"),
+        html.Span("Above avg", className="zscore-heatmap__legend-label"),
+        html.Span(" (inverted for skinfolds/fat)",
+                  className="zscore-heatmap__legend-note"),
+    ], className="zscore-heatmap__legend")
 
     # Header
     header_cells = [
-        html.Th("Measure", style={"position": "sticky", "left": 0, "background": "white",
-                                  "borderBottom": "2px solid #e2e8f0", "padding": "6px 10px",
-                                  "textAlign": "left", "fontSize": 11, "fontWeight": 600, "color": "#475569"}),
-        html.Th("Mean", style={"borderBottom": "2px solid #e2e8f0", "color": "#94a3b8",
-                               "fontSize": 10, "fontWeight": 600, "padding": "6px 8px"}),
-        html.Th("SD",   style={"borderBottom": "2px solid #e2e8f0", "color": "#94a3b8",
-                               "fontSize": 10, "fontWeight": 600, "padding": "6px 8px"}),
+        html.Th("Measure", className="zscore-table__measure-h"),
+        html.Th("Mean", className="zscore-table__stat-h"),
+        html.Th("SD", className="zscore-table__stat-h"),
     ]
     for a in athletes:
-        header_cells.append(html.Th(
-            _zscore_last_name(a["name"]),
-            style={"borderBottom": "2px solid #e2e8f0", "padding": "6px 8px",
-                   "fontSize": 10, "fontWeight": 600, "color": "#475569"}
-        ))
+        header_cells.append(html.Th(_zscore_last_name(a["name"])))
 
     rows = [html.Tr(header_cells)]
     for grp in group_order:
-        rows.append(html.Tr([html.Td(grp, colSpan=3 + len(athletes), style={
-            "background": "#f8fafc", "padding": "5px 10px", "fontSize": 10,
-            "fontWeight": 700, "color": "#64748b", "textTransform": "uppercase",
-            "letterSpacing": "0.05em"})]))
+        rows.append(html.Tr([html.Td(grp, colSpan=3 + len(athletes),
+                                     className="zscore-table__group")]))
         for m in grouped[grp]:
             s = stats.get(m["key"], {})
             inv = is_inverted(m["key"])
             cells = [
-                html.Td([m["label"], html.Span(f" {m['unit']}", style={"color": "#94a3b8", "fontSize": 10, "marginLeft": 4})],
-                        style={"padding": "5px 10px", "fontSize": 11, "color": "#334155",
-                               "borderBottom": "1px solid #f1f5f9", "whiteSpace": "nowrap"}),
+                html.Td([m["label"],
+                         html.Span(f" {m['unit']}", className="zscore-table__unit")],
+                        className="zscore-table__measure"),
                 html.Td(f"{s['mean']:.1f}" if s else "-",
-                        style={"color": "#64748b", "fontSize": 11, "fontWeight": 500,
-                               "padding": "5px 8px", "textAlign": "center", "borderBottom": "1px solid #f1f5f9"}),
+                        className="zscore-table__stat is-mean"),
                 html.Td(f"{s['sd']:.1f}" if s else "-",
-                        style={"color": "#94a3b8", "fontSize": 11,
-                               "padding": "5px 8px", "textAlign": "center", "borderBottom": "1px solid #f1f5f9"}),
+                        className="zscore-table__stat is-sd"),
             ]
             for a in athletes:
                 z = (matrix.get(a["id"]) or {}).get(m["key"])
@@ -647,18 +601,15 @@ def zscore_heatmap(athletes, measures, matrix, raw_values, stats):
                 cells.append(html.Td(
                     f"{z:.1f}" if z is not None else "--",
                     title=title,
-                    style={"backgroundColor": bg, "color": text,
-                           "fontSize": 11, "fontWeight": 600,
-                           "padding": "5px 8px", "textAlign": "center",
-                           "borderBottom": "1px solid #f1f5f9", "minWidth": 44}
+                    className="zscore-table__cell",
+                    # 7-bucket colour comes from z_score_color — stays inline
+                    style={"backgroundColor": bg, "color": text},
                 ))
             rows.append(html.Tr(cells))
 
-    table = html.Table(rows, style={"borderCollapse": "collapse", "width": "100%",
-                                    "fontFamily": "Inter, system-ui, sans-serif"})
-    return html.Div([legend,
-                     html.Div(table, style={"overflowX": "auto", "border": "1px solid #e2e8f0",
-                                            "borderRadius": 8, "background": "white"})])
+    table = html.Table(rows, className="zscore-table")
+    return html.Div([legend, html.Div(table, className="zscore-table-wrap")],
+                    className="zscore-heatmap")
 
 
 # ── 7. Per-athlete z-score radar (Plotly polar) ─────────────────────────────

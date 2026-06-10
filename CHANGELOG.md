@@ -4,6 +4,26 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.47.0] — 2026-06-10
+
+### Changed — anthropometric.py glow-up (forge loop, slice 3 of 4)
+
+The 3 HTML-rendering components ported to semantic classes (v0.47 CSS
+section); Plotly figures (somatochart, growth_chart, zscore_radar_figure)
+and iframe SVGs (skinfold_silhouette, body_fat_gauge) untouched. APIs
+unchanged.
+
+- `athlete_snapshot_card` — `.snapshot-card__*` family; last row drops its
+  divider; navy header band tokenised.
+- `limb_symmetry_bar` — `.limb-sym` with tone modifiers `.sym-good/warn/
+  danger` cascading both the % text colour AND the track border from one
+  class; bar widths stay inline (data-driven).
+- `zscore_heatmap` — `.zscore-table__*` family (sticky measure column,
+  group banners, mean/SD stat cells, legend bar); the 7-bucket z-cell
+  colour stays inline (computed per z-score by `z_score_color`).
+- New `tests/test_anthropometric.py` (3 class-contract tests — module
+  previously had zero test coverage).
+
 ## [0.46.0] — 2026-06-10
 
 ### Changed — viz.py glow-up (forge loop, slice 2 of 4)

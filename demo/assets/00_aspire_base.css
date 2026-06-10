@@ -4227,3 +4227,218 @@ html.dark .ranked-bars__row:hover { background: #273449; }
 html.dark .ranked-bars__value { color: #f1f5f9; }
 html.dark .viz-hbar__track { background: #334155; }
 html.dark .ranked-bars__track { background: #273449; }
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   v0.47 — anthropometric module glow-up (forge loop, slice 3)
+   athlete_snapshot_card / limb_symmetry_bar / zscore_heatmap inline
+   styles → semantic classes. Plotly figures + iframe SVGs untouched.
+   Z-cell colours stay inline (computed per z-score by design).
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Athlete snapshot card (Ruwwad attribute table) ───────────────── */
+.snapshot-card__header {
+    padding: 12px 16px;
+    background: #001d3d;                /* aspire-900 */
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.snapshot-card__body { padding: 8px 16px; }
+
+.snapshot-card__row {
+    display: flex;
+    align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--slate-100);
+}
+
+.snapshot-card__row:last-child { border-bottom: none; }
+
+.snapshot-card__label {
+    flex: 1;
+    color: var(--slate-600);
+    font-size: 13px;
+}
+
+.snapshot-card__value {
+    font-weight: 700;
+    color: var(--slate-900);
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    margin-right: 4px;
+}
+
+.snapshot-card__unit {
+    font-size: 10px;
+    color: var(--slate-400);
+    font-weight: 500;
+}
+
+/* ── Limb symmetry bar ────────────────────────────────────────────── */
+.limb-sym { margin-bottom: 12px; }
+
+.limb-sym__head {
+    display: flex;
+    margin-bottom: 3px;
+}
+
+.limb-sym__name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate-700);
+}
+
+.limb-sym__pct {
+    margin-left: auto;
+    font-weight: 700;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+.limb-sym__track {
+    display: flex;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid transparent;
+}
+
+.limb-sym__left,
+.limb-sym__right {
+    color: #ffffff;
+    padding: 3px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.limb-sym__left {
+    background: #004185;                /* aspire-600 */
+    border-radius: 4px 0 0 4px;
+}
+
+.limb-sym__right {
+    background: var(--slate-500);
+    text-align: right;
+    border-radius: 0 4px 4px 0;
+}
+
+/* Tone cascades: % text + track border from one modifier */
+.limb-sym.sym-good   .limb-sym__pct   { color: #16a34a; }
+.limb-sym.sym-good   .limb-sym__track { border-color: #16a34a; }
+.limb-sym.sym-warn   .limb-sym__pct   { color: #f59e0b; }
+.limb-sym.sym-warn   .limb-sym__track { border-color: #f59e0b; }
+.limb-sym.sym-danger .limb-sym__pct   { color: #dc2626; }
+.limb-sym.sym-danger .limb-sym__track { border-color: #dc2626; }
+
+/* ── Squad z-score heatmap ────────────────────────────────────────── */
+.zscore-heatmap__legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0;
+}
+
+.zscore-heatmap__legend-label {
+    font-size: 11px;
+    color: var(--slate-500);
+    font-weight: 500;
+}
+
+.zscore-heatmap__legend-bar {
+    display: flex;
+    width: 200px;
+    height: 14px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0 8px;
+}
+
+.zscore-heatmap__legend-bar > div { flex: 1; }
+
+.zscore-heatmap__legend-note {
+    font-size: 10px;
+    color: var(--slate-400);
+    margin-left: 8px;
+}
+
+.zscore-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--slate-200);
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.zscore-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: Inter, system-ui, sans-serif;
+}
+
+.zscore-table th {
+    border-bottom: 2px solid var(--slate-200);
+    padding: 6px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--slate-600);
+}
+
+.zscore-table__measure-h {
+    position: sticky;
+    left: 0;
+    background: #ffffff;
+    text-align: left;
+    font-size: 11px;
+    padding: 6px 10px;
+}
+
+.zscore-table__stat-h { color: var(--slate-400); }
+
+.zscore-table__group {
+    background: var(--slate-50);
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.zscore-table__measure {
+    padding: 5px 10px;
+    font-size: 11px;
+    color: var(--slate-700);
+    border-bottom: 1px solid var(--slate-100);
+    white-space: nowrap;
+}
+
+.zscore-table__unit {
+    color: var(--slate-400);
+    font-size: 10px;
+    margin-left: 4px;
+}
+
+.zscore-table__stat {
+    font-size: 11px;
+    padding: 5px 8px;
+    text-align: center;
+    border-bottom: 1px solid var(--slate-100);
+    font-variant-numeric: tabular-nums;
+}
+
+.zscore-table__stat.is-mean { color: var(--slate-500); font-weight: 500; }
+.zscore-table__stat.is-sd   { color: var(--slate-400); }
+
+.zscore-table__cell {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 8px;
+    text-align: center;
+    border-bottom: 1px solid var(--slate-100);
+    min-width: 44px;
+    font-variant-numeric: tabular-nums;
+}
