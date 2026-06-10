@@ -18,7 +18,9 @@ from ..theme import (
 
 
 __all__ = ['toast', 'badge', 'empty_state', 'loading_overlay', 'status_pill',
-            'freshness_banner', 'confirm_modal', 'rate_limit_banner']
+            'freshness_banner', 'confirm_modal', 'rate_limit_banner',
+            # v0.45 — promoted from DASH_VALD / medical-dashboard / aspire-supplements
+            'legend_chips', 'error_banner']
 
 # ── Toast ────────────────────────────────────────────────────────────────────
 
@@ -387,3 +389,50 @@ def rate_limit_banner(
             "position": "sticky", "top": "0", "zIndex": "60", "gap": "8px",
         },
     )
+
+
+# ── Legend chips (v0.45 — promoted from DASH_VALD + medical-dashboard) ──────
+
+def legend_chips(items, gap: int = 6, margin_top: int = 12):
+    """Inline pill-legend row for categorical color scales.
+
+    items: list of (label, bg, fg) tuples — e.g.
+        legend_chips([("Within 1 SD", "#dcfce7", "#166534"),
+                      ("> +2 SD", "#fecaca", "#991b1b")])
+    Pairs with plots.status_heatmap / zone-coloured matrices so readers
+    can decode the colours without hovering.
+    """
+    chips = [
+        html.Span(label, style={
+            "fontSize": "10px", "fontWeight": "600", "padding": "2px 8px",
+            "borderRadius": "4px", "backgroundColor": bg, "color": fg,
+            "fontVariantNumeric": "tabular-nums",
+        })
+        for (label, bg, fg) in items
+    ]
+    return html.Div(chips, className="legend-chips", style={
+        "display": "flex", "alignItems": "center", "flexWrap": "wrap",
+        "gap": f"{gap}px", "marginTop": f"{margin_top}px",
+    })
+
+
+# ── Error banner (v0.45 — promoted from aspire-supplements) ─────────────────
+
+def error_banner(message, *, title: str = "Couldn't load data",
+                 hint: str | None = None):
+    """Generic data-load-failed banner — the red sibling of
+    freshness_banner. Show it in place of the page body when a backing
+    API/database is unreachable, with an optional remediation hint."""
+    body = [html.Div([
+        html.I(className="fa-solid fa-triangle-exclamation",
+               style={"marginRight": "8px"}),
+        html.Strong(title),
+    ]), html.Div(str(message), style={"marginTop": "4px"})]
+    if hint:
+        body.append(html.Div(hint, style={
+            "marginTop": "4px", "fontSize": "12px", "opacity": "0.85"}))
+    return html.Div(body, className="error-banner", role="alert", style={
+        "background": "#fef2f2", "color": "#991b1b",
+        "border": "1px solid #fecaca", "borderLeft": "4px solid #dc2626",
+        "borderRadius": "8px", "padding": "12px 16px", "fontSize": "13px",
+    })

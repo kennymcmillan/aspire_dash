@@ -347,3 +347,51 @@ def adaptive_trend(df, x: str, y: str, *,
                        legend=dict(orientation="h", y=-0.18, x=0,
                                    font=dict(size=11)))
     return apply_template(fig)
+
+
+def sparkline_figure(values, dates=None, *, color=None, height=44, fill=True):
+    """Axis-less inline sparkline figure (v0.45 — promoted from
+    DASH_Anthro + endurance-dashboard, which each rebuilt it).
+
+    The plotly complement to viz.sparkline (SVG): supports a date x-axis,
+    tozeroy alpha fill, and auto y-padding around the data. Hover/toolbar
+    off — pair with dcc.Graph(config={"displayModeBar": False}).
+    """
+    import plotly.graph_objects as go
+
+    color = color or ASPIRE["600"]
+    fig = go.Figure()
+    xs = dates if dates is not None else list(range(len(values)))
+    if fill:
+        fig.add_trace(go.Scatter(
+            x=xs, y=values, mode="lines",
+            line=dict(color=color, width=1.8),
+            fill="tozeroy", fillcolor=_rgba(color, 0.18),
+            hoverinfo="skip", showlegend=False,
+        ))
+    else:
+        fig.add_trace(go.Scatter(
+            x=xs, y=values, mode="lines+markers",
+            line=dict(color=color, width=1.8),
+            marker=dict(size=4, color=color),
+            hoverinfo="skip", showlegend=False,
+        ))
+    yvals = [v for v in values if v is not None]
+    if yvals:
+        ymin, ymax = min(yvals), max(yvals)
+        pad = max(0.5, (ymax - ymin) * 0.4)
+        fig.update_yaxes(range=[ymin - pad, ymax + pad])
+    fig.update_layout(
+        template=None,  # deliberately bare — no grid/legend at this size
+        margin=dict(l=0, r=0, t=2, b=2), height=height,
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+        xaxis=dict(visible=False), yaxis=dict(visible=False),
+        showlegend=False,
+    )
+    return fig
+
+
+def _rgba(hexcol: str, a: float) -> str:
+    h = str(hexcol).lstrip("#")
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    return f"rgba({r},{g},{b},{a})"

@@ -28,6 +28,8 @@ __all__ = [
     'meta_inline_bar',
     'history_table',
     'ranked_dropdown',
+    # v0.45 — promoted from DASH_Anthro / aspire-supplements / aspire-nutrition
+    'section_card',
 ]
 
 # ── Cards ────────────────────────────────────────────────────────────────────
@@ -774,3 +776,52 @@ def ranked_dropdown(
         style={"fontSize": "0.78rem"},
         in_navbar=False,
     )
+
+
+# ── Section card (v0.45 — promoted from DASH_Anthro + aspire-supplements) ───
+
+def section_card(title, children, *, icon: str | None = None,
+                 badge_text: str | None = None, accent_color: str | None = None,
+                 className: str = "", style: dict | None = None):
+    """Titled card with a branded section header — the pattern three apps
+    (DASH_Anthro, aspire-supplements, aspire-nutrition) each rebuilt.
+
+    Parameters
+    ----------
+    title : str — uppercase tracked header text.
+    children : Dash tree — the card body.
+    icon : FontAwesome class (e.g. "fa-solid fa-boxes-stacked"), optional.
+    badge_text : small pill rendered after the title, optional.
+    accent_color : hex/var() — adds a 4px left stripe so urgency reads at
+        a glance (red = low stock, amber = expiring, gold = anchor card).
+    """
+    head = []
+    if icon:
+        head.append(html.I(className=f"{icon}",
+                           style={"color": ASPIRE["600"], "marginRight": "8px"}))
+    head.append(html.Span(title, style={
+        "textTransform": "uppercase", "letterSpacing": "1px",
+        "fontSize": "12.5px", "fontWeight": "600", "color": ASPIRE["800"],
+    }))
+    if badge_text:
+        head.append(html.Span(badge_text, className="badge", style={
+            "marginLeft": "8px", "fontSize": "10px", "fontWeight": "600",
+            "padding": "2px 8px", "borderRadius": "999px",
+            "background": SLATE["100"], "color": SLATE["600"],
+        }))
+    base_style = {
+        "background": "white", "borderRadius": f"{RADIUS_LG}px",
+        "padding": "16px 20px", "boxShadow": SHADOW_SM,
+    }
+    if accent_color:
+        base_style["borderLeft"] = f"4px solid {accent_color}"
+    if style:
+        base_style.update(style)
+    return html.Div([
+        html.Div(head, className="section-header", style={
+            "display": "flex", "alignItems": "center",
+            "borderBottom": f"2px solid {ASPIRE['600']}",
+            "paddingBottom": "6px", "marginBottom": "14px",
+        }),
+        html.Div(children, className="card-body"),
+    ], className=f"card section-card {className}".strip(), style=base_style)
