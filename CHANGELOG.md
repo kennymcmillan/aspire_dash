@@ -4,6 +4,21 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.50.0] — 2026-06-10
+
+### Added — lazy_img: lazy-loading athlete photos
+
+`v12_helpers.lazy_img(src, alt=, className=, style=, placeholder=)` — an
+`html.Img` that fetches only when scrolled near the viewport. Dash 4.1's
+`html.Img` rejects the native `loading="lazy"` prop, so this renders the
+photo URL as `data-src` (legal wildcard prop) and the new shipped
+`assets/lazy_photos.js` (IntersectionObserver, 300px root margin, with a
+MutationObserver for Dash client-side re-renders) swaps it into `src`.
+1×1 transparent gif placeholder avoids the broken-image flash.
+
+Use for athlete-photo grids: 36 SAMS blob fetches on page load become only
+the visible handful. First consumer: whoop_coach_dashboard.
+
 ## [0.49.0] — 2026-06-10
 
 ### Added — responsive sidebar: off-canvas drawer below 1024px (phones + iPads)

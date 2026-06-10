@@ -47,3 +47,11 @@ def test_athlete_card_v2_link_uses_card_link():
     from aspire_dash.v12_helpers import athlete_card_v2
     linked = athlete_card_v2("Ali", rings=[], href="/a")
     assert linked.className == "card-link"
+
+
+def test_lazy_img_renders_data_src_with_placeholder():
+    from aspire_dash.v12_helpers import lazy_img
+    img = lazy_img("https://blob/p.jpg", alt="Ali", className="avatar-circle")
+    assert img.src.startswith("data:image/gif")        # placeholder, not the photo
+    assert getattr(img, "data-src") == "https://blob/p.jpg"
+    assert img.alt == "Ali"

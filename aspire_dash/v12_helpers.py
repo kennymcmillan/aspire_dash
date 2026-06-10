@@ -1299,3 +1299,28 @@ def glass_card(children, *, padding: str = "20px"):
     """
     return html.Div(children, className="glass-card",
                      style={"padding": padding})
+
+
+# == v0.50 -- lazy-loading image (data-src + IntersectionObserver) ===========
+
+def lazy_img(src, *, alt="", className="", style=None, placeholder=None,
+             **kwargs):
+    """``html.Img`` that loads only when scrolled near the viewport.
+
+    Dash 4.1's ``html.Img`` rejects the native ``loading="lazy"`` prop, so
+    this renders ``data-src`` (a legal wildcard prop) and lets the shipped
+    ``lazy_photos.js`` (copied by ``setup_app()``) swap it into ``src`` via
+    IntersectionObserver, 300px before the image becomes visible.
+
+    Use for athlete-photo grids -- 36 SAMS blob fetches on page load become
+    only the visible handful.
+
+    >>> lazy_img(photo_url, alt=name, className="avatar-circle avatar-sm",
+    ...          style={"objectFit": "cover"})
+    """
+    from dash import html as _html
+    # 1x1 transparent gif -- avoids the broken-image icon pre-swap
+    ph = placeholder or ("data:image/gif;base64,"
+                          "R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==")
+    return _html.Img(src=ph, alt=alt, className=className,
+                     style=style or {}, **{"data-src": src}, **kwargs)
