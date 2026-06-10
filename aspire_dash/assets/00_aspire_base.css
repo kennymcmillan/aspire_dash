@@ -10,7 +10,7 @@
    Inter is kept for data-dense surfaces where its tabular-nums and
    variable-axis features shine — opt-in via .font-data class or the
    `data` brand.yml token. */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:opsz,wght@14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:opsz,wght@14..32,100..900&family=Source+Serif+Pro:wght@400;600;700&display=swap');
 
 /* ── CSS Custom Properties (Tailwind Slate + semantic colours) ── */
 :root {
@@ -337,12 +337,9 @@ body {
     transition: box-shadow 0.15s ease, transform 0.15s ease,
                 border-color 0.15s ease;
 }
-.card:hover,
-.budget-card:hover,
-.athlete-card:hover {
-    box-shadow: var(--elev-2);
-    transform: translateY(-1px);
-}
+/* Card hover is owned by ONE block (v0.24 polish, search
+   "elev-hover-card") — earlier per-version hover rules were removed
+   to stop last-rule-wins drift. */
 /* Some cards live inside <a> (clickable). Keep the lift behaviour but
    don't double-apply. */
 a > .card,
@@ -1054,18 +1051,9 @@ table.aspire-table tbody tr:last-child td {
     animation: tooltipFade 0.15s ease-in;
 }
 
-/* Plotly hover tooltip overrides */
-.js-plotly-plot .plotly .hoverlayer .hovertext rect {
-    fill: white !important;
-    stroke: var(--slate-200) !important;
-    rx: 6 !important;
-    ry: 6 !important;
-}
-.js-plotly-plot .plotly .hoverlayer .hovertext text,
-.js-plotly-plot .plotly .hoverlayer .hovertext tspan {
-    fill: var(--slate-800) !important;
-    font-family: 'Inter', sans-serif !important;
-}
+/* Plotly hover tooltips are styled by the central "aspire" template
+   (charts.py hoverlabel) — the old CSS !important override here killed
+   the branded dark tooltip on every chart. Single owner: charts.py. */
 
 /* Bootstrap tooltip overrides */
 .tooltip-inner {
@@ -2173,21 +2161,16 @@ html.dark .period-pills label:has(input:checked) {
 }
 .section-title-v2:first-child { margin-top: 0; }
 
-/* Hover lift — bump 1→2 px so the lift registers as intentional
-   (matches Linear / Stripe). Plus subtle border tint. */
-.card:hover,
-.budget-card:hover,
-.athlete-card:hover,
-.kpi-tile:hover {
-    box-shadow: var(--elev-2);
-    transform: translateY(-2px);
-    border-color: var(--aspire-200);
-}
+/* (v0.19 hover-lift block removed — the v0.24 "elev-hover-card"
+   block below is the single owner of card hover.) */
 
-/* KPI rhythm — narrow the 22→32 px gap to a two-step scale */
+/* KPI rhythm — two-step token scale. --kpi-value is the standard
+   big-number size; --kpi-value-hero the feature-tile size. Compact
+   tiles (budget-card, sparkline-tile) deliberately sit below it. */
+:root { --kpi-value: 30px; --kpi-value-hero: 32px; }
 .budget-card .card-value { font-size: 26px; }
-.kpi-tile .kpi-value     { font-size: 30px; }
-.fr-kpi-value            { font-size: 30px; }
+.kpi-tile .kpi-value     { font-size: var(--kpi-value); }
+.fr-kpi-value            { font-size: var(--kpi-value); }
 
 /* Tabular nums + lining figures across every numeric surface */
 .kpi-value, .card-value, .fr-kpi-value, .amc-metric-value, .amc-score,
@@ -2244,8 +2227,9 @@ table.aspire-table tbody tr:hover {
     color: var(--slate-500);
 }
 
-/* Financial scope serif option — opt-in via .financial-report.serif */
-@import url('https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;600;700&display=swap');
+/* Financial scope serif option — opt-in via .financial-report.serif.
+   Source Serif Pro loads from the TOP @import (line 13) — a mid-file
+   @import is ignored by the CSS spec, which silently broke this mode. */
 .financial-report.serif {
     font-family: 'Source Serif Pro', 'Charter', Georgia, serif;
     font-size: 15px;
@@ -2286,8 +2270,12 @@ table.aspire-table tbody tr:hover {
     --glow-danger:     0 0 0 4px rgba(220, 38, 38,  0.12);
 }
 
-/* Smooth EVERYTHING — universal transition baseline */
-* {
+/* Smooth interactive surfaces — SCOPED, not universal. The old
+   `* { transition: ... }` taxed style-recalc on every AG Grid cell and
+   Plotly SVG node, and made zone-class swaps cross-fade unexpectedly. */
+.card, .aspire-card, .kpi-tile, .badge, .status-pill, .btn,
+.sidebar-link, .topnav-link, .toggle-btn, .filter-pill,
+a, button, input, select {
     transition: background-color var(--duration-fast) var(--ease-out),
                 border-color     var(--duration-fast) var(--ease-out),
                 color            var(--duration-fast) var(--ease-out);
@@ -2374,11 +2362,8 @@ textarea:focus,
     transition: transform var(--duration-fast) var(--ease-spring),
                 background-color var(--duration-fast) var(--ease-out);
 }
-.status-pill:hover,
-.status-badge:hover,
-.badge:hover {
-    transform: scale(1.03);
-}
+/* (badge hover owned by the scale(1.05) block further down —
+   duplicate scale(1.03) rule removed.) */
 
 /* Sidebar links — slide-in + brand tint + gold active marker.
    SCOPED to .sidebar-nav (aspire_dash sidebar() helper) so apps that
@@ -2872,7 +2857,7 @@ body {
     color: var(--slate-500);
 }
 .kpi-with-sparkline .kws-value {
-    font-size: 28px; font-weight: 700;
+    font-size: var(--kpi-value); font-weight: 700;
     line-height: 1.1; color: var(--slate-900);
     font-variant-numeric: tabular-nums;
     margin-top: 2px;
@@ -2943,7 +2928,7 @@ body {
     border-left: 4px solid var(--aspire-600);
 }
 .stat-with-trend:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);   /* match the portfolio-wide card lift */
     box-shadow: var(--elev-2);
 }
 .stat-with-trend.swt-accent-success { border-left-color: #16a34a; }
@@ -2956,7 +2941,7 @@ body {
     color: var(--slate-500);
 }
 .stat-with-trend .swt-value {
-    font-size: 30px; font-weight: 700;
+    font-size: var(--kpi-value); font-weight: 700;
     line-height: 1.1; color: var(--slate-900);
     font-variant-numeric: tabular-nums;
     margin-top: 2px;
@@ -3117,7 +3102,7 @@ body {
     margin-top: 2px;
 }
 .stat-card-mega .scm-value {
-    font-size: 32px; font-weight: 700; line-height: 1.1;
+    font-size: var(--kpi-value-hero); font-weight: 700; line-height: 1.1;
     color: var(--slate-900);
     font-variant-numeric: tabular-nums;
 }
