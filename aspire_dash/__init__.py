@@ -1,4 +1,4 @@
-"""aspire_dash — Aspire Academy shared Dash branding, components, and layouts.
+﻿"""aspire_dash â€” Aspire Academy shared Dash branding, components, and layouts.
 
 Usage in any Dash app:
 
@@ -28,7 +28,7 @@ Usage in any Dash app:
     # Cache pre-warming on app boot (new in 0.5):
     from aspire_dash.cache_prewarm import cache_prewarm
 
-    # New in 0.6 — modules harvested from medical, nutrition, budget,
+    # New in 0.6 â€” modules harvested from medical, nutrition, budget,
     # attendance, training, and mapping apps:
     from aspire_dash.time import (
         period_pill_filter, period_mode_to_dates,
@@ -54,7 +54,7 @@ Usage in any Dash app:
         DEFAULT_GRID_OPTIONS, EDITABLE_GRID_OPTIONS,
     )
 
-    # New in 0.7 — second harvest pass (modal, upload, datatable,
+    # New in 0.7 â€” second harvest pass (modal, upload, datatable,
     # time-ago, sport dropdown, Connect user chip, step card):
     from aspire_dash.components import (
         confirm_modal, file_upload_card,
@@ -71,7 +71,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.44.0"
+__version__ = "0.45.0"
 
 
 def normalised_path(pathname: str | None) -> str:
@@ -79,7 +79,7 @@ def normalised_path(pathname: str | None) -> str:
     router callbacks can dispatch on bare paths like ``"/athletes"``.
 
     **Why:** Connect serves apps at ``/content/<GUID>/``. A `dcc.Location`
-    callback receives the full URL — ``/content/<GUID>/athletes`` — but
+    callback receives the full URL â€” ``/content/<GUID>/athletes`` â€” but
     router dispatch dicts use bare keys like ``"/athletes"``. Without
     stripping the prefix, every click falls back to the default page on
     Connect (works fine locally because the prefix is "/").
@@ -100,7 +100,7 @@ def normalised_path(pathname: str | None) -> str:
     try:
         relative = str(_dash.strip_relative_path(pathname)) or ""
     except _dash.exceptions.UnsupportedRelativePath:
-        # Pathname is ALREADY bare — Dash auto-strips the
+        # Pathname is ALREADY bare â€” Dash auto-strips the
         # requests_pathname_prefix from dcc.Location values before
         # passing to callbacks, so /content/<GUID>/foo arrives as just
         # /foo. strip_relative_path then raises because the input no
@@ -110,14 +110,14 @@ def normalised_path(pathname: str | None) -> str:
     relative = relative.strip("/")
     return "/" + relative if relative else "/"
 
-# ── External stylesheets every Aspire app should load ────────────────────────
+# â”€â”€ External stylesheets every Aspire app should load â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 STYLESHEETS = [
     dbc.themes.BOOTSTRAP,
     dbc.icons.FONT_AWESOME,
     # Inter font is loaded via @import in 00_aspire_base.css
 ]
 
-# ── Optional Tailwind CSS via CDN (v0.27+) ───────────────────────────────────
+# â”€â”€ Optional Tailwind CSS via CDN (v0.27+) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Pass to Dash(__name__, external_scripts=EXTERNAL_SCRIPTS) to unlock
 # Tailwind utility classes in any consumer app:
 #
@@ -129,7 +129,7 @@ STYLESHEETS = [
 #   html.Div(className="grid grid-cols-3 gap-4", children=[...])
 #   html.Div(className="card bg-white p-6 rounded-xl shadow-md", ...)
 #
-# Pairs cleanly with our semantic CSS — use Aspire classes for repeated
+# Pairs cleanly with our semantic CSS â€” use Aspire classes for repeated
 # components (kpi-tile, athlete-card-v2, etc.) and Tailwind utilities
 # for one-off page layouts. Tailwind specificity is lower than our
 # semantic rules so the brand always wins on owned components.
@@ -164,7 +164,7 @@ def setup_app(app):
 
     os.makedirs(app_assets, exist_ok=True)
 
-    # Copy every shared asset — INCLUDING subdirectories.
+    # Copy every shared asset â€” INCLUDING subdirectories.
     # v0.20 added brand/partners/ + brand/sports/ subdirs (Aspire logo +
     # federation logos + sport heroes). Previous code did a flat listdir
     # + isfile check that silently skipped subdirs, so consumer apps
@@ -185,7 +185,7 @@ def setup_app(app):
     # on `app.config` after Dash() runs, so app.config.update(...) raises
     # AttributeError at deploy time. Dash already reads DASH_URL_BASE_PATHNAME
     # from the environment in its own constructor when `url_base_pathname`
-    # isn't passed explicitly — Connect sets this var, so the prefix is
+    # isn't passed explicitly â€” Connect sets this var, so the prefix is
     # honoured automatically. The sidebar/topnav helpers route the link
     # hrefs through dash.get_relative_path() at render time which reads
     # the now-correct prefix.

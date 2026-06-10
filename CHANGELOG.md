@@ -4,6 +4,52 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.45.0] — 2026-06-10
+
+### Changed — sports.py glow-up (forge loop, slice 1 of 4)
+
+All 12 visual components in `aspire_dash.sports` ported from inline `style={}`
+dicts to semantic classes in `00_aspire_base.css` (v0.45 section). Public APIs
+unchanged — consumer apps inherit the upgrade on SHA bump, zero code changes.
+
+- `placement_badge` — medal treatment: gold/silver/bronze get 135deg gradients
+  + inset 1px ring; **bronze corrected from red-tint (#fef2f2) to true bronze
+  (orange-800 on #ffedd5→#fed7aa)**. Classes `.placement-badge` +
+  `.place-{gold,silver,bronze,top8,top16,rest}` + `--sm`.
+- `data_row` — `.aspire-data-row`: hover tint (slate-50), header rows now
+  11px caps + letter-spacing, last cell drops its right border, dark-mode rules.
+- `competition_card` — `.competition-card__*` family; placement number tones
+  via `.place-1/2/3/n`; link wrapper class. Inherits `.card` hover lift.
+- `gradient_stat_card` — `.gradient-stat` structure + hover lift; caller bg /
+  value colour stay inline (data-driven by API contract).
+- `country_flag` / `flag_with_name` — `.flag-chip` (+`--sm/md/lg`),
+  `.flag-name` + `.is-highlight`; AIN fallback pill class.
+- `rank_change` / `trend_arrow` — `.rank-change .rc-{up,down,flat}` /
+  `.trend-arrow .ta-{up,down,flat}` + tabular-nums.
+- `mini_stat` / `header_stat` — class-based, eyebrow letter-spacing tokens.
+- `color_badge` / `source_badge` — `.pill-badge` (+`--source`) structure;
+  federation colours stay inline (data-driven from SOURCE_BADGE_COLORS).
+- `competition_badge` / `category_badge` wrappers — `.badge-row`.
+- 7 new regression tests pin the class contract
+  (tests/test_sports_viz_firstbeat.py). Demo /sports page now also shows
+  source_badge, competition_card, data_row, mini/header stats, trend_arrow.
+- Forge record: `tools/forge/index.html#sports-glowup` (BEFORE/AFTER medals).
+
+Deprecated `stat_card` intentionally NOT ported (removed at 1.0).
+
+## [0.44.1] — 2026-06-10
+
+### Fixed — sidebar shell no longer overflows on narrow screens
+
+`.main-area` is a flex item but was missing `min-width: 0`, so wide content
+(a 6-column DataTable, a chart) forced it past the viewport — the whole page
+scrolled sideways on phone/tablet widths even though tables had their own
+`overflowX: auto`. Added `min-width: 0` in both `layouts.py` (inline) and
+`00_aspire_base.css` so existing apps pick it up from either path.
+
+(Entry reconstructed 2026-06-10 — the original uncommitted text was lost to a
+`git checkout` collision between two sessions; wording of the last line may differ.)
+
 ## [0.44.0] — 2026-06-10
 
 ### Added — ranked bars + editable-table diff (promoted from aspire-supplements)

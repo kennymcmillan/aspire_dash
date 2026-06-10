@@ -40,6 +40,8 @@ def page_layout(sidebar_el, header_el=None, use_pages=True):
             "marginLeft": f"{SIDEBAR_WIDTH}px",
             "backgroundColor": SLATE["100"],
             "flex": "1",
+            "minWidth": 0,  # let the flex item shrink — stops wide tables/charts
+                            # forcing horizontal page overflow on narrow screens
             "minHeight": "100vh",
             "transition": "margin-left 0.3s ease",
         }),

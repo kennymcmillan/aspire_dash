@@ -1,9 +1,9 @@
-"""aspire_dash — Aspire Academy shared Dash component & styling library."""
+﻿"""aspire_dash â€” Aspire Academy shared Dash component & styling library."""
 from setuptools import setup, find_packages
 
 setup(
     name="aspire_dash",
-    version="0.44.0",
+    version="0.45.0",
     description="Aspire Academy shared Dash branding, components, layouts, observability, timeseries, athlete + budget + time + export + tables + forms modules",
     author="Kenny McMillan",
     packages=find_packages(),
