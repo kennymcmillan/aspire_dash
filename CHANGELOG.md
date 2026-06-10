@@ -4,6 +4,17 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.48.1] — 2026-06-10
+
+### Fixed — pandas/numpy declared as runtime deps
+
+`stats.py` (new in 0.48.0) and `timeseries.py` import numpy/pandas at
+module level, but neither was in `install_requires` — a fresh
+`pip install aspire_dash` crashed on `from aspire_dash.stats import …`
+(caught by the CI fresh-clone import smoke). pandas (which pulls numpy)
+is now a declared dependency; the `test` extra carries it too so the
+pytest jobs stop relying on the runner's hand-picked list.
+
 ## [0.48.0] — 2026-06-10
 
 ### Changed — v12_helpers residual glow-up (forge loop, slice 4 of 4 — DONE)

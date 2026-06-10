@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="aspire_dash",
-    version="0.48.0",
+    version="0.48.1",
     description="Aspire Academy shared Dash branding, components, layouts, observability, timeseries, athlete + budget + time + export + tables + forms modules",
     author="Kenny McMillan",
     packages=find_packages(),
@@ -19,9 +19,10 @@ setup(
         "plotly>=5.18,<7",
         "pyyaml>=6.0,<7",
         "dash-svg>=0.0.12,<1",
+        "pandas>=2.0,<3",
     ],
     extras_require={
-        "test": ["pytest>=7", "numpy>=1.24"],
+        "test": ["pytest>=7", "numpy>=1.24", "pandas>=2.0"],
     },
     entry_points={
         "console_scripts": [
