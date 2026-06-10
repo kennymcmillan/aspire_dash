@@ -3666,14 +3666,14 @@ body {
 }
 
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   v0.45 â€” sports module glow-up (forge loop)
-   sports.py inline styles â†’ semantic classes. Data-driven colours
-   (source/colour badges, custom gradients) stay inline by design â€”
+/* ══════════════════════════════════════════════════════════════════════════
+   v0.45 — sports module glow-up (forge loop)
+   sports.py inline styles → semantic classes. Data-driven colours
+   (source/colour badges, custom gradients) stay inline by design —
    only structure + branded variants live here.
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ══════════════════════════════════════════════════════════════════════════ */
 
-/* â”€â”€ Flag chip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Flag chip ───────────────────────────────────────────────────── */
 .flag-chip {
     display: inline-flex;
     align-items: center;
@@ -3698,7 +3698,7 @@ body {
     letter-spacing: 0.02em;
 }
 
-/* Neutral-athlete fallback (AIN) â€” no flag exists */
+/* Neutral-athlete fallback (AIN) — no flag exists */
 .flag-chip__ain {
     display: inline-flex;
     align-items: center;
@@ -3710,7 +3710,7 @@ body {
     font-weight: 600;
 }
 
-/* â”€â”€ Flag + athlete name row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Flag + athlete name row ─────────────────────────────────────── */
 .flag-name {
     display: flex;
     align-items: center;
@@ -3722,7 +3722,7 @@ body {
     color: #004185;                     /* Aspire primary */
 }
 
-/* â”€â”€ Placement badge â€” medal treatment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Placement badge — medal treatment ───────────────────────────── */
 .placement-badge {
     display: inline-flex;
     align-items: center;
@@ -3759,7 +3759,7 @@ body {
 
 .placement-badge.place-bronze {
     background: linear-gradient(135deg, #ffedd5, #fed7aa);
-    color: #9a3412;                     /* orange-800 â€” true bronze, was red-tinted */
+    color: #9a3412;                     /* orange-800 — true bronze, was red-tinted */
     box-shadow: inset 0 0 0 1px rgba(194, 65, 12, 0.25);
 }
 
@@ -3767,7 +3767,7 @@ body {
 .placement-badge.place-top16 { background: #f0fdf4; color: #166534; }
 .placement-badge.place-rest  { background: var(--slate-100); color: var(--slate-500); }
 
-/* â”€â”€ Rank change indicator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Rank change indicator ────────────────────────────────────────── */
 .rank-change {
     display: inline-flex;
     align-items: center;
@@ -3794,14 +3794,14 @@ body {
     background: var(--slate-100);
 }
 
-/* â”€â”€ Badge row (competition / category badge groups) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Badge row (competition / category badge groups) ─────────────── */
 .badge-row {
     display: inline-flex;
     align-items: center;
     gap: 4px;
 }
 
-/* â”€â”€ Data grid row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Data grid row ────────────────────────────────────────────────── */
 .aspire-data-row {
     display: flex;
     background: #ffffff;
@@ -3818,7 +3818,7 @@ body {
 }
 
 .aspire-data-row.is-highlight {
-    background: #eff6ff;                /* blue-50 â€” focus nation */
+    background: #eff6ff;                /* blue-50 — focus nation */
 }
 
 .aspire-data-row__cell {
@@ -3844,7 +3844,7 @@ body {
     letter-spacing: 0.04em;
 }
 
-/* â”€â”€ Trend arrow â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Trend arrow ──────────────────────────────────────────────────── */
 .trend-arrow {
     display: inline-flex;
     align-items: center;
@@ -3861,7 +3861,7 @@ body {
     margin-right: 4px;
 }
 
-/* â”€â”€ Gradient stat (bg/colour stay caller-supplied inline) â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Gradient stat (bg/colour stay caller-supplied inline) ───────── */
 .gradient-stat {
     padding: 16px;
     border-radius: 8px;
@@ -3901,7 +3901,7 @@ body {
     margin-top: 4px;
 }
 
-/* â”€â”€ Mini stat / header stat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Mini stat / header stat ──────────────────────────────────────── */
 .mini-stat__label {
     font-size: 10px;
     font-weight: 600;
@@ -3932,7 +3932,7 @@ body {
     letter-spacing: 0.04em;
 }
 
-/* â”€â”€ Pill badge (colour_badge / source_badge structure) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Pill badge (colour_badge / source_badge structure) ──────────── */
 .pill-badge {
     display: inline-flex;
     align-items: center;
@@ -3952,7 +3952,7 @@ body {
     font-family: Poppins, sans-serif;
 }
 
-/* â”€â”€ Competition card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Competition card ─────────────────────────────────────────────── */
 .competition-card {
     padding: 12px 14px;
     font-family: Poppins, sans-serif;
@@ -4022,7 +4022,7 @@ body {
     display: block;
 }
 
-/* â”€â”€ Dark mode for the section above â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Dark mode for the section above ─────────────────────────────── */
 html.dark .aspire-data-row { background: #1e293b; }
 html.dark .aspire-data-row:hover:not(.is-header) { background: #273449; }
 html.dark .aspire-data-row.is-header { background: #0f172a; }
@@ -4031,3 +4031,199 @@ html.dark .aspire-data-row__cell { color: #cbd5e1; border-color: #334155; }
 html.dark .competition-card__title { color: #f1f5f9; }
 html.dark .header-stat__value { color: #f1f5f9; }
 
+
+/* ══════════════════════════════════════════════════════════════════════════
+   v0.46 — viz module glow-up (forge loop, slice 2)
+   viz.py inline styles → semantic classes. SVG geometry (sizes, radii,
+   stroke colours, computed offsets) stays inline by design — only
+   layout structure + typography live here.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Progress / status ring ───────────────────────────────────────── */
+.viz-ring {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.viz-ring__box { position: relative; }
+
+.viz-ring__centre {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.viz-ring__value {
+    font-weight: 700;
+    color: var(--slate-800);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.viz-ring__unit {
+    color: var(--slate-400);
+    margin-left: 1px;
+}
+
+.viz-ring__label {
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--slate-500);
+}
+
+.viz-ring-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 0;
+    flex-wrap: wrap;
+}
+
+.viz-sparkline { display: inline-block; }
+
+/* ── Horizontal bar ───────────────────────────────────────────────── */
+.viz-hbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.viz-hbar__label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--slate-600);
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.viz-hbar__track {
+    flex: 1;
+    background: var(--slate-200);
+    overflow: hidden;
+}
+
+.viz-hbar__fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.viz-hbar__pct {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-700);
+    width: 40px;
+    text-align: right;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Ranked bars (leaderboard) ────────────────────────────────────── */
+.ranked-bars { padding-top: 4px; }
+
+.ranked-bars__row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 11px;
+    border-radius: 6px;
+    transition: background 0.15s ease;
+}
+
+.ranked-bars__row:hover { background: var(--slate-50); }
+
+.ranked-bars__label {
+    width: 42%;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--slate-700);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ranked-bars__track {
+    flex: 1;
+    background: var(--slate-100);
+    overflow: hidden;
+    margin: 0 10px;
+}
+
+.ranked-bars__fill {
+    height: 100%;
+    transition: width 0.25s ease;
+}
+
+.ranked-bars__value {
+    min-width: 58px;
+    text-align: right;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--slate-800);
+    font-variant-numeric: tabular-nums;
+}
+
+.ranked-bars__empty {
+    font-size: 13px;
+    color: var(--slate-400);
+    padding: 8px;
+}
+
+/* ── Status dot ───────────────────────────────────────────────────── */
+.viz-dot {
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* ── Metric card with sparkline ───────────────────────────────────── */
+.metric-spark {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid var(--slate-200);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.metric-spark:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.metric-spark__label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.metric-spark__value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--slate-800);
+    font-variant-numeric: tabular-nums;
+}
+
+.metric-spark__unit {
+    font-size: 12px;
+    color: var(--slate-400);
+}
+
+/* ── Dark mode for the section above ──────────────────────────────── */
+html.dark .metric-spark { background: #1e293b; border-color: #334155; }
+html.dark .metric-spark__value { color: #f1f5f9; }
+html.dark .viz-ring__value { color: #f1f5f9; }
+html.dark .ranked-bars__row:hover { background: #273449; }
+html.dark .ranked-bars__value { color: #f1f5f9; }
+html.dark .viz-hbar__track { background: #334155; }
+html.dark .ranked-bars__track { background: #273449; }

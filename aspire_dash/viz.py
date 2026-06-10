@@ -102,18 +102,15 @@ def progress_ring(
 
     display_text = display if display is not None else str(round(value))
 
+    # font sizes scale with the size arg — stay inline
     centre_children = [
-        html.Span(display_text, style={
-            "fontWeight": "bold", "fontSize": font_size, "color": SLATE["800"],
-            "lineHeight": "1",
-        }),
+        html.Span(display_text, className="viz-ring__value",
+                  style={"fontSize": font_size}),
     ]
     if unit:
         centre_children.append(
-            html.Span(unit, style={
-                "fontSize": f"{max(9, size // 10)}px", "color": SLATE["400"],
-                "marginLeft": "1px",
-            })
+            html.Span(unit, className="viz-ring__unit",
+                      style={"fontSize": f"{max(9, size // 10)}px"})
         )
 
     children = [
@@ -123,27 +120,15 @@ def progress_ring(
                 _svg_circle(cx, cx, r, stroke=color, stroke_width=stroke_width,
                             dasharray=circ, dashoffset=offset, animated=animated),
             ], width=str(size), height=str(size), style={"transform": "rotate(-90deg)"}),
-            html.Div(
-                centre_children,
-                style={
-                    "position": "absolute", "inset": "0",
-                    "display": "flex", "flexDirection": "column",
-                    "alignItems": "center", "justifyContent": "center",
-                },
-            ),
-        ], style={"position": "relative", "width": f"{size}px", "height": f"{size}px"}),
+            html.Div(centre_children, className="viz-ring__centre"),
+        ], className="viz-ring__box",
+           style={"width": f"{size}px", "height": f"{size}px"}),
     ]
 
     if label:
-        children.append(html.Span(label, style={
-            "marginTop": "4px", "fontSize": "11px", "fontWeight": "500",
-            "textTransform": "uppercase", "letterSpacing": "0.05em",
-            "color": SLATE["500"],
-        }))
+        children.append(html.Span(label, className="viz-ring__label"))
 
-    return html.Div(children, style={
-        "display": "flex", "flexDirection": "column", "alignItems": "center",
-    })
+    return html.Div(children, className="viz-ring")
 
 
 def status_ring(
@@ -182,10 +167,7 @@ def status_ring(
 
 def ring_row(rings, gap="24px"):
     """Horizontal row of ring components with centered alignment."""
-    return html.Div(rings, style={
-        "display": "flex", "alignItems": "center", "justifyContent": "center",
-        "gap": gap, "padding": "16px 0", "flexWrap": "wrap",
-    })
+    return html.Div(rings, className="viz-ring-row", style={"gap": gap})
 
 
 # ── Sparkline ────────────────────────────────────────────────────────────────
@@ -228,7 +210,7 @@ def sparkline(values, color=None, width=120, height=32, stroke_width=2):
                 style={"strokeLinecap": "round", "strokeLinejoin": "round"},
             ),
         ], width=str(width), height=str(height)),
-        style={"display": "inline-block"},
+        className="viz-sparkline",
     )
 
 
@@ -255,34 +237,24 @@ def horizontal_bar(value, max_val=100, color=None, height=8, label=None, show_pc
     pct = min(100, (value / max_val * 100) if max_val else 0)
     color = color or ACCENT
 
+    # width %, fill colour, height and radius are computed — stay inline
     bar = html.Div([
-        html.Div(style={
-            "width": f"{pct:.1f}%", "height": "100%",
+        html.Div(className="viz-hbar__fill", style={
+            "width": f"{pct:.1f}%",
             "backgroundColor": color, "borderRadius": f"{height // 2}px",
-            "transition": "width 0.3s ease",
         }),
-    ], style={
-        "flex": "1", "height": f"{height}px",
-        "backgroundColor": SLATE["200"], "borderRadius": f"{height // 2}px",
-        "overflow": "hidden",
+    ], className="viz-hbar__track", style={
+        "height": f"{height}px", "borderRadius": f"{height // 2}px",
     })
 
     children = []
     if label:
-        children.append(html.Span(label, style={
-            "fontSize": "12px", "fontWeight": "500", "color": SLATE["600"],
-            "width": "80px", "flexShrink": "0",
-        }))
+        children.append(html.Span(label, className="viz-hbar__label"))
     children.append(bar)
     if show_pct:
-        children.append(html.Span(f"{pct:.0f}%", style={
-            "fontSize": "12px", "fontWeight": "600", "color": SLATE["700"],
-            "width": "40px", "textAlign": "right", "flexShrink": "0",
-        }))
+        children.append(html.Span(f"{pct:.0f}%", className="viz-hbar__pct"))
 
-    return html.Div(children, style={
-        "display": "flex", "alignItems": "center", "gap": "8px",
-    })
+    return html.Div(children, className="viz-hbar")
 
 
 # ── Ranked Bars (leaderboard) ─────────────────────────────────────────────────
@@ -328,8 +300,7 @@ def ranked_bars(items, *, color=None, unit="", max_label=34, max_rows=None,
     if max_rows is not None:
         norm = norm[:max_rows]
     if not norm:
-        return html.Div("No data", style={
-            "fontSize": "13px", "color": SLATE["400"], "padding": "8px"})
+        return html.Div("No data", className="ranked-bars__empty")
 
     default = color or ACCENT
     mx = max((v for _, v, _ in norm), default=0) or 1
@@ -356,25 +327,17 @@ def ranked_bars(items, *, color=None, unit="", max_label=34, max_rows=None,
         except (TypeError, ValueError):
             pct = 3.0
         rows.append(html.Div([
-            html.Div(_trunc(label), title=("" if label is None else str(label)), style={
-                "width": "42%", "fontSize": "13px", "fontWeight": "500",
-                "color": SLATE["700"], "whiteSpace": "nowrap",
-                "overflow": "hidden", "textOverflow": "ellipsis",
-            }),
-            html.Div(html.Div(style={
-                "width": f"{pct:.1f}%", "height": "100%",
+            html.Div(_trunc(label), title=("" if label is None else str(label)),
+                     className="ranked-bars__label"),
+            html.Div(html.Div(className="ranked-bars__fill", style={
+                "width": f"{pct:.1f}%",
                 "backgroundColor": c or default, "borderRadius": radius,
-            }), style={
-                "flex": "1", "height": f"{height}px", "backgroundColor": SLATE["100"],
-                "borderRadius": radius, "overflow": "hidden", "margin": "0 10px",
+            }), className="ranked-bars__track", style={
+                "height": f"{height}px", "borderRadius": radius,
             }),
-            html.Div(_fmt(value), style={
-                "minWidth": "58px", "textAlign": "right", "fontSize": "13px",
-                "fontWeight": "700", "color": SLATE["800"],
-                "fontVariantNumeric": "tabular-nums",
-            }),
-        ], style={"display": "flex", "alignItems": "center", "marginBottom": "11px"}))
-    return html.Div(rows, className="ranked-bars", style={"paddingTop": "4px"})
+            html.Div(_fmt(value), className="ranked-bars__value"),
+        ], className="ranked-bars__row"))
+    return html.Div(rows, className="ranked-bars")
 
 
 # ── Status Dot ───────────────────────────────────────────────────────────────
@@ -394,19 +357,16 @@ def status_dot(status="green", size=8, pulse=False):
     color_map = {"green": SUCCESS, "yellow": WARNING, "red": DANGER}
     color = color_map.get(status, status)
 
-    style = {
-        "width": f"{size}px", "height": f"{size}px",
-        "borderRadius": "50%", "backgroundColor": color,
-        "display": "inline-block", "flexShrink": "0",
-    }
-
-    cls = ""
+    cls = "viz-dot"
     if pulse and status == "red":
-        cls = "pulse-red"
+        cls += " pulse-red"
     elif pulse:
-        cls = "pulse-connected"
+        cls += " pulse-connected"
 
-    return html.Span(className=cls, style=style)
+    # size + status colour are caller-driven — stay inline
+    return html.Span(className=cls, style={
+        "width": f"{size}px", "height": f"{size}px", "backgroundColor": color,
+    })
 
 
 # ── Metric Card with Sparkline ───────────────────────────────────────────────
@@ -433,27 +393,15 @@ def metric_spark(label, value, unit="", trend_values=None, color=None):
 
     return html.Div([
         html.Div([
-            html.Div(label, style={
-                "fontSize": "11px", "fontWeight": "500", "color": SLATE["500"],
-                "textTransform": "uppercase", "letterSpacing": "0.03em",
-            }),
+            html.Div(label, className="metric-spark__label"),
             html.Div([
-                html.Span(str(value), style={
-                    "fontSize": "20px", "fontWeight": "700", "color": SLATE["800"],
-                    "fontVariantNumeric": "tabular-nums",
-                }),
-                html.Span(f" {unit}" if unit else "", style={
-                    "fontSize": "12px", "color": SLATE["400"],
-                }),
+                html.Span(str(value), className="metric-spark__value"),
+                html.Span(f" {unit}" if unit else "",
+                          className="metric-spark__unit"),
             ]),
         ]),
         right,
-    ], style={
-        "display": "flex", "alignItems": "center", "justifyContent": "space-between",
-        "padding": "12px 16px", "background": "white",
-        "borderRadius": "8px", "border": f"1px solid {SLATE['200']}",
-        "boxShadow": "0 1px 2px rgba(0,0,0,0.04)",
-    })
+    ], className="metric-spark")
 
 
 # ── Body Fat Gauge (semicircle, green→amber→red) ─────────────────────────────

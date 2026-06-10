@@ -4,6 +4,33 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.46.0] — 2026-06-10
+
+### Changed — viz.py glow-up (forge loop, slice 2 of 4)
+
+7 components in `aspire_dash.viz` ported from inline `style={}` to semantic
+classes (v0.46 CSS section). SVG geometry (ring size, stroke, computed
+offsets, bar %) stays inline by design. Public APIs unchanged.
+
+- `progress_ring`/`status_ring`/`ring_row` — `.viz-ring` family; centre value
+  gains tabular-nums; label uses the eyebrow tokens.
+- `horizontal_bar` — `.viz-hbar` family; pct text gains tabular-nums.
+- `ranked_bars` — `.ranked-bars__*` rows now hover-tint + fills animate
+  (0.25s width transition).
+- `metric_spark` — `.metric-spark` card: slate-tinted shadow + hover lift,
+  matching `.gradient-stat` / `.card` behaviour.
+- `status_dot` — `.viz-dot` structure; pulse classes compose (`viz-dot
+  pulse-red`), size/colour stay inline.
+- `sparkline` — `.viz-sparkline` wrapper.
+- Dark-mode rules for metric-spark, ring values, ranked-bars, hbar tracks.
+- 5 new class-contract tests. `body_fat_gauge` untouched (iframe-isolated SVG).
+
+### Fixed
+
+- Mojibake repair: the v0.45 + v0.46 CSS section comments were appended with
+  a wrong codepage (`â€”` artifacts); file tail rebuilt as clean UTF-8.
+  Selectors were never affected.
+
 ## [0.45.0] — 2026-06-10
 
 ### Changed — sports.py glow-up (forge loop, slice 1 of 4)
@@ -41,14 +68,14 @@ Deprecated `stat_card` intentionally NOT ported (removed at 1.0).
 
 ### Fixed — sidebar shell no longer overflows on narrow screens
 
-`.main-area` is a flex item but was missing `min-width: 0`, so wide content
-(a 6-column DataTable, a chart) forced it past the viewport — the whole page
-scrolled sideways on phone/tablet widths even though tables had their own
-`overflowX: auto`. Added `min-width: 0` in both `layouts.py` (inline) and
-`00_aspire_base.css` so existing apps pick it up from either path.
+`.main-area` is a flex item but couldn't shrink below content width, so wide
+DataTables/charts forced horizontal page overflow on phone/tablet widths
+(894px at a 390px viewport) despite the mobile sidebar-hide media query.
+Added `min-width: 0` in both `layouts.py` (inline) and the `.main-area` CSS
+rule. Zero desktop impact. Surfaced by aspire-supplements' overflow test.
 
-(Entry reconstructed 2026-06-10 — the original uncommitted text was lost to a
-`git checkout` collision between two sessions; wording of the last line may differ.)
+(Entry re-written from commit 8eae018's message after a checkout collision
+ate the original uncommitted text.)
 
 ## [0.44.0] — 2026-06-10
 

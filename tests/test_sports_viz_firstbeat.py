@@ -118,6 +118,66 @@ def test_sparkline_with_values():
     assert is_dash_component(out)
 
 
+# ── v0.46 viz glow-up: inline styles → semantic classes ────────────────────
+
+def test_horizontal_bar_classes():
+    from aspire_dash.viz import horizontal_bar
+    out = horizontal_bar(60, label="Load", show_pct=True)
+    assert out.className == "viz-hbar"
+    kids = out.children
+    assert kids[0].className == "viz-hbar__label"
+    assert kids[1].className == "viz-hbar__track"
+    assert "height" in kids[1].style         # height stays dynamic
+    assert "width" in kids[1].children[0].style   # fill % stays dynamic
+    assert kids[1].children[0].className == "viz-hbar__fill"
+    assert kids[2].className == "viz-hbar__pct"
+
+
+def test_ranked_bars_classes_and_empty():
+    from aspire_dash.viz import ranked_bars
+    out = ranked_bars([("Fencing", 12), ("Padel", 8)])
+    assert out.className == "ranked-bars"
+    row = out.children[0]
+    assert row.className == "ranked-bars__row"
+    assert row.children[0].className == "ranked-bars__label"
+    assert row.children[1].className == "ranked-bars__track"
+    assert row.children[2].className == "ranked-bars__value"
+    assert ranked_bars([]).className == "ranked-bars__empty"
+
+
+def test_status_dot_keeps_pulse_and_dynamic_colour():
+    from aspire_dash.viz import status_dot
+    plain = status_dot("green")
+    assert plain.className == "viz-dot"
+    assert "backgroundColor" in plain.style
+    assert status_dot("red", pulse=True).className == "viz-dot pulse-red"
+    assert status_dot("green", pulse=True).className == "viz-dot pulse-connected"
+
+
+def test_metric_spark_card_classes():
+    from aspire_dash.viz import metric_spark
+    out = metric_spark("HRV", 82, unit="ms")
+    assert out.className == "metric-spark"
+    inner = out.children[0]
+    assert inner.children[0].className == "metric-spark__label"
+    assert inner.children[1].children[0].className == "metric-spark__value"
+
+
+def test_progress_ring_classes():
+    try:
+        import dash_svg  # noqa: F401
+    except ImportError:
+        pytest.skip("dash-svg not installed")
+    from aspire_dash.viz import progress_ring, ring_row
+    out = progress_ring(72, label="Recovery", unit="%")
+    assert out.className == "viz-ring"
+    box = out.children[0]
+    assert box.className == "viz-ring__box"
+    assert "width" in box.style              # size stays dynamic
+    assert out.children[1].className == "viz-ring__label"
+    assert ring_row([out]).className == "viz-ring-row"
+
+
 # ── firstbeat ──────────────────────────────────────────────────────────────
 
 def test_zone_bars_renders():
