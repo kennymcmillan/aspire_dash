@@ -4,6 +4,39 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.52.0] — 2026-06-11
+
+### Added — `sports.match_card()` (head-to-head result card)
+
+Ported from the **SAMS** web app's `.match-card` (recon 2026-06-11) and
+re-branded to Aspire navy/gold + Poppins. Sport-agnostic scoreline card for
+TT / squash / padel / fencing / tennis report apps — the one card pattern SAMS
+had that the library lacked.
+
+```python
+from aspire_dash.sports import match_card
+match_card(
+    {"name": "Abdulla Al-Tamimi", "country": "QAT", "sets": [11,9,11,11], "total": 3},
+    {"name": "Mohamed Samir",     "country": "EGY", "sets": [8,11,7,9],   "total": 1},
+    title="Qatar Squash Open 2026",
+    meta=[("fa-solid fa-location-dot", "Doha"), "Quarter-Final"],
+    tags=["PSA World Tour", "2026-03-14"],
+)
+```
+
+- **Outcome inferred** from totals (win = emerald left-accent + score, loss =
+  red, else Aspire-navy); override with `outcome=`/`score=`.
+- **Per-set winner shading** computed automatically (focus set > opponent set
+  → bold). `focus` competitor is bolded with a brand accent.
+- Avatar = photo if `photo=` given, else navy initials chip; inline flag emoji
+  from IOC/ISO code (`_flag_emoji`). Dark-mode rules included.
+- New semantic classes in `00_aspire_base.css` (`.match-card`, `__header`,
+  `__score`, `__players`, `__player`, `__sets`, `__set.is-won`, `__total`,
+  `__outcome`, `__tag`; `.is-win/.is-loss/.is-neutral`). No inline styles.
+- Ships `assets/no-image-player.png` (SAMS athlete-photo fallback).
+- Forge prototype `tools/forge/match_card.html`; 5 pytest cases
+  (`tests/test_match_card.py`).
+
 ## [0.51.0] — 2026-06-11
 
 ### Changed — all library athlete-card photos lazy-load by default

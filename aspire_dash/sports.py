@@ -853,3 +853,162 @@ def world_map(df, country_col, value_col, *, title=None, height=380,
         font=dict(family="Poppins", size=11),
     )
     return fig
+
+
+# ── Match card (head-to-head result) ───────────────────────────────────────
+# Ported from the SAMS web app's .match-card and re-branded to Aspire navy/gold.
+# Sport-agnostic scoreline card for TT, squash, padel, fencing, tennis reports.
+
+def _flag_emoji(ioc_or_iso):
+    """IOC/ISO code -> regional-indicator flag emoji ('' if unknown)."""
+    if not ioc_or_iso:
+        return ""
+    code = str(ioc_or_iso).upper().strip()
+    iso2 = IOC_TO_ISO.get(code, code if len(code) == 2 else "")
+    if len(iso2) != 2 or not iso2.isalpha():
+        return ""
+    return "".join(chr(0x1F1E6 + ord(c) - ord("A")) for c in iso2)
+
+
+def _match_competitor(c, focus=False):
+    """Render one .match-card__player row from a competitor dict.
+
+    c keys: name (str), country (IOC/ISO, optional), photo (url, optional),
+            sets (list, optional), total (str/int, optional),
+            won_sets (list[bool], optional — overrides auto set-win shading).
+    """
+    name = c.get("name", "—")
+    # avatar: photo if given, else initials on the brand-navy chip
+    if c.get("photo"):
+        avatar = html.Img(src=c["photo"], className="match-card__avatar",
+                          alt=name, **{"data-noimg": "1"})
+    else:
+        initials = "".join(w[0] for w in str(name).split()[:2]).upper() or "?"
+        avatar = html.Span(initials,
+                           className="match-card__avatar match-card__avatar--initials")
+    info = [avatar]
+    flag = _flag_emoji(c.get("country"))
+    if flag:
+        info.append(html.Span(flag, className="match-card__flag"))
+    info.append(html.Span(name, className="match-card__name", title=name))
+
+    children = [html.Div(info, className="match-card__player-info")]
+
+    sets = c.get("sets")
+    if sets is not None:
+        won = c.get("won_sets") or [False] * len(sets)
+        set_spans = [
+            html.Span(str(s), className="match-card__set" + (" is-won" if w else ""))
+            for s, w in zip(sets, won)
+        ]
+        if c.get("total") is not None:
+            set_spans.append(html.Span(str(c["total"]), className="match-card__total"))
+        children.append(html.Div(set_spans, className="match-card__sets"))
+
+    cls = "match-card__player" + (" is-focus" if focus else "")
+    return html.Div(children, className=cls)
+
+
+def match_card(focus, opponent, *, title=None, meta=None, outcome=None,
+               score=None, tags=None):
+    """Head-to-head result card — sport-agnostic (TT / squash / padel / fencing).
+
+    Ported & re-branded from the SAMS web app. Win = emerald left-accent,
+    Loss = red, otherwise Aspire-navy. Emits semantic classes only (CSS lives
+    in 00_aspire_base.css → `.match-card`).
+
+    Parameters
+    ----------
+    focus, opponent : dict
+        Competitor dicts: ``{"name", "country"(IOC/ISO), "photo"(url),
+        "sets"[list], "total"}``. ``focus`` is the Aspire/QAT athlete (bold +
+        focus accent). When both carry ``sets``, per-set winner shading is
+        computed automatically (focus set > opponent set).
+    title : str
+        Competition / event name.
+    meta : list[str]
+        Small meta line under the title (venue, round, …) — joined with dot
+        separators. The first item may start with a FontAwesome icon class
+        passed as ``("fa-solid fa-location-dot", "Doha")`` tuple.
+    outcome : {"win","loss","draw"} or None
+        Result accent + corner badge. If None and both totals are numeric,
+        it is inferred from the totals.
+    score : str
+        Big overall score (e.g. ``"3–1"``). If None, derived from totals.
+    tags : list[str]
+        Optional footer chips (tour, date, …).
+    """
+    f_total, o_total = focus.get("total"), opponent.get("total")
+
+    # auto-derive per-set winners
+    f_sets, o_sets = focus.get("sets"), opponent.get("sets")
+    if f_sets is not None and o_sets is not None and "won_sets" not in focus:
+        def _num(x):
+            try:
+                return float(x)
+            except (TypeError, ValueError):
+                return None
+        fw, ow = [], []
+        for a, b in zip(f_sets, o_sets):
+            na, nb = _num(a), _num(b)
+            fw.append(na is not None and nb is not None and na > nb)
+            ow.append(na is not None and nb is not None and nb > na)
+        focus = {**focus, "won_sets": fw}
+        opponent = {**opponent, "won_sets": ow}
+
+    # auto outcome from totals
+    if outcome is None and f_total is not None and o_total is not None:
+        try:
+            ft, ot = float(f_total), float(o_total)
+            outcome = "win" if ft > ot else "loss" if ft < ot else "draw"
+        except (TypeError, ValueError):
+            outcome = None
+
+    state = {"win": "is-win", "loss": "is-loss"}.get(outcome, "is-neutral")
+
+    # auto score
+    if score is None:
+        score = (f"{f_total}–{o_total}"
+                 if f_total is not None and o_total is not None else "vs")
+
+    # header
+    title_block = [html.Div(title or "", className="match-card__title")]
+    if meta:
+        mchildren, first = [], True
+        for m in meta:
+            if not first:
+                mchildren.append(html.Span("·", className="match-card__meta-sep"))
+            if isinstance(m, (list, tuple)) and len(m) == 2:
+                mchildren.append(html.I(className=m[0]))
+                mchildren.append(html.Span(m[1]))
+            else:
+                mchildren.append(html.Span(str(m)))
+            first = False
+        title_block.append(html.Div(mchildren, className="match-card__meta"))
+
+    score_block = [html.Div(score, className="match-card__score")]
+    if outcome in ("win", "loss", "draw"):
+        label = {"win": "Won", "loss": "Lost", "draw": "Draw"}[outcome]
+        score_block.append(html.Span(label, className=f"match-card__outcome {outcome}"))
+
+    header = html.Div([
+        html.Div(title_block),
+        html.Div(score_block, style={"textAlign": "right"}),
+    ], className="match-card__header")
+
+    body = [
+        header,
+        html.Hr(className="match-card__divider"),
+        html.Div([
+            _match_competitor(focus, focus=True),
+            _match_competitor(opponent),
+        ], className="match-card__players"),
+    ]
+
+    if tags:
+        body.append(html.Div(
+            [html.Span(str(t), className="match-card__tag") for t in tags],
+            className="match-card__footer",
+        ))
+
+    return html.Div(body, className=f"match-card {state}")
