@@ -3,6 +3,7 @@
 Five domain-specific visuals coaches & S&C actually ask for:
 
 - ``force_velocity_scatter`` — VALD ForceDecks FV profile + best-fit + Pmax
+- ``lactate_curve``          — step-test lactate vs speed + HR (dual axis), per date
 - ``acwr_chart``             — Acute:Chronic workload with shaded zones
 - ``hr_zone_distribution``   — Z1–Z5 stacked bar (session or season)
 - ``bullet_chart``           — Target vs actual w/ qualitative ranges
@@ -16,7 +17,7 @@ import plotly.graph_objects as go
 from dash import dcc
 
 from .theme import (
-    ASPIRE, SLATE, SUCCESS, WARNING, DANGER, GOLD,
+    ASPIRE, ASPIRE_BLUE, SECONDARY, SLATE, SUCCESS, WARNING, DANGER, GOLD,
     FONT_DATA, FONT_HEADING, CHART_COLORS,
 )
 from .charts import GRAPH_CONFIG
@@ -130,6 +131,100 @@ def force_velocity_scatter(
 # ─────────────────────────────────────────────────────────────────────────
 # 2. Acute:Chronic Workload Ratio (ACWR) chart
 # ─────────────────────────────────────────────────────────────────────────
+
+
+# Vibrant per-curve palette — gold / teal / amber / green / violet, with the
+# latest test in Aspire blue. No greys: every test reads as its own colour.
+_LACTATE_PALETTE = ["#fbb800", "#1876ab", "#e8833a", "#16a34a", "#8b5cf6", "#e11d8f"]
+
+
+def lactate_curve(
+    curves: dict,
+    *,
+    hr: bool = True,
+    lt2_mmol: float = 4.0,
+    lt1_mmol: float = 2.0,
+    marker_size: int = 9,
+    title: str = "Lactate Curves",
+    height: int = 460,
+    as_graph: bool = True,
+):
+    """Classic incremental step-test chart: speed (x) vs blood lactate (left y)
+    and heart rate (right y, dashed). One curve per test date — click a date in
+    the legend to toggle both its lactate + HR lines (shared legendgroup). The
+    latest test is drawn boldest in Aspire blue with a soft fill; older tests
+    each get a distinct vibrant colour (gold, teal, amber, green, violet — no
+    greys). No zone shading — points are uniform filled circles so individual
+    readings stay legible; the LT2 (4 mmol) guide line is emphasised.
+
+    ``curves``: ordered ``{date_label: rows}`` (oldest → newest). Each ``rows``
+    is anything with ``speed`` / ``la`` / ``hr`` sequences — a pandas DataFrame
+    (columns) or a dict of lists. Sort by speed before passing for a clean line.
+
+    >>> lactate_curve({"14 Sep 2022": df_old, "02 Oct 2025": df_new})
+    """
+    from plotly.subplots import make_subplots
+
+    def _col(rows, name):
+        try:                       # DataFrame
+            return list(rows[name])
+        except Exception:
+            return list((rows or {}).get(name, []))
+
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    dates = list(curves.keys())
+    n = len(dates)
+    for i, d in enumerate(dates):
+        rows = curves[d]
+        speed, la, hrv = _col(rows, "speed"), _col(rows, "la"), _col(rows, "hr")
+        is_latest = (i == n - 1)
+        # latest = Aspire blue + bold + fill; older = a distinct vibrant colour
+        colr = ASPIRE_BLUE if is_latest else _LACTATE_PALETTE[i % len(_LACTATE_PALETTE)]
+        width = 4 if is_latest else 2.5
+        fig.add_trace(go.Scatter(
+            x=speed, y=la, mode="lines+markers", name=str(d), legendgroup=str(d),
+            line=dict(color=colr, width=width, shape="spline"),
+            marker=dict(size=marker_size, color=colr, symbol="circle",
+                        line=dict(color="white", width=1.5)),
+            # soft fill only under the latest curve
+            fill="tozeroy" if is_latest else None,
+            fillcolor="rgba(0,65,133,0.07)" if is_latest else None,
+            hovertemplate="%{x:.1f} km/h<br>%{y:.2f} mmol/L<extra>" + str(d) + "</extra>",
+        ), secondary_y=False)
+        if hr and any(v is not None for v in hrv):
+            fig.add_trace(go.Scatter(
+                x=speed, y=hrv, mode="lines+markers", name=f"{d} HR",
+                legendgroup=str(d), showlegend=False, opacity=0.6,
+                line=dict(color=colr, width=1.5, dash="dot"),
+                marker=dict(size=max(4, marker_size - 4), color=colr, symbol="circle"),
+                hovertemplate="%{x:.1f} km/h<br>%{y:.0f} bpm<extra>" + str(d) + " HR</extra>",
+            ), secondary_y=True)
+
+    # LT2 (4 mmol) — emphasised; LT1 (2 mmol) — light guide
+    fig.add_hline(y=lt2_mmol, line=dict(color=ASPIRE_BLUE, width=2, dash="dash"),
+                  annotation_text=f"LT2 · {lt2_mmol:g} mmol",
+                  annotation_position="top left",
+                  annotation_font=dict(size=11, color=ASPIRE_BLUE, family=FONT_HEADING),
+                  secondary_y=False)
+    fig.add_hline(y=lt1_mmol, line=dict(color=SLATE["300"], width=1, dash="dot"),
+                  annotation_text=f"LT1 · {lt1_mmol:g} mmol",
+                  annotation_position="bottom left",
+                  annotation_font=dict(size=10, color=SLATE["400"]),
+                  secondary_y=False)
+
+    fig.update_xaxes(title_text="Speed (km/h)", showgrid=True, gridcolor=SLATE["100"])
+    fig.update_yaxes(title_text="Blood lactate (mmol/L)", secondary_y=False,
+                     showgrid=True, gridcolor=SLATE["100"], rangemode="tozero")
+    fig.update_yaxes(title_text="Heart rate (bpm)", secondary_y=True,
+                     showgrid=False, rangemode="tozero")
+    fig.update_layout(
+        template="plotly_white", height=height,
+        margin=dict(l=60, r=60, t=10, b=50),
+        legend=dict(orientation="h", y=-0.18, x=0.5, xanchor="center", title_text=""),
+        hovermode="closest", font=dict(family=FONT_DATA),
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+    )
+    return dcc.Graph(figure=fig, config=GRAPH_CONFIG) if as_graph else fig
 
 
 def acwr_chart(

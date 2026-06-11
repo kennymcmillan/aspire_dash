@@ -4,6 +4,26 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.57.0] — 2026-06-11
+
+### Added
+
+- **`aspire_dash.sports_science.lactate_curve`** — incremental step-test
+  chart: speed (x) vs blood lactate (left y) and heart rate (right y,
+  dashed), one curve per test date, click a legend date to toggle both
+  its lactate + HR lines (shared legendgroup). Latest test boldest with a
+  soft fill; **large white-bordered circular points**; **no zone bands**;
+  emphasised LT2 (4 mmol) guide line. Returns `dcc.Graph` (or the
+  `go.Figure` with `as_graph=False`). First consumer: endurance /physiology.
+
+### Changed
+
+- **`rotating_stat` glow-up (v0.57)** — gradient panel + gradient accent
+  rail + radial watermark, bigger value (size-scaled), delta as a pill chip
+  ("▲ +1.4 vs last"), inline unit, active-dot highlight. New `size=`
+  arg ('sm'/'md'/'lg') caps width so it reads as a solid panel, not a thin
+  column or full-bleed stripe. CSS-only; back-compatible API.
+
 ## [0.56.0] — 2026-06-11
 
 ### Added

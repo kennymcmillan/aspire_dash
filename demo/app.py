@@ -100,6 +100,8 @@ nav = [
     # Sport reporting
     {"label": "Sports patterns",    "href": "/sports",
      "icon": "fa-solid fa-medal",        "section": "Sport reporting"},
+    {"label": "Physiology",         "href": "/physio",
+     "icon": "fa-solid fa-lungs"},
 
     # Finance + admin
     {"label": "Budget",             "href": "/budget",

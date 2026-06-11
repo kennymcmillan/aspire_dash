@@ -922,39 +922,51 @@ def rotating_stat(
     faces: list[dict],
     *,
     seconds_per_face: float = 3.0,
+    size: str = "md",
 ):
     """Auto-cycling KPI card — flips through 2-6 metric faces with a CSS
     3D rotateX (pure CSS: no callbacks, no dcc.Interval; pauses on hover,
-    honours prefers-reduced-motion by pinning the first face).
+    honours prefers-reduced-motion by pinning the first face). v0.57 glow-up:
+    gradient panel + accent rail, delta shown as a pill chip ("▲ +1.4 vs last"),
+    inline unit, active-dot highlight.
 
-    faces: [{label, value, sub?, delta?, delta_direction? ('up'/'down'/'flat')}]
+    faces: [{label, value, sub?(unit), delta?, delta_direction? (up/down/flat)}]
+    size: 'sm' | 'md' | 'lg' — sets card width/scale via .rs-size-* class.
     First consumer: endurance-dashboard physiology lactate markers.
     """
     faces = [f for f in faces if f][:6]
     n = max(2, len(faces))
     total = n * float(seconds_per_face)
+    size_cls = {"sm": "rs-size-sm", "lg": "rs-size-lg"}.get(size, "rs-size-md")
     children = []
     for i, f in enumerate(faces):
         direction = f.get("delta_direction", "flat")
         arrow = {"up": "▲", "down": "▼"}.get(direction, "–")
+        unit = f.get("sub")
+        # value + inline unit
+        value_kids = [str(f.get("value", "—"))]
+        if unit:
+            value_kids.append(html.Span(unit, className="rs-unit"))
         trend = None
         if f.get("delta"):
             trend = html.Div([
-                html.Span(arrow, className="rs-arrow"),
-                html.Span(str(f["delta"]), className="rs-delta"),
+                html.Span(f"{arrow} {f['delta']}"),
+                html.Span("vs last", className="rs-since"),
             ], className=f"rs-trend rs-{direction}")
         children.append(html.Div([
             html.Div(f.get("label", ""), className="rs-label"),
-            html.Div(str(f.get("value", "—")), className="rs-value"),
+            html.Div(value_kids, className="rs-value"),
             trend,
-            html.Div(f["sub"], className="rs-sub") if f.get("sub") else None,
         ], className="rotating-stat__face",
            # duration/delay are data-driven (n faces x seconds) — allowed inline
            style={"animationDuration": f"{total}s",
                   "animationDelay": f"{i * float(seconds_per_face)}s"}))
-    children.append(html.Div([html.Span() for _ in faces],
-                             className="rotating-stat__dots"))
-    return html.Div(children, className=f"rotating-stat rs-n{n}")
+    children.append(html.Div(
+        [html.Span(style={"animationDuration": f"{total}s",
+                          "animationDelay": f"{i * float(seconds_per_face)}s"})
+         for i in range(len(faces))],
+        className="rotating-stat__dots"))
+    return html.Div(children, className=f"rotating-stat rs-n{n} {size_cls}")
 
 
 def donut_with_focus(
