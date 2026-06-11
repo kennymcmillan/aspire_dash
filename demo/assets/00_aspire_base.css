@@ -4667,3 +4667,75 @@ img.amc-avatar {
     overflow-x: auto;
 }
 
+/* === Report shell (PBI-style) — v0.53.0, promoted from development_dashboard === */
+.report-band {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--aspire-900);
+    color: white;
+    padding: 12px 24px;
+    border-bottom: 3px solid var(--gold);
+}
+.report-band h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: white;
+}
+.report-band .report-band-sub { font-size: 13px; opacity: 0.8; }
+.report-band img { height: 46px; }
+
+.report-body { display: flex; align-items: stretch; }
+.report-content { flex: 1; padding: 16px 20px; min-width: 0; }
+
+.report-rail {
+    width: 230px;
+    flex-shrink: 0;
+    padding: 16px 14px;
+    background: white;
+    border-right: 1px solid var(--slate-200);
+    min-height: calc(100vh - 80px);
+}
+.report-rail .report-rail-photo { display: flex; justify-content: center; margin-bottom: 14px; }
+.report-rail .control-label { font-size: 10px; font-weight: 700; }
+.report-rail-gap { height: 12px; }
+
+.report-card {
+    padding: 14px 16px;
+    border-top: 3px solid var(--aspire-600);
+    height: 100%;
+}
+.report-card .report-card-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--slate-500);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+.report-card .report-card-value {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--aspire-600);
+    line-height: 1.1;
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+}
+.report-card .report-card-sub { font-size: 12px; color: var(--slate-400); margin-top: 2px; }
+
+.report-grid { display: grid; gap: 12px; }
+.report-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.report-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.report-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.report-grid-6 { grid-template-columns: repeat(6, 1fr); }
+
+@media (max-width: 1023px) {
+    .report-body { flex-direction: column; }
+    .report-rail { width: 100%; min-height: 0; border-right: 0; border-bottom: 1px solid var(--slate-200); }
+    .report-grid-3, .report-grid-4, .report-grid-6 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+    .report-grid-2, .report-grid-3, .report-grid-4, .report-grid-6 { grid-template-columns: 1fr; }
+}
