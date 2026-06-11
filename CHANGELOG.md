@@ -4,6 +4,35 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.53.0] — 2026-06-11
+
+### Added — `report` module: PBI-style report shell + rich-hover trend
+
+Promoted from `development_dashboard` (the Power BI report port). For apps that
+port/replicate a Power BI report layout:
+
+```python
+from aspire_dash.report import (report_page, report_band, athlete_rail,
+                                report_card, report_grid, trend_rich)
+```
+
+- `report_page(title, content, rail=, subtitle=)` — navy title band (Aspire logo,
+  gold underline) + optional left rail + content. CSS: `.report-band`,
+  `.report-body`, `.report-rail`, `.report-content` in `00_aspire_base.css`.
+- `athlete_rail(photo_el, *controls, labels=)` — PBI slicer column (photo +
+  labelled pickers).
+- `report_card(label, value, sub=, accent=)` — PBI value card (uppercase label,
+  big tabular value, top accent stripe). `.report-card`.
+- `report_grid(items, cols=2|3|4|6)` — responsive grid (`.report-grid-N`,
+  collapses 2-col on tablet, 1-col on phones).
+- `trend_rich(dates, values, unit, color=, context=, reverse=, band_lines=)` —
+  spline trend, branded area fill, and a **rich hover** where `context=
+  {label: series}` adds athlete-state lines to the tooltip (the PBI custom-
+  tooltip pattern, e.g. maturation status + height at each test). `reverse=True`
+  for lower-is-better metrics; `band_lines` for PHV-style reference thresholds.
+
+All styling is semantic classes (no inline styles) per the v0.45–0.48 rule.
+
 ## [0.52.0] — 2026-06-11
 
 ### Added — `sports.match_card()` (head-to-head result card)
