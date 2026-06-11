@@ -28,7 +28,7 @@ import dash
 from dash import html
 
 __all__ = ["report_band", "athlete_rail", "report_page", "report_card",
-           "report_grid", "trend_rich"]
+           "report_grid", "trend_rich", "PHV_ZONES"]
 
 
 def report_band(title: str, subtitle: str = "", logo_src: str | None = None) -> html.Div:
@@ -94,15 +94,27 @@ _TREND_LAYOUT = dict(
 )
 
 
+# Maturation (PHV) bands for %-predicted-adult-height charts — shade + label.
+PHV_ZONES = [
+    {"y0": 0, "y1": 85, "label": "Pre-PHV", "color": "#3b82f6"},
+    {"y0": 85, "y1": 90, "label": "Approaching", "color": "#f59e0b"},
+    {"y0": 90, "y1": 95.1, "label": "Circa-PHV", "color": "#ef4444"},
+    {"y0": 95.1, "y1": 100, "label": "Post-PHV", "color": "#16a34a"},
+]
+
+
 def trend_rich(dates, values, unit: str = "", *, color: str = "#004185",
                context: dict | None = None, reverse: bool = False,
-               band_lines: list[tuple] | None = None, height: int = 250) -> go.Figure:
+               band_lines: list[tuple] | None = None, zones: list[dict] | None = None,
+               pb_mask=None, height: int = 250) -> go.Figure:
     """Spline trend with branded area fill + a RICH hover.
 
-    context: optional {label: per-point-iterable} — each entry becomes a hover
-    line (e.g. {"Maturation": mat_series, "Height": heights}). This is the PBI
-    custom-tooltip pattern: the value plus the athlete's state at that moment.
-    band_lines: [(y, label), ...] dotted reference lines (e.g. PHV thresholds).
+    context: {label: per-point-iterable} — each becomes a hover line (the PBI
+        custom-tooltip pattern: value + athlete state at that moment).
+    band_lines: [(y, label), ...] dotted reference lines.
+    zones: [{y0,y1,label,color}, ...] shaded horizontal bands (e.g. PHV_ZONES,
+        ACWR/ref-range zones) — the "wow" layer for maturation/load charts.
+    pb_mask: per-point bool iterable — gold ★ markers on personal-best points.
     reverse: invert the y-axis for lower-is-better metrics (contact time).
     """
     d = pd.DataFrame({"x": pd.to_datetime(dates),
@@ -110,6 +122,8 @@ def trend_rich(dates, values, unit: str = "", *, color: str = "#004185",
     ctx_labels = list((context or {}).keys())
     for i, lab in enumerate(ctx_labels):
         d[f"_c{i}"] = list(context[lab])
+    if pb_mask is not None:
+        d["_pb"] = list(pb_mask)
     d = d.dropna(subset=["y"]).sort_values("x")
 
     hover = "<b>%{x|%d %b %Y}</b><br>%{y:.1f} " + unit
@@ -121,12 +135,29 @@ def trend_rich(dates, values, unit: str = "", *, color: str = "#004185",
     h = color.lstrip("#")
     fill = f"rgba({int(h[0:2], 16)},{int(h[2:4], 16)},{int(h[4:6], 16)},0.08)"
 
-    fig = go.Figure(go.Scatter(
+    fig = go.Figure()
+    for z in (zones or []):
+        zh = z["color"].lstrip("#")
+        fig.add_hrect(y0=z["y0"], y1=z["y1"], line_width=0,
+                      fillcolor=f"rgba({int(zh[0:2],16)},{int(zh[2:4],16)},{int(zh[4:6],16)},0.07)",
+                      annotation_text=z.get("label", ""), annotation_position="right",
+                      annotation_font_size=9, annotation_font_color="#94a3b8", layer="below")
+
+    fig.add_trace(go.Scatter(
         x=d["x"], y=d["y"], mode="lines+markers",
         line=dict(color=color, width=2.5, shape="spline"),
         marker=dict(size=8, color=color, line=dict(width=2, color="white")),
-        fill="tozeroy", fillcolor=fill,
+        fill="tozeroy" if not zones else None, fillcolor=fill if not zones else None,
         customdata=custom, hovertemplate=hover))
+
+    if pb_mask is not None and "_pb" in d:
+        pb = d[d["_pb"].astype(bool)]
+        if len(pb):
+            fig.add_trace(go.Scatter(
+                x=pb["x"], y=pb["y"], mode="markers",
+                marker=dict(symbol="star", size=14, color="#fbb800",
+                            line=dict(width=1, color="#b8860b")),
+                hovertemplate="<b>PB</b> %{y:.1f} " + unit + "<extra></extra>"))
 
     for y, label in (band_lines or []):
         fig.add_hline(y=y, line_dash="dot", line_color="#cbd5e1",

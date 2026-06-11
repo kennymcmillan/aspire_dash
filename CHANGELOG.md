@@ -4,6 +4,17 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.54.0] — 2026-06-11
+
+### Added — `report.trend_rich` polish: zone shading + PB markers
+
+- `zones=[{y0,y1,label,color}, …]` — shaded horizontal bands with edge labels
+  (the "wow" layer for maturation/load charts). Ships `report.PHV_ZONES`
+  (Pre/Approaching/Circa/Post-PHV at 85/90/95.1) for %-predicted-adult-height
+  trends. Bands render `layer="below"` at 7% opacity.
+- `pb_mask=<per-point bool>` — gold ★ markers on personal-best points.
+- (When `zones` set, the area fill is dropped so the bands read cleanly.)
+
 ## [0.53.0] — 2026-06-11
 
 ### Added — `report` module: PBI-style report shell + rich-hover trend
