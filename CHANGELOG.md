@@ -4,6 +4,18 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.56.0] — 2026-06-11
+
+### Added
+
+- **`aspire_dash.v12_helpers.rotating_stat`** — auto-cycling KPI card:
+  flips through 2-6 metric faces with a pure-CSS 3D rotateX (no
+  callbacks/intervals), pauses on hover, honours prefers-reduced-motion.
+  CSS: `.rotating-stat` block in `00_aspire_base.css` (keyframes
+  `rs-cycle-2..6`, visible window = 1/N of the loop). First consumer:
+  endurance-dashboard physiology page (lactate markers: vVO2max,
+  LT2 @4mmol, LT1, Peak VO2, La max).
+
 ## [0.55.0] — 2026-06-11
 
 ### Added — `viz.ref_band_grid` (reference-band heatmap grid)

@@ -4767,3 +4767,112 @@ img.amc-avatar {
     display: inline-block; width: 13px; height: 13px; border-radius: 3px;
     margin-right: 5px; vertical-align: -2px;
 }
+
+
+/* ============ ROTATING STAT (v0.56.0) ============
+   Auto-cycling KPI card: faces flip through with a CSS 3D rotateX —
+   pure CSS (no Dash callbacks/intervals), pauses on hover, respects
+   prefers-reduced-motion. Helper: v12_helpers.rotating_stat(). Face
+   animation duration/delay are data-driven inline (n faces x seconds). */
+.rotating-stat {
+  position: relative;
+  perspective: 700px;
+  min-height: 132px;
+  background: var(--surface-card, #fff);
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #004185;
+  padding: 16px 20px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+.rotating-stat__face {
+  position: absolute;
+  inset: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  opacity: 0;
+  transform: rotateX(80deg) translateY(8px);
+  transform-origin: center 65%;
+  backface-visibility: hidden;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+.rotating-stat:hover .rotating-stat__face { animation-play-state: paused; }
+.rs-n2 .rotating-stat__face { animation-name: rs-cycle-2; }
+.rs-n3 .rotating-stat__face { animation-name: rs-cycle-3; }
+.rs-n4 .rotating-stat__face { animation-name: rs-cycle-4; }
+.rs-n5 .rotating-stat__face { animation-name: rs-cycle-5; }
+.rs-n6 .rotating-stat__face { animation-name: rs-cycle-6; }
+/* visible window = 1/N of the loop: flip in, hold, flip out */
+@keyframes rs-cycle-2 {
+  0% { opacity: 0; transform: rotateX(80deg) translateY(8px); }
+  6% { opacity: 1; transform: rotateX(0) translateY(0); }
+  44% { opacity: 1; transform: rotateX(0) translateY(0); }
+  50% { opacity: 0; transform: rotateX(-80deg) translateY(-8px); }
+  100% { opacity: 0; transform: rotateX(80deg) translateY(8px); }
+}
+@keyframes rs-cycle-3 {
+  0% { opacity: 0; transform: rotateX(80deg) translateY(8px); }
+  4% { opacity: 1; transform: rotateX(0) translateY(0); }
+  29% { opacity: 1; transform: rotateX(0) translateY(0); }
+  33.33% { opacity: 0; transform: rotateX(-80deg) translateY(-8px); }
+  100% { opacity: 0; transform: rotateX(80deg) translateY(8px); }
+}
+@keyframes rs-cycle-4 {
+  0% { opacity: 0; transform: rotateX(80deg) translateY(8px); }
+  3% { opacity: 1; transform: rotateX(0) translateY(0); }
+  22% { opacity: 1; transform: rotateX(0) translateY(0); }
+  25% { opacity: 0; transform: rotateX(-80deg) translateY(-8px); }
+  100% { opacity: 0; transform: rotateX(80deg) translateY(8px); }
+}
+@keyframes rs-cycle-5 {
+  0% { opacity: 0; transform: rotateX(80deg) translateY(8px); }
+  2.5% { opacity: 1; transform: rotateX(0) translateY(0); }
+  17.5% { opacity: 1; transform: rotateX(0) translateY(0); }
+  20% { opacity: 0; transform: rotateX(-80deg) translateY(-8px); }
+  100% { opacity: 0; transform: rotateX(80deg) translateY(8px); }
+}
+@keyframes rs-cycle-6 {
+  0% { opacity: 0; transform: rotateX(80deg) translateY(8px); }
+  2% { opacity: 1; transform: rotateX(0) translateY(0); }
+  14.5% { opacity: 1; transform: rotateX(0) translateY(0); }
+  16.67% { opacity: 0; transform: rotateX(-80deg) translateY(-8px); }
+  100% { opacity: 0; transform: rotateX(80deg) translateY(8px); }
+}
+.rs-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+.rs-value {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+.rs-sub { font-size: 12px; color: #94a3b8; }
+.rs-trend { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; }
+.rs-trend.rs-up { color: #16a34a; }
+.rs-trend.rs-down { color: #dc2626; }
+.rs-trend.rs-flat { color: #64748b; }
+.rotating-stat__dots {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  display: flex;
+  gap: 4px;
+}
+.rotating-stat__dots span {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #cbd5e1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rotating-stat__face { animation: none !important; }
+  .rotating-stat__face:first-of-type { opacity: 1; transform: none; }
+}
