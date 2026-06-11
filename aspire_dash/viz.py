@@ -369,6 +369,61 @@ def status_dot(status="green", size=8, pulse=False):
     })
 
 
+# ── Reference-band heatmap grid ──────────────────────────────────────────────
+
+def ref_band_grid(columns, groups, *, legend=None, row_label="Athlete"):
+    """Compact entity × metric heatmap, optionally grouped — a whole-squad scan.
+
+    The CALLER computes the band colour per cell (this stays domain-agnostic:
+    reference ranges, percentiles, z-scores, RAG status — anything). Renders a
+    sticky-first-column table with `.heat-*` classes from 00_aspire_base.css.
+
+    Parameters
+    ----------
+    columns : list[str]
+        Metric column headers.
+    groups : list[dict]
+        ``[{"label": "Development 1", "rows": [row, ...]}, ...]``. For an
+        ungrouped grid pass a single group with ``label=None``.
+        Each ``row`` is ``{"label": "Athlete Name",
+        "cells": [cell, ...]}`` where each cell is either ``None`` (no data) or
+        ``{"text": "12.7", "color": "#16a34a", "title": "tooltip"}``.
+    legend : list[tuple[str, str]] | None
+        ``[(label, hex_colour), ...]`` rendered as a swatch key above the grid.
+    row_label : str
+        Header for the first (sticky) column.
+    """
+    head = [html.Th(row_label, className="heat-athlete-col")] + \
+           [html.Th(c) for c in columns]
+    body = []
+    ncol = len(columns) + 1
+    for g in groups:
+        if g.get("label"):
+            body.append(html.Tr(html.Td(g["label"], colSpan=ncol),
+                                className="heat-group-row"))
+        for row in g.get("rows", []):
+            tds = [html.Td(row.get("label", ""), className="heat-athlete")]
+            for cell in row.get("cells", []):
+                if cell and cell.get("color"):
+                    tds.append(html.Td(cell.get("text", ""), className="heat-cell",
+                                       style={"background": cell["color"]},
+                                       title=cell.get("title", "")))
+                else:
+                    txt = (cell or {}).get("text", "–") if isinstance(cell, dict) else "–"
+                    tds.append(html.Td(txt, className="heat-cell is-empty"))
+            body.append(html.Tr(tds))
+
+    table = html.Table([html.Thead(html.Tr(head)), html.Tbody(body)],
+                       className="heat-table")
+    children = []
+    if legend:
+        children.append(html.Div(
+            [html.Span([html.Span(className="heat-swatch", style={"background": c}), lab])
+             for lab, c in legend], className="heat-legend"))
+    children.append(html.Div(table, style={"overflowX": "auto"}))
+    return html.Div(children)
+
+
 # ── Metric Card with Sparkline ───────────────────────────────────────────────
 
 def metric_spark(label, value, unit="", trend_values=None, color=None):

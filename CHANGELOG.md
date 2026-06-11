@@ -4,6 +4,17 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.55.0] — 2026-06-11
+
+### Added — `viz.ref_band_grid` (reference-band heatmap grid)
+
+Compact entity × metric heatmap, optionally grouped — a whole-squad at-a-glance
+scan. Promoted from `development_dashboard`. Domain-agnostic: the **caller**
+computes each cell's band colour (ref ranges, percentiles, z-scores, RAG), the
+library renders a sticky-first-column grid with group header rows + a swatch
+legend. `.heat-*` classes added to `00_aspire_base.css` (sticky athlete column,
+hover zoom, navy group rows). Only data-driven cell colours stay inline.
+
 ## [0.54.0] — 2026-06-11
 
 ### Added — `report.trend_rich` polish: zone shading + PB markers
