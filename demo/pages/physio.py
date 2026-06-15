@@ -68,4 +68,34 @@ def layout():
             "    '02 Oct 2025': df_new,\n"
             "})  # → dcc.Graph; as_graph=False returns the go.Figure"
         ),
+
+        section("lactate_curve markers= — threshold-speed guides (v0.58)"),
+        html.P("Optional vertical guides at computed threshold speeds — pass "
+               "markers=[(speed, label, colour), …] (LT1/LT2/Dmax/FBLC computed "
+               "elsewhere). Drawn as dashed vlines with top labels, no need to "
+               "hand-add add_vline after the curve.",
+               style={"fontSize": "13px", "color": "#475569", "marginBottom": "12px"}),
+        html.Div(lactate_curve(_CURVES, markers=[
+            (14.4, "LT1", "#16a34a"), (16.75, "LT2", "#d97706"),
+            (16.5, "Dmax", "#1876ab"),
+        ]), className="card", style={"padding": "12px 16px"}),
+        code_block(
+            "lactate_curve(curves, markers=[\n"
+            "    (14.4,  'LT1',  '#16a34a'),\n"
+            "    (16.75, 'LT2',  '#d97706'),\n"
+            "    (16.5,  'Dmax', '#1876ab'),\n"
+            "])"
+        ),
+
+        section("Export identity helpers (v0.58)"),
+        html.P("Stamp SAMS identity on every exported row + name the file after "
+               "the athlete — companions to send_export, so picker-stamped "
+               "exports are one call.",
+               style={"fontSize": "13px", "color": "#475569", "marginBottom": "12px"}),
+        code_block(
+            "from aspire_dash.components.print_export import (\n"
+            "    identity_columns, identity_filename_slug)\n\n"
+            "rows = [{**identity_columns(athlete, test_date), **r} for r in rows]\n"
+            "fname = identity_filename_slug(athlete, 'cmj') + '.csv'"
+        ),
     ], style={"padding": "24px"})
