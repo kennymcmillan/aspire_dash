@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge — Fencing Reports migration target</title>
+<!-- Link the REAL aspire_dash base CSS so this preview is production-faithful,
+     not a Tailwind approximation. Every class below already ships in v0.59. -->
+<link rel="stylesheet" href="../../aspire_dash/assets/00_aspire_base.css">
+<style>
+  /* preview chrome only — NOT part of the migration */
+  body { padding: 24px; max-width: 1080px; margin: 0 auto; }
+  .preview-note { background:#fff; border:1px solid var(--slate-200); border-radius:10px;
+                  padding:14px 18px; margin:18px 0; font-size:13px; color:var(--slate-600); }
+  .preview-note b { color: var(--slate-800); }
+  .preview-note code { background:var(--slate-100); padding:1px 5px; border-radius:4px; }
+  .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:14px 0 26px; }
+  .tbl { border:1px solid var(--slate-200); border-radius:10px; overflow:hidden; }
+  @media (max-width:640px){ .kpi-row{ grid-template-columns:repeat(2,1fr);} }
+</style>
+</head>
+<body>
+
+  <!-- ── Brand heading (replaces the app's h2{} override: Inter/slate → Poppins/navy/uppercase) ── -->
+  <div class="aspire-section-heading">Foil — World Ranking</div>
+
+  <div class="preview-note">
+    <b>AFTER.</b> Everything below is rendered with classes that already exist in
+    <b>aspire_dash v0.59</b> — <code>.aspire-section-heading</code>, <code>.stat-card-mega</code>,
+    <code>.aspire-data-row</code>. The migration deletes the app's ~699 inline <code>style={}</code>
+    dicts, the brittle <code>div[style*="borderRadius: 8px"]</code> CSS selectors, and the local
+    <code>h2{}</code> brand override — and emits these classes via a shared <code>data_table()</code> helper.
+  </div>
+
+  <!-- ── KPI row (replaces hand-rolled stat divs with inline borderRadius/padding) ── -->
+  <div class="kpi-row">
+    <div class="stat-card-mega scm-accent-aspire">
+      <div class="scm-label">Qatari fencers ranked</div>
+      <div class="scm-value-row"><span class="scm-value">14</span>
+        <span class="scm-trend"><span class="scm-arrow">▲</span>2</span></div>
+      <div class="scm-sub">across foil, épée &amp; sabre</div>
+    </div>
+    <div class="stat-card-mega scm-accent-success">
+      <div class="scm-label">Best world rank</div>
+      <div class="scm-value-row"><span class="scm-value">23</span></div>
+      <div class="scm-sub">M. Abdulrahman · foil</div>
+    </div>
+    <div class="stat-card-mega scm-accent-gold">
+      <div class="scm-label">Top-50 fencers</div>
+      <div class="scm-value-row"><span class="scm-value">5</span>
+        <span class="scm-trend"><span class="scm-arrow">▲</span>1</span></div>
+      <div class="scm-sub">vs last release</div>
+    </div>
+    <div class="stat-card-mega scm-accent-warning">
+      <div class="scm-label">Avg points (QAT)</div>
+      <div class="scm-value-row"><span class="scm-value">42.8</span></div>
+      <div class="scm-sub">season 2025–26</div>
+    </div>
+  </div>
+
+  <!-- ── Data table: header + zebra + hover + highlighted QAT rows, all via .aspire-data-row ── -->
+  <div class="tbl">
+    <div class="aspire-data-row is-header">
+      <div class="aspire-data-row__cell" style="max-width:70px">Rank</div>
+      <div class="aspire-data-row__cell" style="flex:3">Fencer</div>
+      <div class="aspire-data-row__cell">Nation</div>
+      <div class="aspire-data-row__cell" style="text-align:right">Points</div>
+      <div class="aspire-data-row__cell" style="text-align:right">Δ</div>
+    </div>
+
+    <div class="aspire-data-row">
+      <div class="aspire-data-row__cell" style="max-width:70px"><span class="zone-badge zone-gold">1</span></div>
+      <div class="aspire-data-row__cell" style="flex:3">Alessio Foconi</div>
+      <div class="aspire-data-row__cell">🇮🇹 ITA</div>
+      <div class="aspire-data-row__cell" style="text-align:right">198.0</div>
+      <div class="aspire-data-row__cell" style="text-align:right; color:#16a34a">▲3</div>
+    </div>
+
+    <div class="aspire-data-row">
+      <div class="aspire-data-row__cell" style="max-width:70px"><span class="zone-badge zone-neutral">2</span></div>
+      <div class="aspire-data-row__cell" style="flex:3">Ka Long Cheung</div>
+      <div class="aspire-data-row__cell">🇭🇰 HKG</div>
+      <div class="aspire-data-row__cell" style="text-align:right">186.5</div>
+      <div class="aspire-data-row__cell" style="text-align:right; color:#dc2626">▼1</div>
+    </div>
+
+    <div class="aspire-data-row is-highlight">
+      <div class="aspire-data-row__cell" style="max-width:70px"><span class="zone-badge zone-aspire">23</span></div>
+      <div class="aspire-data-row__cell" style="flex:3"><b>Mohammed Abdulrahman</b></div>
+      <div class="aspire-data-row__cell">🇶🇦 QAT</div>
+      <div class="aspire-data-row__cell" style="text-align:right">71.0</div>
+      <div class="aspire-data-row__cell" style="text-align:right; color:#16a34a">▲5</div>
+    </div>
+
+    <div class="aspire-data-row">
+      <div class="aspire-data-row__cell" style="max-width:70px"><span class="zone-badge zone-neutral">24</span></div>
+      <div class="aspire-data-row__cell" style="flex:3">Daniele Garozzo</div>
+      <div class="aspire-data-row__cell">🇮🇹 ITA</div>
+      <div class="aspire-data-row__cell" style="text-align:right">70.5</div>
+      <div class="aspire-data-row__cell" style="text-align:right; color:var(--slate-400)">—</div>
+    </div>
+
+    <div class="aspire-data-row is-highlight">
+      <div class="aspire-data-row__cell" style="max-width:70px"><span class="zone-badge zone-aspire">47</span></div>
+      <div class="aspire-data-row__cell" style="flex:3"><b>Abdulrahman Hemeida</b></div>
+      <div class="aspire-data-row__cell">🇶🇦 QAT</div>
+      <div class="aspire-data-row__cell" style="text-align:right">38.0</div>
+      <div class="aspire-data-row__cell" style="text-align:right; color:#16a34a">▲2</div>
+    </div>
+  </div>
+
+  <div class="preview-note">
+    Only <b>data-driven</b> values stay inline (the green/red Δ colour, a column's text-align). Structure,
+    spacing, zebra, hover and the QAT highlight are owned by one CSS file — so a brand tweak cascades to
+    every sport app, and changing a radius can never silently break a <code>div[style*=…]</code> selector again.
+  </div>
+
+</body>
+</html>
