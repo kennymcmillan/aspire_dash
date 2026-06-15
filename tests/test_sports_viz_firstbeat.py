@@ -49,6 +49,16 @@ def test_placement_badge_emits_tone_classes():
     assert "placement-badge--sm" in placement_badge(1, size="sm").className
 
 
+def test_rank_pill_emits_tone_classes():
+    from aspire_dash.sports import rank_pill
+    assert "rank-pill" in rank_pill(3).className
+    assert "rank-top10" in rank_pill(3).className
+    assert "rank-top50" in rank_pill(28).className
+    assert "rank-other" in rank_pill(220).className
+    assert "rank-na" in rank_pill(None).className
+    assert "rank-na" in rank_pill(float("nan")).className
+
+
 def test_rank_change_emits_tone_classes():
     from aspire_dash.sports import rank_change
     assert "rc-up" in rank_change(3, 7).className

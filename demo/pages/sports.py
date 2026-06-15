@@ -3,7 +3,7 @@ import dash
 from dash import html
 
 from aspire_dash.sports import (
-    country_flag, flag_with_name, placement_badge, rank_change,
+    country_flag, flag_with_name, placement_badge, rank_pill, rank_change,
     competition_badge, category_badge, format_season, gradient_stat_card,
     stat_card, source_badge, competition_card, data_row, mini_stat,
     header_stat, trend_arrow,
@@ -61,6 +61,19 @@ def layout():
                  ], style={"display": "flex", "gap": "8px",
                             "alignItems": "center"}),
                  "placement_badge(1, size='md')"),
+
+        section("rank_pill",
+                 "World/leaderboard rank: gold ≤10, blue ≤50, grey beyond; "
+                 "em-dash for missing. For ranking reports (vs podium badges)."),
+        example("Rank pills",
+                 html.Div([
+                     rank_pill(3),
+                     rank_pill(28),
+                     rank_pill(220),
+                     rank_pill(None),
+                 ], style={"display": "flex", "gap": "8px",
+                            "alignItems": "center"}),
+                 "rank_pill(3)  # gold ·  rank_pill(220)  # grey ·  rank_pill(None)  # —"),
 
         section("rank_change",
                  "Up / down / unchanged arrow w/ delta."),

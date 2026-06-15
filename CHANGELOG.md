@@ -4,6 +4,16 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.59.0] — 2026-06-15
+
+### Added (promoted from the Table Tennis Player Career report)
+
+- **`sports.rank_pill(rank)`** — world/leaderboard rank pill: gold for top-10,
+  blue for top-50, grey beyond, em-dash for missing (None/NaN/NA). Distinct from
+  `placement_badge` (event podium, where 1/2/3 are the medals) — this is for a
+  *world ranking* number. CSS: `.rank-pill .rank-top10/.rank-top50/.rank-other/
+  .rank-na` in `00_aspire_base.css`, styled to match the placement-badge family.
+
 ## [0.58.0] — 2026-06-15
 
 ### Added (promoted from DASH_Vyntus)

@@ -337,6 +337,29 @@ def placement_badge(place, size="md"):
     return html.Span(children, className=cls)
 
 
+# ── Rank Pill ───────────────────────────────────────────────────────────────
+
+def rank_pill(rank):
+    """World / leaderboard rank pill — gold for top-10, blue for top-50, grey beyond.
+
+    Distinct from :func:`placement_badge` (event podium, where 1/2/3 are the
+    medals): this is for a *world ranking* number, where the "elite" thresholds
+    are top-10 and top-50.
+
+    Parameters
+    ----------
+    rank : int, str, or None
+        The ranking number. Anything that won't convert to an int (None, NaN,
+        pandas NA, blank) renders an em-dash placeholder.
+    """
+    try:
+        r = int(rank)
+    except (ValueError, TypeError):
+        return html.Span("—", className="rank-pill rank-na")
+    tone = "rank-top10" if r <= 10 else ("rank-top50" if r <= 50 else "rank-other")
+    return html.Span(str(r), className=f"rank-pill {tone}")
+
+
 # ── Rank Change Indicator ──────────────────────────────────────────────────
 
 def rank_change(current, previous):

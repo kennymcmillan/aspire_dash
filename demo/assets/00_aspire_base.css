@@ -3765,6 +3765,27 @@ body {
 .placement-badge.place-top16 { background: #f0fdf4; color: #166534; }
 .placement-badge.place-rest  { background: var(--slate-100); color: var(--slate-500); }
 
+/* ── Rank pill — world / leaderboard ranking number ───────────────── */
+.rank-pill {
+    display: inline-block;
+    min-width: 26px;
+    padding: 2px 9px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+}
+.rank-pill.rank-top10 {
+    background: linear-gradient(135deg, #fef9c3, #fde68a);
+    color: #92400e;                     /* amber-800 — elite, matches place-gold */
+    box-shadow: inset 0 0 0 1px rgba(217, 119, 6, 0.25);
+}
+.rank-pill.rank-top50 { background: #dbeafe; color: #1e40af; }
+.rank-pill.rank-other { background: var(--slate-100); color: var(--slate-500); }
+.rank-pill.rank-na    { background: transparent; color: var(--slate-300); font-weight: 400; }
+
 /* ── Rank change indicator ────────────────────────────────────────── */
 .rank-change {
     display: inline-flex;
