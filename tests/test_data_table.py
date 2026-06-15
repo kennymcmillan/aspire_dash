@@ -85,6 +85,29 @@ def test_wrap_column_opts_out_of_ellipsis():
     assert rich.style["overflow"] == "visible"
 
 
+def test_row_class_adds_per_row_modifier():
+    rows = [["available"], ["pending"], ["available"]]
+    tbl = data_table(
+        ["X"], rows,
+        row_class=lambda i, row: "is-dim" if row[0] == "pending" else "",
+    )
+    body = tbl.children[1:]
+    assert "is-dim" not in _classes(body[0])
+    assert "is-dim" in _classes(body[1])
+    assert "is-dim" not in _classes(body[2])
+
+
+def test_row_class_composes_with_highlight():
+    tbl = data_table(
+        ["X"], [["a"], ["b"]],
+        highlight={0},
+        row_class=lambda i, row: "is-dim",
+    )
+    first = tbl.children[1]
+    assert "is-highlight" in _classes(first)
+    assert "is-dim" in _classes(first)
+
+
 def test_short_row_pads_missing_cells():
     tbl = data_table(["A", "B", "C"], [["only_a"]])
     cells = tbl.children[1].children

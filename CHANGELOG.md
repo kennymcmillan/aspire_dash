@@ -4,6 +4,16 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.61.0] — 2026-06-15
+
+### Added (promoted from the Fencing Reports migration)
+
+- **`sports.data_table` gains `row_class=callable(i, row) -> str`** — apply extra
+  class(es) per row (e.g. `"is-dim"` to fade a competition whose report isn't
+  available yet). New CSS `.aspire-data-row.is-dim { opacity: 0.6 }`. Also
+  formalises the `wrap` (multi-line cell) + float `grow` column options added
+  for the fencer-search table.
+
 ## [0.60.0] — 2026-06-15
 
 ### Added (promoted from the Fencing Reports migration)

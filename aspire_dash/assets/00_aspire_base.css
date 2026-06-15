@@ -3875,6 +3875,12 @@ body {
     border-bottom: none;
 }
 
+/* Faded row — e.g. a competition whose report isn't available yet.
+   v0.61 — pairs with sports.data_table(row_class=...). */
+.aspire-data-row.is-dim {
+    opacity: 0.6;
+}
+
 /* ── Trend arrow ──────────────────────────────────────────────────── */
 .trend-arrow {
     display: inline-flex;

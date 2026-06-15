@@ -534,7 +534,7 @@ def data_row(cells, header=False, highlight=False):
     )
 
 
-def data_table(columns, rows, *, highlight=None, id=None, className=""):
+def data_table(columns, rows, *, highlight=None, row_class=None, id=None, className=""):
     """Assemble a hover/highlight data grid from the ``.aspire-data-row`` family.
 
     A thin assembler over the same classes :func:`data_row` uses, adding
@@ -563,6 +563,9 @@ def data_table(columns, rows, *, highlight=None, id=None, className=""):
     highlight : callable | iterable | None
         ``callable(index, row) -> bool`` or an iterable of row indices to mark
         with ``.is-highlight`` (the focus-nation blue). Default: none.
+    row_class : callable | None
+        ``callable(index, row) -> str`` returning extra class(es) for that row's
+        ``.aspire-data-row`` — e.g. ``"is-dim"`` to fade a not-yet-available row.
     id, className : str
         Forwarded to the wrapping ``.aspire-data-table`` container.
 
@@ -632,7 +635,13 @@ def data_table(columns, rows, *, highlight=None, id=None, className=""):
             if override is not None:
                 val = override["value"]
             cells.append(_cell(val, spec, override))
-        cls = "aspire-data-row" + (" is-highlight" if _is_hi(i, row) else "")
+        cls = "aspire-data-row"
+        if _is_hi(i, row):
+            cls += " is-highlight"
+        if row_class:
+            extra = row_class(i, row)
+            if extra:
+                cls += f" {extra}"
         body.append(html.Div(cells, className=cls))
 
     kwargs = {"className": "aspire-data-table" + (f" {className}" if className else "")}
