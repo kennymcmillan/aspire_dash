@@ -4,6 +4,20 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.58.0] — 2026-06-15
+
+### Added (promoted from DASH_Vyntus)
+
+- **`sports_science.lactate_curve(..., markers=)`** — optional threshold-speed
+  vertical guides: a list of `(speed, label, color)` (LT1/LT2/FBLC/Dmax computed
+  elsewhere) drawn as dashed vlines with top labels. Saves apps hand-adding
+  `add_vline` after the curve.
+- **`components.print_export.identity_columns(athlete, test_date)`** +
+  **`identity_filename_slug(athlete, suffix)`** — stamp SAMS identity
+  (Player_ID/MRN/Athlete/Sport/DOB/Age/Test_Date) on every exported row and name
+  the file after the athlete (companions to `send_export`). Every picker-stamped
+  export re-rolled these.
+
 ## [0.57.0] — 2026-06-11
 
 ### Added

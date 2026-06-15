@@ -144,6 +144,7 @@ def lactate_curve(
     hr: bool = True,
     lt2_mmol: float = 4.0,
     lt1_mmol: float = 2.0,
+    markers: list | None = None,
     marker_size: int = 9,
     title: str = "Lactate Curves",
     height: int = 460,
@@ -211,6 +212,15 @@ def lactate_curve(
                   annotation_position="bottom left",
                   annotation_font=dict(size=10, color=SLATE["400"]),
                   secondary_y=False)
+
+    # Optional threshold-speed markers (vertical guides): list of
+    # (speed, label, color) — e.g. LT1/LT2/FBLC/Dmax computed elsewhere.
+    for mv, label, color in (markers or []):
+        if mv is None:
+            continue
+        fig.add_vline(x=mv, line=dict(color=color, width=1.5, dash="dash"))
+        fig.add_annotation(x=mv, yref="paper", y=1.04, text=label, showarrow=False,
+                           font=dict(size=10, color=color))
 
     fig.update_xaxes(title_text="Speed (km/h)", showgrid=True, gridcolor=SLATE["100"])
     fig.update_yaxes(title_text="Blood lactate (mmol/L)", secondary_y=False,

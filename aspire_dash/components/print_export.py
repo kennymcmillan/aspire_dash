@@ -18,7 +18,38 @@ from ..theme import (
 
 
 __all__ = ['print_header', 'print_footer', 'export_buttons', 'send_export',
-           'a4_report_shell', 'register_print_button', 'safe_markdown_label']
+           'a4_report_shell', 'register_print_button', 'safe_markdown_label',
+           'identity_columns', 'identity_filename_slug']
+
+import re as _re
+
+
+def identity_columns(athlete: dict | None, test_date=None) -> dict:
+    """Leading SAMS-identity columns to stamp on every exported row, so a download
+    is self-describing. ``athlete`` is the picker-store payload (player_id,
+    full_name, mrn, sport, date_of_birth, age) or None. Keys are always present
+    (blank when nothing is picked) so the column set is stable.
+    """
+    a = athlete or {}
+    return {
+        "Player_ID": a.get("player_id") or "",
+        "MRN": a.get("mrn") or "",
+        "Athlete": a.get("full_name") or "",
+        "Sport": a.get("sport") or "",
+        "DOB": a.get("date_of_birth") or "",
+        "Age": a.get("age") if a.get("age") is not None else "",
+        "Test_Date": test_date or "",
+    }
+
+
+def identity_filename_slug(athlete: dict | None, suffix=None) -> str:
+    """Filesystem-safe ``Name_<suffix>`` slug from the picked athlete (e.g.
+    ``Amir_Omuash_2026-06-15``). Returns "" when no athlete — caller falls back."""
+    name = ((athlete or {}).get("full_name") or "").strip()
+    if not name:
+        return ""
+    safe = _re.sub(r"[^A-Za-z0-9]+", "_", name).strip("_")
+    return f"{safe}_{suffix}" if suffix else safe
 
 # ── Print Header/Footer ─────────────────────────────────────────────────────
 
