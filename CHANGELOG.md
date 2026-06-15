@@ -4,6 +4,26 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.61.2] — 2026-06-15
+
+### Fixed
+- Scaffolder (`aspire-dash new`): generated `deploy.sh` / `deploy.bat` / README used
+  `--entrypoint app.app`, which Connect reads as a package path (`app/app.py`) and
+  rejects for the flat `app.py` the scaffold creates. Now emits the correct
+  `--entrypoint app:app`. (Cost two failed deploys before diagnosis on padel_scout.)
+
+## [0.61.1] — 2026-06-15
+
+### Fixed
+
+- **`aspire_dash new` scaffold `.gitignore` now uses an allowlist** instead of a
+  brittle named denylist. `setup_app()` copies the whole shared asset tree
+  (CSS, logo, `brand/**`, JS, `body-bodymap.svg`, …) into `assets/` on every
+  boot; the old template only ignored 6 files, so `brand/**` and any
+  library-added asset got committed and produced version churn that never
+  reflected runtime (Connect regenerates from the pinned library). Template is
+  now `assets/*` + `!assets/10_app.css` — only app-owned assets are tracked.
+
 ## [0.61.0] — 2026-06-15
 
 ### Added (promoted from the Fencing Reports migration)

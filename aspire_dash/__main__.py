@@ -23,7 +23,7 @@ Quick start:
     python app.py             # local dev on http://localhost:{port}
 
 Deploy to Posit Connect:
-    rsconnect deploy dash . --entrypoint app.app
+    rsconnect deploy dash . --entrypoint app:app
 \"\"\"
 
 import dash
@@ -245,13 +245,13 @@ __pycache__/
 .venv/
 venv/
 
-# aspire_dash copies its own assets in — don't commit duplicates
-assets/00_aspire_base.css
-assets/01_aspire_print.css
-assets/02_aspire_skeletons.css
-assets/aspire-logo.png
-assets/sidebar_toggle.js
-assets/dark_mode.js
+# aspire_dash copies its shared assets (CSS / logo / brand / JS) into assets/
+# at boot via setup_app() — those are generated copies, not source, so don't
+# commit them (they only create version churn). Only app-owned assets are
+# tracked; the conventional app stylesheet is assets/10_app.css. Add another
+# "!assets/<file>" line for any other app-specific asset you create.
+assets/*
+!assets/10_app.css
 """
 
 
@@ -263,7 +263,7 @@ DEPLOY_BAT = """\
 git add -A
 git commit -m "%~1"
 git push
-rsconnect deploy dash . --entrypoint app.app
+rsconnect deploy dash . --entrypoint app:app
 """
 
 
@@ -275,7 +275,7 @@ MSG="${1:-deploy}"
 git add -A
 git commit -m "$MSG" || true
 git push
-rsconnect deploy dash . --entrypoint app.app
+rsconnect deploy dash . --entrypoint app:app
 """
 
 
@@ -295,7 +295,7 @@ python app.py         # http://localhost:{port}
 ## Deploy
 
 ```bash
-rsconnect deploy dash . --entrypoint app.app
+rsconnect deploy dash . --entrypoint app:app
 # or, with auto-commit:
 ./deploy.sh "describe your changes"
 ```
@@ -384,7 +384,7 @@ def _scaffold(name, port=8050, title=None, app_type="dashboard"):
     print(f"  python app.py          # http://localhost:{port}")
     print()
     print("Then:")
-    print( "  rsconnect deploy dash . --entrypoint app.app")
+    print( "  rsconnect deploy dash . --entrypoint app:app")
     print( "  # or ./deploy.sh \"describe your changes\"")
 
 
