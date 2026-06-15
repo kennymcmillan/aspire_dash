@@ -534,6 +534,113 @@ def data_row(cells, header=False, highlight=False):
     )
 
 
+def data_table(columns, rows, *, highlight=None, id=None, className=""):
+    """Assemble a hover/highlight data grid from the ``.aspire-data-row`` family.
+
+    A thin assembler over the same classes :func:`data_row` uses, adding
+    per-column alignment + width and an optional focus-row highlight — so sport
+    report pages stop hand-rolling ``html.Div`` tables with an inline ``style={}``
+    on every header and cell (and the brittle ``div[style*=…]`` CSS that targets
+    those inline strings).
+
+    Parameters
+    ----------
+    columns : list
+        One entry per column — a plain ``str`` (header label; left-aligned,
+        equal width) or a dict::
+
+            {"label": str,
+             "align": "left" | "right" | "center",   # default "left"
+             "grow":  int | float,                    # flex-grow, default 1
+             "width": str | None,                     # fixed width e.g. "70px"
+             "wrap":  bool}                            # multi-line cell, default False
+                                                       # (opts out of single-line ellipsis)
+    rows : list
+        One entry per row — a list/tuple of cell values positionally matching
+        ``columns``. A cell may be a ``str``/number/Dash component, or a dict
+        ``{"value": ..., "align": ..., "style": {...}, "className": ...}`` to
+        override just that cell (e.g. a data-driven up/down colour).
+    highlight : callable | iterable | None
+        ``callable(index, row) -> bool`` or an iterable of row indices to mark
+        with ``.is-highlight`` (the focus-nation blue). Default: none.
+    id, className : str
+        Forwarded to the wrapping ``.aspire-data-table`` container.
+
+    Returns
+    -------
+    dash.html.Div
+        Header row + one row per ``rows`` entry, wrapped in ``.aspire-data-table``.
+
+    Example
+    -------
+    ::
+
+        data_table(
+            ["Rank", {"label": "Fencer", "grow": 3},
+             "Nation", {"label": "Points", "align": "right"}],
+            [[rank_pill(1),  "Foconi",     flag_it,  "198.0"],
+             [rank_pill(23), "Abdulrahman", flag_qa, "71.0"]],
+            highlight=lambda i, row: row[2] == "QAT",
+        )
+    """
+    def _spec(c):
+        if isinstance(c, str):
+            return {"label": c, "align": "left", "grow": 1, "width": None, "wrap": False}
+        return {"label": c.get("label", ""), "align": c.get("align", "left"),
+                "grow": c.get("grow", 1), "width": c.get("width"),
+                "wrap": bool(c.get("wrap", False))}
+
+    specs = [_spec(c) for c in columns]
+
+    def _cell(content, spec, override=None):
+        override = override or {}
+        st = {"textAlign": override.get("align", spec["align"])}
+        if spec["width"]:
+            st["flex"] = f"0 0 {spec['width']}"
+            st["maxWidth"] = spec["width"]
+        else:
+            st["flex"] = str(spec["grow"])
+        if spec.get("wrap"):
+            # rich / multi-line cell — opt out of the single-line ellipsis clamp
+            st["whiteSpace"] = "normal"
+            st["overflow"] = "visible"
+            st["textOverflow"] = "clip"
+        if override.get("style"):
+            st.update(override["style"])
+        cls = "aspire-data-row__cell"
+        if override.get("className"):
+            cls += f" {override['className']}"
+        return html.Div(content, className=cls, style=st)
+
+    hl_set = set(highlight) if (highlight is not None and not callable(highlight)) else None
+
+    def _is_hi(i, row):
+        if highlight is None:
+            return False
+        if callable(highlight):
+            return bool(highlight(i, row))
+        return i in hl_set
+
+    header = html.Div([_cell(s["label"], s) for s in specs],
+                      className="aspire-data-row is-header")
+    body = []
+    for i, row in enumerate(rows):
+        cells = []
+        for ci, spec in enumerate(specs):
+            val = row[ci] if ci < len(row) else ""
+            override = val if isinstance(val, dict) and "value" in val else None
+            if override is not None:
+                val = override["value"]
+            cells.append(_cell(val, spec, override))
+        cls = "aspire-data-row" + (" is-highlight" if _is_hi(i, row) else "")
+        body.append(html.Div(cells, className=cls))
+
+    kwargs = {"className": "aspire-data-table" + (f" {className}" if className else "")}
+    if id:
+        kwargs["id"] = id
+    return html.Div([header, *body], **kwargs)
+
+
 # ── Trend Arrow (mini) ─────────────────────────────────────────────────────
 
 def trend_arrow(values, label=None):

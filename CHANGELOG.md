@@ -4,6 +4,27 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.60.0] — 2026-06-15
+
+### Added (promoted from the Fencing Reports migration)
+
+- **`sports.data_table(columns, rows, *, highlight=…)`** — assembles a hover/
+  highlight data grid from the existing `.aspire-data-row` family, with
+  per-column alignment + width and an optional focus-row predicate. Replaces the
+  hand-rolled `html.Div` tables (with an inline `style={}` on every header/cell)
+  and the brittle `div[style*="borderRadius: 8px"]` CSS selectors in the sport
+  report apps. Composes the same classes as the existing `sports.data_row()`
+  primitive. New CSS: `.aspire-data-table` card-like wrapper in `00_aspire_base.css`.
+
+### Fixed
+
+- **`kpi_tile` / `kpi_strip` no longer crash on non-numeric values.** The value
+  was unconditionally formatted with `f"{value:,.0f}"`, so any string (a rank,
+  country, week label, "sweet spot") or decimal passed as text raised
+  `ValueError: Unknown format code 'f' for object of type 'str'` at render. Now
+  numbers are thousands-grouped as before and pre-formatted strings render
+  verbatim. Surfaced by the aspire-squash-pulse ranking/Firstbeat cards.
+
 ## [0.59.0] — 2026-06-15
 
 ### Added (promoted from the Table Tennis Player Career report)

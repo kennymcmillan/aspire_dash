@@ -19,6 +19,19 @@ from ..theme import (
 
 __all__ = ['kpi_tile', 'kpi_tile_row', 'kpi_strip', 'kpi_stat']
 
+
+def _fmt_value(value):
+    """Display a KPI value: None -> em-dash; real numbers -> thousands-grouped
+    integer; anything else (a pre-formatted string like a rank, country, week
+    label, or a decimal ACWR) -> shown verbatim instead of crashing on ':,.0f'."""
+    if value is None:
+        return "—"
+    if isinstance(value, bool):           # bool is an int subclass — treat as text
+        return str(value)
+    if isinstance(value, (int, float)):
+        return f"{value:,.0f}"
+    return str(value)
+
 # ── KPI Tile ────────────────────────────────────────────────────────────────
 
 def kpi_tile(label, value, unit="", color=None, target=None, size="lg",
@@ -100,8 +113,11 @@ def kpi_tile(label, value, unit="", color=None, target=None, size="lg",
                         "fontSize": label_text_size}),
         # v0.32 — value is None handled separately (was "if value" which
         # rendered "—" for legitimate 0 counts like "Injuries: 0").
+        # v0.60 — numbers are comma-formatted; non-numeric values (pre-formatted
+        # strings like a rank "28", "Qatar", "Week 21-2026", an ACWR "0.81") are
+        # shown as-is instead of crashing on the numeric format code.
         # tabular-nums on the value so widths don't jitter on refresh.
-        html.Div(f"{value:,.0f}" if value is not None else "—",
+        html.Div(_fmt_value(value),
                  style={"fontSize": value_text_size,
                         "fontWeight": "700",
                         "color": accent, "lineHeight": "1.1",
