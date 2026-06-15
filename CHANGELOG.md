@@ -11,11 +11,6 @@ additive minors, breaking changes get a major bump when we get there.
   `--entrypoint app.app`, which Connect reads as a package path (`app/app.py`) and
   rejects for the flat `app.py` the scaffold creates. Now emits the correct
   `--entrypoint app:app`. (Cost two failed deploys before diagnosis on padel_scout.)
-
-## [0.61.1] — 2026-06-15
-
-### Fixed
-
 - **`aspire_dash new` scaffold `.gitignore` now uses an allowlist** instead of a
   brittle named denylist. `setup_app()` copies the whole shared asset tree
   (CSS, logo, `brand/**`, JS, `body-bodymap.svg`, …) into `assets/` on every
