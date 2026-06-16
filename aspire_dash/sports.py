@@ -644,10 +644,30 @@ def data_table(columns, rows, *, highlight=None, row_class=None, id=None, classN
                 cls += f" {extra}"
         body.append(html.Div(cells, className=cls))
 
-    kwargs = {"className": "aspire-data-table" + (f" {className}" if className else "")}
+    # Wide tables must SCROLL on a narrow viewport, not shrink-to-fit (which
+    # crammed 10 columns into "Ve/D/SE/W/G…" — the responsive failure in
+    # v0.60-0.62). Give the table a min-width (sum of per-column minimums) and
+    # wrap it in a horizontal-scroll container, so narrow screens scroll instead
+    # of ellipsis-truncating every cell.
+    def _col_min_px(spec):
+        w = spec["width"]
+        if w:
+            try:
+                return int(str(w).replace("px", "").strip())
+            except ValueError:
+                return 90
+        return max(80, int(round(spec["grow"] * 75)))
+
+    min_width = sum(_col_min_px(s) for s in specs)
+    table = html.Div(
+        [header, *body],
+        className="aspire-data-table" + (f" {className}" if className else ""),
+        style={"minWidth": f"{min_width}px"},
+    )
+    wrap = {"className": "aspire-data-table-scroll"}
     if id:
-        kwargs["id"] = id
-    return html.Div([header, *body], **kwargs)
+        wrap["id"] = id
+    return html.Div(table, **wrap)
 
 
 # ── Trend Arrow (mini) ─────────────────────────────────────────────────────

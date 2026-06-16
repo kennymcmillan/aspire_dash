@@ -4,6 +4,20 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.63.0] — 2026-06-16
+
+### Fixed
+
+- **`sports.data_table` is now responsive** — a wide table (many columns) used to
+  *shrink-to-fit* on a narrow viewport, cramming 10 columns into "Ve/D/SE/W/G…"
+  with every cell ellipsis-truncated (shipped broken in 0.60-0.62; caught on the
+  live Fencing Reports app at laptop+sidebar / tablet / mobile widths). The
+  builder now gives the table a `min-width` (sum of per-column minimums) and
+  wraps it in a `.aspire-data-table-scroll` horizontal-scroll container, so
+  narrow screens **scroll** instead of truncating. **Note: the return is now a
+  scroll wrapper around the `.aspire-data-table` div** (one extra nesting level).
+  Verified with desktop + tablet + mobile screenshots. +3 tests (14 total).
+
 ## [0.62.0] — 2026-06-16
 
 ### Fixed (fleet-wide hardening)

@@ -3865,6 +3865,14 @@ body {
 
 /* Card-like bordered container for the .aspire-data-row family.
    v0.60 — pairs with sports.data_table(). */
+/* Horizontal-scroll wrapper so a wide table (many columns) scrolls on a narrow
+   viewport instead of shrink-to-fit cramming. v0.63 — sports.data_table() wraps
+   its table in this; the table carries an inline min-width (sum of column mins). */
+.aspire-data-table-scroll {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
 .aspire-data-table {
     border: 1px solid var(--slate-200);
     border-radius: 10px;
