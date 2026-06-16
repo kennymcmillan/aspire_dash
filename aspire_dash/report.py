@@ -89,8 +89,8 @@ _TREND_LAYOUT = dict(
     margin=dict(l=44, r=16, t=10, b=34), showlegend=False,
     plot_bgcolor="white", paper_bgcolor="white",
     font=dict(family="Poppins, sans-serif", size=11, color="#334155"),
-    hoverlabel=dict(bgcolor="white", font_size=12, bordercolor="#e2e8f0",
-                    font_family="Poppins, sans-serif"),
+    hoverlabel=dict(bgcolor="white", font_size=12, font_color="#0f172a",
+                    bordercolor="#e2e8f0", font_family="Poppins, sans-serif"),
 )
 
 
@@ -140,8 +140,14 @@ def trend_rich(dates, values, unit: str = "", *, color: str = "#004185",
         zh = z["color"].lstrip("#")
         fig.add_hrect(y0=z["y0"], y1=z["y1"], line_width=0,
                       fillcolor=f"rgba({int(zh[0:2],16)},{int(zh[2:4],16)},{int(zh[4:6],16)},0.07)",
-                      annotation_text=z.get("label", ""), annotation_position="right",
-                      annotation_font_size=9, annotation_font_color="#94a3b8", layer="below")
+                      layer="below")
+        # zone label OUTSIDE the plot, in the right margin (xref=paper > 1), at the
+        # band midpoint, coloured by the zone — so it never overlaps the data.
+        if z.get("label"):
+            fig.add_annotation(xref="paper", x=1.01, xanchor="left",
+                               yref="y", y=(z["y0"] + z["y1"]) / 2, yanchor="middle",
+                               text=z["label"], showarrow=False,
+                               font=dict(size=9, color=z["color"]))
 
     fig.add_trace(go.Scatter(
         x=d["x"], y=d["y"], mode="lines+markers",
@@ -164,7 +170,10 @@ def trend_rich(dates, values, unit: str = "", *, color: str = "#004185",
                       annotation_text=label, annotation_font_size=9,
                       annotation_font_color="#94a3b8")
 
-    fig.update_layout(height=height, yaxis_title=unit, **_TREND_LAYOUT)
+    layout = dict(_TREND_LAYOUT)
+    if zones:  # make room in the right margin for the zone labels
+        layout["margin"] = {**_TREND_LAYOUT["margin"], "r": 88}
+    fig.update_layout(height=height, yaxis_title=unit, **layout)
     fig.update_xaxes(showgrid=False, linecolor="#e2e8f0")
     fig.update_yaxes(gridcolor="#f1f5f9", zeroline=False,
                      autorange="reversed" if reverse else True)

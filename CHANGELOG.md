@@ -4,6 +4,17 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.63.1] — 2026-06-16
+
+### Fixed
+
+- **`trend_rich` hover text was invisible** — `hoverlabel` set `bgcolor="white"`
+  with no font colour, so the tooltip text rendered white-on-white. Set
+  `font_color="#0f172a"`.
+- **`trend_rich` zone labels now sit OUTSIDE the plot** in the right margin
+  (xref=paper, coloured per zone) instead of overlapping the data at the right
+  edge; the right margin widens to ~88px when `zones` are present.
+
 ## [0.63.0] — 2026-06-16
 
 ### Fixed
