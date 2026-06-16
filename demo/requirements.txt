@@ -1,8 +1,8 @@
-dash>=2.17.0
+dash>=2.17.0,<4.2   # cap: 4.2 untested with aspire_dash
 dash-bootstrap-components>=1.6.0
 dash-ag-grid>=31.0.0
 plotly>=5.18.0
 pandas>=2.0.0
 # aspire_dash itself — kept current with each release by aspire-fleet-bump
 # (the demo is a fleet target now, so it never lags the library again).
-aspire_dash @ git+https://github.com/kennymcmillan/aspire_dash.git@bf1ca2f790482db4ef0534323cf78dc6de944e32
+aspire_dash @ git+https://github.com/kennymcmillan/aspire_dash.git@a3c31d9cfb79ceff099efbc4bbdb21a8063c15b2
