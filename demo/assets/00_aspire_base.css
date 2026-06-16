@@ -3863,6 +3863,24 @@ body {
     letter-spacing: 0.04em;
 }
 
+/* Card-like bordered container for the .aspire-data-row family.
+   v0.60 — pairs with sports.data_table(). */
+.aspire-data-table {
+    border: 1px solid var(--slate-200);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.aspire-data-table .aspire-data-row:last-child {
+    border-bottom: none;
+}
+
+/* Faded row — e.g. a competition whose report isn't available yet.
+   v0.61 — pairs with sports.data_table(row_class=...). */
+.aspire-data-row.is-dim {
+    opacity: 0.6;
+}
+
 /* ── Trend arrow ──────────────────────────────────────────────────── */
 .trend-arrow {
     display: inline-flex;
