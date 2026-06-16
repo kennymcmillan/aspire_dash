@@ -71,7 +71,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.61.2"
+__version__ = "0.62.0"
 
 
 def normalised_path(pathname: str | None) -> str:
@@ -178,6 +178,19 @@ def setup_app(app):
             dst = os.path.join(dst_dir, f)
             if not os.path.exists(dst) or os.path.getmtime(src) > os.path.getmtime(dst):
                 shutil.copy2(src, dst)
+
+    # Dash 4.x raises ImportedInsideCallbackError if a component library is
+    # FIRST imported during a callback. aspire_dash lazy-imports optional
+    # component libs inside helpers (tables/v12_helpers -> dash_ag_grid,
+    # viz -> dash_svg) to keep them optional deps. Register whatever is
+    # installed here at setup time (startup, before any callback runs), so an
+    # app that first builds a grid/svg INSIDE a callback never trips it.
+    # Guarded so a missing optional lib doesn't break setup_app.
+    for _lib in ("dash_ag_grid", "dash_svg"):
+        try:
+            __import__(_lib)
+        except ImportError:
+            pass
 
     # Sidebar toggle is handled by sidebar_toggle.js (no callback needed)
 

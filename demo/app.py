@@ -10,20 +10,10 @@ should add a matching page or section in this demo.
 import dash
 from dash import Dash, html, dcc
 
-# Eagerly register the OPTIONAL component libs that aspire_dash lazy-imports
-# inside helpers (tables/v12_helpers → dash_ag_grid, viz → dash_svg). Dash 4.x
-# raises ImportedInsideCallbackError if a component library is first imported
-# *during* a callback; importing them at startup registers their components up
-# front so a callback that builds a grid/svg never trips it. Guarded so a
-# missing optional lib doesn't crash boot.
-for _lib in ("dash_ag_grid", "dash_svg"):
-    try:
-        __import__(_lib)
-    except ImportError:
-        pass
-
 import aspire_dash
 from aspire_dash import setup_app, STYLESHEETS
+# NB: the optional component libs (dash_ag_grid / dash_svg) are eagerly
+# registered by setup_app() since v0.62.0 — no per-app import needed.
 from aspire_dash.components import (
     sidebar, header, dark_mode_toggle,
     register_linear_step_toggle,

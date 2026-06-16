@@ -4,6 +4,18 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.62.0] — 2026-06-16
+
+### Fixed (fleet-wide hardening)
+- **`setup_app()` now eagerly registers the optional component libs** that
+  aspire_dash lazy-imports inside helpers (`dash_ag_grid` in tables/v12_helpers,
+  `dash_svg` in viz). Dash 4.x raises `ImportedInsideCallbackError` when a
+  component library is FIRST imported during a callback — so any app that builds
+  a grid/svg *inside a callback* (first-touch) would crash on Dash 4.x. Importing
+  them at setup time (startup, before any callback) fixes every consumer app at
+  once; guarded so a missing optional dep doesn't break `setup_app`. Surfaced by
+  the component-showcase demo on Dash 4.1.0.
+
 ## [0.61.2] — 2026-06-15
 
 ### Fixed
