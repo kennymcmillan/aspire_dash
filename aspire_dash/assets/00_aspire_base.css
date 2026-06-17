@@ -979,7 +979,9 @@ table.aspire-table tbody tr:last-child td {
     border-right: 1px solid #eef2f7 !important;
 }
 .dash-spreadsheet-container .dash-spreadsheet-inner th:hover {
-    background-color: #eef2f7 !important;
+    /* header bg is Aspire blue with white text — darken slightly on hover so the
+       text stays visible (was #eef2f7, which hid white-on-light header labels). */
+    background-color: #003566 !important;
 }
 
 /* Sort indicator */

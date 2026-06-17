@@ -4,6 +4,28 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.64.0] — 2026-06-17
+
+### Changed
+
+- **`aspire_datatable` now centres values by default, with the first column
+  (name / label) left-aligned** — the Aspire table convention. Headers match
+  (centre, first-column left). Callers left-align a different column (e.g. when
+  column 0 is a rank `#`) by appending a `style_cell_conditional` rule.
+- **`style_overrides` conditional lists now APPEND to the defaults** instead of
+  replacing them — so passing `style_data_conditional` no longer silently drops
+  the zebra-row striping / totals-row styling (latent bug), and
+  `style_cell_conditional` adds to the default alignment.
+- **`aspire_datatable` `filter_` now defaults to `False`** — the native filter
+  row (input boxes under the headers) is off unless a table opts in. Cleaner
+  default; pass `filter_=True` to restore it.
+
+### Fixed
+
+- **DataTable column-header text vanished on hover** — `th:hover` lightened the
+  header to `#eef2f7` while the header text is white (blue header), so labels
+  disappeared. Hover now darkens to `#003566`, keeping the text readable.
+
 ## [0.63.1] — 2026-06-16
 
 ### Fixed

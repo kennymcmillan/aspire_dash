@@ -258,7 +258,7 @@ def aspire_datatable(
     *,
     page_size: int = 50,
     sort: bool = True,
-    filter_: bool = True,
+    filter_: bool = False,
     export: str | None = None,
     style_overrides: dict | None = None,
     totals_row_label: str | None = None,
@@ -281,7 +281,8 @@ def aspire_datatable(
     sort : bool
         Enable native sorting.
     filter_ : bool
-        Enable native filter row.
+        Enable the native filter row (the input boxes under the headers).
+        Default ``False`` — opt in per table when filtering is wanted.
     export : str or None
         ``"csv"`` to enable native CSV export; default disabled.
     style_overrides : dict or None
@@ -293,19 +294,31 @@ def aspire_datatable(
     """
     from dash import dash_table
 
+    # Aspire table convention: values are CENTRED, the first column (the
+    # name / label, e.g. Athlete) reads LEFT. Callers left-align a different
+    # column (e.g. when col 0 is a rank "#") by appending to
+    # style_cell_conditional via style_overrides.
+    first_id = (columns or [{"id": ""}])[0].get("id", "")
     base_style = dict(
         style_cell={
             "padding": "8px 10px",
             "fontFamily": "Inter, sans-serif",
             "fontSize": "13px",
-            "textAlign": "left",
+            "textAlign": "center",
         },
+        style_cell_conditional=[
+            {"if": {"column_id": first_id}, "textAlign": "left"},
+        ],
         style_header={
             "backgroundColor": ASPIRE_BLUE,
             "color": "white",
             "fontWeight": "700",
             "border": "none",
+            "textAlign": "center",
         },
+        style_header_conditional=[
+            {"if": {"column_id": first_id}, "textAlign": "left"},
+        ],
         style_data_conditional=[
             {"if": {"row_index": "odd"}, "backgroundColor": "#fafbfc"},
         ],
@@ -313,8 +326,6 @@ def aspire_datatable(
     )
 
     if totals_row_label:
-        # first column is index 0; using filter_query on first column id
-        first_id = (columns or [{"id": ""}])[0].get("id", "")
         base_style["style_data_conditional"].append({
             "if": {"filter_query": f'{{{first_id}}} = "{totals_row_label}"'},
             "backgroundColor": ASPIRE_NAVY,
@@ -323,7 +334,13 @@ def aspire_datatable(
         })
 
     if style_overrides:
-        base_style.update(style_overrides)
+        # APPEND to the conditional lists (so caller rules add to the Aspire
+        # defaults instead of clobbering zebra rows / alignment); replace scalars.
+        for k, v in style_overrides.items():
+            if k.endswith("_conditional") and isinstance(v, list):
+                base_style[k] = base_style.get(k, []) + v
+            else:
+                base_style[k] = v
 
     kwargs = dict(
         id=id,
