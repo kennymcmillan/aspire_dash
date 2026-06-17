@@ -45,6 +45,16 @@ __all__ = [
     "skinfold_silhouette_svg",
     "zscore_heatmap",
     "zscore_radar_figure",
+    # Maturation / growth colour rules (shared so every app shades the same way).
+    "MAT_COLOUR_GREEN",
+    "MAT_COLOUR_AMBER",
+    "MAT_COLOUR_RED",
+    "GROWTH_RED_CM",
+    "WEIGHT_RED_KG",
+    "mat_status_colour",
+    "pah_colour",
+    "growth_colour",
+    "weight_change_colour",
     # Re-exported from .zscores for one-stop imports.
     "INVERTED_MEASURES",
     "Z_SCORE_MEASURES",
@@ -53,6 +63,54 @@ __all__ = [
     "z_score",
     "z_score_color",
 ]
+
+
+# ── Maturation / growth colour rules ───────────────────────────────────────
+# The Aspire athlete-development colour convention (matched to the Power BI
+# "Development Testing Dashboard" card conditional-formatting). Maturation
+# status & % predicted adult height share the PHV bands; Circa-PHV / 90–95.99%
+# PAH = RED (peak height velocity, highest injury-risk window). 12-month growth
+# ≥ 7.5 cm and 12-month weight gain ≥ 9 kg flag red. Colours match the app
+# palette (maturation chips, ref-range bands). Pre-PHV / sub-threshold → None.
+MAT_COLOUR_GREEN = "#27AE60"
+MAT_COLOUR_AMBER = "#E67E22"
+MAT_COLOUR_RED = "#E74C3C"
+GROWTH_RED_CM = 7.5
+WEIGHT_RED_KG = 9.0
+
+
+def mat_status_colour(status: str | None) -> str | None:
+    """Maturation-status label → hex. Pre-PHV / unknown → None (no fill)."""
+    return {"Post-PHV": MAT_COLOUR_GREEN, "Approaching-PHV": MAT_COLOUR_AMBER,
+            "Circa-PHV": MAT_COLOUR_RED}.get(status)
+
+
+def pah_colour(pah: float | None) -> str | None:
+    """% Predicted Adult Height → hex band. ≥96 green · 90–95.99 red (Circa,
+    peak growth) · 85–89.99 amber · ≤84.99 / no data → None."""
+    if pah is None or pd.isna(pah):
+        return None
+    if pah >= 96:
+        return MAT_COLOUR_GREEN
+    if pah >= 90:
+        return MAT_COLOUR_RED
+    if pah >= 85:
+        return MAT_COLOUR_AMBER
+    return None
+
+
+def growth_colour(height_yoy_cm: float | None) -> str | None:
+    """12-month height growth → red at ≥ 7.5 cm/yr, else None."""
+    if height_yoy_cm is None or pd.isna(height_yoy_cm):
+        return None
+    return MAT_COLOUR_RED if height_yoy_cm >= GROWTH_RED_CM else None
+
+
+def weight_change_colour(weight_yoy_kg: float | None) -> str | None:
+    """12-month weight change → red at ≥ 9 kg/yr, else None."""
+    if weight_yoy_kg is None or pd.isna(weight_yoy_kg):
+        return None
+    return MAT_COLOUR_RED if weight_yoy_kg >= WEIGHT_RED_KG else None
 
 
 # ── 1. Heath-Carter somatochart ────────────────────────────────────────────

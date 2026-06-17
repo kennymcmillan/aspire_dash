@@ -4,6 +4,18 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.65.0] — 2026-06-17
+
+### Added
+
+- **Shared maturation / growth colour rules** in `anthropometric` (matched to the
+  Power BI Development Testing Dashboard): `mat_status_colour`, `pah_colour`,
+  `growth_colour`, `weight_change_colour` + `MAT_COLOUR_{GREEN,AMBER,RED}` /
+  `GROWTH_RED_CM` (7.5) / `WEIGHT_RED_KG` (9). Circa-PHV / 90–95.99 %PAH = red
+  (peak height velocity); ≥96 green; 85–89.99 amber; Pre-PHV / sub-threshold →
+  none. So every app shades maturation status, %PAH, 12-mo growth and 12-mo
+  weight change identically.
+
 ## [0.64.0] — 2026-06-17
 
 ### Changed
