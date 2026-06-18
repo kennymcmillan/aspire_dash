@@ -4,6 +4,19 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.66.0] — 2026-06-18
+
+### Added
+
+- **`report.combo_chart` + `report.multiline_chart`** — PBI-style charts promoted
+  from the Development Testing Dashboard "Longitudinal Physical Data" port.
+  `combo_chart(bars, line, left_unit, right_unit)` = dual-axis combo (grouped
+  columns on the primary y + a line on the secondary y, e.g. test values with a
+  paired index/power/force line); `multiline_chart(series, unit)` = multi-series
+  line. Defaults match the PBI (teal columns `#01B8AA`, gold line `#F2C80F`, navy
+  labels), reuse `_TREND_LAYOUT` (Poppins), and label both axes. Reusable for any
+  PBI combo-chart port.
+
 ## [0.65.0] — 2026-06-17
 
 ### Added

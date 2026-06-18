@@ -28,7 +28,8 @@ import dash
 from dash import html
 
 __all__ = ["report_band", "athlete_rail", "report_page", "report_card",
-           "report_grid", "trend_rich", "PHV_ZONES"]
+           "report_grid", "trend_rich", "combo_chart", "multiline_chart",
+           "PHV_ZONES"]
 
 
 def report_band(title: str, subtitle: str = "", logo_src: str | None = None) -> html.Div:
@@ -177,4 +178,73 @@ def trend_rich(dates, values, unit: str = "", *, color: str = "#004185",
     fig.update_xaxes(showgrid=False, linecolor="#e2e8f0")
     fig.update_yaxes(gridcolor="#f1f5f9", zeroline=False,
                      autorange="reversed" if reverse else True)
+    return fig
+
+
+# PBI combo/line charts — promoted from the Development Testing Dashboard port
+# (the "Longitudinal Physical Data" page). Defaults match the PBI: teal columns,
+# a gold secondary-axis line, navy data labels.
+COMBO_COLUMN = "#01B8AA"   # primary grouped columns (teal)
+COMBO_LINE = "#F2C80F"     # secondary-axis line (gold)
+COMBO_LABEL = "#050574"    # data labels (navy)
+
+
+def combo_chart(bars, line, left_unit: str = "", right_unit: str = "", *,
+                height: int = 320, line_color: str = COMBO_LINE,
+                label_color: str = COMBO_LABEL) -> go.Figure:
+    """Dual-axis combo (PBI lineClusteredColumnComboChart): grouped columns on the
+    primary y, a line on the secondary y — e.g. test values as columns with a paired
+    index (RSI, power, F/BM) as the line.
+
+    bars: ``[(name, x, y, colour, decimals), ...]`` — one grouped column series each.
+    line: ``(name, x, y, decimals)`` — the secondary-axis line (gold by default).
+    """
+    fig = go.Figure()
+    for name, x, y, colour, dp in bars:
+        fig.add_bar(x=list(x), y=list(y), name=name, marker_color=colour,
+                    text=[f"{v:.{dp}f}" for v in y], textposition="outside",
+                    textfont=dict(size=9, color=label_color), cliponaxis=False)
+    ln_name, lx, ly, ldp = line
+    fig.add_trace(go.Scatter(
+        x=list(lx), y=list(ly), name=ln_name, yaxis="y2",
+        mode="lines+markers+text", line=dict(color=line_color, width=2.6),
+        marker=dict(size=7, color=line_color, line=dict(color="white", width=1)),
+        text=[f"{v:.{ldp}f}" for v in ly], textposition="top center",
+        textfont=dict(size=9, color=label_color)))
+    layout = dict(_TREND_LAYOUT)
+    layout.update(showlegend=True, margin=dict(l=54, r=54, t=10, b=38),
+                  legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0,
+                              font=dict(size=10)))
+    fig.update_layout(height=height, barmode="group", **layout)
+    fig.update_xaxes(showgrid=False, linecolor="#e2e8f0", tickfont=dict(size=10))
+    fig.update_yaxes(title_text=left_unit, title_font={"size": 11}, title_standoff=4,
+                     gridcolor="#f1f5f9", zeroline=False)
+    fig.update_layout(yaxis2=dict(title=dict(text=right_unit, font={"size": 11}),
+                                  overlaying="y", side="right", showgrid=False,
+                                  zeroline=False, rangemode="tozero"))
+    return fig
+
+
+def multiline_chart(series, unit: str = "", *, height: int = 320,
+                    label_color: str = COMBO_LABEL) -> go.Figure:
+    """Multi-series line chart (PBI lineChart): one line per series on a shared axis.
+
+    series: ``[(name, x, y, colour, decimals), ...]``.
+    """
+    fig = go.Figure()
+    for name, x, y, colour, dp in series:
+        fig.add_trace(go.Scatter(
+            x=list(x), y=list(y), name=name, mode="lines+markers+text",
+            line=dict(color=colour, width=2.6),
+            marker=dict(size=7, color=colour, line=dict(color="white", width=1)),
+            text=[f"{v:.{dp}f}" for v in y], textposition="top center",
+            textfont=dict(size=9, color=label_color)))
+    layout = dict(_TREND_LAYOUT)
+    layout.update(showlegend=True,
+                  legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0,
+                              font=dict(size=10)))
+    fig.update_layout(height=height, **layout)
+    fig.update_xaxes(showgrid=False, linecolor="#e2e8f0", tickfont=dict(size=10))
+    fig.update_yaxes(title_text=unit, title_font={"size": 11}, title_standoff=4,
+                     gridcolor="#f1f5f9", zeroline=False)
     return fig
