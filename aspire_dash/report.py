@@ -189,9 +189,20 @@ COMBO_LINE = "#F2C80F"     # secondary-axis line (gold)
 COMBO_LABEL = "#050574"    # data labels (navy)
 
 
+def _point_labels(values, dp, mode):
+    """Data-label text per `mode`: 'last' (only the latest point — declutters a long
+    series), 'all', or 'none'. Hover always shows every point regardless."""
+    vals = list(values)
+    if mode == "none" or not vals:
+        return None
+    if mode == "all":
+        return [f"{v:.{dp}f}" for v in vals]
+    return ["" for _ in vals[:-1]] + [f"{vals[-1]:.{dp}f}"]  # 'last'
+
+
 def combo_chart(bars, line, left_unit: str = "", right_unit: str = "", *,
                 height: int = 320, line_color: str = COMBO_LINE,
-                label_color: str = COMBO_LABEL) -> go.Figure:
+                label_color: str = COMBO_LABEL, label_mode: str = "last") -> go.Figure:
     """Dual-axis combo (PBI lineClusteredColumnComboChart): grouped columns on the
     primary y, a line on the secondary y — e.g. test values as columns with a paired
     index (RSI, power, F/BM) as the line.
@@ -202,14 +213,14 @@ def combo_chart(bars, line, left_unit: str = "", right_unit: str = "", *,
     fig = go.Figure()
     for name, x, y, colour, dp in bars:
         fig.add_bar(x=list(x), y=list(y), name=name, marker_color=colour,
-                    text=[f"{v:.{dp}f}" for v in y], textposition="outside",
+                    text=_point_labels(y, dp, label_mode), textposition="outside",
                     textfont=dict(size=9, color=label_color), cliponaxis=False)
     ln_name, lx, ly, ldp = line
     fig.add_trace(go.Scatter(
         x=list(lx), y=list(ly), name=ln_name, yaxis="y2",
         mode="lines+markers+text", line=dict(color=line_color, width=2.6),
         marker=dict(size=7, color=line_color, line=dict(color="white", width=1)),
-        text=[f"{v:.{ldp}f}" for v in ly], textposition="top center",
+        text=_point_labels(ly, ldp, label_mode), textposition="top center",
         textfont=dict(size=9, color=label_color)))
     layout = dict(_TREND_LAYOUT)
     layout.update(showlegend=True, margin=dict(l=54, r=54, t=10, b=38),
@@ -226,7 +237,7 @@ def combo_chart(bars, line, left_unit: str = "", right_unit: str = "", *,
 
 
 def multiline_chart(series, unit: str = "", *, height: int = 320,
-                    label_color: str = COMBO_LABEL) -> go.Figure:
+                    label_color: str = COMBO_LABEL, label_mode: str = "last") -> go.Figure:
     """Multi-series line chart (PBI lineChart): one line per series on a shared axis.
 
     series: ``[(name, x, y, colour, decimals), ...]``.
@@ -237,7 +248,7 @@ def multiline_chart(series, unit: str = "", *, height: int = 320,
             x=list(x), y=list(y), name=name, mode="lines+markers+text",
             line=dict(color=colour, width=2.6),
             marker=dict(size=7, color=colour, line=dict(color="white", width=1)),
-            text=[f"{v:.{dp}f}" for v in y], textposition="top center",
+            text=_point_labels(y, dp, label_mode), textposition="top center",
             textfont=dict(size=9, color=label_color)))
     layout = dict(_TREND_LAYOUT)
     layout.update(showlegend=True,

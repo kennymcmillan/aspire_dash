@@ -4,6 +4,15 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.66.1] — 2026-06-18
+
+### Changed
+
+- `combo_chart` / `multiline_chart` gain a **`label_mode`** arg (`"last"` default,
+  `"all"`, `"none"`). Default now labels only the latest point of each series —
+  declutters long longitudinal series (overlapping data labels); hover still shows
+  every point. Pass `label_mode="all"` for the old every-point behaviour.
+
 ## [0.66.0] — 2026-06-18
 
 ### Added
