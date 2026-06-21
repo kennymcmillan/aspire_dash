@@ -979,7 +979,9 @@ table.aspire-table tbody tr:last-child td {
     border-right: 1px solid #eef2f7 !important;
 }
 .dash-spreadsheet-container .dash-spreadsheet-inner th:hover {
-    background-color: #eef2f7 !important;
+    /* header bg is Aspire blue with white text — darken slightly on hover so the
+       text stays visible (was #eef2f7, which hid white-on-light header labels). */
+    background-color: #003566 !important;
 }
 
 /* Sort indicator */
@@ -3865,6 +3867,14 @@ body {
 
 /* Card-like bordered container for the .aspire-data-row family.
    v0.60 — pairs with sports.data_table(). */
+/* Horizontal-scroll wrapper so a wide table (many columns) scrolls on a narrow
+   viewport instead of shrink-to-fit cramming. v0.63 — sports.data_table() wraps
+   its table in this; the table carries an inline min-width (sum of column mins). */
+.aspire-data-table-scroll {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
 .aspire-data-table {
     border: 1px solid var(--slate-200);
     border-radius: 10px;
@@ -4973,3 +4983,21 @@ img.amc-avatar {
   .rotating-stat__face, .rotating-stat__dots span { animation: none !important; }
   .rotating-stat__face:first-of-type { opacity: 1; transform: none; }
 }
+
+/* ── sparkline-tile modifiers (v0.67) — group accent + asymmetry zone + empty ──
+   Promoted from the endurance-dashboard tile-consolidation (forge #metric-tile).
+   accent-* = thin left edge for group identity; zone-* reuses the universal
+   .zone tint and colours the value to match; is-empty dims a no-data tile. */
+.sparkline-tile.accent-aspire    { border-left: 3px solid var(--aspire-600); }
+.sparkline-tile.accent-secondary { border-left: 3px solid var(--aspire-secondary); }
+.sparkline-tile.accent-gold      { border-left: 3px solid var(--gold); }
+.sparkline-tile.accent-success   { border-left: 3px solid #16a34a; }
+.sparkline-tile.accent-danger    { border-left: 3px solid #dc2626; }
+.sparkline-tile.accent-neutral   { border-left: 3px solid var(--slate-300); }
+.sparkline-tile.zone-green  .spk-value { color: #16a34a; }
+.sparkline-tile.zone-yellow .spk-value { color: #b45309; }
+.sparkline-tile.zone-red    .spk-value { color: #dc2626; }
+.sparkline-tile .spk-unit { font-size: 12px; font-weight: 600; color: var(--slate-500); margin-left: 3px; }
+.sparkline-tile .spk-sub  { font-size: 10px; color: var(--slate-400); margin-top: 2px; }
+.sparkline-tile.is-empty  { opacity: 0.55; box-shadow: none; }
+.sparkline-tile.is-empty .spk-value { color: var(--slate-400); }

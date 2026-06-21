@@ -4,6 +4,26 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.67.0] - 2026-06-21
+
+### Added
+
+- `sparkline_tile` gains composable, backward-compatible modifiers, promoted from the
+  endurance-dashboard tile consolidation (one tile now replaces five per-page tile
+  treatments):
+  - `accent` (aspire | secondary | gold | success | danger | neutral): a thin left-edge
+    accent for group identity.
+  - `zone` (green | yellow | red): reuses the universal `.zone-*` tint and colours the
+    value to match, for asymmetry / status tiles where colour carries meaning.
+  - `delta_tone` (good | bad): colours the delta independent of its arrow direction, so a
+    lower-is-better metric can show a down-arrow in green.
+  - `unit` and `sub`: a small unit suffix after the value and a muted sub-line.
+  - An empty/falsy `series` now renders a dimmed empty-state tile (no chart) instead of
+    erroring, so a no-data metric can collapse gracefully.
+  An old `sparkline_tile(label, value, series, ...)` call renders exactly as before.
+  New CSS: `.sparkline-tile.accent-*`, `.sparkline-tile.zone-* .spk-value`, `.spk-unit`,
+  `.spk-sub`, `.sparkline-tile.is-empty`.
+
 ## [0.66.1] — 2026-06-18
 
 ### Changed

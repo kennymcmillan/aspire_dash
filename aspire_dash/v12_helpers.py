@@ -285,12 +285,57 @@ def sparkline_tile(
     series: list[float],
     *,
     delta: str | None = None,
-    delta_direction: str = "flat",   # up | down | flat
-    color: str | None = None,
+    delta_direction: str = "flat",   # up | down | flat (drives the arrow)
+    delta_tone: str | None = None,   # good | bad — colour the delta independent of the
+                                     # arrow, so a lower-is-better metric can show ▼ in green
+    color: str | None = None,        # sparkline line/fill colour (hex)
+    accent: str | None = None,       # aspire | secondary | gold | success | danger | neutral
+                                     # — thin left-edge accent for group identity
+    zone: str | None = None,         # green | yellow | red — asymmetry status: universal
+                                     # .zone-* tint + value coloured to match
+    unit: str = "",                  # small suffix after the value (cm, W/kg, %)
+    sub: str | None = None,          # muted sub-line (e.g. "5 sessions")
 ):
     """KPI tile with an inline sparkline. `series` is a list of recent
-    values (last 7-14 typical). Renders via Plotly mini-chart."""
+    values (last 7-14 typical). Renders via Plotly mini-chart.
+
+    All modifiers are optional and backward-compatible (a call with just
+    label/value/series renders exactly as before):
+    - accent: thin left-border in a brand token, for group identity.
+    - zone:   asymmetry status — universal .zone-* tint + value coloured to match.
+    - delta_tone: colour the delta good/bad independent of its arrow direction.
+    - unit/sub: unit suffix after the value + a muted sub-line.
+    Pass an empty/falsy `series` to render a dimmed empty-state tile (no chart).
+    """
     import plotly.graph_objects as go
+
+    tile_classes = "sparkline-tile"
+    if accent:
+        tile_classes += f" accent-{accent}"
+    if zone:
+        tile_classes += f" zone-{zone}"
+
+    # v0.32 — guard floats so a stray 42.7142857 doesn't dump full repr
+    if isinstance(value, float):
+        value_str = f"{value:,.2f}"
+    elif isinstance(value, int):
+        value_str = f"{value:,}"
+    else:
+        value_str = str(value)
+    value_children = [html.Span(value_str, className="spk-value-num")]
+    if unit:
+        value_children.append(html.Span(unit, className="spk-unit"))
+
+    # Empty-state: no series -> dimmed placeholder tile, no chart.
+    if not series:
+        return html.Div([
+            html.Div([
+                html.Div(label, className="spk-label"),
+                html.Div(value_children, className="spk-value"),
+                html.Div(sub, className="spk-sub") if sub else None,
+            ], className="spk-text"),
+        ], className=tile_classes + " is-empty")
+
     color = color or "#004185"
     # Convert hex to rgba for the fill — Plotly doesn't accept 8-char hex
     r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
@@ -309,34 +354,31 @@ def sparkline_tile(
         plot_bgcolor="rgba(0,0,0,0)",
         xaxis=dict(visible=False), yaxis=dict(visible=False),
     )
-    delta_color = {"up": "#16a34a", "down": "#dc2626"}.get(delta_direction, "var(--slate-400)")
+    tone = delta_tone or delta_direction
+    delta_color = {"up": "#16a34a", "good": "#16a34a",
+                   "down": "#dc2626", "bad": "#dc2626"}.get(tone, "var(--slate-400)")
     # v0.32 — flat-delta glyph was "·" (low bullet, off-baseline). Use en-dash.
     delta_arrow = {"up": "▲", "down": "▼", "flat": "–"}.get(delta_direction, "–")
 
-    # v0.32 — guard floats so a stray 42.7142857 doesn't dump full repr
-    if isinstance(value, float):
-        value_str = f"{value:,.2f}"
-    elif isinstance(value, int):
-        value_str = f"{value:,}"
-    else:
-        value_str = str(value)
-
     text_block = [
         html.Div(label, className="spk-label"),
-        html.Div(value_str, className="spk-value"),
+        html.Div(value_children, className="spk-value"),
     ]
     if delta is not None:
         text_block.append(
             html.Div(f"{delta_arrow} {delta}", className="spk-delta",
                       style={"color": delta_color})
         )
+    if sub:
+        text_block.append(html.Div(sub, className="spk-sub"))
+
     return html.Div([
         html.Div(text_block, className="spk-text"),
         html.Div(dcc.Graph(figure=fig,
                             config={"displayModeBar": False, "staticPlot": True},
                             style={"height": "36px"}),
                   className="spk-chart"),
-    ], className="sparkline-tile")
+    ], className=tile_classes)
 
 
 # ── 9. Injury card ──────────────────────────────────────────────────────────

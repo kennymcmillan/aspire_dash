@@ -135,6 +135,110 @@
   </section>
 
 
+  <!-- ═══ UNIFIED METRIC TILE — prototype (endurance-dashboard consolidation) ═══ -->
+  <section id="metric-tile" class="mb-12">
+    <h2 class="text-lg font-semibold mb-1 text-slate-800">Unified metric tile — declutter the Endurance / Strength grids</h2>
+    <p class="text-xs text-slate-500 mb-4">
+      Goal: one compact tile for every "value + trend" across all pages. White card,
+      group colour as a thin LEFT accent only, value in near-black, status colour
+      (green/amber/red) reserved for the delta and for asymmetry zones. Extends the
+      existing <code>.sparkline-tile</code> with <code>accent-*</code> + <code>zone-*</code> modifiers.
+    </p>
+
+    <!-- BEFORE: today's two competing treatments -->
+    <div class="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Before (two different tile systems, four colour signals each)</div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <!-- EP tile today: full blue tint + blue value + colored delta + sparkline -->
+      <div class="rounded-lg p-3 border" style="background:linear-gradient(135deg,rgba(37,99,235,.10),#fff 60%);border-color:#bfdbfe;">
+        <div class="text-[10px] font-semibold uppercase tracking-wide text-blue-700/80 mb-1" style="min-height:28px">Jump Height (Imp-Mom)</div>
+        <div class="text-[26px] font-extrabold text-blue-700 leading-none">38.4<span class="text-sm font-semibold"> cm</span></div>
+        <div class="text-[11px] font-semibold text-green-600 mt-1">▲ +1.2</div>
+        <svg viewBox="0 0 100 28" class="w-full h-7 mt-1"><polyline points="0,20 20,18 40,14 60,15 80,9 100,6" fill="none" stroke="#2563eb" stroke-width="2"/></svg>
+      </div>
+      <!-- Strength tile today: value painted in accent colour -->
+      <div class="bg-white rounded-lg p-3 border border-slate-200 border-t-4" style="border-top-color:#fbb800">
+        <div class="text-[10px] font-semibold uppercase tracking-wide text-slate-500 mb-1">Run Specific RSI</div>
+        <div class="text-[26px] font-extrabold leading-none" style="color:#fbb800">0.42</div>
+        <div class="text-[11px] font-semibold text-red-600 mt-1">▼ -0.03</div>
+        <svg viewBox="0 0 100 28" class="w-full h-7 mt-1"><polyline points="0,8 20,10 40,9 60,14 80,16 100,19" fill="none" stroke="#fbb800" stroke-width="2"/></svg>
+      </div>
+      <!-- EP empty tile today: full-weight "no data" -->
+      <div class="rounded-lg p-3 border" style="background:linear-gradient(135deg,rgba(22,163,74,.10),#fff 60%);border-color:#bbf7d0;">
+        <div class="text-[10px] font-semibold uppercase tracking-wide text-green-700/80 mb-1" style="min-height:28px">Peak Vertical Force</div>
+        <div class="text-[26px] font-extrabold text-slate-300 leading-none">—</div>
+        <div class="text-[11px] text-slate-400 mt-1">no prev · 0 sessions</div>
+        <div class="h-7 mt-1"></div>
+      </div>
+      <div class="rounded-lg p-3 border" style="background:linear-gradient(135deg,rgba(124,58,237,.10),#fff 60%);border-color:#ddd6fe;">
+        <div class="text-[10px] font-semibold uppercase tracking-wide text-violet-700/80 mb-1" style="min-height:28px">Max Velocity</div>
+        <div class="text-[26px] font-extrabold text-violet-700 leading-none">9.8<span class="text-sm font-semibold"> m/s</span></div>
+        <div class="text-[11px] font-semibold text-green-600 mt-1">▲ +0.1</div>
+        <svg viewBox="0 0 100 28" class="w-full h-7 mt-1"><polyline points="0,18 20,16 40,12 60,13 80,8 100,7" fill="none" stroke="#7c3aed" stroke-width="2"/></svg>
+      </div>
+    </div>
+
+    <!-- AFTER: one tile, neutral, group accent on the left edge only -->
+    <div class="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">After — CMJ group (aspire left-accent, neutral white, black value, status only on delta)</div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <!-- helper macro inline: .sparkline-tile look + 3px left accent -->
+      <div class="flex items-center gap-3.5 bg-white border border-slate-200 rounded-lg shadow-sm px-4 py-3" style="border-left:3px solid #004185">
+        <div class="flex-1 min-w-0">
+          <div class="text-[10px] font-semibold uppercase tracking-[0.5px] text-slate-500">Jump Height</div>
+          <div class="text-[22px] font-bold text-slate-900 leading-tight tabular-nums">38.4</div>
+          <div class="text-[11px] font-semibold text-green-600 mt-0.5">▲ +1.2</div>
+        </div>
+        <svg viewBox="0 0 100 36" class="w-[100px] h-9 shrink-0"><polyline points="0,28 20,24 40,18 60,20 80,11 100,7" fill="none" stroke="#004185" stroke-width="2"/></svg>
+      </div>
+      <div class="flex items-center gap-3.5 bg-white border border-slate-200 rounded-lg shadow-sm px-4 py-3" style="border-left:3px solid #004185">
+        <div class="flex-1 min-w-0">
+          <div class="text-[10px] font-semibold uppercase tracking-[0.5px] text-slate-500">Peak Power / BM</div>
+          <div class="text-[22px] font-bold text-slate-900 leading-tight tabular-nums">52.1</div>
+          <div class="text-[11px] font-semibold text-green-600 mt-0.5">▲ +0.8</div>
+        </div>
+        <svg viewBox="0 0 100 36" class="w-[100px] h-9 shrink-0"><polyline points="0,26 20,22 40,23 60,16 80,14 100,9" fill="none" stroke="#004185" stroke-width="2"/></svg>
+      </div>
+      <div class="flex items-center gap-3.5 bg-white border border-slate-200 rounded-lg shadow-sm px-4 py-3" style="border-left:3px solid #004185">
+        <div class="flex-1 min-w-0">
+          <div class="text-[10px] font-semibold uppercase tracking-[0.5px] text-slate-500">RSI-modified</div>
+          <div class="text-[22px] font-bold text-slate-900 leading-tight tabular-nums">0.48</div>
+          <div class="text-[11px] font-semibold text-slate-400 mt-0.5">– 0.00</div>
+        </div>
+        <svg viewBox="0 0 100 36" class="w-[100px] h-9 shrink-0"><polyline points="0,18 20,19 40,17 60,18 80,17 100,18" fill="none" stroke="#004185" stroke-width="2"/></svg>
+      </div>
+      <!-- asym tile: zone tint + value coloured by zone, delta kept -->
+      <div class="flex items-center gap-3.5 border rounded-lg shadow-sm px-4 py-3" style="border-left:3px solid #004185;background:linear-gradient(135deg,rgba(234,179,8,.12),#fff 60%);border-color:#fde68a">
+        <div class="flex-1 min-w-0">
+          <div class="text-[10px] font-semibold uppercase tracking-[0.5px] text-slate-500">Ecc. Braking Asym</div>
+          <div class="text-[22px] font-bold leading-tight tabular-nums" style="color:#b45309">7.4%</div>
+          <div class="text-[11px] font-semibold text-amber-600 mt-0.5">amber · imbalance</div>
+        </div>
+        <svg viewBox="0 0 100 36" class="w-[100px] h-9 shrink-0"><polyline points="0,10 20,14 40,12 60,18 80,16 100,20" fill="none" stroke="#d97706" stroke-width="2"/></svg>
+      </div>
+    </div>
+
+    <!-- group accents + asym zones reference row -->
+    <div class="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Group accents (brand tokens) + asymmetry zones</div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+      <div class="bg-white border border-slate-200 rounded-lg shadow-sm px-4 py-2.5" style="border-left:3px solid #004185"><div class="text-[10px] font-semibold uppercase tracking-[0.5px] text-slate-500">CMJ</div><div class="text-[18px] font-bold text-slate-900 tabular-nums">aspire</div></div>
+      <div class="bg-white border border-slate-200 rounded-lg shadow-sm px-4 py-2.5" style="border-left:3px solid #fbb800"><div class="text-[10px] font-semibold uppercase tracking-[0.5px] text-slate-500">Hop 10-5</div><div class="text-[18px] font-bold text-slate-900 tabular-nums">gold</div></div>
+      <div class="bg-white border border-slate-200 rounded-lg shadow-sm px-4 py-2.5" style="border-left:3px solid #16a34a"><div class="text-[10px] font-semibold uppercase tracking-[0.5px] text-slate-500">Iso Squat</div><div class="text-[18px] font-bold text-slate-900 tabular-nums">success</div></div>
+      <div class="bg-white border border-slate-200 rounded-lg shadow-sm px-4 py-2.5" style="border-left:3px solid #1876ab"><div class="text-[10px] font-semibold uppercase tracking-[0.5px] text-slate-500">SLISOT</div><div class="text-[18px] font-bold text-slate-900 tabular-nums">secondary</div></div>
+    </div>
+    <div class="grid grid-cols-3 gap-3 mb-6 max-w-2xl">
+      <div class="border rounded-lg shadow-sm px-4 py-2.5" style="background:linear-gradient(135deg,rgba(22,163,74,.10),#fff 60%);border-color:#bbf7d0"><div class="text-[10px] font-semibold uppercase tracking-[0.5px] text-slate-500">Asym &lt; 5%</div><div class="text-[18px] font-bold tabular-nums" style="color:#16a34a">2.1%</div></div>
+      <div class="border rounded-lg shadow-sm px-4 py-2.5" style="background:linear-gradient(135deg,rgba(234,179,8,.12),#fff 60%);border-color:#fde68a"><div class="text-[10px] font-semibold uppercase tracking-[0.5px] text-slate-500">Asym 5-10%</div><div class="text-[18px] font-bold tabular-nums" style="color:#b45309">7.4%</div></div>
+      <div class="border rounded-lg shadow-sm px-4 py-2.5" style="background:linear-gradient(135deg,rgba(220,38,38,.12),#fff 60%);border-color:#fecaca"><div class="text-[10px] font-semibold uppercase tracking-[0.5px] text-slate-500">Asym &gt; 10%</div><div class="text-[18px] font-bold tabular-nums" style="color:#dc2626">13.8%</div></div>
+    </div>
+
+    <!-- empty group collapses to ONE slim strip instead of N empty tiles -->
+    <div class="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Empty group collapses to one strip (was 4 dead tiles)</div>
+    <div class="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-400 max-w-2xl">
+      <span class="text-base">○</span>
+      <span class="text-[13px] font-medium">No Isometric Squat data for this athlete</span>
+    </div>
+  </section>
+
+
   <!-- ═══ DATE PICKER — prototype ═══ -->
   <section id="date-picker" class="mb-12">
     <h2 class="text-lg font-semibold mb-1 text-slate-800">Date Picker — toolbar pattern</h2>

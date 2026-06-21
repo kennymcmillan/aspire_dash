@@ -209,6 +209,33 @@ def layout():
             "               color='#6366f1')"
         ),
 
+        # 8b. Sparkline tile — accent / zone / empty modifiers (v0.67)
+        section("8b · sparkline_tile modifiers — group accent, asymmetry zone, empty"),
+        html.Div([
+            sparkline_tile("Jump Height", 38.4, series=[34, 35, 36, 37, 38, 38.4],
+                            delta="1.2", delta_direction="up", delta_tone="good",
+                            accent="aspire", color="#004185", unit="cm", sub="6 sessions"),
+            sparkline_tile("Best Contact Time", 182, series=[210, 200, 195, 188, 182],
+                            delta="6", delta_direction="down", delta_tone="good",
+                            accent="gold", color="#fbb800", unit="ms", sub="5 sessions"),
+            sparkline_tile("Ecc. Braking Asym", 7.4, series=[3.1, 5.2, 6.8, 7.4],
+                            delta="2.2", delta_direction="up", zone="yellow",
+                            color="#d97706", unit="%", sub="4 sessions"),
+            sparkline_tile("Peak Vertical Force", "—", series=[], unit="N",
+                            sub="no data"),
+        ], style={"display": "grid",
+                   "gridTemplateColumns": "repeat(auto-fit, minmax(240px, 1fr))",
+                   "gap": "12px", "marginBottom": "12px"}),
+        code_block(
+            "sparkline_tile('Jump Height', 38.4, series=[...],\n"
+            "               delta='1.2', delta_direction='up', delta_tone='good',\n"
+            "               accent='aspire', color='#004185', unit='cm', sub='6 sessions')\n\n"
+            "sparkline_tile('Ecc. Braking Asym', 7.4, series=[...],\n"
+            "               delta='2.2', delta_direction='up', zone='yellow',\n"
+            "               color='#d97706', unit='%')   # zone tints + colours the value\n\n"
+            "sparkline_tile('Peak Vertical Force', '—', series=[], unit='N', sub='no data')"
+        ),
+
         # 9. Injury card
         section("9 · injury_card — medical-domain card with severity stripe"),
         html.Div([
