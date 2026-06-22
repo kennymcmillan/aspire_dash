@@ -53,6 +53,25 @@ def _g(fig, label):
     ], className="card", style={"marginBottom": "12px"})
 
 
+# Sample data for percentile_age_chart (High Jump development example)
+_HJ_BANDS = [
+    {"age": 13, "p10": 1.25, "p25": 1.35, "p50": 1.45, "p75": 1.58, "p90": 1.65},
+    {"age": 14, "p10": 1.35, "p25": 1.45, "p50": 1.55, "p75": 1.65, "p90": 1.72},
+    {"age": 15, "p10": 1.45, "p25": 1.55, "p50": 1.66, "p75": 1.78, "p90": 1.86},
+    {"age": 16, "p10": 1.55, "p25": 1.66, "p50": 1.78, "p75": 1.92, "p90": 2.00},
+    {"age": 17, "p10": 1.62, "p25": 1.74, "p50": 1.86, "p75": 2.00, "p90": 2.08},
+    {"age": 18, "p10": 1.66, "p25": 1.80, "p50": 1.92, "p75": 2.06, "p90": 2.13},
+]
+_HJ_MARKS = [
+    {"age": 15, "mark": 1.70}, {"age": 16, "mark": 1.85},
+    {"age": 17, "mark": 1.97}, {"age": 18, "mark": 2.07, "pb": True},
+]
+_HJ_REF = [{"y": 2.08, "label": "U20 qualifying 2.08 m", "color": "#b3261e"}]
+_HJ_OVERLAY = {"name": "Legend (same age)", "color": "#8A1538",
+               "points": [{"age": 16, "mark": 2.06}, {"age": 17, "mark": 2.14},
+                          {"age": 18, "mark": 2.27}]}
+
+
 def layout():
     return html.Div([
         html.H1("v0.17 — chart collection",
@@ -115,6 +134,12 @@ def layout():
         ), "slope_chart(df, x='phase', y='jump', group='athlete')"),
         _g(p.dumbbell(_DF_BEFORE_AFTER, "athlete", "before", "after"),
             "dumbbell(df, 'athlete', 'before', 'after')"),
+
+        section("Development / benchmarking"),
+        _g(p.percentile_age_chart(
+            _HJ_BANDS, _HJ_MARKS, reference_lines=_HJ_REF, overlay=_HJ_OVERLAY,
+            y_title="Height (m)", title="High Jump — mark vs age",
+        ), "percentile_age_chart(bands, marks, reference_lines=..., overlay=...)"),
 
         code_block(
             "# Single import — every helper at your fingertips:\n"
