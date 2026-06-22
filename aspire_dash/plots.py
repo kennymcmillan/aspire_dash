@@ -409,9 +409,84 @@ def _records(x):
     return list(x)
 
 
-def percentile_age_chart(bands, marks=None, *,
-                         reference_lines=None, overlay=None,
+def format_time(seconds):
+    """Seconds -> athletics time string: 110.0 -> '1:50.00', 10.5 -> '10.50'."""
+    if seconds is None:
+        return ""
+    s = float(seconds)
+    sign = "-" if s < 0 else ""
+    s = abs(s)
+    if s >= 60:
+        m = int(s // 60)
+        return f"{sign}{m}:{s - m * 60:05.2f}"
+    return f"{sign}{s:.2f}"
+
+
+def _nice_ticks(lo, hi, target=7):
+    """Round tick positions across [lo, hi] (so a time axis lands on 1:40, 1:50,
+    2:00, not 1:46.52)."""
+    import math
+    span = hi - lo
+    if span <= 0:
+        return [lo]
+    mag = 10 ** math.floor(math.log10(span / target))
+    step = mag
+    for m in (1, 2, 2.5, 5, 10):
+        step = m * mag
+        if span / step <= target * 1.4:
+            break
+    start = math.ceil(lo / step) * step
+    ticks, v = [], start
+    while v <= hi + step * 1e-6:
+        ticks.append(round(v, 6))
+        v += step
+    return ticks or [lo, hi]
+
+
+def _value_formatter(value_format):
+    """None | 'time' | callable(value)->str  ->  formatter function or None."""
+    if value_format is None:
+        return None
+    if callable(value_format):
+        return value_format
+    if value_format == "time":
+        return format_time
+    return None
+
+
+def _norm_mark_series(marks, age_col, value_col, pb_col, default_mark_color):
+    """Normalise `marks` into series: [{name, line_color, mark_color, points}].
+    Accepts a flat list/df of points (one athlete) OR a list of
+    {name, data/points, color, *_col} series (compare multiple athletes)."""
+    if marks is None:
+        return []
+    rows = _records(marks)
+    if not rows:
+        return []
+    gold = default_mark_color or GOLD
+    is_series = isinstance(rows[0], dict) and (("data" in rows[0]) or ("points" in rows[0]))
+    if not is_series:
+        pts = [{"age": r.get(age_col), "mark": r.get(value_col),
+                "pb": r.get(pb_col), "label": r.get("label")} for r in rows]
+        return [{"name": "Athlete", "line_color": ASPIRE["600"],
+                 "mark_color": gold, "points": pts}]
+    out = []
+    for k, s in enumerate(rows):
+        col = s.get("color") or CHART_COLORS[k % len(CHART_COLORS)]
+        a_c, v_c, p_c = s.get("age_col", age_col), s.get("value_col", value_col), s.get("pb_col", pb_col)
+        pts = [{"age": p.get(a_c), "mark": p.get(v_c), "pb": p.get(p_c),
+                "label": p.get("label")}
+               for p in _records(s.get("data") or s.get("points") or [])]
+        out.append({"name": s.get("name", f"Series {k + 1}"),
+                    "line_color": col, "mark_color": col, "points": pts})
+    return out
+
+
+def percentile_age_chart(bands=None, marks=None, *,
+                         reference_lines=None, overlay=None, overlays=None,
                          pct=(10, 25, 50, 75, 90),
+                         age_col="age", value_col="mark", pb_col="pb",
+                         lower_is_better=False, value_format=None,
                          title=None, x_title="Age (years)", y_title="Mark",
                          band_color="#7f9bb8", mark_color=None,
                          height=460):
@@ -419,29 +494,50 @@ def percentile_age_chart(bands, marks=None, *,
 
     The canonical "how good is this for the athlete's age?" chart: a shaded
     normal-for-age corridor (outer + inner percentile bands and a median line)
-    with the athlete's marks plotted over it, plus optional reference lines
-    (records / qualifying standards) and an overlay curve (e.g. an elite
-    athlete's progression at the same age).
+    with the athlete's marks plotted over it, plus any number of reference lines
+    (records / qualifying standards) and overlay curves (e.g. record-holder
+    progressions). Built to be sport-agnostic and easy to connect data to:
+    every input is optional and accepts a DataFrame or a list of dicts, and the
+    mark columns are mappable so you do not have to rename your data.
 
     Parameters
     ----------
-    bands : DataFrame | list[dict]
+    bands : DataFrame | list[dict] | None
         One row per age step with an ``age`` column and percentile columns named
         ``p{n}`` for each ``n`` in ``pct`` (e.g. ``p10, p25, p50, p75, p90``).
+        Build it from raw population marks with :func:`age_percentile_bands`.
+        Omit it to plot marks + reference lines with no corridor.
     marks : DataFrame | list[dict] | None
-        Athlete marks: ``age``, ``mark``, optional ``pb`` (bool) and ``label``.
-        PB marks render as a star.
+        EITHER one athlete's points (``age``/``mark``/``pb``/``label``, column
+        names overridable via ``age_col`` / ``value_col`` / ``pb_col``), OR a
+        list of series to compare multiple athletes, each
+        ``{"name": str, "data": [points...], "color": str?, "pb_col": str?}``.
+        PB points render as a star.
     reference_lines : list[dict] | None
-        Horizontal references: ``{"y": float, "label": str, "color": str?}``.
-    overlay : dict | None
-        Comparison curve: ``{"name": str, "points": [{"age","mark"}...],
-        "color": str?}`` — e.g. a record-holder's progression by age.
+        Horizontal benchmark lines (qualifying standards, world / continental /
+        championship records): ``{"y": float, "label": str, "color": str?}``.
+        Any number; colours auto-cycle and labels alternate sides so close lines
+        stay legible. Feed e.g. a row from the pinned U20 standards.
+    overlay / overlays : dict | list[dict] | None
+        One or many comparison curves:
+        ``{"name": str, "points": [{"age","mark"}...], "color": str?}``.
+    age_col, value_col, pb_col : str
+        Column/key names in ``marks`` (defaults ``age`` / ``mark`` / ``pb``).
+    lower_is_better : bool
+        True for time events (faster = lower = better): the y-axis is reversed so
+        better performances sit at the top. False (default) for jumps / throws /
+        scores where higher is better. Build `bands` with the same flag.
+    value_format : None | "time" | callable
+        Formats the y-axis tick labels and hover values. "time" renders seconds
+        as an athletics clock (110.0 -> "1:50.00", 10.5 -> "10.50"); pass a
+        callable ``value -> str`` for other units. None leaves raw numbers.
     pct : tuple[int, ...]
         Percentiles present in ``bands`` (ascending). Outer band = first/last,
         inner band = second/second-last, median = the middle value.
     """
     fig = go.Figure()
-    rows = sorted(_records(bands), key=lambda r: r.get("age", 0))
+    rows = (sorted(_records(bands), key=lambda r: r.get("age", 0))
+            if bands is not None else [])
     pcts = sorted(pct)
     mark_color = mark_color or GOLD
 
@@ -470,44 +566,140 @@ def percentile_age_chart(bands, marks=None, *,
             line=dict(color="#5a7799", width=2.2, dash="dash"),
             hovertemplate=f"{med}th pct · age %{{x}}: %{{y}}<extra></extra>"))
 
-    if overlay and overlay.get("points"):
-        opts = sorted(_records(overlay["points"]), key=lambda r: r.get("age", 0))
+    ovs = list(overlays or [])
+    if overlay:
+        ovs.append(overlay)
+    ov_cycle = ["#8A1538", ASPIRE_BLUE, SLATE["500"]]
+    for j, ov in enumerate(ovs):
+        if not ov.get("points"):
+            continue
+        opts = sorted(_records(ov["points"]), key=lambda r: r.get("age", 0))
+        ocol = ov.get("color") or ov_cycle[j % len(ov_cycle)]
         fig.add_trace(go.Scatter(
             x=[p.get("age") for p in opts], y=[p.get("mark") for p in opts],
-            mode="lines+markers", name=overlay.get("name", "Overlay"),
-            line=dict(color=overlay.get("color", "#8A1538"), width=2),
-            marker=dict(size=5, color=overlay.get("color", "#8A1538")),
-            hovertemplate=f"{overlay.get('name', 'Overlay')} · age %{{x}}: %{{y}}<extra></extra>"))
+            mode="lines+markers", name=ov.get("name", "Overlay"),
+            line=dict(color=ocol, width=2), marker=dict(size=5, color=ocol),
+            hovertemplate=f"{ov.get('name', 'Overlay')} · age %{{x}}: %{{y}}<extra></extra>"))
 
-    mrows = _records(marks)
-    non_pb = [m for m in mrows if not m.get("pb")]
-    pb = [m for m in mrows if m.get("pb")]
-    if non_pb:
-        fig.add_trace(go.Scatter(
-            x=[m["age"] for m in non_pb], y=[m["mark"] for m in non_pb],
-            mode="markers", name="Mark",
-            marker=dict(color=mark_color, size=10, line=dict(color="#8a6d00", width=1)),
-            hovertemplate="%{y} at age %{x}<extra></extra>"))
-    if pb:
-        fig.add_trace(go.Scatter(
-            x=[m["age"] for m in pb], y=[m["mark"] for m in pb],
-            mode="markers+text", name="Personal best",
-            marker=dict(color=mark_color, size=20, symbol="star",
-                        line=dict(color="#8a6d00", width=1.5)),
-            text=["PB"] * len(pb), textposition="top center",
-            textfont=dict(color="#8a6d00", size=11),
-            hovertemplate="PB %{y} at age %{x}<extra></extra>"))
+    # Athlete marks: one or many series, each a connecting trajectory line (so the
+    # eye reads improvement over age) with markers + PB stars on top.
+    series = _norm_mark_series(marks, age_col, value_col, pb_col, mark_color)
+    multi = len(series) > 1
+    for s in series:
+        pts = sorted([p for p in s["points"]
+                      if p.get("age") is not None and p.get("mark") is not None],
+                     key=lambda p: p["age"])
+        if not pts:
+            continue
+        if len(pts) >= 2:
+            fig.add_trace(go.Scatter(
+                x=[p["age"] for p in pts], y=[p["mark"] for p in pts],
+                mode="lines", legendgroup=s["name"], showlegend=False,
+                line=dict(color=s["line_color"], width=2.6, shape="spline",
+                          smoothing=0.5), hoverinfo="skip"))
+        non_pb = [p for p in pts if not p.get("pb")]
+        pb = [p for p in pts if p.get("pb")]
+        pre = (s["name"] + " ") if multi else ""
+        if non_pb:
+            fig.add_trace(go.Scatter(
+                x=[p["age"] for p in non_pb], y=[p["mark"] for p in non_pb],
+                mode="markers", name=s["name"] if multi else "Mark",
+                legendgroup=s["name"],
+                marker=dict(color=s["mark_color"], size=11,
+                            line=dict(color=ASPIRE["700"], width=1.5)),
+                hovertemplate=pre + "%{y} at age %{x}<extra></extra>"))
+        if pb:
+            fig.add_trace(go.Scatter(
+                x=[p["age"] for p in pb], y=[p["mark"] for p in pb],
+                mode="markers", name=(s["name"] + " PB") if multi else "Personal best",
+                legendgroup=s["name"],
+                marker=dict(color=s["mark_color"], size=19, symbol="star",
+                            line=dict(color=ASPIRE["700"], width=1.5)),
+                hovertemplate=pre + "PB: %{y} at age %{x}<extra></extra>"))
 
-    for ref in (reference_lines or []):
-        col = ref.get("color", "#b3261e")
-        fig.add_hline(y=ref["y"], line=dict(color=col, width=1.6, dash="dot"),
-                      annotation_text=ref.get("label", ""),
-                      annotation_position="top left",
-                      annotation_font=dict(color=col, size=11))
+    # Benchmark lines (qualifying standards, world / continental records, ...).
+    # Distinct brand colours + a coloured label chip + alternating label side so
+    # lines that sit close together stay legible.
+    ref_cycle = [GOLD, ASPIRE_BLUE, "#8A1538", ASPIRE["600"], SLATE["500"]]
+    refs = [r for r in (reference_lines or []) if r.get("y") is not None]
+    for i, ref in enumerate(refs):
+        col = ref.get("color") or ref_cycle[i % len(ref_cycle)]
+        side = "right" if i % 2 == 0 else "left"
+        fig.add_hline(
+            y=ref["y"], line=dict(color=col, width=2),
+            annotation_text=" " + str(ref.get("label", "")) + " ",
+            annotation_position=f"top {side}",
+            annotation_font=dict(color="#ffffff", size=11,
+                                 family="Poppins, sans-serif"),
+            annotation_bgcolor=col, annotation_borderpad=3)
 
     fig.update_layout(
-        title=title, xaxis_title=x_title, yaxis_title=y_title, height=height,
+        title=dict(text=title or "",
+                   font=dict(family="Poppins, sans-serif", size=17,
+                             color=ASPIRE["700"])),
+        xaxis_title=x_title, yaxis_title=y_title, height=height,
+        font=dict(family="Poppins, sans-serif", color=SLATE["700"]),
+        hoverlabel=dict(font=dict(family="Poppins, sans-serif")),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        margin=dict(l=60, r=30, t=70 if title else 40, b=50))
+        margin=dict(l=64, r=30, t=72 if title else 44, b=52))
     apply_template(fig)
+
+    # Value formatting (e.g. running times as 1:50.00 on the axis + hover) and
+    # the lower-is-better axis flip so elite always sits at the top.
+    fmt = _value_formatter(value_format)
+    ys = []
+    if fmt:
+        for tr in fig.data:
+            yvals = list(getattr(tr, "y", []) or [])
+            ys += [v for v in yvals if v is not None]
+            htmpl = getattr(tr, "hovertemplate", None) or ""
+            if yvals and "%{y}" in htmpl:
+                tr.customdata = [[fmt(v)] if v is not None else [""] for v in yvals]
+                tr.hovertemplate = htmpl.replace("%{y}", "%{customdata[0]}")
+        ys += [r["y"] for r in refs]
+    if fmt and ys:
+        lo, hi = min(ys), max(ys)
+        pad = (hi - lo) * 0.06 or 1.0
+        r0, r1 = lo - pad, hi + pad
+        ticks = _nice_ticks(r0, r1)
+        fig.update_yaxes(tickmode="array", tickvals=ticks,
+                         ticktext=[fmt(t) for t in ticks],
+                         range=[r1, r0] if lower_is_better else [r0, r1])
+    elif lower_is_better:
+        fig.update_yaxes(autorange="reversed")
     return fig
+
+
+def age_percentile_bands(population, *, age_col="age", value_col="value",
+                         pct=(10, 25, 50, 75, 90), age_step=1.0, min_n=3,
+                         lower_is_better=False):
+    """Build the ``bands`` DataFrame (``age`` + ``p{n}`` columns) that
+    :func:`percentile_age_chart` needs, from RAW population marks of any sport or
+    event. Ages are binned to ``age_step`` and percentiles taken per bin; bins
+    with fewer than ``min_n`` samples are dropped.
+
+    The ``p{n}`` columns are PERFORMANCE percentiles: ``p90`` is the mark better
+    than 90% of the population. For a time event (``lower_is_better=True``) that
+    is the faster, lower value, so set the same ``lower_is_better`` on the chart
+    and elite always sits at the top of the corridor. Returns an empty DataFrame
+    on no usable input.
+    """
+    import numpy as np
+    rows = _records(population)
+    pts = [(r.get(age_col), r.get(value_col)) for r in rows
+           if r.get(age_col) is not None and r.get(value_col) is not None]
+    if not pts:
+        return pd.DataFrame()
+    df = pd.DataFrame(pts, columns=["age", "value"])
+    df["bin"] = (df["age"] / age_step).round() * age_step
+    out = []
+    for b, g in df.groupby("bin"):
+        if len(g) < min_n:
+            continue
+        row = {"age": float(b)}
+        for p in pct:
+            q = (100 - p) if lower_is_better else p
+            row[f"p{p}"] = float(np.percentile(g["value"], q))
+        out.append(row)
+    return pd.DataFrame(out).sort_values("age").reset_index(drop=True) if out \
+        else pd.DataFrame()

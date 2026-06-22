@@ -4,6 +4,30 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.68.0] - 2026-06-22
+
+### Added
+
+- **Benchmarking** demo section (`demo/pages/benchmarking.py`): the home of the
+  performance-vs-age visual.
+
+### Changed
+
+- `plots.percentile_age_chart` upgraded into a sport-agnostic benchmarking chart
+  (builds on the initial version):
+  - Athlete marks connect into a progression trajectory line; supports ONE
+    athlete or a list of series to compare a squad. Column mapping
+    (`age_col` / `value_col` / `pb_col`) connects data of any shape.
+  - `lower_is_better` reverses the axis for time events so faster sits at the
+    top; `value_format="time"` (or a callable) renders the axis ticks and hover
+    as an athletics clock (110.0 -> "1:50.00") on round tick values.
+  - Any number of `reference_lines` (qualifying standards, world / continental /
+    championship records) auto-colour with legible chips on alternating sides;
+    `overlays` (plural) for several comparison curves. `bands` is now optional.
+- New `plots.age_percentile_bands(population, ...)` builds the percentile
+  corridor from raw population marks (PERFORMANCE percentiles: p90 = better than
+  90% of peers, in either direction). New `plots.format_time` helper.
+
 ## [0.67.0] - 2026-06-21
 
 ### Added
