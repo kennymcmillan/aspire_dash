@@ -1,6 +1,6 @@
 """Aspire-styled Plotly chart helpers — sport-dashboard collection.
 
-11 helpers covering the patterns that appear repeatedly in athlete and
+12 helpers covering the patterns that appear repeatedly in athlete and
 performance dashboards. All return a `plotly.graph_objects.Figure` with
 the `aspire` template applied + tight margins + Aspire palette. Drop
 into any `dcc.Graph(figure=...)` slot.
@@ -11,6 +11,7 @@ The set:
     calendar_heatmap
     waterfall, sankey
     radar, slope_chart, dumbbell
+    percentile_age_chart
 
 Designed for: sport rankings, athlete comparisons, load monitoring,
 budget waterfalls, attendance heatmaps, transition flows.
@@ -24,7 +25,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 
-from .theme import CHART_COLORS, ASPIRE, SLATE
+from .theme import CHART_COLORS, ASPIRE, SLATE, GOLD, ASPIRE_BLUE
 from .charts import apply_template
 
 
@@ -395,3 +396,118 @@ def _rgba(hexcol: str, a: float) -> str:
     h = str(hexcol).lstrip("#")
     r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
     return f"rgba({r},{g},{b},{a})"
+
+
+# ── Development / benchmarking ──────────────────────────────────────────────
+
+def _records(x):
+    """Accept a DataFrame or a list of dicts; return a list of dicts."""
+    if x is None:
+        return []
+    if hasattr(x, "to_dict"):
+        return x.to_dict("records")
+    return list(x)
+
+
+def percentile_age_chart(bands, marks=None, *,
+                         reference_lines=None, overlay=None,
+                         pct=(10, 25, 50, 75, 90),
+                         title=None, x_title="Age (years)", y_title="Mark",
+                         band_color="#7f9bb8", mark_color=None,
+                         height=460):
+    """Athlete mark-vs-age plotted against shaded age-percentile bands.
+
+    The canonical "how good is this for the athlete's age?" chart: a shaded
+    normal-for-age corridor (outer + inner percentile bands and a median line)
+    with the athlete's marks plotted over it, plus optional reference lines
+    (records / qualifying standards) and an overlay curve (e.g. an elite
+    athlete's progression at the same age).
+
+    Parameters
+    ----------
+    bands : DataFrame | list[dict]
+        One row per age step with an ``age`` column and percentile columns named
+        ``p{n}`` for each ``n`` in ``pct`` (e.g. ``p10, p25, p50, p75, p90``).
+    marks : DataFrame | list[dict] | None
+        Athlete marks: ``age``, ``mark``, optional ``pb`` (bool) and ``label``.
+        PB marks render as a star.
+    reference_lines : list[dict] | None
+        Horizontal references: ``{"y": float, "label": str, "color": str?}``.
+    overlay : dict | None
+        Comparison curve: ``{"name": str, "points": [{"age","mark"}...],
+        "color": str?}`` — e.g. a record-holder's progression by age.
+    pct : tuple[int, ...]
+        Percentiles present in ``bands`` (ascending). Outer band = first/last,
+        inner band = second/second-last, median = the middle value.
+    """
+    fig = go.Figure()
+    rows = sorted(_records(bands), key=lambda r: r.get("age", 0))
+    pcts = sorted(pct)
+    mark_color = mark_color or GOLD
+
+    if rows and len(pcts) >= 2:
+        xs = [r.get("age") for r in rows]
+
+        def yv(p):
+            return [r.get(f"p{p}") for r in rows]
+
+        lo_o, hi_o = pcts[0], pcts[-1]
+        med = pcts[len(pcts) // 2]
+        pairs = [(lo_o, hi_o, 0.12)]
+        if len(pcts) >= 4:
+            pairs.append((pcts[1], pcts[-2], 0.24))
+        for lo, hi, alpha in pairs:
+            fig.add_trace(go.Scatter(x=xs, y=yv(lo), mode="lines",
+                                     line=dict(width=0), hoverinfo="skip",
+                                     showlegend=False))
+            fig.add_trace(go.Scatter(
+                x=xs, y=yv(hi), mode="lines", name=f"{lo}th–{hi}th percentile",
+                line=dict(width=0), fill="tonexty",
+                fillcolor=_rgba(band_color, alpha),
+                hovertemplate=f"{hi}th pct · age %{{x}}: %{{y}}<extra></extra>"))
+        fig.add_trace(go.Scatter(
+            x=xs, y=yv(med), mode="lines", name=f"{med}th percentile (median)",
+            line=dict(color="#5a7799", width=2.2, dash="dash"),
+            hovertemplate=f"{med}th pct · age %{{x}}: %{{y}}<extra></extra>"))
+
+    if overlay and overlay.get("points"):
+        opts = sorted(_records(overlay["points"]), key=lambda r: r.get("age", 0))
+        fig.add_trace(go.Scatter(
+            x=[p.get("age") for p in opts], y=[p.get("mark") for p in opts],
+            mode="lines+markers", name=overlay.get("name", "Overlay"),
+            line=dict(color=overlay.get("color", "#8A1538"), width=2),
+            marker=dict(size=5, color=overlay.get("color", "#8A1538")),
+            hovertemplate=f"{overlay.get('name', 'Overlay')} · age %{{x}}: %{{y}}<extra></extra>"))
+
+    mrows = _records(marks)
+    non_pb = [m for m in mrows if not m.get("pb")]
+    pb = [m for m in mrows if m.get("pb")]
+    if non_pb:
+        fig.add_trace(go.Scatter(
+            x=[m["age"] for m in non_pb], y=[m["mark"] for m in non_pb],
+            mode="markers", name="Mark",
+            marker=dict(color=mark_color, size=10, line=dict(color="#8a6d00", width=1)),
+            hovertemplate="%{y} at age %{x}<extra></extra>"))
+    if pb:
+        fig.add_trace(go.Scatter(
+            x=[m["age"] for m in pb], y=[m["mark"] for m in pb],
+            mode="markers+text", name="Personal best",
+            marker=dict(color=mark_color, size=20, symbol="star",
+                        line=dict(color="#8a6d00", width=1.5)),
+            text=["PB"] * len(pb), textposition="top center",
+            textfont=dict(color="#8a6d00", size=11),
+            hovertemplate="PB %{y} at age %{x}<extra></extra>"))
+
+    for ref in (reference_lines or []):
+        col = ref.get("color", "#b3261e")
+        fig.add_hline(y=ref["y"], line=dict(color=col, width=1.6, dash="dot"),
+                      annotation_text=ref.get("label", ""),
+                      annotation_position="top left",
+                      annotation_font=dict(color=col, size=11))
+
+    fig.update_layout(
+        title=title, xaxis_title=x_title, yaxis_title=y_title, height=height,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        margin=dict(l=60, r=30, t=70 if title else 40, b=50))
+    apply_template(fig)
+    return fig
