@@ -84,6 +84,8 @@ nav = [
     # Athlete / performance domain
     {"label": "Athlete",            "href": "/athlete",
      "icon": "fa-solid fa-user",         "section": "Athlete & performance"},
+    {"label": "Benchmarking",       "href": "/benchmarking",
+     "icon": "fa-solid fa-ranking-star"},
     {"label": "Anthropometric",     "href": "/v18",
      "icon": "fa-solid fa-person-rays"},
     {"label": "Medical",            "href": "/medical",
