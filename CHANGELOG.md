@@ -4,6 +4,23 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.69.0] - 2026-06-23
+
+### percentile_age_chart — elite ceiling + cleaner layout
+- **`elite_line` (default `100`)**: draws a dashed gold "100th percentile (elite)"
+  line on top of the corridor when the bands carry a `p{elite_line}` column — the
+  world-class target the athlete's gold marks are chasing. Safe to leave on for
+  population-derived bands that stop at the 90th (skipped when absent). Pairs with
+  `aspire_data.benchmarks.standard_bands`, which now emits `p100` from the
+  historical Oracle norms (`aspire_data_event_percentiles`).
+- **`x_range`**: focus the age axis (e.g. `(8, 26)`) so a youth athlete's marks
+  and the steep part of the corridor fill the chart instead of the senior plateau.
+- **Legend moved below the plot**: a top legend with up to 6 entries collided with
+  the title; it is now a centred horizontal row under the x-axis label.
+- Benchmarking demo page: High Jump bands carry `p100` to show the elite line, and
+  a new section documents the production path (`benchmark_inputs` / `standard_bands`
+  reading the Oracle historical norms).
+
 ## [0.68.0] - 2026-06-22
 
 ### Added

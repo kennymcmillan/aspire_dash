@@ -484,12 +484,12 @@ def _norm_mark_series(marks, age_col, value_col, pb_col, default_mark_color):
 
 def percentile_age_chart(bands=None, marks=None, *,
                          reference_lines=None, overlay=None, overlays=None,
-                         pct=(10, 25, 50, 75, 90),
+                         pct=(10, 25, 50, 75, 90), elite_line=100,
                          age_col="age", value_col="mark", pb_col="pb",
                          lower_is_better=False, value_format=None,
                          title=None, x_title="Age (years)", y_title="Mark",
                          band_color="#7f9bb8", mark_color=None,
-                         height=460):
+                         x_range=None, height=460):
     """Athlete mark-vs-age plotted against shaded age-percentile bands.
 
     The canonical "how good is this for the athlete's age?" chart: a shaded
@@ -532,8 +532,14 @@ def percentile_age_chart(bands=None, marks=None, *,
         as an athletics clock (110.0 -> "1:50.00", 10.5 -> "10.50"); pass a
         callable ``value -> str`` for other units. None leaves raw numbers.
     pct : tuple[int, ...]
-        Percentiles present in ``bands`` (ascending). Outer band = first/last,
-        inner band = second/second-last, median = the middle value.
+        Percentiles used for the shaded corridor (ascending, symmetric around the
+        median). Outer band = first/last, inner band = second/second-last,
+        median = the middle value.
+    elite_line : int | None
+        Percentile to draw as a dashed "elite ceiling" line on top of the
+        corridor (default ``100`` — the world-class best). Drawn only when the
+        ``bands`` carry a ``p{elite_line}`` column, so it is safe to leave on for
+        population-derived bands that stop at the 90th. Set ``None`` to hide it.
     """
     fig = go.Figure()
     rows = (sorted(_records(bands), key=lambda r: r.get("age", 0))
@@ -565,6 +571,19 @@ def percentile_age_chart(bands=None, marks=None, *,
             x=xs, y=yv(med), mode="lines", name=f"{med}th percentile (median)",
             line=dict(color="#5a7799", width=2.2, dash="dash"),
             hovertemplate=f"{med}th pct · age %{{x}}: %{{y}}<extra></extra>"))
+
+        # Elite ceiling: a dashed line at the top percentile (e.g. 100th) when the
+        # bands carry it. Drawn in gold so it reads as the "world-class" target the
+        # athlete's gold marks are chasing; silently skipped if absent.
+        if elite_line is not None and f"p{elite_line}" in rows[0]:
+            ev = yv(elite_line)
+            if any(v is not None for v in ev):
+                fig.add_trace(go.Scatter(
+                    x=xs, y=ev, mode="lines",
+                    name=f"{elite_line}th percentile (elite)",
+                    line=dict(color=GOLD, width=2, dash="dash"),
+                    hovertemplate=f"{elite_line}th pct · age %{{x}}: %{{y}}"
+                                  "<extra></extra>"))
 
     ovs = list(overlays or [])
     if overlay:
@@ -640,8 +659,13 @@ def percentile_age_chart(bands=None, marks=None, *,
         xaxis_title=x_title, yaxis_title=y_title, height=height,
         font=dict(family="Poppins, sans-serif", color=SLATE["700"]),
         hoverlabel=dict(font=dict(family="Poppins, sans-serif")),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        margin=dict(l=64, r=30, t=72 if title else 44, b=52))
+        # Legend BELOW the plot — with up to 6 entries a top legend collides with
+        # the title. Centred horizontal row under the x-axis label.
+        legend=dict(orientation="h", yanchor="top", y=-0.16, xanchor="center",
+                    x=0.5, font=dict(size=11)),
+        margin=dict(l=64, r=30, t=52 if title else 24, b=92))
+    if x_range:
+        fig.update_xaxes(range=list(x_range))
     apply_template(fig)
 
     # Value formatting (e.g. running times as 1:50.00 on the axis + hover) and

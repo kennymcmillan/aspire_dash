@@ -52,13 +52,15 @@ _REF_800 = [
 ]
 
 # --- Field event: High Jump. Higher is better, metres, one athlete + overlay. -
+# p100 = the elite ceiling: percentile_age_chart draws it as the gold dashed
+# "100th percentile (elite)" line (the world-class target the marks chase).
 _HJ_BANDS = [
-    {"age": 13, "p10": 1.25, "p25": 1.35, "p50": 1.45, "p75": 1.58, "p90": 1.65},
-    {"age": 14, "p10": 1.35, "p25": 1.45, "p50": 1.55, "p75": 1.65, "p90": 1.72},
-    {"age": 15, "p10": 1.45, "p25": 1.55, "p50": 1.66, "p75": 1.78, "p90": 1.86},
-    {"age": 16, "p10": 1.55, "p25": 1.66, "p50": 1.78, "p75": 1.92, "p90": 2.00},
-    {"age": 17, "p10": 1.62, "p25": 1.74, "p50": 1.86, "p75": 2.00, "p90": 2.08},
-    {"age": 18, "p10": 1.66, "p25": 1.80, "p50": 1.92, "p75": 2.06, "p90": 2.13},
+    {"age": 13, "p10": 1.25, "p25": 1.35, "p50": 1.45, "p75": 1.58, "p90": 1.65, "p100": 1.80},
+    {"age": 14, "p10": 1.35, "p25": 1.45, "p50": 1.55, "p75": 1.65, "p90": 1.72, "p100": 1.88},
+    {"age": 15, "p10": 1.45, "p25": 1.55, "p50": 1.66, "p75": 1.78, "p90": 1.86, "p100": 2.02},
+    {"age": 16, "p10": 1.55, "p25": 1.66, "p50": 1.78, "p75": 1.92, "p90": 2.00, "p100": 2.14},
+    {"age": 17, "p10": 1.62, "p25": 1.74, "p50": 1.86, "p75": 2.00, "p90": 2.08, "p100": 2.24},
+    {"age": 18, "p10": 1.66, "p25": 1.80, "p50": 1.92, "p75": 2.06, "p90": 2.13, "p100": 2.31},
 ]
 _HJ_MARKS = [{"age": 15, "mark": 1.70}, {"age": 16, "mark": 1.85},
              {"age": 17, "mark": 1.97}, {"age": 18, "mark": 2.07, "pb": True}]
@@ -95,14 +97,36 @@ def layout():
             "    age_col='yrs', value_col='time', pb_col='best',\n"
             "    lower_is_better=True, value_format='time')"),
 
-        section("Field event (higher is better, metres, record overlay)"),
+        section("Field event (higher is better, metres, elite ceiling, overlay)"),
         _g(percentile_age_chart(
             _HJ_BANDS, _HJ_MARKS,
             reference_lines=[{"y": 2.08, "label": "U20 qualifying 2.08 m"}],
             overlay=_HJ_OVERLAY,
             y_title="Height (m)", title="High Jump mark vs age",
         ),
-            "percentile_age_chart(bands, marks,\n"
+            "percentile_age_chart(bands, marks,   # bands carry p100 -> elite line\n"
             "    reference_lines=[{'y': 2.08, 'label': 'U20 qualifying 2.08 m'}],\n"
             "    overlay={'name': 'Legend', 'points': [...]})   # higher is better"),
+
+        section("Production bands: the historical norms table (aspire_data)"),
+        html.P("In an app the corridor and elite line come straight from the "
+                "historical percentile norms in Oracle "
+                "(aspire_data_event_percentiles, EVENT x AGE_BIN at every 5%), "
+                "via aspire_data.benchmarks. One call shapes marks + bands + "
+                "standard line + direction + time formatting for any sport.",
+                style={"color": "#64748b", "fontSize": "13px", "marginBottom": "8px"}),
+        code_block(
+            "from aspire_data.benchmarks import benchmark_inputs, standard_bands\n"
+            "\n"
+            "# bands straight from the Oracle historical norms (incl. p100 elite):\n"
+            "bands = standard_bands('800m')          # age + p10..p90 + p100\n"
+            "\n"
+            "# or one call for a whole athlete + event (marks, bands, U20 line):\n"
+            "inp = benchmark_inputs(results_df, dob='2008-04-14', sex='M',\n"
+            "                       event='800m')\n"
+            "percentile_age_chart(\n"
+            "    bands=inp['bands'], marks=inp['marks'],\n"
+            "    reference_lines=inp['reference_lines'], pct=inp['pct'],\n"
+            "    lower_is_better=inp['lower_is_better'],\n"
+            "    value_format=inp['value_format'])   # elite_line=100 by default"),
     ], style={"padding": "24px"})
