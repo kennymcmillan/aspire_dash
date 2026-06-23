@@ -20,3 +20,13 @@ rsconnect-python/
 demo/rsconnect-python/
 demo/demo_skeletons.png
 demo/screenshots/
+
+# Forge design sandbox: keep the curated prototypes already tracked, but never
+# auto-add NEW scratch html. render_percentile_chart.py output can embed real
+# athlete data -> aspire_dash is PUBLIC, so this prevents a PII leak. Use
+# `git add -f` for an intentional new prototype.
+tools/forge/*.html
+!tools/forge/index.html
+!tools/forge/athlete_card_v2.html
+!tools/forge/fencing_migration.html
+!tools/forge/match_card.html
