@@ -23,6 +23,22 @@ glance.
 - Fully backward-compatible: marks without a percentile render exactly as before
   (uniform star, no suffix). 4 tests in `tests/test_percentile_chart.py`.
 
+### `sports.benchmark_table` — the tabular age-band benchmarking view
+
+The table companion to the chart, consuming the SAME
+`best_pb_by_ageband(with_percentile=True)` rows: one row per Power-of-10 age band
+with the band range, best mark, when it was set, the result count, and the band
+percentile as a tier-tinted pill.
+
+- **`benchmark_table(rows, *, value_format=None, value_label="Best PB",
+  show_tests=True)`** — pure composition over `data_table` + `color_badge`, so it
+  inherits the responsive scroll + brand styling with NO new CSS. `value_format`
+  ("time" / callable / 2dp) formats the mark column.
+- **`percentile_badge(pct)`** — tier-tinted percentile pill (gold>=90, green>=75,
+  blue>=50, amber>=25, red below; neutral em-dash when missing), reusable on its
+  own. Tones from `theme.SEMANTIC_PALETTE`. 5 tests in
+  `tests/test_benchmark_table.py`.
+
 ## [0.69.0] - 2026-06-23
 
 ### percentile_age_chart — elite ceiling + cleaner layout

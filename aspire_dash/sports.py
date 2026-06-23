@@ -670,6 +670,107 @@ def data_table(columns, rows, *, highlight=None, row_class=None, id=None, classN
     return html.Div(table, **wrap)
 
 
+# ── Age-band benchmarking table ────────────────────────────────────────────
+
+#: Percentile tier -> SEMANTIC_PALETTE tone for the benchmark percentile badge.
+_PCT_TIERS = ((90, "gold"), (75, "success"), (50, "info"), (25, "warning"))
+
+_BENCH_MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+
+def _pct_tone(pct):
+    """SEMANTIC_PALETTE tone for a percentile: gold>=90, green>=75, blue>=50,
+    amber>=25, red below; neutral when missing."""
+    if pct is None:
+        return "neutral"
+    for thresh, tone in _PCT_TIERS:
+        if pct >= thresh:
+            return tone
+    return "danger"
+
+
+def _bench_short_date(d):
+    """ISO 'YYYY-MM-DD' -> 'Apr 2023'; pass anything else through."""
+    s = str(d or "")
+    if len(s) >= 7 and s[4] == "-":
+        try:
+            return f"{_BENCH_MONTHS[int(s[5:7]) - 1]} {s[:4]}"
+        except (ValueError, IndexError):
+            return s
+    return s
+
+
+def _bench_fmt_mark(v, value_format):
+    if v is None:
+        return ""
+    if callable(value_format):
+        return value_format(v)
+    if value_format == "time":
+        v = float(v)
+        if v >= 60:
+            m = int(v // 60)
+            return f"{m}:{v - 60 * m:05.2f}"
+        return f"{v:.2f}"
+    return ("%.2f" % v) if isinstance(v, float) else str(v)
+
+
+def percentile_badge(pct):
+    """Tier-tinted percentile pill ('78th'); neutral em-dash when missing.
+    Tiers: gold>=90, green>=75, blue>=50, amber>=25, red below."""
+    pal = _SEM_[_pct_tone(pct)]
+    text = "—" if pct is None else f"{pct:g}th"
+    return color_badge(text, bg=pal["bg"], color=pal["text"])
+
+
+def benchmark_table(rows, *, value_format=None, value_label="Best PB",
+                    show_tests=True, id=None, className=""):
+    """Age-band PB benchmarking table from
+    ``aspire_data.benchmarks.best_pb_by_ageband(with_percentile=True)``.
+
+    One row per Power-of-10 age band: the band range, the best mark in it, when
+    it was set, how many results fed it, and the band percentile as a tier-tinted
+    badge (red < amber < blue < green < gold) - the "where is this athlete for
+    their age?" read in a table, sharing the same norms as
+    :func:`aspire_dash.plots.percentile_age_chart`. Pure composition over
+    :func:`data_table` + :func:`color_badge` (no new styling).
+
+    Parameters
+    ----------
+    rows : list[dict]
+        ``{age_band_label | age_band, mark, date, n, percentile}`` per band
+        (exactly the ``best_pb_by_ageband`` row shape).
+    value_format : None | "time" | callable
+        Formats the mark column ("time" -> athletics clock; callable
+        ``value -> str``; None -> 2dp).
+    value_label : str
+        Header for the mark column (default "Best PB").
+    show_tests : bool
+        Show the per-band result-count column (default True).
+    id, className : str
+        Forwarded to :func:`data_table`.
+    """
+    cols = ["Age band", {"label": value_label, "align": "right"},
+            {"label": "Date", "align": "right", "width": "92px"}]
+    if show_tests:
+        cols.append({"label": "Tests", "align": "right", "width": "60px"})
+    cols.append({"label": "Percentile", "align": "right", "width": "104px"})
+
+    body = []
+    for r in rows:
+        band = r.get("age_band_label") or (
+            ("%g" % r["age_band"]) if r.get("age_band") is not None else "")
+        cells = [band, _bench_fmt_mark(r.get("mark"), value_format),
+                 _bench_short_date(r.get("date"))]
+        if show_tests:
+            cells.append(str(r.get("n", "")))
+        cells.append(percentile_badge(r.get("percentile")))
+        body.append(cells)
+
+    return data_table(cols, body, id=id,
+                      className=("benchmark-table " + className).strip())
+
+
 # ── Trend Arrow (mini) ─────────────────────────────────────────────────────
 
 def trend_arrow(values, label=None):
