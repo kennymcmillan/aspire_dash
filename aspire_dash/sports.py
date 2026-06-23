@@ -715,11 +715,20 @@ def _bench_fmt_mark(v, value_format):
     return ("%.2f" % v) if isinstance(v, float) else str(v)
 
 
+def ordinal(n):
+    """Whole-number ordinal string: 1 -> '1st', 22 -> '22nd', 63 -> '63rd',
+    37 -> '37th'. Rounds floats to the nearest whole number first."""
+    n = int(round(float(n)))
+    suffix = "th" if 10 <= n % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
+
+
 def percentile_badge(pct):
     """Tier-tinted percentile pill ('78th'); neutral em-dash when missing.
+    Percentile is shown as a whole-number ordinal (63.8 -> '64th').
     Tiers: gold>=90, green>=75, blue>=50, amber>=25, red below."""
     pal = _SEM_[_pct_tone(pct)]
-    text = "—" if pct is None else f"{pct:g}th"
+    text = "—" if pct is None else ordinal(pct)
     return color_badge(text, bg=pal["bg"], color=pal["text"])
 
 

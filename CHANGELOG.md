@@ -4,6 +4,15 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.71.0] - 2026-06-23
+
+### Percentiles render as whole-number ordinals
+
+`percentile_badge` (table) and the `percentile_age_chart` mark hover now show the
+percentile as a whole-number ordinal: `63.8` -> `64th`, `21` -> `21st`,
+`92` -> `92nd` (was `63.8th` / `92th`). New `sports.ordinal(n)` helper (rounds +
+correct st/nd/rd/th suffix), reusable on its own.
+
 ## [0.70.0] - 2026-06-23
 
 ### percentile_age_chart — age-band PB percentile on the marks

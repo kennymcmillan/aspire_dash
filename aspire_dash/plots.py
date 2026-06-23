@@ -487,9 +487,13 @@ def _norm_mark_series(marks, age_col, value_col, pb_col, default_mark_color,
 
 
 def _pct_suffix(p):
-    """Hover suffix ' · 65th pct' when a point carries a percentile, else ''."""
+    """Hover suffix ' · 65th pct' (whole-number ordinal) when a point carries a
+    percentile, else ''."""
     pct = p.get("percentile")
-    return (" · %gth pct" % pct) if pct is not None else ""
+    if pct is None:
+        return ""
+    from .sports import ordinal
+    return f" · {ordinal(pct)} pct"
 
 
 def _star_size(p, base=19.0, lo=12.0, hi=24.0):

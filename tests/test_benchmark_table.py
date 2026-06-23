@@ -7,8 +7,17 @@ from __future__ import annotations
 
 from dash.development.base_component import Component
 
-from aspire_dash.sports import benchmark_table, percentile_badge
+from aspire_dash.sports import benchmark_table, percentile_badge, ordinal
 from aspire_dash.theme import SEMANTIC_PALETTE
+
+
+def test_ordinal_suffixes():
+    assert ordinal(1) == "1st"
+    assert ordinal(22) == "22nd"
+    assert ordinal(63) == "63rd"
+    assert ordinal(37) == "37th"
+    assert ordinal(11) == "11th" and ordinal(12) == "12th" and ordinal(13) == "13th"
+    assert ordinal(63.8) == "64th"   # rounds to whole number
 
 
 def _rows():
@@ -51,6 +60,7 @@ def test_badge_tone_by_tier():
 
 def test_badge_text_and_missing():
     assert percentile_badge(78).children == "78th"
+    assert percentile_badge(63.8).children == "64th"   # whole-number ordinal
     miss = percentile_badge(None)
     assert miss.children == "—"
     assert miss.style["backgroundColor"] == SEMANTIC_PALETTE["neutral"]["bg"]
@@ -62,7 +72,7 @@ def test_table_renders_bands_dates_and_percentiles():
     texts = _texts(benchmark_table(_rows()))
     for expect in ("Age band", "Best PB", "Date", "Tests", "Percentile",
                    "12.5 - 13.5", "13.5 - 14.5", "Apr 2023", "Jan 2024",
-                   "5.50", "6.00", "48th", "92th"):
+                   "5.50", "6.00", "48th", "92nd"):
         assert expect in texts, f"missing {expect!r}"
 
 
