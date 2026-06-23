@@ -454,10 +454,12 @@ def _value_formatter(value_format):
     return None
 
 
-def _norm_mark_series(marks, age_col, value_col, pb_col, default_mark_color):
+def _norm_mark_series(marks, age_col, value_col, pb_col, default_mark_color,
+                      pct_col="percentile"):
     """Normalise `marks` into series: [{name, line_color, mark_color, points}].
     Accepts a flat list/df of points (one athlete) OR a list of
-    {name, data/points, color, *_col} series (compare multiple athletes)."""
+    {name, data/points, color, *_col} series (compare multiple athletes).
+    Each point also carries an optional `percentile` (read from `pct_col`)."""
     if marks is None:
         return []
     rows = _records(marks)
@@ -467,25 +469,44 @@ def _norm_mark_series(marks, age_col, value_col, pb_col, default_mark_color):
     is_series = isinstance(rows[0], dict) and (("data" in rows[0]) or ("points" in rows[0]))
     if not is_series:
         pts = [{"age": r.get(age_col), "mark": r.get(value_col),
-                "pb": r.get(pb_col), "label": r.get("label")} for r in rows]
+                "pb": r.get(pb_col), "label": r.get("label"),
+                "percentile": r.get(pct_col)} for r in rows]
         return [{"name": "Athlete", "line_color": ASPIRE["600"],
                  "mark_color": gold, "points": pts}]
     out = []
     for k, s in enumerate(rows):
         col = s.get("color") or CHART_COLORS[k % len(CHART_COLORS)]
         a_c, v_c, p_c = s.get("age_col", age_col), s.get("value_col", value_col), s.get("pb_col", pb_col)
+        pc = s.get("pct_col", pct_col)
         pts = [{"age": p.get(a_c), "mark": p.get(v_c), "pb": p.get(p_c),
-                "label": p.get("label")}
+                "label": p.get("label"), "percentile": p.get(pc)}
                for p in _records(s.get("data") or s.get("points") or [])]
         out.append({"name": s.get("name", f"Series {k + 1}"),
                     "line_color": col, "mark_color": col, "points": pts})
     return out
 
 
+def _pct_suffix(p):
+    """Hover suffix ' · 65th pct' when a point carries a percentile, else ''."""
+    pct = p.get("percentile")
+    return (" · %gth pct" % pct) if pct is not None else ""
+
+
+def _star_size(p, base=19.0, lo=12.0, hi=24.0):
+    """PB star size scaled by percentile (best-for-age = biggest star); the
+    fixed `base` when the point has no percentile."""
+    pct = p.get("percentile")
+    if pct is None:
+        return base
+    frac = max(0.0, min(100.0, float(pct))) / 100.0
+    return lo + frac * (hi - lo)
+
+
 def percentile_age_chart(bands=None, marks=None, *,
                          reference_lines=None, overlay=None, overlays=None,
                          pct=(10, 25, 50, 75, 90), elite_line=100,
                          age_col="age", value_col="mark", pb_col="pb",
+                         pct_col="percentile",
                          lower_is_better=False, value_format=None,
                          title=None, x_title="Age (years)", y_title="Mark",
                          band_color="#7f9bb8", mark_color=None,
@@ -521,8 +542,12 @@ def percentile_age_chart(bands=None, marks=None, *,
     overlay / overlays : dict | list[dict] | None
         One or many comparison curves:
         ``{"name": str, "points": [{"age","mark"}...], "color": str?}``.
-    age_col, value_col, pb_col : str
-        Column/key names in ``marks`` (defaults ``age`` / ``mark`` / ``pb``).
+    age_col, value_col, pb_col, pct_col : str
+        Column/key names in ``marks`` (defaults ``age`` / ``mark`` / ``pb`` /
+        ``percentile``). When a point carries a ``percentile`` (0..100, e.g. from
+        ``aspire_data.benchmarks.best_pb_by_ageband(with_percentile=True)``), the
+        PB star is sized by it (best-for-age = biggest star) and the hover shows
+        it (``PB: 6.50 at age 17 · 65th pct``). Omit it for today's uniform star.
     lower_is_better : bool
         True for time events (faster = lower = better): the y-axis is reversed so
         better performances sit at the top. False (default) for jumps / throws /
@@ -602,7 +627,7 @@ def percentile_age_chart(bands=None, marks=None, *,
 
     # Athlete marks: one or many series, each a connecting trajectory line (so the
     # eye reads improvement over age) with markers + PB stars on top.
-    series = _norm_mark_series(marks, age_col, value_col, pb_col, mark_color)
+    series = _norm_mark_series(marks, age_col, value_col, pb_col, mark_color, pct_col)
     multi = len(series) > 1
     for s in series:
         pts = sorted([p for p in s["points"]
@@ -623,18 +648,23 @@ def percentile_age_chart(bands=None, marks=None, *,
             fig.add_trace(go.Scatter(
                 x=[p["age"] for p in non_pb], y=[p["mark"] for p in non_pb],
                 mode="markers", name=s["name"] if multi else "Mark",
-                legendgroup=s["name"],
+                legendgroup=s["name"], text=[_pct_suffix(p) for p in non_pb],
                 marker=dict(color=s["mark_color"], size=11,
                             line=dict(color=ASPIRE["700"], width=1.5)),
-                hovertemplate=pre + "%{y} at age %{x}<extra></extra>"))
+                hovertemplate=pre + "%{y} at age %{x}%{text}<extra></extra>"))
         if pb:
+            # Star size scales with each band-PB's percentile (best-for-age =
+            # biggest star); a fixed size when no percentile is supplied so
+            # existing callers are unchanged.
+            has_pct = any(p.get("percentile") is not None for p in pb)
+            star_size = [_star_size(p) for p in pb] if has_pct else 19
             fig.add_trace(go.Scatter(
                 x=[p["age"] for p in pb], y=[p["mark"] for p in pb],
                 mode="markers", name=(s["name"] + " PB") if multi else "Personal best",
-                legendgroup=s["name"],
-                marker=dict(color=s["mark_color"], size=19, symbol="star",
+                legendgroup=s["name"], text=[_pct_suffix(p) for p in pb],
+                marker=dict(color=s["mark_color"], size=star_size, symbol="star",
                             line=dict(color=ASPIRE["700"], width=1.5)),
-                hovertemplate=pre + "PB: %{y} at age %{x}<extra></extra>"))
+                hovertemplate=pre + "PB: %{y} at age %{x}%{text}<extra></extra>"))
 
     # Benchmark lines (qualifying standards, world / continental records, ...).
     # Distinct brand colours + a coloured label chip + alternating label side so

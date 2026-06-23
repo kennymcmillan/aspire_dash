@@ -4,6 +4,25 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.70.0] - 2026-06-23
+
+### percentile_age_chart — age-band PB percentile on the marks
+
+Pairs with `aspire_data.benchmarks.best_pb_by_ageband(with_percentile=True)`:
+feed one best-PB-per-age-band point (each carrying its Power-of-10 `percentile`)
+as `marks=` and the chart now reads "where is this athlete for their age?" at a
+glance.
+
+- **Star sizes scale with percentile** — each age-band PB star grows with its
+  percentile (best-for-age = biggest star, weaker ages = small), so the age at
+  which the athlete was most exceptional pops out. Sizing by percentile, not raw
+  mark, is the point: raw marks just grow with age.
+- **Hover surfaces the percentile** (hover-only, no chart clutter):
+  `PB: 6.50 at age 17 · 65th pct`. Works alongside `value_format="time"`.
+- New **`pct_col`** param (default `percentile`); per-series `pct_col` too.
+- Fully backward-compatible: marks without a percentile render exactly as before
+  (uniform star, no suffix). 4 tests in `tests/test_percentile_chart.py`.
+
 ## [0.69.0] - 2026-06-23
 
 ### percentile_age_chart — elite ceiling + cleaner layout
