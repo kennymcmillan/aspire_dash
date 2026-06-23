@@ -12,6 +12,7 @@ import numpy as np
 from dash import dcc, html
 
 from aspire_dash.plots import percentile_age_chart, age_percentile_bands
+from aspire_dash.sports import benchmark_table
 
 from ._shared import section, code_block
 
@@ -67,6 +68,24 @@ _HJ_MARKS = [{"age": 15, "mark": 1.70}, {"age": 16, "mark": 1.85},
 _HJ_OVERLAY = {"name": "Legend (same age)", "points": [
     {"age": 16, "mark": 2.06}, {"age": 17, "mark": 2.14}, {"age": 18, "mark": 2.27}]}
 
+# --- Age-band PBs: percentile stars + the benchmark table (v0.70 / v0.71) ------
+# Shape produced by aspire_data.benchmarks.best_pb_by_ageband(with_percentile=True):
+# the best PB in each Power-of-10 age band + its percentile vs the historical norms.
+_BAND_PBS = [
+    {"age_band_label": "13.5 - 14.5", "age": 14.2, "mark": 132.0, "date": "2022-04-06", "n": 2, "percentile": 22},
+    {"age_band_label": "14.5 - 15.5", "age": 15.6, "mark": 126.4, "date": "2023-03-10", "n": 4, "percentile": 41},
+    {"age_band_label": "15.5 - 16.5", "age": 16.4, "mark": 120.1, "date": "2024-02-23", "n": 5, "percentile": 64},
+    {"age_band_label": "16.5 - 17.5", "age": 17.5, "mark": 114.8, "date": "2025-01-15", "n": 3, "percentile": 78},
+    {"age_band_label": "17.5 - 18.5", "age": 18.2, "mark": 111.3, "date": "2026-02-01", "n": 2, "percentile": 88},
+]
+# Chart marks: every result a mark, the band best a percentile-sized star.
+_PCT_MARKS = (
+    [{"age": r["age"], "mark": r["mark"], "pb": True, "percentile": r["percentile"]}
+     for r in _BAND_PBS]
+    + [{"age": 15.0, "mark": 130.0}, {"age": 16.0, "mark": 123.2},
+       {"age": 17.0, "mark": 117.1}, {"age": 18.0, "mark": 113.0}]   # other results
+)
+
 
 def layout():
     return html.Div([
@@ -107,6 +126,35 @@ def layout():
             "percentile_age_chart(bands, marks,   # bands carry p100 -> elite line\n"
             "    reference_lines=[{'y': 2.08, 'label': 'U20 qualifying 2.08 m'}],\n"
             "    overlay={'name': 'Legend', 'points': [...]})   # higher is better"),
+
+        section("Age-band PBs: percentile stars + benchmark table (v0.70 / v0.71)"),
+        html.P("The best PB in each Power-of-10 age band, scored against the "
+                "historical norms. On the chart every result is a mark and the "
+                "band best is a star sized by its percentile (best-for-age = "
+                "biggest); the table lists the same per-band bests with a "
+                "tier-tinted percentile badge. Both read off one "
+                "best_pb_by_ageband(with_percentile=True) call.",
+                style={"color": "#64748b", "fontSize": "13px", "marginBottom": "8px"}),
+        _g(percentile_age_chart(
+            _BANDS_800, _PCT_MARKS,
+            reference_lines=[{"y": 110.0, "label": "World U20 standard (1:50.00)"}],
+            lower_is_better=True, value_format="time", pct_col="percentile",
+            y_title="800m time", title="Age-band PBs sized by percentile",
+        ),
+            "marks = best_pb_by_ageband(results_df, dob, event='800m',\n"
+            "                           with_percentile=True)   # per-band best + pct\n"
+            "percentile_age_chart(bands, marks, pct_col='percentile',\n"
+            "    lower_is_better=True, value_format='time')   # star size = percentile"),
+        html.Div([
+            html.Div("PB percentile by age band", className="stat-label",
+                     style={"margin": "4px 0 8px", "fontWeight": 600}),
+            benchmark_table(_BAND_PBS, value_format="time", value_label="Best 800m"),
+            code_block(
+                "from aspire_dash.sports import benchmark_table\n"
+                "benchmark_table(best_pb_by_ageband(df, dob, event='800m',\n"
+                "                                   with_percentile=True),\n"
+                "                value_format='time', value_label='Best 800m')"),
+        ], className="card", style={"marginBottom": "16px"}),
 
         section("Production bands: the historical norms table (aspire_data)"),
         html.P("In an app the corridor and elite line come straight from the "
