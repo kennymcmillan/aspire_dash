@@ -41,7 +41,7 @@ __all__ = ["GRAPH_CONFIG", "apply_template",
             # v0.28 chart-polish helpers
             "add_reference_line", "aspire_area_fill",
             "aspire_bar_gradient", "add_drop_shadow_trace",
-            "aspire_hover_template"]
+            "aspire_hover_template", "progression_vs_typical_bar"]
 
 # ── Graph config (hide modebar by default) ───────────────────────────────────
 GRAPH_CONFIG = {
@@ -261,3 +261,67 @@ def aspire_hover_template(unit: str = "", title_key: str = "x",
         f"%{{{value_key}:.{precision}f}}{unit}"
         "<extra></extra>"
     )
+
+
+def progression_vs_typical_bar(categories, actual, typical, *,
+                               actual_name: str = "Actual",
+                               typical_name: str = "Typical",
+                               unit: str = "", title: str | None = None,
+                               x_title: str | None = None,
+                               y_title: str | None = None, height: int = 320):
+    """Grouped bars per category comparing an athlete's value to a typical/expected
+    value, with a bold vertical arrow + signed delta label per category
+    (green ▲ when above typical, red ▼ when below). Returns a styled go.Figure.
+
+    Built for "actual vs expected" comparisons (e.g. year-on-year improvement vs
+    the population norm by age), but works for any paired-by-category data.
+
+    >>> progression_vs_typical_bar(
+    ...     ["15→16", "16→17", "17→18"], actual=[8, 13, 6], typical=[5, 2, 2],
+    ...     unit=" cm", actual_name="His improvement", typical_name="Typical for age",
+    ...     title="Year-on-year improvement vs typical",
+    ...     x_title="Age step (years)", y_title="Improvement (cm)")
+    """
+    cats = list(categories)
+    actual = list(actual)
+    typical = list(typical)
+    blue = ASPIRE.get("600", "#004185")
+    GREEN, RED = "#16a34a", "#dc2626"
+    GREEN_BG, RED_BG = "#e7f6ee", "#fdeaec"
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=cats, y=typical, name=typical_name, marker_color="#cbd5e1",
+                         hovertemplate=f"{typical_name}: %{{y}}{unit}<extra></extra>"))
+    fig.add_trace(go.Bar(x=cats, y=actual, name=actual_name, marker_color=blue,
+                         hovertemplate=f"{actual_name}: %{{y}}{unit}<extra></extra>"))
+
+    for c, a, t in zip(cats, actual, typical):
+        diff = a - t
+        col = GREEN if diff >= 0 else RED
+        bg = GREEN_BG if diff >= 0 else RED_BG
+        if diff != 0:  # bold vertical arrow from typical level to actual level
+            fig.add_annotation(x=c, y=a, ax=c, ay=t, xref="x", yref="y",
+                               axref="x", ayref="y", showarrow=True, arrowhead=2,
+                               arrowsize=1.6, arrowwidth=4, arrowcolor=col)
+        fig.add_annotation(
+            x=c, y=max(a, t, 0), yshift=20, showarrow=False,
+            text=f"<b>{'▲' if diff >= 0 else '▼'} {'+' if diff >= 0 else ''}{diff:g}{unit}</b>",
+            font=dict(color=col, size=14), bgcolor=bg, bordercolor=col,
+            borderwidth=1.5, borderpad=4)
+
+    layout = dict(barmode="group", height=height,
+                  margin=dict(l=50, r=20, t=64 if title else 30, b=44),
+                  legend=dict(orientation="h", yanchor="bottom", y=1.02,
+                              xanchor="center", x=0.5))
+    if title:
+        layout["title"] = dict(text=title, font=dict(size=15, color=blue),
+                               x=0.5, xanchor="center")
+    if x_title:
+        layout["xaxis_title"] = x_title
+    if y_title:
+        layout["yaxis_title"] = y_title
+    fig.update_layout(**layout)
+    apply_template(fig)
+    vals = actual + typical + [0]
+    fig.update_yaxes(range=[min(vals) - 2, max(vals) + 13])  # headroom for labels
+    return fig
