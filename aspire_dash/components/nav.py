@@ -125,7 +125,9 @@ def topnav(
         style={
             "display": "flex", "justifyContent": "space-between",
             "alignItems": "center", "padding": "10px 24px",
-            "borderBottom": "1px solid #dbeafe", "background": "#f5f9ff",
+            # was literal #dbeafe / #f5f9ff Aspire blue — now palette-driven so the
+            # bar follows the brand (maroon wash under Ruwwad, blue under Aspire).
+            "borderBottom": f"1px solid {ASPIRE['100']}", "background": ASPIRE["50"],
             "gap": "24px",
         },
     )
@@ -191,7 +193,7 @@ def sidebar(
     title: str,
     subtitle: str = "Aspire Academy",
     nav_items: list[dict] | None = None,
-    logo_gradient: tuple[str, str] = ("#004185", "#0059b3"),
+    logo_gradient: tuple[str, str] | None = None,
     footer: object = None,
     logo_src: str | None = None,
 ):
@@ -218,6 +220,10 @@ def sidebar(
         that haven't migrated yet (works locally, breaks on Connect).
     """
     nav_items = nav_items or []
+    # Default the logo-chip gradient to the brand primary (was a literal
+    # #004185→#0059b3 blue) so it follows the palette. Callers can still pass an
+    # explicit gradient (e.g. Ruwwad apps pass a gold chip).
+    logo_gradient = logo_gradient or (ASPIRE["600"], ASPIRE["500"])
 
     # Build navigation links
     nav_children = []

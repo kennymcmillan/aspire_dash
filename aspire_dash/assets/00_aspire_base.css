@@ -163,7 +163,7 @@ body {
     color: #1e293b;
 }
 .topnav-link.active {
-    background: #004185;
+    background: var(--aspire-600);   /* was #004185 — now follows brand primary */
     color: white;
 }
 
@@ -2262,10 +2262,12 @@ table.aspire-table tbody tr:hover {
     --duration-normal: 200ms;
     --duration-slow:   400ms;
 
-    --elev-hover-card: 0 8px 24px -8px rgba(0, 65, 133, 0.18),
+    /* Brand-tinted depth/glow — derived from the primary so they follow the
+       palette (were literal rgba(0,65,133,…) Aspire blue). */
+    --elev-hover-card: 0 8px 24px -8px color-mix(in srgb, var(--aspire-600) 18%, transparent),
                        0 4px 12px -4px rgba(15, 23, 42, 0.08);
-    --elev-hover-cta:  0 6px 16px -4px rgba(0, 65, 133, 0.40);
-    --glow-aspire:     0 0 0 4px rgba(0, 65, 133, 0.10);
+    --elev-hover-cta:  0 6px 16px -4px color-mix(in srgb, var(--aspire-600) 40%, transparent);
+    --glow-aspire:     0 0 0 4px color-mix(in srgb, var(--aspire-600) 10%, transparent);
     --glow-gold:       0 0 0 4px rgba(251, 184, 0,  0.18);
     --glow-success:    0 0 0 4px rgba(22, 163, 74,  0.12);
     --glow-danger:     0 0 0 4px rgba(220, 38, 38,  0.12);
@@ -2319,7 +2321,7 @@ a, button, input, select {
 .btn-primary,
 button.btn-primary,
 .aspire-btn-primary {
-    background: linear-gradient(180deg, #0059b3 0%, #004185 100%) !important;
+    background: linear-gradient(180deg, var(--aspire-500) 0%, var(--aspire-600) 100%) !important;  /* was #0059b3→#004185 */
     border: none !important;
     color: white !important;
     padding: 8px 16px !important;
@@ -2506,7 +2508,9 @@ body {
     border-color: #fecaca !important;
 }
 .zone-aspire {
-    background: linear-gradient(135deg, rgba(0, 65, 133, 0.10) 0%,
+    /* was a literal blue rgba(0,65,133,…) fill; now a light tint of the brand
+       primary so it follows the palette (maroon under Ruwwad, blue under Aspire). */
+    background: linear-gradient(135deg, var(--aspire-100) 0%,
                                           rgba(255, 255, 255, 1) 60%) !important;
     border-color: var(--aspire-200) !important;
 }
