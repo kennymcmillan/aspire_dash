@@ -3,7 +3,13 @@
 import os
 import yaml
 
-_BRAND_PATH = os.path.join(os.path.dirname(__file__), "brand.yml")
+# Brand source resolution: an app can point at its OWN brand.yml (same schema,
+# different values — e.g. a Ruwwad rebrand) via the ASPIRE_BRAND_PATH env var.
+# Read at import time, so it MUST be set before the first `import aspire_dash`.
+# Unset → byte-identical to the historical behaviour (bundled brand.yml).
+_BRAND_PATH = os.environ.get("ASPIRE_BRAND_PATH") or os.path.join(
+    os.path.dirname(__file__), "brand.yml"
+)
 with open(_BRAND_PATH, "r", encoding="utf-8") as f:
     BRAND = yaml.safe_load(f)
 

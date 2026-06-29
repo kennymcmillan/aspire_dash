@@ -1,4 +1,8 @@
 """Theme constants + band_color helper."""
+import os
+import subprocess
+import sys
+
 import pytest
 
 
@@ -52,3 +56,50 @@ def test_radius_and_shadow_tokens_exist():
         assert isinstance(v, (int, str))
     for v in (SHADOW_SM, SHADOW_MD, SHADOW_LG):
         assert isinstance(v, str) and v
+
+
+# ── ASPIRE_BRAND_PATH hook ──────────────────────────────────────────────────
+# theme.py resolves its brand.yml at IMPORT time, so the env-var override can
+# only be exercised in a fresh interpreter — by the time this test module runs,
+# aspire_dash.theme is already imported and its constants bound by value. Each
+# case therefore spawns a subprocess.
+
+def _package_and_root():
+    import aspire_dash
+    pkg_dir = os.path.dirname(aspire_dash.__file__)
+    return pkg_dir, os.path.dirname(pkg_dir)
+
+
+def _aspire_blue_in_subprocess(env_overrides):
+    """Return theme.ASPIRE_BLUE as seen by a fresh interpreter under `env`."""
+    pkg_dir, repo_root = _package_and_root()
+    env = {k: v for k, v in os.environ.items() if k != "ASPIRE_BRAND_PATH"}
+    env.update(env_overrides)
+    # cwd=repo_root so `-c`'s implicit sys.path[0]="" resolves the package even
+    # when aspire_dash is not pip-installed (matches conftest's path insert).
+    out = subprocess.check_output(
+        [sys.executable, "-c", "import aspire_dash.theme as t; print(t.ASPIRE_BLUE)"],
+        env=env, cwd=repo_root, text=True,
+    )
+    return out.strip()
+
+
+def test_brand_path_unset_is_bundled_default():
+    # No ASPIRE_BRAND_PATH → byte-identical to historical behaviour.
+    assert _aspire_blue_in_subprocess({}) == "#004185"
+
+
+def test_brand_path_env_var_overrides_brand(tmp_path):
+    # Point at a fixture brand.yml (real schema, maroon primary) → constant
+    # reflects the override. Building the fixture from the bundled file keeps
+    # it schema-current so this can't drift from theme.py's direct lookups.
+    import yaml
+    pkg_dir, _root = _package_and_root()
+    with open(os.path.join(pkg_dir, "brand.yml"), encoding="utf-8") as f:
+        brand = yaml.safe_load(f)
+    brand["colors"]["aspire-600"] = "#8A1739"  # Ruwwad maroon
+    fixture = tmp_path / "brand.yml"
+    fixture.write_text(yaml.safe_dump(brand), encoding="utf-8")
+    assert _aspire_blue_in_subprocess(
+        {"ASPIRE_BRAND_PATH": str(fixture)}
+    ) == "#8A1739"
