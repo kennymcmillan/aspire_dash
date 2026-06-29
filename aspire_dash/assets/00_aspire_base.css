@@ -2684,7 +2684,7 @@ body {
     color: white;
     font-weight: 700;
     font-size: 14px;
-    background: linear-gradient(135deg, #0059b3, #004185);
+    background: linear-gradient(135deg, var(--aspire-500), var(--aspire-600));
     border: 2px solid var(--aspire-600);
     flex-shrink: 0;
 }

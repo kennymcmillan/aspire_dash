@@ -135,7 +135,7 @@ def a4_report_shell(
                        style={"marginRight": "6px"}),
                 "Print / Save PDF",
             ], id=print_button_id, n_clicks=0,
-               style={"background": "#004185", "color": "white",
+               style={"background": ACCENT, "color": "white",
                        "border": "none", "borderRadius": "8px",   # v0.24: canonical
                        "padding": "8px 16px", "fontSize": "13px", # v0.24: on-scale
                        "cursor": "pointer"}),
@@ -151,7 +151,7 @@ def a4_report_shell(
                 html.Div([
                     html.I(className="fa-solid fa-medal",
                            style={"color": "white", "fontSize": "14px"}),
-                ], style={"background": "#004185", "padding": "8px",   # v0.24: on-scale
+                ], style={"background": ACCENT, "padding": "8px",   # v0.24: on-scale
                            "borderRadius": "8px",                       # v0.24: canonical
                            "display": "inline-flex",
                            "alignItems": "center"}),
@@ -167,9 +167,9 @@ def a4_report_shell(
                 html.Span(**period_label_kwargs,
                           style={"marginLeft": "auto",
                                  "fontSize": "13px", "fontWeight": 600,
-                                 "color": "#004185"}),
+                                 "color": ACCENT}),
             ], style={"display": "flex", "alignItems": "center",
-                       "borderBottom": "2px solid #004185",
+                       "borderBottom": f"2px solid {ACCENT}",
                        "padding": "10px 0", "marginBottom": "14px"}),
 
             # Body

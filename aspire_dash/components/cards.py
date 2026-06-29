@@ -535,7 +535,7 @@ def meta_inline_bar(
                       style={"letterSpacing": "0.4px"}),
             html.Span(str(value) if value else "—",
                       className="fw-semibold me-4",
-                      style={"color": "#001d3d"}),
+                      style={"color": ASPIRE["900"]}),
         ]))
 
     rows = [html.Div(chips, className="d-flex flex-wrap align-items-center")]
@@ -632,7 +632,7 @@ def history_table(
         chip_spans = []
         for value, label, tone in summary_chips:
             cls = tone_classes.get(tone, tone_classes["muted"])
-            style = {"color": "#001d3d"} if tone == "primary" else None
+            style = {"color": ASPIRE["900"]} if tone == "primary" else None
             chip_spans.append(html.Span(
                 f"{value} {label}",
                 className=cls,
@@ -757,7 +757,7 @@ def ranked_dropdown(
         children = [html.Div(
             item_label,
             className="fw-semibold",
-            style={"color": "#001d3d", "whiteSpace": "normal"},
+            style={"color": ASPIRE["900"], "whiteSpace": "normal"},
         )]
         if sublabel:
             children.append(html.Div(sublabel, className=f"small text-{tone}"))

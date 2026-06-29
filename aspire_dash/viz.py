@@ -14,7 +14,7 @@ try:
 except ImportError:
     _HAS_SVG = False
 
-from .theme import SUCCESS, WARNING, DANGER, SLATE, ACCENT, GOLD
+from .theme import SUCCESS, WARNING, DANGER, SLATE, ACCENT, GOLD, ASPIRE
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -569,14 +569,14 @@ def body_fat_gauge_svg(value: float) -> str:
     # Needle indicator
     nx, ny = _bfg_polar(target, _BFG_R_INNER - 2)
     parts.append(
-        f'<circle cx="{nx:.2f}" cy="{ny:.2f}" r="3" fill="#001d3d" '
+        f'<circle cx="{nx:.2f}" cy="{ny:.2f}" r="3" fill="{ASPIRE["900"]}" '
         'stroke="white" stroke-width="1.5" />'
     )
 
     # Center value
     parts.append(
         f'<text x="{_BFG_CX}" y="{_BFG_CY - 6}" text-anchor="middle" font-size="26" '
-        'font-weight="700" fill="#001d3d" style="font-variant-numeric:tabular-nums;">'
+        f'font-weight="700" fill="{ASPIRE["900"]}" style="font-variant-numeric:tabular-nums;">'
         f'{float(value or 0):.1f}</text>'
     )
     parts.append(

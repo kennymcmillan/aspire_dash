@@ -77,7 +77,7 @@ def empty_state(icon="fa-solid fa-inbox", text="No data found", hint=""):
 
 # ── Loading overlay ─────────────────────────────────────────────────────────
 
-def loading_overlay(children, color: str = "#004185", overlay_opacity: float = 0.4,
+def loading_overlay(children, color: str = ACCENT, overlay_opacity: float = 0.4,
                     z_index: int = 999):
     """Aspire-branded centered spinner overlay.
 

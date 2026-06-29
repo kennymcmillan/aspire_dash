@@ -336,7 +336,7 @@ def sparkline_tile(
             ], className="spk-text"),
         ], className=tile_classes + " is-empty")
 
-    color = color or "#004185"
+    color = color or _A["600"]   # brand primary (was literal #004185)
     # Convert hex to rgba for the fill — Plotly doesn't accept 8-char hex
     r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
     fill_rgba = f"rgba({r},{g},{b},0.12)"
@@ -775,7 +775,7 @@ def athlete_card_compact(
             "green":  "#16a34a",
             "yellow": "#d97706",
             "red":    "#dc2626",
-            "aspire": "#004185",
+            "aspire": _A["600"],
         }
         stat_items = []
         for s in stats:
@@ -1304,7 +1304,7 @@ def radial_multi_track(
         pct = max(0, min(100, m.get("pct", 0)))
         circ = 2 * math.pi * r
         dash_offset = circ - (pct / 100) * circ
-        color = m.get("color", "#004185")
+        color = m.get("color", _A["600"])
         rings.append(
             f'<defs><linearGradient id="rmt-g{i}" x1="0%" y1="0%" x2="100%" y2="100%">'
             f'<stop offset="0%" stop-color="{color}" stop-opacity="0.85"/>'
