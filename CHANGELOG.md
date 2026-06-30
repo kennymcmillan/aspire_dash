@@ -4,6 +4,34 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.72.0] - 2026-06-30
+
+### Re-skinnable without a fork — `ASPIRE_BRAND_PATH` + palette-linked components
+
+aspire_dash can now be fully re-branded (e.g. a Ruwwad maroon/gold theme) by an
+override `brand.yml`, with **no fork and no colour merge conflicts** on future
+bumps. Two parts, both **backwards-compatible** (an Aspire-brand app is
+byte-identical except one imperceptible topnav wash shade):
+
+- **`ASPIRE_BRAND_PATH` env var** (`theme.py`): point at your own `brand.yml`
+  (same schema, different values) and every `theme.*` constant + inline style
+  follows it. Read at import time, so set it before the first `import
+  aspire_dash`. Unset → the bundled Aspire brand, exactly as before.
+- **Palette-linked components**: a sweep replacing hardcoded Aspire-blue
+  literals with palette references so they follow the brand instead of staying
+  blue under a re-skin —
+  - `nav.py`: topnav bar bg/border, `sidebar()` logo-chip default gradient.
+  - `00_aspire_base.css`: `.topnav-link.active`, `.btn-primary` gradient,
+    `.zone-aspire` fill, hover/glow elevation tokens, avatar gradient.
+  - `cards.py` / `feedback.py` / `print_export.py` / `viz.py` / `v12_helpers.py`:
+    primary text, loading spinner, PDF header, gauge fills, metric-ring defaults.
+
+  Every swap resolves to the identical hex for the Aspire brand. A `--blue-*`
+  scale, `.badge-blue`, and the palette_lab demo sandbox stay intentionally blue.
+
+Pairs with the `ruwwad_brand` companion package (Ruwwad `brand.yml` + a
+late-sorting `99_ruwwad.css` for the CSS `:root` layer + logo/favicon).
+
 ## [0.71.0] - 2026-06-23
 
 ### Percentiles render as whole-number ordinals
