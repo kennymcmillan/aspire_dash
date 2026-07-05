@@ -36,7 +36,7 @@ Usage in any Dash app:
         format_period_label, days_ago_chip_label,
     )
     from aspire_dash.athlete import (
-        athlete_avatar, athlete_profile_header,
+        athlete_avatar, athlete_profile_header, athlete_hero,
         athlete_picker, register_athlete_picker,
         PICKER_STORE_ID,
     )
