@@ -4,7 +4,7 @@ from dash import dcc, html
 import dash_bootstrap_components as dbc
 
 from aspire_dash.athlete import (
-    athlete_avatar, athlete_profile_header,
+    athlete_avatar, athlete_profile_header, athlete_hero,
     selected_athlete_banner, register_athlete_banner,
 )
 
@@ -166,6 +166,52 @@ def layout():
             '    is_target=True,  # gold ring\n'
             '    badges=[html.Span("Captain", ...)],\n'
             ')',
+        ),
+
+        section("athlete_hero",
+                 "Richer profile-top strip (promoted from the Athletics "
+                 "Benchmarking app): rectangular photo with a status-tone rim "
+                 "glow, name + optional flag, and a row of labelled key/value "
+                 "fields. Pure data → component."),
+        example(
+            "Hero with field row + availability rim",
+            athlete_hero(
+                name="Mutaz Essa Barshim",
+                photo_url=None,
+                status_tone="good",
+                fields=[
+                    ("Event", "High Jump"),
+                    ("Age", "34y 2m"),
+                    ("Date of birth", "1991-06-24"),
+                    ("Coach", "Stanley Franks"),
+                    ("Pathway", "Elite"),
+                ],
+            ),
+            'athlete_hero(\n'
+            '    name=profile["fullName"],\n'
+            '    photo_url=profile.get("imageUrl"),\n'
+            '    status_tone="good",  # good/great green · warn amber · bad red · neutral grey\n'
+            '    fields=[\n'
+            '        ("Event", "High Jump"),\n'
+            '        ("Age", "34y 2m"),\n'
+            '        ("Coach", "Stanley Franks"),\n'
+            '    ],\n'
+            ')',
+        ),
+        example(
+            "Unavailable tone (red rim) + initials fallback",
+            athlete_hero(
+                name="Ali Turki Owaida",
+                photo_url=None,
+                status_tone="bad",
+                fields=[
+                    ("Event", "Long Jump"),
+                    ("Age", "19y 8m"),
+                    ("Status", "In rehab — hamstring"),
+                ],
+            ),
+            'athlete_hero(name="Ali Turki Owaida", status_tone="bad",\n'
+            '             fields=[("Event", "Long Jump"), ("Age", "19y 8m")])',
         ),
 
         # v0.38 — selected_athlete_banner + register_athlete_banner with
