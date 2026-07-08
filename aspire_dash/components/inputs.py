@@ -261,9 +261,45 @@ TABS_PARENT_STYLE = {
     "marginTop": "8px",
 }
 
+# ── Segmented "pill" variant (promoted from the Development Testing Dashboard) ──
+# The bar reads as a distinct control: a light slate band container with a filled
+# navy pill for the selected tab, instead of a thin underline. Inline styles here
+# mirror the `.aspire-tabs` CSS in 00_aspire_base.css (inline wins over the class,
+# so the look is guaranteed even before setup_app() copies the stylesheet).
+TABS_BAND_STYLE = {
+    "display": "flex",
+    "gap": "4px",
+    "padding": "4px",
+    "background": "#eef2f7",             # light slate band so the bar stands out
+    "border": "1px solid #dbe3ec",
+    "borderRadius": "10px",
+    "marginTop": "8px",
+}
+TAB_STYLE_PILL = {
+    "padding": "8px 18px",
+    "fontSize": "14px",
+    "fontWeight": "600",
+    "color": "#475569",
+    "background": "transparent",
+    "border": "none",
+    "borderRadius": "8px",
+    "transition": "color .15s ease, background-color .15s ease",
+}
+TAB_SELECTED_STYLE_PILL = {
+    "padding": "8px 18px",
+    "fontSize": "14px",
+    "fontWeight": "600",
+    "color": "#ffffff",
+    "background": ACCENT,                # brand-navy pill = obvious selected state
+    "border": "none",
+    "borderRadius": "8px",
+    "boxShadow": "0 1px 3px rgba(0,65,133,0.25)",
+}
 
-def aspire_tabs(id: str, tabs: list[dict], value: str | None = None):
-    """Branded ``dcc.Tabs`` with the Aspire-blue underline indicator.
+
+def aspire_tabs(id: str, tabs: list[dict], value: str | None = None, *,
+                variant: str = "pill"):
+    """Branded ``dcc.Tabs`` as a segmented pill bar (or classic underline).
 
     Replaces hand-rolled TAB_STYLE / TAB_SELECTED_STYLE dicts in every
     app that uses ``dcc.Tabs``. Same Aspire navy + gold accent applies
@@ -279,21 +315,43 @@ def aspire_tabs(id: str, tabs: list[dict], value: str | None = None):
         ``dcc.Tabs`` output into your own router callback).
     value : str or None
         Initial active tab; defaults to first entry's value.
+    variant : {"pill", "underline"}
+        ``"pill"`` (default, new in 0.73.0): a segmented control, a light slate
+        band with a filled navy pill for the selected tab, so the bar reads as a
+        distinct control. ``"underline"``: the pre-0.73 look, a thin Aspire-blue
+        underline on the selected tab. Pass ``variant="underline"`` to keep the
+        old appearance unchanged.
     """
+    pill = variant != "underline"
+    tab_style = TAB_STYLE_PILL if pill else TAB_STYLE
+    selected_style = TAB_SELECTED_STYLE_PILL if pill else TAB_SELECTED_STYLE
+
     tab_children = []
     for t in tabs:
         kwargs = {
             "label": t["label"], "value": t["value"],
-            "style": TAB_STYLE, "selected_style": TAB_SELECTED_STYLE,
+            "style": tab_style, "selected_style": selected_style,
         }
         if "children" in t:
             kwargs["children"] = t["children"]
         tab_children.append(dcc.Tab(**kwargs))
-    return dcc.Tabs(
+
+    tabs_kwargs = dict(
         id=id,
         value=value or (tabs[0]["value"] if tabs else None),
         children=tab_children,
-        parent_style=TABS_PARENT_STYLE,
     )
+    if pill:
+        # In Dash 4.x, `className` + `style` both land on the `.tab-container`
+        # (the tab row), so the band sits on the row, not the content. Set the
+        # band inline too, so it renders even before the stylesheet is copied.
+        tabs_kwargs["className"] = "aspire-tabs"
+        tabs_kwargs["style"] = TABS_BAND_STYLE
+    else:
+        # Legacy underline: inline per-tab styles carry the look; the standalone
+        # marker class lets static markup opt into the same look via CSS.
+        tabs_kwargs["className"] = "aspire-tabs--underline"
+        tabs_kwargs["parent_style"] = TABS_PARENT_STYLE
+    return dcc.Tabs(**tabs_kwargs)
 
 

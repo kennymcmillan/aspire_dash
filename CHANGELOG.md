@@ -4,6 +4,57 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.73.0] - 2026-07-08
+
+### Chart + tab + table patterns promoted from the Development Testing Dashboard
+
+Seven battle-tested visual patterns, proven in-app this week, lifted UP into the
+library so every report-port app inherits them. All additive; existing callers
+render unchanged unless they opt in, except the two clearly-flagged default
+improvements below (`aspire_tabs` variant, two-line date ticks).
+
+- **Bar value labels on `report.combo_chart`.** New `bar_labels` param prints each
+  column's value ABOVE the bar, independent of the line's `label_mode`. `None`
+  (default) = legacy behaviour unchanged; `True` = every column labelled in a pop
+  navy (`bar_label_color`, default `#004185`) with reserved top headroom so the
+  outside labels are never clipped; `False` = no column labels. New constant
+  `COMBO_BAR_LABEL = "#004185"`.
+- **Categorical-date x-axis for clustered columns** (the big one). New public
+  `report.categorical_date_axis(fig)` + `report.date_categories(stamps)`, and a
+  `categorical_x=True` opt-in on `combo_chart`. On a datetime x-axis Plotly sizes
+  every bar to the smallest date gap, so unevenly spaced tests render as skinny
+  slivers; converting to evenly-spaced categories (with two-line month/year
+  labels) fixes it and matches the original PBI clustered-column look. No-op on
+  non-date axes, so it is safe to call unconditionally.
+- **Two-line month/year date ticks** (`DATE_TICK_FORMAT = "%b<br>%Y"`) are now the
+  default x-tick format for the time-series charts `report.trend_rich` and
+  `report.multiline_chart`, via a new `date_ticks=True` param on each. Set
+  `date_ticks=False` for the bare axis. **Minor visual change** to existing
+  `trend_rich`/`multiline_chart` callers on this bump: date ticks now read
+  "Mar / 2026" over two lines.
+- **`report.apply_break(fig, values, *, pad=0.12)`**: focus a growth-curve y-axis
+  on its data (not anchored at 0) and draw a small `//` axis-break glyph at the
+  base. Degrades safely for 0 / 1 / all-equal points.
+- **`report.add_injury_markers(fig, dates, labels=None)`**: reusable red-X
+  event-marker primitive on a hidden overlay axis, so markers never disturb the
+  primary (or secondary) y-range. Pass category labels as `x` on a categorical
+  chart.
+- **Segmented "pill" tab bar for `aspire_tabs`.** New `variant="pill"` (now the
+  **default**): a light slate band container with a filled navy pill for the
+  selected tab, so the bar reads as a distinct control instead of a thin
+  underline. `variant="underline"` reproduces the exact pre-0.73 look. CSS
+  `.aspire-tabs` in `00_aspire_base.css` folded to the pill; the underline is kept
+  as the `.aspire-tabs--underline` modifier. **Fleet-visible change:** every app
+  calling `aspire_tabs()` inherits the pill on this bump unless it passes
+  `variant="underline"`.
+- **First-class tooltips on `aspire_datatable`.** New explicit `tooltip_header=`,
+  `tooltip_data=`, `tooltip_duration=` params forward straight to the underlying
+  `dash_table.DataTable` (no more routing them awkwardly through
+  `style_overrides`). Duration is only forwarded when a tooltip is set.
+
+26 new tests across `tests/test_report_charts.py`, `tests/test_tabs_variant.py` and
+`tests/test_datatable_tooltips.py` (deterministic, no network).
+
 ## [0.72.0] - 2026-06-30
 
 ### Re-skinnable without a fork — `ASPIRE_BRAND_PATH` + palette-linked components
