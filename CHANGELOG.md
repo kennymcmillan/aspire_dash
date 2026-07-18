@@ -4,6 +4,18 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.74.0] - 2026-07-18
+
+### `aspire_dash evaluate` - live-app critic CLI (dev tool)
+
+New `python -m aspire_dash evaluate <url>` subcommand: a thin wrapper that runs the
+framework-agnostic live-app critic (`evaluate_web.py`, from the /software-design harness)
+against a RUNNING Dash OR Next.js app. Drives system Chrome, scores a rubric (renders /
+runtime / mobile-overflow / tap-targets / interaction), exit != 0 unless all pass so a Stop
+hook can gate a build loop. Dev/CI only; no deployed-app behaviour changes. The critic core
+lives in the harness (a Next.js app can't import a Dash lib); set `ASPIRE_EVALUATE_WEB` to
+override its path.
+
 ## [0.73.0] - 2026-07-08
 
 ### Chart + tab + table patterns promoted from the Development Testing Dashboard
