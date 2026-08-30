@@ -85,6 +85,17 @@
     return d;
   }
 
+  /* M4: a stable anonymous user id per browser (localStorage) so the engine can remember this coach's athletes
+     across threads and sessions; apps with a login can set window.AspireChat.userId instead. */
+  function userId() {
+    if (window.AspireChat && window.AspireChat.userId) return window.AspireChat.userId;
+    try {
+      var k = "aspire-chat-user", v = localStorage.getItem(k);
+      if (!v) { v = "anon-" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); localStorage.setItem(k, v); }
+      return v;
+    } catch (e) { return null; }
+  }
+
   function setStore(id, data) {
     /* write a dcc.Store from JS via dash_clientside.set_props (Dash >= 2.16) */
     if (window.dash_clientside && window.dash_clientside.set_props) window.dash_clientside.set_props(id, { data: data });
@@ -108,7 +119,7 @@
       if (sendBtn) sendBtn.disabled = true;
       var acc = "";
       var threadId = thread;
-      stream(config.engine_url, { question: q, sport: config.sport || sport || null, thread_id: threadId || null }, {
+      stream(config.engine_url, { question: q, sport: config.sport || sport || null, thread_id: threadId || null, user_id: userId() }, {
         onThread: function (t) { threadId = t; setStore(p + "-thread", t); },
         onStatus: function (t) { if (status) status.textContent = t; },
         onToken: function (t) { acc += t; bot.innerHTML = md(acc); msgs.scrollTop = msgs.scrollHeight; },
@@ -127,6 +138,18 @@
       });
       return "streaming";
     },
+    load_chips: function (config) {
+      /* M4: on an empty chat, fetch this user's "your athletes" chips and hand them to the last-event store */
+      if (!config || !config.engine_url) return window.dash_clientside.no_update;
+      var p = config.prefix, uid = userId();
+      if (!uid) return window.dash_clientside.no_update;
+      fetch(config.engine_url.replace(/\/$/, "") + "/api/agent/chips", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ user_id: uid }),
+      }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+        if (d && d.chips && d.chips.length) setStore(p + "-last", { suggestions: d.chips, from: "user_memory" });
+      }).catch(function () {});
+      return window.dash_clientside.no_update;
+    },
     chip_click: function (n_clicks, config) {
       /* a chip carries its question in data-question; put it in the input and submit */
       var t = window.dash_clientside.callback_context && window.dash_clientside.callback_context.triggered;
@@ -140,7 +163,7 @@
     },
   };
 
-  window.AspireChat = { stream: stream, md: md, version: "0.75.0" };
+  window.AspireChat = { stream: stream, md: md, userId: null, version: "0.75.1" };
   window.dash_clientside = window.dash_clientside || {};
   window.dash_clientside.aspire_chat = glue;
 })();

@@ -115,6 +115,13 @@ def register_chat_panel(app, id_prefix: str = "aspire-chat") -> None:
         State(ids["config"], "data"),
         prevent_initial_call=True,
     )
+    # M4: "your athletes" chips on an empty chat, from the engine's cross-thread memory (POST /api/agent/chips)
+    app.clientside_callback(
+        ClientsideFunction(namespace="aspire_chat", function_name="load_chips"),
+        Output(ids["stream_state"], "data", allow_duplicate=True),
+        Input(ids["config"], "data"),
+        prevent_initial_call="initial_duplicate",
+    )
     app.clientside_callback(
         ClientsideFunction(namespace="aspire_chat", function_name="chip_click"),
         Output(ids["input"], "value"),
