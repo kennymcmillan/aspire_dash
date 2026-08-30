@@ -4,6 +4,17 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.75.0] - 2026-08-30
+
+### `chat_panel` + `register_chat_panel` + `assets/aspire-chat.js` (M7: the chatbot in any app)
+
+`from aspire_dash.components import chat_panel, register_chat_panel` gives an app a working chat page on the
+LangGraph sports engine in one import: streaming answers (`POST /api/agent/ask/stream`, SSE, driven client-side
+by `aspire-chat.js` so the Dash server proxies nothing), suggestion chips from the engine's done event, thread
+continuity (`dcc.Store` session or memory), a sport picker or a pinned sport, and a Trace toggle showing agent,
+tools and usage. `aspire-chat.js` also exposes `window.AspireChat.stream(engineUrl, body, handlers)` for React/Next
+pages (the Vercel chatbot). Pure helpers `chips_from_done`, `trace_text`. Tests: tests/test_chat_panel.py.
+
 ## [0.74.0] - 2026-07-18
 
 ### `aspire_dash evaluate` - live-app critic CLI (dev tool)
