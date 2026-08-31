@@ -388,6 +388,54 @@ def _scaffold(name, port=8050, title=None, app_type="dashboard"):
     print( "  # or ./deploy.sh \"describe your changes\"")
 
 
+def _run_evaluate(args):
+    """Dev convenience: critique a RUNNING Dash/Next.js app with the
+    framework-agnostic live-app critic (evaluate_web.py). The critic CORE lives
+    in the /software-design harness (a Next.js app can't import a Dash lib), so
+    this is a thin wrapper that builds a config and shells to it. Dev/CI only;
+    a deployed app never runs this."""
+    import os
+    import sys
+    import json
+    import tempfile
+    import subprocess
+    from pathlib import Path
+
+    default = Path.home() / ".claude" / "skills" / "software-design" / "evaluate_web.py"
+    evaluator = Path(os.environ.get("ASPIRE_EVALUATE_WEB", str(default)))
+    if not evaluator.exists():
+        print(f"evaluate_web.py not found at {evaluator}. It ships with the "
+              f"/software-design skill; set ASPIRE_EVALUATE_WEB to its path.",
+              file=sys.stderr)
+        return 2
+
+    cleanup = None
+    if args.config:
+        cfg_path = args.config
+    else:
+        cfg = {"name": args.url, "url": args.url,
+               "ready_selector": args.ready, "abort_cdn": args.abort_cdn}
+        if args.screenshot:
+            cfg["screenshot"] = args.screenshot
+        tf = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False,
+                                         encoding="utf-8")
+        json.dump(cfg, tf)
+        tf.close()
+        cfg_path = cleanup = tf.name
+
+    cmd = [sys.executable, str(evaluator), "--config", str(cfg_path)]
+    if args.out:
+        cmd += ["--out", args.out]
+    try:
+        return subprocess.run(cmd).returncode
+    finally:
+        if cleanup:
+            try:
+                os.unlink(cleanup)
+            except OSError:
+                pass
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="aspire_dash",
@@ -404,10 +452,23 @@ def main():
                             choices=["dashboard"],
                             help="Scaffold type (only 'dashboard' for now)")
 
+    ev = sub.add_parser("evaluate",
+                        help="Critique a RUNNING Dash/Next.js app (live-app rubric)")
+    ev.add_argument("url", help="URL of a RUNNING app, e.g. http://127.0.0.1:8050")
+    ev.add_argument("--ready", default="body",
+                    help="A selector the app ALWAYS renders (proof it loaded)")
+    ev.add_argument("--out", help="Write critique JSON here")
+    ev.add_argument("--config", help="Full evaluate.config.json (overrides url/ready)")
+    ev.add_argument("--abort-cdn", action="store_true",
+                    help="Abort CDN requests (ONLY on the CDN-blocked Aspire net)")
+    ev.add_argument("--screenshot", help="Mobile screenshot path (keep OUT of git if PII)")
+
     args = parser.parse_args()
     if args.command == "new":
         _scaffold(args.name, port=args.port, title=args.title,
                    app_type=args.type)
+    elif args.command == "evaluate":
+        raise SystemExit(_run_evaluate(args))
     else:
         parser.print_help()
 

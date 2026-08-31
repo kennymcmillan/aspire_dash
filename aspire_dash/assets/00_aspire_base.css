@@ -1549,24 +1549,74 @@ html.dark .period-pills label:has(input:checked) {
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
- * Aspire tabs — Aspire-blue underline indicator for dcc.Tabs
- * Apply via aspire_dash.components.aspire_tabs() — provides matching styles
- * for static markup too.
+ * Aspire tabs — segmented "pill" control for dcc.Tabs (default since 0.72.0)
+ * A light slate band with a filled navy pill for the selected tab, so the bar
+ * reads as a distinct control (not a thin underline merging into the page).
+ * Apply via aspire_dash.components.aspire_tabs(); the same classes style static
+ * dcc.Tabs markup (className="aspire-tabs"). Add "aspire-tabs--underline" for
+ * the pre-0.72 underline look.
  * ──────────────────────────────────────────────────────────────────────── */
+.aspire-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    margin-top: 8px;
+    background: #eef2f7;                  /* light slate band so the bar stands out */
+    border: 1px solid #dbe3ec;
+    border-radius: 10px;
+}
 .aspire-tabs .tab {
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--slate-600, #475569);
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    transition: color 150ms ease, background-color 150ms ease;
+}
+.aspire-tabs .tab:hover {
+    color: var(--aspire-600, #004185);
+    background: var(--slate-200, #e2e8f0);
+}
+.aspire-tabs .tab.tab--selected {
+    font-weight: 600;
+    color: #ffffff;
+    background: var(--aspire-600, #004185);   /* brand-navy filled pill */
+    box-shadow: 0 1px 3px rgba(0, 65, 133, 0.25);
+}
+
+/* Underline variant — the pre-0.72 look. Standalone marker class (the pill band
+   is NOT inherited); opt in with className="aspire-tabs--underline". */
+.aspire-tabs--underline {
+    display: block;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--slate-200, #e2e8f0);
+    border-radius: 0;
+    margin-top: 8px;
+}
+.aspire-tabs--underline .tab {
     padding: 10px 22px;
     font-size: 14px;
     font-weight: 500;
     color: var(--slate-500, #64748b);
-    background: transparent;
     border: none;
+    border-radius: 0;
     border-bottom: 3px solid transparent;
+    background: transparent;
     transition: color 150ms ease, border-color 150ms ease;
 }
-.aspire-tabs .tab.tab--selected {
+.aspire-tabs--underline .tab:hover {
+    background: transparent;
+}
+.aspire-tabs--underline .tab.tab--selected {
     font-weight: 700;
     color: var(--aspire-600, #004185);
+    background: transparent;
     border-bottom-color: var(--aspire-600, #004185);
+    box-shadow: none;
 }
 
 /* ────────────────────────────────────────────────────────────────────────────

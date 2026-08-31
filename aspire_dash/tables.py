@@ -262,6 +262,9 @@ def aspire_datatable(
     export: str | None = None,
     style_overrides: dict | None = None,
     totals_row_label: str | None = None,
+    tooltip_header: dict | None = None,
+    tooltip_data: list | None = None,
+    tooltip_duration: int | None = 2000,
 ):
     """Branded ``dash_table.DataTable`` with Aspire-blue headers + zebra rows.
 
@@ -291,6 +294,16 @@ def aspire_datatable(
     totals_row_label : str or None
         If set, the first-column value matching this label is rendered
         in navy with white text (e.g. ``"TOTAL"`` row).
+    tooltip_header : dict or None
+        Per-column header tooltips, forwarded to ``DataTable.tooltip_header``
+        (``{"col_id": "help text", ...}``). Explains cryptic column headers on
+        hover instead of routing them awkwardly through ``style_overrides``.
+    tooltip_data : list or None
+        Per-cell tooltips, forwarded to ``DataTable.tooltip_data`` — one dict per
+        row (``[{"col_id": {"value": "...", "type": "markdown"}}, ...]``).
+    tooltip_duration : int or None
+        How long a tooltip stays visible, in ms; ``None`` keeps it open until the
+        pointer leaves. Forwarded only when a tooltip is set. Default ``2000``.
     """
     from dash import dash_table
 
@@ -352,6 +365,16 @@ def aspire_datatable(
     )
     if export == "csv":
         kwargs["export_format"] = "csv"
+
+    # First-class tooltips: forward header / cell tooltips straight to the
+    # underlying DataTable (instead of routing them through style_overrides).
+    if tooltip_header is not None:
+        kwargs["tooltip_header"] = tooltip_header
+    if tooltip_data is not None:
+        kwargs["tooltip_data"] = tooltip_data
+    if tooltip_header is not None or tooltip_data is not None:
+        kwargs["tooltip_duration"] = tooltip_duration
+
     kwargs.update(base_style)
 
     return dash_table.DataTable(**kwargs)
