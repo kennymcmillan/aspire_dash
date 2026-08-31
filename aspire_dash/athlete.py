@@ -154,6 +154,90 @@ def athlete_profile_header(
     })
 
 
+# ── Athlete Hero — promoted from hj-benchmarking (Athletics Benchmarking) ──
+#
+# A richer profile-top strip than athlete_profile_header: a rectangular photo
+# with a status-tone rim glow, the name (+ optional right-of-name content such
+# as a flag), and a horizontal row of labelled key/value fields (Event, Age,
+# DOB, Coach, Pathway…). Pure data → component, no callbacks.
+
+# Availability / status tone → photo rim colour.
+_HERO_RIM = {
+    "good": "#16a34a", "great": "#16a34a",
+    "warn": "#d97706", "bad": "#dc2626",
+    "neutral": SLATE["300"],
+}
+
+
+def _hero_field(label: str, value):
+    return html.Div([
+        html.Div(label, style={
+            "fontSize": "10px", "fontWeight": "700", "textTransform": "uppercase",
+            "letterSpacing": "0.05em", "color": SLATE["500"]}),
+        html.Div(value if (value not in (None, "")) else "—", style={
+            "fontSize": "14px", "fontWeight": "600", "color": ASPIRE_NAVY,
+            "marginTop": "1px"}),
+    ], style={"minWidth": "0"})
+
+
+def athlete_hero(
+    name: str,
+    photo_url: str | None = None,
+    fields: "list[tuple[str, object]] | None" = None,
+    name_suffix=None,
+    status_tone: str = "neutral",
+):
+    """Profile hero strip with a key/value field row and a status-tone photo rim.
+
+    A richer alternative to ``athlete_profile_header`` for a single-athlete
+    page top. Pure data → component (no callbacks).
+
+    Args:
+        name: Athlete's display name.
+        photo_url: Photo URL (SAMS ``imageUrl``); initials fallback if absent.
+        fields: List of ``(label, value)`` pairs rendered as a horizontal row
+            beneath the name — e.g. ``[("Event", "High Jump"), ("Age", "17y 3m")]``.
+        name_suffix: Optional element placed right of the name (e.g. a flag).
+        status_tone: Rim-glow colour keyed by availability —
+            ``good``/``great`` green, ``warn`` amber, ``bad`` red,
+            ``neutral`` grey (default).
+    """
+    rim = _HERO_RIM.get(status_tone, _HERO_RIM["neutral"])
+    src = photo_url if isinstance(photo_url, str) and photo_url.startswith("http") else None
+    photo_style = {
+        "width": "72px", "height": "96px", "borderRadius": "8px",
+        "objectFit": "cover", "background": SLATE["100"], "flexShrink": "0",
+        "boxShadow": f"0 0 0 3px {rim}, 0 0 8px 1px {rim}55"}
+    if src:
+        photo = html.Img(src=src, style=photo_style)
+    else:
+        photo = html.Div(_initials(name), style={
+            **photo_style, "display": "flex", "alignItems": "center",
+            "justifyContent": "center", "fontSize": "24px", "fontWeight": "700",
+            "color": SLATE["500"]})
+
+    detail = html.Div(
+        [_hero_field(lbl, val) for lbl, val in (fields or [])],
+        style={"display": "flex", "gap": "26px", "flexWrap": "wrap",
+               "alignItems": "center"})
+
+    return html.Div([
+        photo,
+        html.Div([
+            html.Div([
+                html.H2(name or "—", style={
+                    "margin": "0", "color": ASPIRE_NAVY, "fontSize": "22px"}),
+                html.Span(name_suffix, style={"marginLeft": "10px"}) if name_suffix else None,
+            ], style={"display": "flex", "alignItems": "center", "flexWrap": "wrap",
+                      "gap": "4px", "marginBottom": "8px"}),
+            detail,
+        ], style={"flex": "1", "minWidth": "0"}),
+    ], style={"display": "flex", "gap": "18px", "alignItems": "center",
+              "background": "white", "border": f"1px solid {SLATE['200']}",
+              "borderRadius": f"{RADIUS_LG}px", "padding": "14px 18px",
+              "marginBottom": "18px", "boxShadow": SHADOW_SM})
+
+
 # ── Athlete Identity Card — v0.37 (promoted from DASH_Anthro) ─────────────
 #
 # "Did I pick the right person?" — sits at the top of any capture /

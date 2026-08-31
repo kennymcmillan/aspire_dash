@@ -106,7 +106,7 @@ Avoid one-off `.kpi-tile-budget` — use composable modifiers.
 - If no → continue.
 
 ### Step 2 — prototype in Forge
-- Open `~/Documents/posit-deploys/aspire_dash/tools/forge/index.html`
+- Open `tools/forge/index.html` (paths in this skill are relative to the repo root)
 - Add a `<section id="...">` block with:
   - H2 + 1-line goal
   - BEFORE (current render, simple recreation)
@@ -158,8 +158,10 @@ Avoid one-off `.kpi-tile-budget` — use composable modifiers.
 
 ## Quick reference paths
 
+All paths below are relative to the repo root (wherever you cloned `aspire_dash`).
+
 ```
-~/Documents/posit-deploys/aspire_dash/
+<repo root>/
 ├── aspire_dash/
 │   ├── assets/00_aspire_base.css         ← SEMANTIC CSS RULES GO HERE
 │   ├── assets/brand/                      ← Aspire logo + favicons
