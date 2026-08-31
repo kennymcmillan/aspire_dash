@@ -4,6 +4,18 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.76.0] - 2026-08-31
+
+### `athlete_hero` — profile hero strip for a single-athlete page top
+
+`from aspire_dash.athlete import athlete_hero` gives a richer alternative to
+`athlete_profile_header`: a photo (SAMS `imageUrl`, initials fallback) with a status-tone rim
+glow, the name plus an optional `name_suffix` element (e.g. a flag), and a horizontal
+`(label, value)` field row beneath it — `[("Event", "High Jump"), ("Age", "17y 3m")]`.
+`status_tone` keys the rim to availability: `good`/`great` green, `warn` amber, `bad` red,
+`neutral` grey (default). Pure data → component, no callbacks. Showcase example in
+demo/pages/athlete.py.
+
 ## [0.75.0] - 2026-08-30
 
 ### `chat_panel` + `register_chat_panel` + `assets/aspire-chat.js` (M7: the chatbot in any app)
