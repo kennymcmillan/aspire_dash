@@ -5,4 +5,4 @@ plotly>=5.18.0
 pandas>=2.0.0
 # aspire_dash itself — kept current with each release by aspire-fleet-bump
 # (the demo is a fleet target now, so it never lags the library again).
-aspire_dash @ git+https://github.com/kennymcmillan/aspire_dash.git@60c75bfcf81d863e47144540cb30599e95e47c22
+aspire_dash @ git+https://github.com/kennymcmillan/aspire_dash.git@11cdea34857eea5230fb111a0c36bee757dad379
