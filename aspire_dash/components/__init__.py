@@ -22,6 +22,8 @@ from .feedback import *
 from .inputs import *
 from .print_export import *
 from .chat import chat_panel, register_chat_panel, chips_from_done, trace_text  # noqa: F401  (v0.75 M7)
+from .help import help_drawer, help_button, welcome_modal, register_help  # noqa: F401  (v0.76)
+from .search import search_box, search_hit, search_hit_id, hit_list  # noqa: F401  (v0.76)
 
 # v0.37 — re-export athlete banner helpers under components so
 # `from aspire_dash.components import selected_athlete_banner,
@@ -55,4 +57,7 @@ __all__ = [
     'print_header', 'print_footer', 'export_buttons', 'send_export',
     # chat (v0.75, M7 2026-08-30): the sports chatbot embedded in any app
     'chat_panel', 'register_chat_panel', 'chips_from_done', 'trace_text',
+    # help + search (v0.76, promoted from the Data Explorer app 2026-09-12)
+    'help_drawer', 'help_button', 'welcome_modal', 'register_help',
+    'search_box', 'search_hit', 'search_hit_id', 'hit_list',
 ]

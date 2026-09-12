@@ -4,6 +4,33 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.76.0] - 2026-09-12
+
+### Search, help and grid-filter patterns promoted from the Data Explorer app
+
+Four additive pieces proven in the Aspire Data Explorer (Connect `c49dfe40`) this week, lifted
+into the library so any data app gets them in one import. Nothing existing changes.
+
+- **`aspire_dash.grid_filters`**: `from_grid_model(filterModel, valid_columns)` turns dash-ag-grid's
+  filter model (text / number / date, AND/OR per column, blank/notBlank, v31 + legacy condition
+  forms) into clauses; `compile_where_report(clauses, valid_columns) -> (where, warnings)` emits a
+  safe AND-joined MySQL WHERE (column allowlist, escaped literals, bare identifiers so the Sports
+  API's REST `where` guard accepts it, backticks only for odd names + `needs_tool_route`) and NAMES
+  every dropped clause; `sentence(clauses)` reads a filter back in plain words; `sort_from_grid(columnState)`.
+  Ops: = != > >= < <= contains / not contains / starts with / ends with / in / not in / between /
+  is empty / not empty; range ops accept ISO dates.
+- **`aspire_dash.viewstate`**: `encode(filter_model, picks, sort_col, sort_desc)` /
+  `decode(token)` / `column_state(...)`: a compact, tolerant URL token (`?v=`) that reopens the
+  same grid view for a colleague.
+- **`components.help_drawer / help_button / welcome_modal / register_help`**: a right-side help
+  panel (no backdrop) with "How do I…" accordion, grouped example links, pointers + contact; a
+  header Help button; a first-visit welcome remembered per browser; callbacks in one call.
+- **`components.search_box / search_hit / search_hit_id / hit_list`**: debounced search input +
+  results container, and one clickable hit row with a pattern id so a single callback handles
+  clicks from results, recents and examples alike.
+
+Tests: `tests/test_grid_filters*.py`, `tests/test_help_search_viewstate.py`.
+
 ## [0.75.0] - 2026-08-30
 
 ### `chat_panel` + `register_chat_panel` + `assets/aspire-chat.js` (M7: the chatbot in any app)
