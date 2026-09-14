@@ -4,6 +4,14 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.81.0] - 2026-09-14
+
+### athlete_banner: bigger, bolder, more spaced
+
+Typography bump (Kenny 2026-09-14): larger avatar (52px), name to 22px/800 with a
+touch of letter-spacing, event chip to 14px/800, meta row to 14px/600 with wider
+gaps, and roomier card padding. No API change.
+
 ## [0.80.0] - 2026-09-14
 
 ### Nationality flags: accept ISO 3166 alpha-3 codes (SAMS), not just IOC

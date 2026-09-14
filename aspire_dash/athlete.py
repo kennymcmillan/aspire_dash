@@ -959,7 +959,7 @@ def athlete_banner(
     name = name or "Unknown"
     band = age_group if age_group is not None else athletics_age_band(age)
     ring = "#e0b53a" if is_target else ("#3b82f6" if pathway == "Future Target" else "#cbd5e1")
-    sz = 42
+    sz = 52   # larger avatar (v0.81 — Kenny asked for a bigger, bolder banner)
     common = {"width": f"{sz}px", "height": f"{sz}px", "flex": f"0 0 {sz}px",
               "borderRadius": "50%", "border": f"2px solid {ring}",
               "boxShadow": "0 0 0 3px #ffffff, 0 1px 3px rgba(2,23,60,0.18)"}
@@ -970,7 +970,7 @@ def athlete_banner(
         avatar = html.Div(_initials(name), style={
             **common, "display": "flex", "alignItems": "center", "justifyContent": "center",
             "background": f"linear-gradient(135deg, {ASPIRE}, #001d3d)", "color": "white",
-            "fontWeight": "700", "fontSize": "15px"})
+            "fontWeight": "700", "fontSize": "18px"})
 
     dot = html.Span("·", style={"color": "#cbd5e1", "margin": "0 1px"})
     meta = []
@@ -987,24 +987,28 @@ def athlete_banner(
         meta += [dot, html.Span(f"{age:.1f}y")]
     if band:
         meta.append(html.Span(band, style={
-            "fontSize": "11px", "fontWeight": "700", "padding": "1px 8px", "marginLeft": "6px",
+            "fontSize": "12.5px", "fontWeight": "800", "padding": "2px 10px", "marginLeft": "8px",
             "borderRadius": "999px", "background": "#eef2f7", "color": "#334155"}))
     dob_txt = _banner_fmt_dob(date_of_birth)
     if dob_txt:
         meta.append(html.Span(f"DOB {dob_txt}", style={
-            "marginLeft": "8px", "fontSize": "11.5px", "color": "#94a3b8"}))
+            "marginLeft": "10px", "fontSize": "13px", "color": "#94a3b8"}))
 
     event_chip = html.Span(event, style={
-        "fontSize": "12px", "fontWeight": "700", "padding": "2px 9px", "borderRadius": "6px",
+        "fontSize": "14px", "fontWeight": "800", "padding": "3px 12px", "borderRadius": "6px",
         "background": "#e7effb", "color": ASPIRE, "whiteSpace": "nowrap"}) if event else None
 
+    # Bigger, bolder, more spaced (v0.81 — Kenny 2026-09-14): name up to 22px/800,
+    # meta up to 14px with wider gaps.
     ident = html.Div(style={"flex": "1", "minWidth": "0", "display": "flex",
-                            "alignItems": "center", "gap": "9px", "flexWrap": "wrap"}, children=[
-        html.Span(name, style={"fontSize": "16.5px", "fontWeight": "700",
-                               "color": SLATE["900"], "whiteSpace": "nowrap"}),
+                            "alignItems": "center", "gap": "12px", "flexWrap": "wrap"}, children=[
+        html.Span(name, style={"fontSize": "22px", "fontWeight": "800",
+                               "color": SLATE["900"], "whiteSpace": "nowrap",
+                               "letterSpacing": "0.2px"}),
         event_chip,
-        html.Span(meta, style={"fontSize": "12.5px", "color": SLATE["500"], "display": "flex",
-                               "alignItems": "center", "gap": "4px", "flexWrap": "wrap"}),
+        html.Span(meta, style={"fontSize": "14px", "fontWeight": "600",
+                               "color": SLATE["500"], "display": "flex",
+                               "alignItems": "center", "gap": "7px", "flexWrap": "wrap"}),
     ])
 
     # Target status shows as ONE gold chip (it already carries a star icon). A
@@ -1019,11 +1023,11 @@ def athlete_banner(
         tags.append(_banner_tag(pathway, kind="future" if pathway == "Future Target" else "neutral"))
 
     return html.Div(className="card", style={
-        "marginBottom": margin_bottom, "padding": "9px 15px",
-        "borderLeft": f"3px solid {ASPIRE}"}, children=[
+        "marginBottom": margin_bottom, "padding": "13px 18px",
+        "borderLeft": f"4px solid {ASPIRE}"}, children=[
         html.Div([avatar, ident,
                   html.Div(tags, style={"display": "flex", "gap": "6px", "flexWrap": "wrap"})],
-                 style={"display": "flex", "gap": "13px", "alignItems": "center"}),
+                 style={"display": "flex", "gap": "16px", "alignItems": "center"}),
     ])
 
 
