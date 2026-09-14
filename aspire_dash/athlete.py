@@ -772,12 +772,25 @@ _IOC_ISO2 = {
 
 
 def nationality_flag(nat: str | None) -> str:
-    """Flag emoji for an IOC 3-letter nationality code (e.g. 'KSA' -> 🇸🇦), or ''
-    when the code is missing / unmapped."""
+    """Flag EMOJI for an IOC 3-letter nationality code (e.g. 'KSA' -> 🇸🇦), or ''
+    when unmapped. NB: Windows/Chrome renders flag emoji as plain letters — prefer
+    :func:`nationality_flag_img` in the UI; this stays for text/label use."""
     iso = _IOC_ISO2.get((nat or "").strip().upper())
     if not iso or len(iso) != 2 or not iso.isalpha():
         return ""
     return "".join(chr(0x1F1E6 + ord(c) - ord("A")) for c in iso.upper())
+
+
+def nationality_flag_img(nat: str | None, height: int = 13):
+    """Small flag IMAGE for an IOC code (flagcdn.com PNG), or None when unmapped.
+    Renders on every OS including Windows, where flag emoji do not. Callers should
+    still show the country code alongside so a blocked image degrades gracefully."""
+    iso = _IOC_ISO2.get((nat or "").strip().upper())
+    if not iso:
+        return None
+    return html.Img(src=f"https://flagcdn.com/h20/{iso.lower()}.png", alt="",
+                    style={"height": f"{height}px", "width": "auto", "borderRadius": "2px",
+                           "boxShadow": "0 0 0 1px rgba(0,0,0,0.10)", "verticalAlign": "middle"})
 
 
 def athletics_age_band(age) -> str | None:
@@ -851,10 +864,13 @@ def athlete_banner(
 
     dot = html.Span("·", style={"color": "#cbd5e1", "margin": "0 1px"})
     meta = []
-    flag = nationality_flag(nationality)
     if nationality:
-        meta.append(html.Span(f"{flag + ' ' if flag else ''}{nationality}",
-                              style={"fontWeight": "600", "color": SLATE["900"]}))
+        flag_img = nationality_flag_img(nationality)
+        nat_kids = ([flag_img, html.Span(nationality, style={"marginLeft": "5px"})]
+                    if flag_img is not None else [html.Span(nationality)])
+        meta.append(html.Span(nat_kids, style={
+            "fontWeight": "600", "color": SLATE["900"],
+            "display": "inline-flex", "alignItems": "center"}))
     if sex:
         meta += [dot, html.Span(sex)]
     if isinstance(age, (int, float)):

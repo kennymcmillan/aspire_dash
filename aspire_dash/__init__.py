@@ -38,7 +38,7 @@ Usage in any Dash app:
     from aspire_dash.athlete import (
         athlete_avatar, athlete_profile_header,
         athlete_picker, register_athlete_picker,
-        athlete_banner, nationality_flag, athletics_age_band,
+        athlete_banner, nationality_flag, nationality_flag_img, athletics_age_band,
         PICKER_STORE_ID,
     )
     from aspire_dash.budget import (
@@ -72,7 +72,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.77.0"
+__version__ = "0.78.0"
 
 
 def normalised_path(pathname: str | None) -> str:
