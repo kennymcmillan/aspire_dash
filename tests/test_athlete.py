@@ -309,3 +309,36 @@ def test_nationality_flag_img_accepts_iso3_sams_codes():
     # IOC codes still work
     for code in ("QAT", "EGY", "IRI", "NGR", "PLE", "SUD"):
         assert nationality_flag_img(code) is not None, code
+
+
+def test_banner_decimal_age_from_dob_not_passed_integer():
+    """Banner shows a TRUE decimal age from DOB, not `.1f` of a passed integer
+    (18 + DOB must not read '18.0y'). Kenny 2026-09-14."""
+    from aspire_dash.athlete import athlete_banner, _banner_frac_age
+    import datetime
+    # ~18.x for a 2008-04-14 DOB (any run after Apr 2026)
+    fa = _banner_frac_age("2008-04-14")
+    assert fa is not None and fa > 18.0
+    assert _banner_frac_age(datetime.date(2008, 4, 14)) == fa
+    o = []
+
+    def leaves(n):
+        if isinstance(n, str):
+            o.append(n)
+        elif isinstance(n, (list, tuple)):
+            for x in n:
+                leaves(x)
+        else:
+            c = getattr(n, "children", None)
+            if c is not None:
+                leaves(c if isinstance(c, (list, tuple)) else [c])
+    leaves(athlete_banner(name="X", age=18, date_of_birth="2008-04-14"))
+    assert f"{fa:.1f}y" in o
+    assert "18.0y" not in o
+
+
+def test_banner_frac_age_robust():
+    from aspire_dash.athlete import _banner_frac_age
+    assert _banner_frac_age(None) is None
+    assert _banner_frac_age("") is None
+    assert _banner_frac_age("not-a-date") is None

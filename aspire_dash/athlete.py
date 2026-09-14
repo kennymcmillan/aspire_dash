@@ -929,6 +929,26 @@ def _banner_fmt_dob(v) -> str | None:
         return str(v)
 
 
+def _banner_frac_age(v):
+    """Decimal age in years from a DOB (date / datetime / Timestamp / ISO string),
+    to one place, computed to today. None if missing/unparseable. Used so the
+    banner shows a TRUE decimal age (e.g. 18.4) rather than `.1f` of a passed
+    integer age (which reads a misleading 18.0)."""
+    if not v:
+        return None
+    from datetime import date as _d, datetime as _dt
+    try:
+        if isinstance(v, _dt):            # datetime / pandas Timestamp
+            dob = v.date()
+        elif isinstance(v, _d):           # plain date
+            dob = v
+        else:                             # ISO string (or anything str-able)
+            dob = _dt.strptime(str(v)[:10], "%Y-%m-%d").date()
+        return round((_d.today() - dob).days / 365.25, 1)
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def _banner_tag(text, kind="neutral"):
     palette = {
         "target": ("#fef3c7", "#8a6500", "transparent"),
@@ -957,7 +977,12 @@ def athlete_banner(
     its :func:`nationality_flag`. Replaces per-app hand-rolled identity headers.
     """
     name = name or "Unknown"
-    band = age_group if age_group is not None else athletics_age_band(age)
+    # Prefer a DOB-derived decimal age (true to today) over a passed integer age,
+    # so "18.0y" from an integer becomes the real 18.4y (Kenny 2026-09-14).
+    disp_age = _banner_frac_age(date_of_birth)
+    if disp_age is None and isinstance(age, (int, float)):
+        disp_age = float(age)
+    band = age_group if age_group is not None else athletics_age_band(disp_age)
     ring = "#e0b53a" if is_target else ("#3b82f6" if pathway == "Future Target" else "#cbd5e1")
     sz = 52   # larger avatar (v0.81 — Kenny asked for a bigger, bolder banner)
     common = {"width": f"{sz}px", "height": f"{sz}px", "flex": f"0 0 {sz}px",
@@ -983,8 +1008,8 @@ def athlete_banner(
             "display": "inline-flex", "alignItems": "center"}))
     if sex:
         meta += [dot, html.Span(sex)]
-    if isinstance(age, (int, float)):
-        meta += [dot, html.Span(f"{age:.1f}y")]
+    if isinstance(disp_age, (int, float)):
+        meta += [dot, html.Span(f"{disp_age:.1f}y")]
     if band:
         meta.append(html.Span(band, style={
             "fontSize": "12.5px", "fontWeight": "800", "padding": "2px 10px", "marginLeft": "8px",

@@ -4,6 +4,15 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.82.0] - 2026-09-14
+
+### athlete_banner: true decimal age from DOB
+
+When a `date_of_birth` is passed, the banner now computes the decimal age to today
+(e.g. 18.4y) instead of showing `.1f` of a passed integer age (a misleading
+"18.0y"). Falls back to the passed `age` when there is no DOB. The age-group pill
+uses the same derived age. Kenny 2026-09-14.
+
 ## [0.81.0] - 2026-09-14
 
 ### athlete_banner: bigger, bolder, more spaced
