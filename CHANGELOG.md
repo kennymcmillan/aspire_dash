@@ -4,6 +4,16 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.80.0] - 2026-09-14
+
+### Nationality flags: accept ISO 3166 alpha-3 codes (SAMS), not just IOC
+
+`nationality_flag` / `nationality_flag_img` now map both the IOC codes (KSA, IRI,
+NGR, PLE, SUD...) AND the ISO 3166-1 alpha-3 codes SAMS actually emits (SAU, IRN,
+NGA, PSE, SDN, DZA, ...). Aspire's athlete feed is ISO3 while world-athletics data
+is IOC, so an app should not have to know which it holds. Fixes missing flags for
+Iran / Sudan / Nigeria / Palestine on SAMS-fed rosters.
+
 ## [0.79.0] - 2026-09-14
 
 ### Fly-out picker shell + athlete_banner single-Target fix

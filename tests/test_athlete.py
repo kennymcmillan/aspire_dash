@@ -298,3 +298,14 @@ def test_register_flyout_wires_toggle_callback():
     # the canvas is_open must be a wired Output
     ids = {str(o) for o in outputs}
     assert any(flyout_canvas_id("ind-pick") in s and "is_open" in s for s in ids)
+
+
+def test_nationality_flag_img_accepts_iso3_sams_codes():
+    """SAMS emits ISO 3166 alpha-3 (IRN/SDN/NGA/PSE), not IOC — both must map."""
+    from aspire_dash.athlete import nationality_flag_img, nationality_flag
+    for code in ("IRN", "SDN", "NGA", "PSE", "PAL", "SAU", "ARE", "DZA"):
+        assert nationality_flag_img(code) is not None, code
+        assert nationality_flag(code) != "", code
+    # IOC codes still work
+    for code in ("QAT", "EGY", "IRI", "NGR", "PLE", "SUD"):
+        assert nationality_flag_img(code) is not None, code

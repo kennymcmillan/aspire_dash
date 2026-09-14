@@ -859,7 +859,13 @@ def athlete_options_with_recency(
 # IOC 3-letter nationality code -> ISO 3166-1 alpha-2, so a code becomes a flag
 # emoji (regional-indicator pair). Covers Aspire's squads + common athletics
 # nations; an unmapped code just shows without a flag.
+# Nationality 3-letter code -> ISO 3166-1 alpha-2 (drives the flag emoji / image).
+# Covers BOTH the IOC codes (KSA, IRI, NGR, PLE, SUD...) and the ISO 3166-1 alpha-3
+# codes SAMS actually emits (SAU, IRN, NGA, PSE, SDN...), because Aspire's athlete
+# feed is ISO3 while world-athletics data is IOC — an app should not have to know
+# which it holds. An unmapped code just shows without a flag.
 _IOC_ISO2 = {
+    # ── IOC codes ──
     "QAT": "QA", "KSA": "SA", "UAE": "AE", "BRN": "BH", "KUW": "KW", "OMA": "OM",
     "IRQ": "IQ", "JOR": "JO", "SYR": "SY", "LBN": "LB", "YEM": "YE", "PLE": "PS",
     "MAR": "MA", "ALG": "DZ", "TUN": "TN", "LBA": "LY", "EGY": "EG", "SUD": "SD",
@@ -868,6 +874,10 @@ _IOC_ISO2 = {
     "FRA": "FR", "GBR": "GB", "ESP": "ES", "ITA": "IT", "GER": "DE", "USA": "US",
     "IND": "IN", "PAK": "PK", "BAN": "BD", "SRI": "LK", "IRI": "IR", "TUR": "TR",
     "AUS": "AU", "CAN": "CA", "BRA": "BR", "JPN": "JP", "CHN": "CN", "KOR": "KR",
+    # ── ISO 3166-1 alpha-3 aliases (SAMS) where they differ from the IOC code ──
+    "SAU": "SA", "ARE": "AE", "BHR": "BH", "KWT": "KW", "OMN": "OM", "DZA": "DZ",
+    "LBY": "LY", "SDN": "SD", "IRN": "IR", "NGA": "NG", "PSE": "PS", "PAL": "PS",
+    "ZAF": "ZA", "BGD": "BD", "LKA": "LK", "DEU": "DE",
 }
 
 
