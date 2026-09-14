@@ -31,6 +31,8 @@ from .search import search_box, search_hit, search_hit_id, hit_list  # noqa: F40
 # `aspire_dash.athlete` location.
 from ..athlete import selected_athlete_banner, register_athlete_banner  # noqa: F401, E402
 from ..athlete import athlete_banner, nationality_flag, nationality_flag_img, athletics_age_band  # noqa: F401, E402
+from ..athlete import (flyout_trigger, flyout_canvas, register_flyout,  # noqa: F401, E402
+                       flyout_open_id, flyout_canvas_id)
 
 
 __all__ = [
@@ -47,6 +49,8 @@ __all__ = [
     'ranked_dropdown',
     'selected_athlete_banner', 'register_athlete_banner',
     'athlete_banner', 'nationality_flag', 'nationality_flag_img', 'athletics_age_band',
+    'flyout_trigger', 'flyout_canvas', 'register_flyout',
+    'flyout_open_id', 'flyout_canvas_id',
     # kpi
     'kpi_tile', 'kpi_tile_row', 'kpi_strip', 'kpi_stat',
     # feedback

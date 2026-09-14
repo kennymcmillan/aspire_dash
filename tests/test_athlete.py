@@ -230,3 +230,71 @@ def test_athlete_id_card_fractional_age_robust():
     assert f("") is None
     assert f("not-a-date") is None
     assert f("2010-01-21") > 15.0
+
+
+# ── v0.79: athlete_banner single Target chip + fly-out picker shell ──────────
+
+def _count_leaf(node, text):
+    """Count leaf strings in a Dash tree equal to `text`."""
+    out = []
+
+    def flat(n):
+        if isinstance(n, str):
+            out.append(n)
+        elif isinstance(n, (list, tuple)):
+            for x in n:
+                flat(x)
+        else:
+            c = getattr(n, "children", None)
+            if c is not None:
+                flat(c if isinstance(c, (list, tuple)) else [c])
+    flat(node)
+    return sum(1 for s in out if s == text)
+
+
+def test_banner_one_target_chip_when_is_target_and_pathway_target():
+    """Regression: is_target=True + pathway='Target' must render ONE gold chip,
+    not two 'Target' tags (Kenny 2026-09-14)."""
+    from aspire_dash.athlete import athlete_banner
+    b = athlete_banner(name="Nassim Lachgar", event="800m", nationality="MAR",
+                       sex="Male", age=16.0, date_of_birth="2010-01-18",
+                       is_target=True, pathway="Target")
+    assert _count_leaf(b, "Target") == 1
+
+
+def test_banner_pathway_target_alone_still_one_chip():
+    from aspire_dash.athlete import athlete_banner
+    b = athlete_banner(name="X", is_target=False, pathway="Target")
+    assert _count_leaf(b, "Target") == 1
+
+
+def test_banner_future_target_shows_distinct_chip():
+    from aspire_dash.athlete import athlete_banner
+    b = athlete_banner(name="X", is_target=False, pathway="Future Target")
+    assert _count_leaf(b, "Future Target") == 1
+    assert _count_leaf(b, "Target") == 0   # the plain-Target gold chip is not added
+
+
+def test_flyout_ids_and_builders():
+    from aspire_dash.athlete import (flyout_open_id, flyout_canvas_id,
+                                     flyout_trigger, flyout_canvas)
+    from conftest import is_dash_component
+    assert flyout_open_id("ind-pick") == "ind-pick-flyout-open"
+    assert flyout_canvas_id("ind-pick") == "ind-pick-flyout-canvas"
+    trg = flyout_trigger("ind-pick", label="Choose athlete")
+    assert is_dash_component(trg) and trg.id == "ind-pick-flyout-open"
+    cvs = flyout_canvas("ind-pick", [], title="Select athlete")
+    assert is_dash_component(cvs) and cvs.id == "ind-pick-flyout-canvas"
+    assert cvs.is_open is False
+
+
+def test_register_flyout_wires_toggle_callback():
+    import dash
+    from aspire_dash.athlete import register_flyout, flyout_canvas_id
+    app = dash.Dash(__name__, suppress_callback_exceptions=True)
+    register_flyout(app, "ind-pick", item_type="ind-athlete-btn")
+    outputs = [o for m in app.callback_map.values() for o in
+               ([m["output"]] if not isinstance(m["output"], list) else m["output"])]
+    # the canvas is_open must be a wired Output
+    ids = {str(o) for o in outputs}
+    assert any(flyout_canvas_id("ind-pick") in s and "is_open" in s for s in ids)

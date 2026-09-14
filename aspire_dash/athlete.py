@@ -14,7 +14,7 @@ from __future__ import annotations
 from typing import Callable, Iterable
 
 import dash
-from dash import (Input, Output, State, callback_context, dcc, html, no_update)
+from dash import (ALL, Input, Output, State, callback_context, dcc, html, no_update)
 import dash_bootstrap_components as dbc
 
 from .theme import ASPIRE, SLATE, GOLD, ASPIRE_NAVY, RADIUS_LG, SHADOW_SM, BG_PAGE
@@ -678,6 +678,106 @@ def register_athlete_picker(
         return no_update, no_update, no_update
 
 
+# ── Fly-out picker shell — v0.79 ─────────────────────────────────────────────
+#
+# A lean "trigger button + slide-in Offcanvas" pop-out the CALLER fills with its
+# OWN controls (a group filter, a clickable athlete list, ...). It reclaims canvas
+# space by moving the athlete chooser off the page into a fly-out.
+#
+# Distinct from athlete_picker(): that is a full SAMS sport-cascade + name-search
+# picker that OWNS its data wiring. This is a bring-your-own-content shell for
+# apps that already have their own roster/list callbacks and just want the
+# fly-out mechanics (open on a trigger, close when an item is picked). Promoted
+# from development_dashboard's "Choose athlete" pop-out (Kenny 2026-09-14).
+#
+# Pure builders + one register helper. Ids are derived from a `prefix` so an app
+# can mount more than one:
+#   flyout_open_id(prefix)   -> "{prefix}-flyout-open"    (the trigger button)
+#   flyout_canvas_id(prefix) -> "{prefix}-flyout-canvas"  (the Offcanvas)
+
+
+def flyout_open_id(prefix: str) -> str:
+    """Id of the trigger button for a fly-out with this prefix."""
+    return f"{prefix}-flyout-open"
+
+
+def flyout_canvas_id(prefix: str) -> str:
+    """Id of the Offcanvas for a fly-out with this prefix."""
+    return f"{prefix}-flyout-canvas"
+
+
+def flyout_trigger(prefix: str, *, label: str = "Choose athlete",
+                   icon: str | None = "fa-solid fa-user-group",
+                   color: str = "primary", outline: bool = True,
+                   size: str | None = "sm", **button_kwargs):
+    """The button that opens the fly-out. Drop it wherever the trigger belongs
+    (a top bar, a filter row). Extra dbc.Button kwargs pass through."""
+    kids: list = []
+    if icon:
+        kids.append(html.I(className=icon, style={"marginRight": "6px"}))
+    kids.append(label)
+    style = {"whiteSpace": "nowrap", **button_kwargs.pop("style", {})}
+    return dbc.Button(kids, id=flyout_open_id(prefix), n_clicks=0, color=color,
+                      outline=outline, size=size, style=style, **button_kwargs)
+
+
+def flyout_canvas(prefix: str, children, *, title: str = "Select athlete",
+                  placement: str = "start", scrollable: bool = True,
+                  **offcanvas_kwargs):
+    """The slide-in Offcanvas holding the caller's own controls. Mount it in the
+    page body; it starts closed and is toggled by :func:`register_flyout`."""
+    return dbc.Offcanvas(children, id=flyout_canvas_id(prefix), title=title,
+                         placement=placement, is_open=False, scrollable=scrollable,
+                         **offcanvas_kwargs)
+
+
+def register_flyout(app, prefix: str, *, item_type: str | None = None) -> None:
+    """Wire the fly-out's open/close once after ``Dash()`` is created.
+
+    Opens on the trigger button; closes when a pickable item inside the canvas is
+    clicked. ``item_type`` is the ``type`` of the pattern-matching id on those
+    items (``{"type": item_type, "index": ...}``); it defaults to
+    ``f"{prefix}-item"``. Pass ``item_type=""`` (falsy) to skip close-on-pick and
+    only wire the toggle.
+
+    The trigger commonly re-mounts (e.g. it lives in a page-scoped top bar), which
+    fires a spurious 0-click; that is guarded, so the fly-out never auto-opens on
+    mount. Group changes / list rebuilds fire all-zero item clicks; those are
+    ignored too, so only a real pick closes it.
+    """
+    if item_type is None:
+        item_type = f"{prefix}-item"
+    open_id, canvas_id = flyout_open_id(prefix), flyout_canvas_id(prefix)
+
+    if item_type:
+        @app.callback(
+            Output(canvas_id, "is_open"),
+            Input(open_id, "n_clicks"),
+            Input({"type": item_type, "index": ALL}, "n_clicks"),
+            State(canvas_id, "is_open"),
+            prevent_initial_call=True)
+        def _toggle(open_clicks, item_clicks, is_open):
+            trig = callback_context.triggered_id
+            if trig == open_id:
+                if not open_clicks:      # spurious 0-click on (re)mount
+                    return no_update
+                return not is_open
+            if (isinstance(trig, dict) and trig.get("type") == item_type
+                    and item_clicks and any(c for c in item_clicks if c)):
+                return False             # a real pick closes the fly-out
+            return no_update
+    else:
+        @app.callback(
+            Output(canvas_id, "is_open"),
+            Input(open_id, "n_clicks"),
+            State(canvas_id, "is_open"),
+            prevent_initial_call=True)
+        def _toggle_only(open_clicks, is_open):
+            if not open_clicks:
+                return no_update
+            return not is_open
+
+
 # ── Last-test-date dropdown options (sort by recent) ───────────────────────
 
 def athlete_options_with_recency(
@@ -897,10 +997,15 @@ def athlete_banner(
                                "alignItems": "center", "gap": "4px", "flexWrap": "wrap"}),
     ])
 
+    # Target status shows as ONE gold chip (it already carries a star icon). A
+    # `pathway` of "Target" is the same fact as `is_target`, so it must NOT render
+    # a second, grey "Target" chip (that produced the duplicate Kenny flagged
+    # 2026-09-14). Render the pathway chip only when it says something the gold
+    # chip doesn't (e.g. "Future Target").
     tags = []
-    if is_target:
+    if is_target or pathway == "Target":
         tags.append(_banner_tag("Target", kind="target"))
-    if pathway:
+    elif pathway and pathway != "Non-Target":
         tags.append(_banner_tag(pathway, kind="future" if pathway == "Future Target" else "neutral"))
 
     return html.Div(className="card", style={

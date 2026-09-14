@@ -39,6 +39,8 @@ Usage in any Dash app:
         athlete_avatar, athlete_profile_header,
         athlete_picker, register_athlete_picker,
         athlete_banner, nationality_flag, nationality_flag_img, athletics_age_band,
+        flyout_trigger, flyout_canvas, register_flyout,
+        flyout_open_id, flyout_canvas_id,
         PICKER_STORE_ID,
     )
     from aspire_dash.budget import (

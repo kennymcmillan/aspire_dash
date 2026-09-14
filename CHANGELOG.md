@@ -4,6 +4,33 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.79.0] - 2026-09-14
+
+### Fly-out picker shell + athlete_banner single-Target fix
+
+- **`aspire_dash.athlete` fly-out picker shell** (`flyout_trigger`, `flyout_canvas`,
+  `register_flyout`, `flyout_open_id`, `flyout_canvas_id`): a lean "trigger button +
+  slide-in Offcanvas" the caller fills with its OWN controls (a group filter, a
+  clickable roster list). Distinct from `athlete_picker()` (the full SAMS
+  sport-cascade + search picker that owns its data): this is a bring-your-own-content
+  pop-out for apps that already have roster/list callbacks and just want the fly-out
+  mechanics (open on a trigger, close on a pick). Ids derive from a `prefix` so an app
+  can mount several. Promoted from development_dashboard's "Choose athlete" pop-out.
+- **`athlete_banner` fix**: passing both `is_target=True` and `pathway="Target"` (the
+  same fact from two fields) rendered TWO "Target" chips. Now the gold Target chip
+  (with its star icon) is the single source of truth; the pathway chip renders only
+  when it says something the gold chip doesn't (e.g. "Future Target").
+
+## [0.78.0] - 2026-09-14
+
+- **`athlete_banner`** thin identity banner + `nationality_flag` (emoji) /
+  `nationality_flag_img` (flagcdn PNG, renders on Windows where flag emoji do not) +
+  `athletics_age_band` (U16/U18/U20/Senior). The banner shows the flag as an IMAGE.
+
+## [0.77.0] - 2026-09-14
+
+- **`athlete_banner`** first cut (thin identity banner) + `nationality_flag`.
+
 ## [0.76.0] - 2026-09-12
 
 ### Search, help and grid-filter patterns promoted from the Data Explorer app
