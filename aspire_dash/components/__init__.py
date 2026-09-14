@@ -30,6 +30,7 @@ from .search import search_box, search_hit, search_hit_id, hit_list  # noqa: F40
 # register_athlete_banner` works alongside the canonical
 # `aspire_dash.athlete` location.
 from ..athlete import selected_athlete_banner, register_athlete_banner  # noqa: F401, E402
+from ..athlete import athlete_banner, nationality_flag, athletics_age_band  # noqa: F401, E402
 
 
 __all__ = [
@@ -45,6 +46,7 @@ __all__ = [
     'history_table',
     'ranked_dropdown',
     'selected_athlete_banner', 'register_athlete_banner',
+    'athlete_banner', 'nationality_flag', 'athletics_age_band',
     # kpi
     'kpi_tile', 'kpi_tile_row', 'kpi_strip', 'kpi_stat',
     # feedback

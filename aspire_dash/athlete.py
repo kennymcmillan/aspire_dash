@@ -755,6 +755,147 @@ def athlete_options_with_recency(
 # Promoted from aspire-nutrition's athlete_picker.selected_athlete_banner
 # + _render_athlete_banner + _selected_chip (with missing-MRN warning).
 
+# ── Thin identity banner (pure render) ──────────────────────────────────────
+# IOC 3-letter nationality code -> ISO 3166-1 alpha-2, so a code becomes a flag
+# emoji (regional-indicator pair). Covers Aspire's squads + common athletics
+# nations; an unmapped code just shows without a flag.
+_IOC_ISO2 = {
+    "QAT": "QA", "KSA": "SA", "UAE": "AE", "BRN": "BH", "KUW": "KW", "OMA": "OM",
+    "IRQ": "IQ", "JOR": "JO", "SYR": "SY", "LBN": "LB", "YEM": "YE", "PLE": "PS",
+    "MAR": "MA", "ALG": "DZ", "TUN": "TN", "LBA": "LY", "EGY": "EG", "SUD": "SD",
+    "DJI": "DJ", "SOM": "SO", "ERI": "ER", "ETH": "ET", "KEN": "KE", "UGA": "UG",
+    "NGR": "NG", "GHA": "GH", "SEN": "SN", "CIV": "CI", "CMR": "CM", "RSA": "ZA",
+    "FRA": "FR", "GBR": "GB", "ESP": "ES", "ITA": "IT", "GER": "DE", "USA": "US",
+    "IND": "IN", "PAK": "PK", "BAN": "BD", "SRI": "LK", "IRI": "IR", "TUR": "TR",
+    "AUS": "AU", "CAN": "CA", "BRA": "BR", "JPN": "JP", "CHN": "CN", "KOR": "KR",
+}
+
+
+def nationality_flag(nat: str | None) -> str:
+    """Flag emoji for an IOC 3-letter nationality code (e.g. 'KSA' -> 🇸🇦), or ''
+    when the code is missing / unmapped."""
+    iso = _IOC_ISO2.get((nat or "").strip().upper())
+    if not iso or len(iso) != 2 or not iso.isalpha():
+        return ""
+    return "".join(chr(0x1F1E6 + ord(c) - ord("A")) for c in iso.upper())
+
+
+def athletics_age_band(age) -> str | None:
+    """World Athletics age group for an age: U16 / U18 / U20 / Senior. None if the
+    age is missing / non-numeric."""
+    if not isinstance(age, (int, float)):
+        return None
+    if age < 16:
+        return "U16"
+    if age < 18:
+        return "U18"
+    if age < 20:
+        return "U20"
+    return "Senior"
+
+
+def _banner_fmt_dob(v) -> str | None:
+    if not v:
+        return None
+    try:
+        if hasattr(v, "strftime"):
+            return v.strftime("%d-%b-%Y")
+        from datetime import datetime
+        return datetime.strptime(str(v)[:10], "%Y-%m-%d").strftime("%d-%b-%Y")
+    except Exception:  # noqa: BLE001
+        return str(v)
+
+
+def _banner_tag(text, kind="neutral"):
+    palette = {
+        "target": ("#fef3c7", "#8a6500", "transparent"),
+        "future": ("#e7effb", "#1d4ed8", "transparent"),
+    }.get(kind, ("#f8fafc", SLATE["500"], "#e2e8f0"))
+    bg, fg, border = palette
+    star = html.I(className="fas fa-star",
+                  style={"fontSize": "8px", "marginRight": "5px"}) if kind == "target" else None
+    return html.Span([star, text] if star else text, style={
+        "fontSize": "11.5px", "fontWeight": "700", "padding": "3px 11px", "borderRadius": "999px",
+        "background": bg, "color": fg, "border": "1px solid " + border, "whiteSpace": "nowrap"})
+
+
+def athlete_banner(
+    *, name: str, event: str | None = None, nationality: str | None = None,
+    sex: str | None = None, age=None, date_of_birth=None, age_group: str | None = None,
+    photo_url: str | None = None, is_target: bool = False, pathway: str | None = None,
+    margin_bottom: str = "12px",
+) -> html.Div:
+    """Thin athlete identity banner (one low card): a ringed avatar, the name + an
+    event accent chip, then flag-tagged nationality / sex / age with an age-group
+    pill and a muted DOB, and status tags (Target / pathway) on the right.
+
+    A pure render helper — pass the fields; no store / callback wiring. ``age_group``
+    defaults to :func:`athletics_age_band` of ``age``; ``nationality`` is shown with
+    its :func:`nationality_flag`. Replaces per-app hand-rolled identity headers.
+    """
+    name = name or "Unknown"
+    band = age_group if age_group is not None else athletics_age_band(age)
+    ring = "#e0b53a" if is_target else ("#3b82f6" if pathway == "Future Target" else "#cbd5e1")
+    sz = 42
+    common = {"width": f"{sz}px", "height": f"{sz}px", "flex": f"0 0 {sz}px",
+              "borderRadius": "50%", "border": f"2px solid {ring}",
+              "boxShadow": "0 0 0 3px #ffffff, 0 1px 3px rgba(2,23,60,0.18)"}
+    if photo_url:
+        avatar = html.Img(src=photo_url, alt="",
+                          style={**common, "objectFit": "cover", "objectPosition": "center 20%"})
+    else:
+        avatar = html.Div(_initials(name), style={
+            **common, "display": "flex", "alignItems": "center", "justifyContent": "center",
+            "background": f"linear-gradient(135deg, {ASPIRE}, #001d3d)", "color": "white",
+            "fontWeight": "700", "fontSize": "15px"})
+
+    dot = html.Span("·", style={"color": "#cbd5e1", "margin": "0 1px"})
+    meta = []
+    flag = nationality_flag(nationality)
+    if nationality:
+        meta.append(html.Span(f"{flag + ' ' if flag else ''}{nationality}",
+                              style={"fontWeight": "600", "color": SLATE["900"]}))
+    if sex:
+        meta += [dot, html.Span(sex)]
+    if isinstance(age, (int, float)):
+        meta += [dot, html.Span(f"{age:.1f}y")]
+    if band:
+        meta.append(html.Span(band, style={
+            "fontSize": "11px", "fontWeight": "700", "padding": "1px 8px", "marginLeft": "6px",
+            "borderRadius": "999px", "background": "#eef2f7", "color": "#334155"}))
+    dob_txt = _banner_fmt_dob(date_of_birth)
+    if dob_txt:
+        meta.append(html.Span(f"DOB {dob_txt}", style={
+            "marginLeft": "8px", "fontSize": "11.5px", "color": "#94a3b8"}))
+
+    event_chip = html.Span(event, style={
+        "fontSize": "12px", "fontWeight": "700", "padding": "2px 9px", "borderRadius": "6px",
+        "background": "#e7effb", "color": ASPIRE, "whiteSpace": "nowrap"}) if event else None
+
+    ident = html.Div(style={"flex": "1", "minWidth": "0", "display": "flex",
+                            "alignItems": "center", "gap": "9px", "flexWrap": "wrap"}, children=[
+        html.Span(name, style={"fontSize": "16.5px", "fontWeight": "700",
+                               "color": SLATE["900"], "whiteSpace": "nowrap"}),
+        event_chip,
+        html.Span(meta, style={"fontSize": "12.5px", "color": SLATE["500"], "display": "flex",
+                               "alignItems": "center", "gap": "4px", "flexWrap": "wrap"}),
+    ])
+
+    tags = []
+    if is_target:
+        tags.append(_banner_tag("Target", kind="target"))
+    if pathway:
+        tags.append(_banner_tag(pathway, kind="future" if pathway == "Future Target" else "neutral"))
+
+    return html.Div(className="card", style={
+        "marginBottom": margin_bottom, "padding": "9px 15px",
+        "borderLeft": f"3px solid {ASPIRE}"}, children=[
+        html.Div([avatar, ident,
+                  html.Div(tags, style={"display": "flex", "gap": "6px", "flexWrap": "wrap"})],
+                 style={"display": "flex", "gap": "13px", "alignItems": "center"}),
+    ])
+
+
 BANNER_ID = "selected-athlete-banner"
 
 
