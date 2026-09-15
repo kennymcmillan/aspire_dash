@@ -304,7 +304,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 24px;
+    padding: 12px 16px;
     background: rgba(255,255,255,0.85);
     border-bottom: 1px solid var(--slate-200);
     position: sticky;
@@ -315,9 +315,15 @@ body {
 }
 
 .page-content {
-    padding: 32px;
-    max-width: 1360px;
-    margin: 0 auto;        /* centre on ultrawide screens */
+    /* Compact default (2026-09-15): tight 8px top so a slim banner/heading sits
+       close under the sticky header, and a wide 1840px cap so content reclaims
+       the right-of-screen gutter on wide monitors instead of centring inside
+       1360. Sides stay 16px so content never touches the sidebar and phones keep
+       a >=16px gutter at every width (no separate phone override needed). Apps
+       that want full-bleed still override .page-content in their own app CSS. */
+    padding: 8px 16px 16px;
+    max-width: 1840px;
+    margin: 0 auto;
 }
 
 

@@ -304,7 +304,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 24px;
+    padding: 12px 16px;
     background: rgba(255,255,255,0.85);
     border-bottom: 1px solid var(--slate-200);
     position: sticky;
@@ -315,9 +315,10 @@ body {
 }
 
 .page-content {
-    padding: 32px;
-    max-width: 1360px;
-    margin: 0 auto;        /* centre on ultrawide screens */
+    /* Compact default (2026-09-15): see aspire_dash/assets/00_aspire_base.css. */
+    padding: 8px 16px 16px;
+    max-width: 1840px;
+    margin: 0 auto;
 }
 
 
