@@ -1,4 +1,4 @@
-"""v0.90 — hover-out popouts promoted from endurance-dashboard.
+"""v0.90 hover-out popouts promoted from endurance-dashboard.
 
 Covers the test-history column chart (chips + leader lines + best ring) and the
 modal / hover-card BUILDERS returning the right Dash components. Deterministic,

@@ -70,7 +70,7 @@ def _history_modal_toggle(card_clicks, _close, store):
     if isinstance(trig, dict) and trig.get("type") == "hist-card" and any(card_clicks or []):
         rec = (store or {}).get(trig["index"])
         if rec:
-            # Build the figure HERE, on click — the store carries only the small raw
+            # Build the figure HERE, on click. The store carries only the small raw
             # series/params, so we don't build + serialise every card's figure on
             # every athlete switch. The aspire-blue header + chrome come from CSS.
             fig = history_figure(rec.get("series") or [], unit=rec.get("unit", ""),

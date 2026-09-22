@@ -5198,7 +5198,7 @@ html.dark .pct-bad  { color: #f87171; }
     font-size: 17px;
     letter-spacing: 0.01em;
 }
-/* dbc's close X is a dark glyph — invert it to white on the blue header */
+/* dbc's close X is a dark glyph, inverted to white on the blue header */
 .hist-modal .modal-header .btn-close {
     filter: invert(1) grayscale(1) brightness(2);
     opacity: 0.85;

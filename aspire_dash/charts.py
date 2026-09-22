@@ -43,7 +43,7 @@ __all__ = ["GRAPH_CONFIG", "apply_template",
             "add_reference_line", "aspire_area_fill",
             "aspire_bar_gradient", "add_drop_shadow_trace",
             "aspire_hover_template",
-            # v0.90 — test-history column chart (promoted from endurance-dashboard)
+            # v0.90 test-history column chart (promoted from endurance-dashboard)
             "history_figure"]
 
 # ── Graph config (hide modebar by default) ───────────────────────────────────
@@ -267,25 +267,25 @@ def aspire_hover_template(unit: str = "", title_key: str = "x",
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-# v0.90 — Test-history column chart (promoted from endurance-dashboard)
+# v0.90 - Test-history column chart (promoted from endurance-dashboard)
 # One bar per test date: navy bars, gold-ringed best test, a value chip boxed at
 # each bar top, a dashed mean rule, and ggrepel-style right-margin mean/benchmark
 # labels that fan out (with leader lines) when they would collide. All colours
 # read from the Aspire palette tokens rather than re-hardcoded hexes.
 # ═════════════════════════════════════════════════════════════════════════════
 
-# Palette — Aspire tokens. VALUE_BOX (lighter navy chip) and REFLINE (target
+# Palette - Aspire tokens. VALUE_BOX (lighter navy chip) and REFLINE (target
 # amber, the app --target token) have no exact palette token, so they stay named
 # literals; everything else maps to a theme token.
-_HIST_BAR_LATEST = ASPIRE["600"]                 # aspire-600 — the latest test
-_HIST_BAR_MUTED = _hex_to_rgba(ASPIRE["600"], 0.24)  # navy at low opacity — prior tests
+_HIST_BAR_LATEST = ASPIRE["600"]                 # aspire-600 - the latest test
+_HIST_BAR_MUTED = _hex_to_rgba(ASPIRE["600"], 0.24)  # navy at low opacity - prior tests
 _HIST_BEST_OUTLINE = GOLD                        # Aspire gold ring on the best test
-_HIST_MEAN_LINE = SLATE["500"]                   # slate-500 — the dashed mean rule
+_HIST_MEAN_LINE = SLATE["500"]                   # slate-500 - the dashed mean rule
 _HIST_VALUE_BOX = "#0a5ba8"                      # lighter navy chip behind each value
-_HIST_MEAN_LABEL = SLATE["600"]                  # slate-600 — readable mean label
-_HIST_REFLINE = "#92400e"                        # target amber — benchmark rules
-_HIST_AXIS = SLATE["700"]                        # slate-700 — axis + label text
-_HIST_MUTED_TXT = SLATE["500"]                   # slate-500 — secondary notes
+_HIST_MEAN_LABEL = SLATE["600"]                  # slate-600 - readable mean label
+_HIST_REFLINE = "#92400e"                        # target amber - benchmark rules
+_HIST_AXIS = SLATE["700"]                        # slate-700 - axis + label text
+_HIST_MUTED_TXT = SLATE["500"]                   # slate-500 - secondary notes
 
 
 def _num_fmt(v, unit=""):

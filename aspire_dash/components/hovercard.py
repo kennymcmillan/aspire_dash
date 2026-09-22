@@ -31,7 +31,7 @@ __all__ = ["render_card", "hovercard_graph", "HOVERCARD_ARROW"]
 GRAPH = "hovercard-graph"
 TIP = "hovercard-tip"
 
-#: Default speech-bubble pointer colour — a subtle on-brand aspire-700 navy
+#: Default speech-bubble pointer colour: a subtle on-brand aspire-700 navy
 #: (was a soft red in the source). Override per graph via ``arrow_color=``.
 HOVERCARD_ARROW = "#003566"
 
