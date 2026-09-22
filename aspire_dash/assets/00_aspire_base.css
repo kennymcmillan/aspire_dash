@@ -5168,3 +5168,165 @@ html.dark .pct-bad  { color: #f87171; }
    opt-in Inter + tabular-nums for numeric surfaces, so apps stop hardcoding
    fontFamily:'Inter' inline. (Folded in from a peer's WIP for this release.) */
 .font-data { font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Hover-out popouts (v0.90, promoted from endurance-dashboard)
+   Styles for the click-to-open history modal (aspire_dash.components.history_modal
+   + history_trigger) and the rich graph hover card (components.hovercard_graph),
+   so both are fully styled in any app with no app-local CSS.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Click-to-open history modal ────────────────────────────────────────────
+   Aspire branding: an aspire-blue header with a white title + white close X, a
+   gold hairline (the signature element), rounded body, soft shadow, branded
+   Close button. Metric cards wrapped by history_trigger get a subtle lift. */
+.hist-modal .modal-content {
+    border: none;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 24px 70px rgba(2, 23, 60, 0.30);
+}
+.hist-modal .modal-header {
+    background: linear-gradient(135deg, var(--aspire-700, #003566), var(--aspire-600, #004185));
+    /* gold hairline ties the popout to the Aspire brand (the signature element) */
+    border-bottom: 3px solid var(--gold, #fbb800);
+    padding: 15px 24px;
+}
+.hist-modal .modal-header .modal-title {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: 0.01em;
+}
+/* dbc's close X is a dark glyph — invert it to white on the blue header */
+.hist-modal .modal-header .btn-close {
+    filter: invert(1) grayscale(1) brightness(2);
+    opacity: 0.85;
+}
+.hist-modal .modal-header .btn-close:hover { opacity: 1; }
+.hist-modal .modal-body { background: #ffffff; }
+.hist-modal .modal-footer { border-top: 1px solid #eef2f7; padding: 10px 18px; }
+.hist-modal .hist-modal-close-btn {
+    background: var(--aspire-600, #004185);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 6px 18px;
+}
+.hist-modal .hist-modal-close-btn:hover { background: var(--aspire-700, #003566); }
+/* the clickable metric cards get a subtle lift + pointer to signal "click me" */
+.hist-clickable { transition: box-shadow 0.15s ease, transform 0.15s ease; }
+.hist-clickable:hover { transform: translateY(-2px); }
+.hist-clickable:hover .card { box-shadow: 0 8px 22px rgba(2, 23, 60, 0.14); }
+
+/* ── Rich graph hover card (PBI tooltip-page replacement) ───────────────────
+   Driven by components.hovercard_graph via dcc.Tooltip. The .hover-card IS the
+   bubble, so the dcc chrome is neutralised:
+   - the white blob at the point is dcc's bounding-box indicator -> transparent
+   - the bubble wrapper bg/shadow stripped so only the card shows
+   - the pointer (arrow) recoloured to a subtle on-brand navy (was soft red);
+     the hovercard_graph arrow_color= param overrides it per graph. */
+.dcc-tooltip-bounding-box {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+.hovercard-tip {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    border: 0 !important;
+    /* Hard belt: the card can never be wider than the viewport, even if the JS flip
+       is unavailable. A no-op at desktop widths (256px < 100vw - 16px). */
+    max-width: min(256px, calc(100vw - 16px));
+}
+.hover:has(.hovercard-tip) {
+    --Dash-Tooltip-Background-Color: var(--aspire-700, #003566);
+    --Dash-Tooltip-Border-Color: var(--aspire-700, #003566);
+}
+/* Lift the hovered chart above its grid neighbours AND the sidebar/header so the
+   card, which overflows its chart, paints on top of everything. The sidebar sits
+   around z-index 1000, so go well above it. */
+.hovercard-wrap { position: relative; }
+.hovercard-wrap:hover { z-index: 5000; }
+/* A hover-card graph nested INSIDE a .card grid cell only lifts WITHIN that cell,
+   so raise the whole grid cell while its inner graph is hovered and let the cell
+   show overflow so nothing is clipped. */
+.card:has(.hovercard-wrap:hover) { position: relative; z-index: 5000; overflow: visible; }
+.card:has(.hovercard-wrap) { overflow: visible; }
+/* Remove Plotly's native hover box outright (the grey box at the point). Hiding
+   the SVG hover layer does NOT stop the plotly_hover event, so the card still
+   fires; this beats colouring the label, which can't match a non-white chart. */
+.hovercard-wrap .js-plotly-plot .hoverlayer { display: none !important; }
+
+.hover-card {
+    /* no entry animation: it re-played on every hover move and read as flicker */
+    width: 256px;
+    max-width: min(256px, calc(100vw - 16px));  /* belt: never exceed the viewport */
+    font-family: 'Poppins', sans-serif;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 12px 34px rgba(2, 23, 60, 0.22), 0 2px 6px rgba(2, 23, 60, 0.12);
+    border: 1px solid var(--slate-200, #e2e8f0);
+    overflow: hidden;
+}
+.hover-card .hc-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 13px;
+    background: linear-gradient(135deg, var(--aspire-700, #003566), var(--aspire-600, #004185));
+    color: #fff;
+}
+.hover-card .hc-photo {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    flex: 0 0 auto;
+    background: rgba(255, 255, 255, 0.15);
+}
+.hover-card .hc-photo--empty { display: inline-block; }
+.hover-card .hc-id { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.hover-card .hc-name {
+    font-size: 13.5px; font-weight: 600; line-height: 1.15;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hover-card .hc-mat { align-self: flex-start; font-size: 10px; padding: 1px 8px; }
+
+.hover-card .hc-headline { padding: 12px 14px 8px; }
+.hover-card .hc-metric-label {
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.03em;
+    text-transform: uppercase; color: var(--slate-600, #475569);
+}
+.hover-card .hc-metric-line { display: flex; align-items: baseline; gap: 5px; margin-top: 3px; }
+.hover-card .hc-metric-val { font-size: 27px; font-weight: 700; color: var(--aspire-900, #001d3d); line-height: 1; }
+.hover-card .hc-metric-unit { font-size: 12.5px; font-weight: 600; color: var(--slate-500, #64748b); }
+
+.hover-card .hc-rows { padding: 2px 14px 6px; }
+.hover-card .hc-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 0; font-size: 12.5px;
+    border-top: 1px solid var(--slate-100, #f1f5f9);
+}
+.hover-card .hc-row-label { color: var(--slate-600, #475569); flex: 1; }
+.hover-card .hc-row-val { font-weight: 700; color: var(--slate-800, #1e293b); }
+
+.hover-card .hc-delta {
+    font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 999px;
+    white-space: nowrap;
+}
+.hover-card .hc-up { color: #047857; background: #d1fae5; }
+.hover-card .hc-down { color: #b91c1c; background: #fee2e2; }
+
+.hover-card .hc-foot {
+    padding: 7px 14px; font-size: 11px; font-weight: 500;
+    color: var(--slate-500, #64748b);
+    background: var(--slate-50, #f8fafc);
+    border-top: 1px solid var(--slate-100, #f1f5f9);
+}
+@keyframes hc-fade-in {
+    from { opacity: 0; transform: translateY(3px) scale(0.985); }
+    to   { opacity: 1; transform: none; }
+}
