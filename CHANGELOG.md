@@ -14,26 +14,26 @@ palette tokens, and their callbacks AUTO-REGISTER on import via Dash's global
 callback registry (no `register_*` call needed).
 
 - **`aspire_dash.charts.history_figure(series, unit=None, title=None, *,
-  lower_is_better=False, benchmarks=None, last_n=12, height=360, width=560)`** — a
+  lower_is_better=False, benchmarks=None, last_n=12, height=360, width=560)`** - a
   test-history column chart: aspire-600 bars, a gold ring on the best test, a value
   chip boxed at each bar top, a dashed mean rule, and ggrepel-style right-margin
   mean/benchmark labels that fan out with thin leader lines when they collide (the
   `_repel_1d` helper came across too). Colours read from the palette tokens
   (`ASPIRE`, `GOLD`, `SLATE`, `SUCCESS`, `DANGER`) instead of re-hardcoded hexes.
 - **`aspire_dash.components.history_modal(figures)` + `history_trigger(index,
-  inner)`** — wrap any metric card in `history_trigger`, mount one `history_modal`
+  inner)`** - wrap any metric card in `history_trigger`, mount one `history_modal`
   per page, and a click opens the shared modal that builds the metric's
   `history_figure` on demand. The store carries only the raw series/params, so
   switching athletes does not re-serialise every figure.
 - **`aspire_dash.components.hovercard_graph(figure, index, metas=None, *,
   title=None, config=None, selector=None, height=None, arrow_color=None)` +
-  `render_card`** — a graph whose points pop a branded speech-bubble card (photo,
+  `render_card`** - a graph whose points pop a branded speech-bubble card (photo,
   maturation badge, headline metric + change, rows, measured date). ONE MATCH
   callback renders the card for every such graph; ONE clientside callback flips the
   card away from the screen edges so it never clips. The speech-bubble arrow colour
   is now a param (`arrow_color=`, default the on-brand `HOVERCARD_ARROW` aspire-700
   navy) instead of the source's hardcoded soft red.
-- **CSS** — the `.hist-modal*` / `.hist-clickable` and `.hover-card*` /
+- **CSS** - the `.hist-modal*` / `.hist-clickable` and `.hover-card*` /
   `.hovercard-*` rules moved into `00_aspire_base.css` as semantic classes (arrow
   belt recoloured on-brand), so both components are fully styled with no app-local
   CSS.
