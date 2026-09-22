@@ -90,11 +90,15 @@ def test_build_acute_traces_uses_amber_not_red():
                 f"acute marker must be alert_amber, got {color}"
 
 
-def test_build_main_line_trace_default_linear_not_spline():
-    """Regression: spline shape was distorting discrete test data."""
+def test_build_main_line_trace_flows_by_default_markers_pinned():
+    """The line flows (spline, the Vercel look) by default; markers stay at the
+    real values so nothing is misrepresented. Linear stays opt-in."""
     from aspire_dash.timeseries import build_main_line_trace
-    tr = build_main_line_trace(["d1", "d2"], [10, 20])
-    assert tr.line.shape == "linear"
+    tr = build_main_line_trace(["2025-01-01", "2025-02-01"], [10, 20])
+    assert tr.line.shape == "spline"
+    assert "markers" in tr.mode and list(tr.y) == [10, 20]
+    ln = build_main_line_trace(["2025-01-01", "2025-02-01"], [10, 20], shape="linear")
+    assert ln.line.shape == "linear"
 
 
 # ── timeseries: session aggregator ─────────────────────────────────────────
@@ -177,3 +181,25 @@ def test_build_adaptive_traces_spline_and_linear_options():
     assert sp[0].line.shape == "spline" and sp[0].line.smoothing == 1.3
     ln = build_adaptive_traces(["a", "b"], [1, 2], [3, 4], smooth="linear")
     assert ln[0].line.shape == "linear" and len(ln[0].x) == 2
+
+
+def test_build_4pt_ma_flows_monotone_with_real_dates():
+    """With real dates + >=3 points the MA band densifies (monotone flow);
+    falls back to straight (input length) when dates are not parseable."""
+    from aspire_dash.timeseries import build_4pt_ma_traces
+    dates = ["2025-01-01", "2025-02-01", "2025-03-01", "2025-04-01"]
+    out = build_4pt_ma_traces(dates, [1, 2, 3, 4], window=4)
+    assert len(out) == 3
+    assert len(out[0].x) > 4                       # densified upper band edge
+    # non-date labels: graceful straight fallback, still 3 traces
+    raw = build_4pt_ma_traces([f"d{i}" for i in range(4)], [1, 2, 3, 4], window=4)
+    assert len(raw) == 3 and len(raw[0].x) == 4
+
+
+def test_build_acute_flows_monotone_markers_at_real_dates():
+    from aspire_dash.timeseries import build_acute_traces
+    dates = ["2025-01-01", "2025-02-01", "2025-03-01", "2025-04-01", "2025-05-01"]
+    out = build_acute_traces(dates, [10, 10.5, 10.2, 10.8, 50.0])
+    assert len(out) == 4                           # 3 band + 1 acute marker
+    assert len(out[0].x) > 5                       # densified band
+    assert out[-1].name == "Acute" and len(out[-1].x) == 1   # marker at real date

@@ -83,8 +83,10 @@ def build_sd_traces(dates, values, stats, colors=DEFAULT_COLORS):
     ]
 
 
-def build_4pt_ma_traces(dates, values, window=4, colors=DEFAULT_COLORS):
-    """Rolling mean + ±1SD band. Needs ≥`window` points."""
+def build_4pt_ma_traces(dates, values, window=4, colors=DEFAULT_COLORS, smooth="monotone"):
+    """Rolling mean + ±1SD band. Needs ≥`window` points. Band + mean flow with a
+    monotone-cubic (PCHIP) resample by default (the Vercel look); falls back to
+    straight segments when scipy is missing or there are <3 points."""
     n = len(values)
     if n < window:
         return []
@@ -92,22 +94,32 @@ def build_4pt_ma_traces(dates, values, window=4, colors=DEFAULT_COLORS):
     rolling_std = [np.std(values[max(0, i - window + 1):i + 1]) for i in range(n)]
     upper = [m + s for m, s in zip(rolling_mean, rolling_std)]
     lower = [m - s for m, s in zip(rolling_mean, rolling_std)]
+    xs, lo, up, mid_x, mid = dates, lower, upper, dates, rolling_mean
+    if smooth == "monotone":
+        band = _smooth_pair(dates, lower, upper)
+        gm = _monotone_one(dates, rolling_mean)
+        if band and gm:
+            xs, lo, up = band
+            mid_x, mid = gm
     return [
-        go.Scatter(x=dates, y=upper, mode="lines",
+        go.Scatter(x=xs, y=up, mode="lines",
                     line=dict(color=colors["ma_band"], width=1.5, dash="dashdot"),
                     showlegend=False, hoverinfo="skip"),
-        go.Scatter(x=dates, y=lower, mode="lines",
+        go.Scatter(x=xs, y=lo, mode="lines",
                     line=dict(color=colors["ma_band"], width=1.5, dash="dashdot"),
                     fill="tonexty", fillcolor=colors["ma_fill"],
                     showlegend=False, hoverinfo="skip"),
-        go.Scatter(x=dates, y=rolling_mean, mode="lines",
+        go.Scatter(x=mid_x, y=mid, mode="lines",
                     line=dict(color=colors["ma_line"], width=2),
                     name="4pt MA", hoverinfo="skip"),
     ]
 
 
-def build_acute_traces(dates, values, window=4, sd_mult=1.5, colors=DEFAULT_COLORS):
-    """Rolling mean ±`sd_mult`×SD band + alert markers for breaches."""
+def build_acute_traces(dates, values, window=4, sd_mult=1.5, colors=DEFAULT_COLORS,
+                       smooth="monotone"):
+    """Rolling mean ±`sd_mult`×SD band + alert markers for breaches. Band + mean
+    flow with a monotone-cubic (PCHIP) resample by default; straight fallback.
+    Alert markers stay at the real test dates."""
     n = len(values)
     if n < window:
         return []
@@ -116,15 +128,22 @@ def build_acute_traces(dates, values, window=4, sd_mult=1.5, colors=DEFAULT_COLO
     upper = [m + sd_mult * s for m, s in zip(rolling_mean, rolling_std)]
     lower = [m - sd_mult * s for m, s in zip(rolling_mean, rolling_std)]
 
+    xs, lo, up, mid_x, mid = dates, lower, upper, dates, rolling_mean
+    if smooth == "monotone":
+        band = _smooth_pair(dates, lower, upper)
+        gm = _monotone_one(dates, rolling_mean)
+        if band and gm:
+            xs, lo, up = band
+            mid_x, mid = gm
     traces = [
-        go.Scatter(x=dates, y=upper, mode="lines",
+        go.Scatter(x=xs, y=up, mode="lines",
                     line=dict(color=colors["acute_line"], width=1.5, dash="dashdot"),
                     showlegend=False, hoverinfo="skip"),
-        go.Scatter(x=dates, y=lower, mode="lines",
+        go.Scatter(x=xs, y=lo, mode="lines",
                     line=dict(color=colors["acute_line"], width=1.5, dash="dashdot"),
                     fill="tonexty", fillcolor=colors["acute_fill"],
                     showlegend=False, hoverinfo="skip"),
-        go.Scatter(x=dates, y=rolling_mean, mode="lines",
+        go.Scatter(x=mid_x, y=mid, mode="lines",
                     line=dict(color=colors["acute_rolling"], width=1, dash="dot"),
                     name="Rolling Mean", hoverinfo="skip"),
     ]
@@ -157,25 +176,38 @@ def _monotone_resample(dates, lars, uars, n=240):
     ``(xs, lars_d, uars_d)`` of length ``n`` along a date axis, or ``None`` to
     fall back to straight segments (scipy missing, or fewer than 3 usable pts).
     """
+    return _smooth_pair(dates, lars, uars, n)
+
+
+def _monotone_one(dates, y, n=240):
+    """Dense monotone-cubic (PCHIP) resample of a single series over the date
+    axis. Returns (xs, y_dense) or None (scipy missing / <3 usable pts)."""
     try:
         import numpy as np
         import pandas as pd
         from scipy.interpolate import PchipInterpolator
-    except Exception:  # noqa: BLE001
+        x = pd.to_datetime(list(dates)).asi8.astype(float)   # raises on non-dates
+        order = np.argsort(x)
+        x = x[order]
+        yy = np.asarray(y, dtype=float)[order]
+        keep = np.concatenate(([True], np.diff(x) > 0))
+        x, yy = x[keep], yy[keep]
+        if len(x) < 3:
+            return None
+        grid = np.linspace(x[0], x[-1], n)
+        return list(pd.to_datetime(grid.astype("int64"))), list(PchipInterpolator(x, yy)(grid))
+    except Exception:  # noqa: BLE001 — any parse/interp failure = fall back to straight
         return None
-    x = pd.to_datetime(list(dates)).asi8.astype(float)   # ns since epoch
-    order = np.argsort(x)
-    x = x[order]
-    lo = np.asarray(lars, dtype=float)[order]
-    up = np.asarray(uars, dtype=float)[order]
-    keep = np.concatenate(([True], np.diff(x) > 0))       # strictly increasing x
-    x, lo, up = x[keep], lo[keep], up[keep]
-    if len(x) < 3:
-        return None                                       # 2 pts already straight
-    grid = np.linspace(x[0], x[-1], n)
-    ld = PchipInterpolator(x, lo)(grid)
-    ud = PchipInterpolator(x, up)(grid)
-    return list(pd.to_datetime(grid.astype("int64"))), list(ld), list(ud)
+
+
+def _smooth_pair(dates, lower, upper, n=240):
+    """Monotone-resample a lower+upper band onto ONE shared dense date grid so a
+    `fill='tonexty'` between them stays exact. Returns (xs, lo, up) or None."""
+    lo = _monotone_one(dates, lower, n)
+    up = _monotone_one(dates, upper, n)
+    if lo is None or up is None:
+        return None
+    return lo[0], lo[1], up[1]                          # shared grid (same x)
 
 
 def build_adaptive_traces(dates, lars, uars, colors=DEFAULT_COLORS,
@@ -243,11 +275,13 @@ def build_sd_outlier_traces(dates, values, stats, sd_threshold=2, colors=DEFAULT
 
 
 def build_main_line_trace(dates, values, *, color="#667eea",
-                           metric_name="", unit="", shape="linear"):
+                           metric_name="", unit="", shape="spline"):
     """The data line that sits on top of any overlays.
 
-    `shape="linear"` is the safer default — `shape="spline"` invents
-    smooth curves between discrete test points (misleading).
+    `shape="spline"` (default) draws a smooth flowing line — matching the Vercel
+    app's Recharts ``type="monotone"`` series — while the markers stay pinned at
+    the real test values, so no data point is misrepresented. Pass
+    `shape="linear"` for the old straight point-to-point line.
     """
     return go.Scatter(
         x=dates, y=values, mode="lines+markers",
