@@ -228,3 +228,99 @@ def adaptive_range_table(target_values, population_series, side="two",
     if len(sampl) < 2 or not pop:
         return []
     return em_f(pop, sampl, side=side, tol_alpha=tol_alpha, tol_por=tol_por)
+
+
+# ===========================================================================
+# Cohort selection (promoted from endurance data/adaptive_pop.py, 2026-09-22)
+# Pure functions: the app fetches + aggregates + outlier-trims its own data and
+# passes it in, so aspire_dash stays free of any data-client dependency. Both
+# endurance-dashboard and DASH_VALD share this one implementation.
+# ===========================================================================
+
+# Junk VALD groups (import dumps, catch-alls, one-off test days, birth-year cohorts)
+_JUNK_GROUP_MARKERS = ("Import", "ALL Athletes", "ALL Padel", "Pending", "ForceDecks Cloud",
+                       "ForceDecks Local", "Database File", "QSL MOPUP", "TRIALIST",
+                       "Preset team", "TID Testing")
+_DEFAULT_AGE_BANDS = (3.0, 5.0, 8.0, 12.0)
+
+
+def meaningful_group(name) -> bool:
+    """True for a real sport/event squad; False for import dumps, catch-alls,
+    one-off test days and pure birth-year cohorts."""
+    if not name:
+        return False
+    n = str(name).strip()
+    if not n or n.isdigit():
+        return False
+    if any(j in n for j in _JUNK_GROUP_MARKERS):
+        return False
+    if n[:4].isdigit() and "/" in n[:9]:      # birth-year cohorts "2003/2004 ..."
+        return False
+    return True
+
+
+def select_cohort(population_series: dict, ages: dict, groups: dict, target_id, *,
+                  min_group: int = 20, min_controls: int = 50,
+                  age_bands=_DEFAULT_AGE_BANDS):
+    """Best-matched control cohort for a target. Returns (cohort_series, label).
+    Fallback ladder, first to reach its floor wins:
+      sport/event group + age +/-3/5/8/12y -> group (any age) -> age +/-Ny -> all.
+    `population_series` = {athlete_id: [session-best values]} (already aggregated +
+    outlier-trimmed by the caller), `ages` = {id: years}, `groups` = {id: set(names)}.
+    Group tiers use the lower `min_group` floor (comparable > large-mixed). Target
+    is always excluded."""
+    t_age = ages.get(target_id)
+    t_groups = groups.get(target_id, set())
+
+    def cohort(pred):
+        return {k: v for k, v in population_series.items() if k != target_id and pred(k)}
+
+    def in_group(k):
+        return bool(groups.get(k, set()) & t_groups)
+
+    attempts = []  # (label, predicate, floor)
+    if t_groups:
+        _g = sorted(t_groups)
+        gname = _g[0] if len(_g) == 1 else f"{_g[0]} +{len(_g) - 1} grp"
+        if t_age is not None:
+            for bw in age_bands:
+                attempts.append((f"{gname} +/-{bw:g}y",
+                                 lambda k, bw=bw: in_group(k) and k in ages
+                                 and abs(ages[k] - t_age) <= bw, min_group))
+        attempts.append((gname, in_group, min_group))
+    if t_age is not None:
+        for bw in age_bands:
+            attempts.append((f"+/-{bw:g}y",
+                             lambda k, bw=bw: k in ages and abs(ages[k] - t_age) <= bw,
+                             min_controls))
+    for label, pred, floor in attempts:
+        c = cohort(pred)
+        if len(c) >= floor:
+            return c, label
+    return cohort(lambda k: True), "all VALD"
+
+
+def cohort_band_dated(target_dated, population_series, *, exclude_key=None,
+                      higher_is_better: bool = True, tol_alpha: float = 0.10,
+                      tol_por: float = 0.95, side: str = "two") -> list[dict]:
+    """Per-observation adaptive band for one athlete's dated series against a cohort.
+    Returns [{date, value, LAR, UAR, outcome}]; the Abnormal flag fires on the BAD
+    tail only (low for higher-is-better, high for lower-is-better). Band stays
+    two-sided for context. [] if <2 target points or empty population."""
+    def _isnan(x):
+        return isinstance(x, float) and np.isnan(x)
+    pts = sorted([d for d in (target_dated or [])
+                  if d.get("value") is not None and not _isnan(float(d["value"]))],
+                 key=lambda d: str(d.get("date", "")))
+    values = [float(d["value"]) for d in pts]
+    pop = {k: v for k, v in (population_series or {}).items() if k != exclude_key}
+    if len(values) < 2 or not pop:
+        return []
+    tbl = adaptive_range_table(values, pop, side=side, tol_alpha=tol_alpha, tol_por=tol_por)
+    out = []
+    for row, d in zip(tbl, pts):
+        lar, uar, v = row["LAR"], row["UAR"], row["value"]
+        bad = (not _isnan(lar) and v < lar) if higher_is_better else (not _isnan(uar) and v > uar)
+        out.append({"date": str(d.get("date", ""))[:10], "value": v, "LAR": lar,
+                    "UAR": uar, "outcome": "Abnormal" if bad else "Normal"})
+    return out
