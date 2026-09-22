@@ -147,23 +147,33 @@ def build_acute_traces(dates, values, window=4, sd_mult=1.5, colors=DEFAULT_COLO
     return traces
 
 
-def build_adaptive_traces(dates, lars, uars, colors=DEFAULT_COLORS):
+def build_adaptive_traces(dates, lars, uars, colors=DEFAULT_COLORS,
+                          shape="spline", smoothing=1.3):
     """Evolving LAR/UAR band from a Bayesian adaptive-range fit.
 
     Pass parallel ``dates``, lower (``lars``) and upper (``uars``) per-point
-    series — typically the output of an R Plumber ``/compute-ranges`` call.
-    Returns three traces: dashed upper line, dashed lower line (which
-    fills to the upper via ``fill='tonexty'``), and a filled emerald band
-    between them.
+    series — the per-observation output of the in-process Roshan-Newell
+    adaptive engine (``aspire_dash.adaptive`` / a consumer's ``compute_adaptive_
+    ranges``). Returns two traces: a dashed upper edge and a dashed lower edge
+    that fills up to the upper via ``fill='tonexty'``, giving a filled band.
+
+    ``shape="spline"`` (default) draws the band edges as smooth flowing curves
+    (the VALD/Vercel look) instead of straight point-to-point segments;
+    ``smoothing`` (0-1.3) sets how much. Pass ``shape="linear"`` to force the
+    old angular envelope. Spline only smooths the *band edges* for legibility —
+    the data line on top is drawn separately and stays honest.
     """
     if not dates or len(dates) != len(lars) or len(dates) != len(uars):
         return []
+    _line = dict(color=colors["adaptive_line"], width=1.5, dash="dash", shape=shape)
+    if shape == "spline":
+        _line["smoothing"] = smoothing
     return [
         go.Scatter(x=dates, y=uars, mode="lines",
-                    line=dict(color=colors["adaptive_line"], width=1.5, dash="dash"),
+                    line=dict(_line),
                     showlegend=False, hoverinfo="skip"),
         go.Scatter(x=dates, y=lars, mode="lines",
-                    line=dict(color=colors["adaptive_line"], width=1.5, dash="dash"),
+                    line=dict(_line),
                     fill="tonexty", fillcolor=colors["adaptive_fill"],
                     showlegend=False, hoverinfo="skip"),
     ]

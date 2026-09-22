@@ -141,3 +141,21 @@ def test_aggregate_sessions_sorts_output():
     assert [r["date"] for r in out] == [
         "2026-01-15", "2026-02-15", "2026-03-15",
     ]
+
+
+def test_build_adaptive_traces_flows_by_default():
+    """Adaptive band edges are spline (the flowing VALD look), not linear."""
+    from aspire_dash.timeseries import build_adaptive_traces
+    t = build_adaptive_traces(["2025-01-01", "2025-03-01", "2025-06-01"],
+                              [10, 11, 10.5], [14, 15, 14.5])
+    assert len(t) == 2
+    assert t[0].line.shape == "spline" and t[1].line.shape == "spline"
+    assert t[0].line.smoothing == 1.3
+    assert t[1].fill == "tonexty"
+
+
+def test_build_adaptive_traces_linear_override():
+    from aspire_dash.timeseries import build_adaptive_traces
+    t = build_adaptive_traces(["a", "b"], [1, 2], [3, 4], shape="linear")
+    assert t[0].line.shape == "linear"
+    assert t[0].line.smoothing is None
