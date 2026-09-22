@@ -147,8 +147,39 @@ def build_acute_traces(dates, values, window=4, sd_mult=1.5, colors=DEFAULT_COLO
     return traces
 
 
+def _monotone_resample(dates, lars, uars, n=240):
+    """Dense monotone-cubic (PCHIP) resample of the LAR/UAR band over real time.
+
+    This is a faithful match for the Vercel/VALD app, whose flowing band is
+    Recharts ``<Area type="monotone">`` = d3 ``curveMonotoneX`` = a monotone
+    cubic (PCHIP): smooth, but it NEVER overshoots between points (unlike a
+    Catmull-Rom/Plotly spline, which can bulge past the data). Returns
+    ``(xs, lars_d, uars_d)`` of length ``n`` along a date axis, or ``None`` to
+    fall back to straight segments (scipy missing, or fewer than 3 usable pts).
+    """
+    try:
+        import numpy as np
+        import pandas as pd
+        from scipy.interpolate import PchipInterpolator
+    except Exception:  # noqa: BLE001
+        return None
+    x = pd.to_datetime(list(dates)).asi8.astype(float)   # ns since epoch
+    order = np.argsort(x)
+    x = x[order]
+    lo = np.asarray(lars, dtype=float)[order]
+    up = np.asarray(uars, dtype=float)[order]
+    keep = np.concatenate(([True], np.diff(x) > 0))       # strictly increasing x
+    x, lo, up = x[keep], lo[keep], up[keep]
+    if len(x) < 3:
+        return None                                       # 2 pts already straight
+    grid = np.linspace(x[0], x[-1], n)
+    ld = PchipInterpolator(x, lo)(grid)
+    ud = PchipInterpolator(x, up)(grid)
+    return list(pd.to_datetime(grid.astype("int64"))), list(ld), list(ud)
+
+
 def build_adaptive_traces(dates, lars, uars, colors=DEFAULT_COLORS,
-                          shape="spline", smoothing=1.3):
+                          smooth="monotone", n_dense=240):
     """Evolving LAR/UAR band from a Bayesian adaptive-range fit.
 
     Pass parallel ``dates``, lower (``lars``) and upper (``uars``) per-point
@@ -157,23 +188,34 @@ def build_adaptive_traces(dates, lars, uars, colors=DEFAULT_COLORS,
     ranges``). Returns two traces: a dashed upper edge and a dashed lower edge
     that fills up to the upper via ``fill='tonexty'``, giving a filled band.
 
-    ``shape="spline"`` (default) draws the band edges as smooth flowing curves
-    (the VALD/Vercel look) instead of straight point-to-point segments;
-    ``smoothing`` (0-1.3) sets how much. Pass ``shape="linear"`` to force the
-    old angular envelope. Spline only smooths the *band edges* for legibility —
-    the data line on top is drawn separately and stays honest.
+    ``smooth`` controls the band-edge shape (the data line on top is drawn
+    separately and stays honest):
+      - ``"monotone"`` (default) — dense monotone-cubic (PCHIP) resample, the
+        FAITHFUL match to the Vercel app's Recharts ``type="monotone"`` band:
+        flowing but never overshooting the data. Needs scipy + >=3 points;
+        otherwise falls back to straight edges automatically.
+      - ``"spline"`` — Plotly's Catmull-Rom spline (smoothing 1.3). Smooth but
+        can overshoot; cheaper, no resample.
+      - ``"linear"`` — the old angular point-to-point envelope.
     """
     if not dates or len(dates) != len(lars) or len(dates) != len(uars):
         return []
-    _line = dict(color=colors["adaptive_line"], width=1.5, dash="dash", shape=shape)
-    if shape == "spline":
-        _line["smoothing"] = smoothing
+    xs, ys_lo, ys_up = list(dates), list(lars), list(uars)
+    _line = dict(color=colors["adaptive_line"], width=1.5, dash="dash")
+    if smooth == "monotone":
+        g = _monotone_resample(dates, lars, uars, n_dense)
+        if g is not None:                                 # dense pts = smooth linears
+            xs, ys_lo, ys_up = g
+        _line["shape"] = "linear"
+    elif smooth == "spline":
+        _line["shape"] = "spline"
+        _line["smoothing"] = 1.3
+    else:                                                 # "linear"
+        _line["shape"] = "linear"
     return [
-        go.Scatter(x=dates, y=uars, mode="lines",
-                    line=dict(_line),
+        go.Scatter(x=xs, y=ys_up, mode="lines", line=dict(_line),
                     showlegend=False, hoverinfo="skip"),
-        go.Scatter(x=dates, y=lars, mode="lines",
-                    line=dict(_line),
+        go.Scatter(x=xs, y=ys_lo, mode="lines", line=dict(_line),
                     fill="tonexty", fillcolor=colors["adaptive_fill"],
                     showlegend=False, hoverinfo="skip"),
     ]

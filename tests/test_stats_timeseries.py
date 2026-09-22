@@ -143,19 +143,37 @@ def test_aggregate_sessions_sorts_output():
     ]
 
 
-def test_build_adaptive_traces_flows_by_default():
-    """Adaptive band edges are spline (the flowing VALD look), not linear."""
+def test_build_adaptive_traces_monotone_densifies_by_default():
+    """Default = monotone-cubic (Vercel Recharts type='monotone'): the band is
+    resampled to many dense points so the edges flow without overshoot."""
     from aspire_dash.timeseries import build_adaptive_traces
     t = build_adaptive_traces(["2025-01-01", "2025-03-01", "2025-06-01"],
                               [10, 11, 10.5], [14, 15, 14.5])
     assert len(t) == 2
-    assert t[0].line.shape == "spline" and t[1].line.shape == "spline"
-    assert t[0].line.smoothing == 1.3
+    # densified far beyond the 3 input points, drawn as smooth linears
+    assert len(t[0].x) > 50 and t[0].line.shape == "linear"
     assert t[1].fill == "tonexty"
 
 
-def test_build_adaptive_traces_linear_override():
+def test_build_adaptive_traces_monotone_no_overshoot():
+    """PCHIP never overshoots: the dense band stays within the input min/max."""
     from aspire_dash.timeseries import build_adaptive_traces
-    t = build_adaptive_traces(["a", "b"], [1, 2], [3, 4], shape="linear")
-    assert t[0].line.shape == "linear"
-    assert t[0].line.smoothing is None
+    uars = [14, 15, 14.5]
+    t = build_adaptive_traces(["2025-01-01", "2025-03-01", "2025-06-01"],
+                              [10, 11, 10.5], uars)
+    assert max(t[0].y) <= max(uars) + 1e-9      # no bulge above the data
+
+
+def test_build_adaptive_traces_two_points_stay_straight():
+    from aspire_dash.timeseries import build_adaptive_traces
+    t = build_adaptive_traces(["2025-01-01", "2025-06-01"], [1, 2], [3, 4])
+    assert len(t[0].x) == 2 and t[0].line.shape == "linear"
+
+
+def test_build_adaptive_traces_spline_and_linear_options():
+    from aspire_dash.timeseries import build_adaptive_traces
+    sp = build_adaptive_traces(["2025-01-01", "2025-03-01", "2025-06-01"],
+                               [1, 2, 1.5], [3, 4, 3.5], smooth="spline")
+    assert sp[0].line.shape == "spline" and sp[0].line.smoothing == 1.3
+    ln = build_adaptive_traces(["a", "b"], [1, 2], [3, 4], smooth="linear")
+    assert ln[0].line.shape == "linear" and len(ln[0].x) == 2
