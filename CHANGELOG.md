@@ -4,6 +4,27 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.89.1] - 2026-09-22
+
+### roster_table: the standard athlete-roster / directory table
+
+`aspire_dash.tables.roster_table` (also `from aspire_dash.components import
+roster_table`) — a branded, mobile-scrolling `html.Table` for athlete rosters and
+directories. It is the one table shape `aspire_datatable` / `aspire_grid` cannot do,
+because its cells hold real flag IMAGES (`nationality_flag_img`) and `dcc.Link`
+navigation. Column specs support `link`, `flag`, `format`, custom `cell`, `align`
+and `hover`; missing values render as an en dash. Promoted from the Development
+Squads roster so new apps get one standard, styled roster table.
+
+Also promoted the `.heat-athlete-link` + `.tbl-scroll` (sticky-header scroll box)
+CSS into `00_aspire_base.css` so the component is fully styled with no app-local CSS.
+
+- **`.font-data`** — ship the data-font class the base CSS already documents
+  (Inter + tabular-nums) so apps stop hardcoding `fontFamily:'Inter'` on numeric
+  surfaces.
+
+Kenny 2026-09-22.
+
 ## [0.89.0] - 2026-09-22
 
 ### Opt-in dense mode + generic identity primitives
@@ -38,7 +59,6 @@ so it works locally and behind a Connect subpath. Opt-in — default `False` kee
 existing apps unchanged. New-app default going forward. Kenny 2026-09-22.
 
 Kenny 2026-09-22.
-
 ## [0.82.0] - 2026-09-14
 
 ### athlete_banner: true decimal age from DOB

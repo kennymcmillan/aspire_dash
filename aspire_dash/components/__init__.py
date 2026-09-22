@@ -33,9 +33,11 @@ from ..athlete import selected_athlete_banner, register_athlete_banner  # noqa: 
 from ..athlete import athlete_banner, nationality_flag, nationality_flag_img, athletics_age_band  # noqa: F401, E402
 from ..athlete import (flyout_trigger, flyout_canvas, register_flyout,  # noqa: F401, E402
                        flyout_open_id, flyout_canvas_id)
+from ..tables import roster_table  # noqa: F401, E402  (v0.89, promoted from development_dashboard)
 
 
 __all__ = [
+    'roster_table',
     'topnav', 'register_topnav_active', 'sidebar', 'hamburger_button',
     'register_sidebar_toggle', 'header',
     # cards

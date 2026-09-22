@@ -5148,3 +5148,23 @@ html.dark .aspire-pill--archived  { background: var(--slate-700); color: var(--s
 html.dark .pct-good { color: #4ade80; }
 html.dark .pct-ok   { color: #fbbf24; }
 html.dark .pct-bad  { color: #f87171; }
+/* ── roster_table (v0.89, promoted from development_dashboard) ───────────────
+   Styles for aspire_dash.tables.roster_table so the component is fully styled in
+   any app without app-local CSS: the blue athlete link + the sticky-header scroll
+   box. `.table`/`.table-hover`/`.tbl-zebra` already live above. */
+.heat-athlete-link { color: var(--aspire-600, #004185); text-decoration: none; font-weight: 500; }
+.heat-athlete-link:hover { text-decoration: underline; color: var(--aspire-700, #003566); }
+/* padding-top:0 is load-bearing: the .card wrapper's top padding otherwise sits
+   ABOVE the sticky header, so scrolling rows leak into that strip. Zero it flush. */
+.tbl-scroll { max-height: calc(100vh - 200px); overflow: auto; padding-top: 0 !important; }
+.tbl-scroll .table thead th {
+    position: sticky; top: 0; z-index: 5;
+    box-shadow: 0 2px 6px rgba(2, 23, 60, 0.18);
+    background-clip: padding-box;
+}
+
+/* ── .font-data (v0.89) ─────────────────────────────────────────────────────
+   The data face the typography comment above already documents but never shipped:
+   opt-in Inter + tabular-nums for numeric surfaces, so apps stop hardcoding
+   fontFamily:'Inter' inline. (Folded in from a peer's WIP for this release.) */
+.font-data { font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; }

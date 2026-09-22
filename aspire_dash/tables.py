@@ -378,3 +378,101 @@ def aspire_datatable(
     kwargs.update(base_style)
 
     return dash_table.DataTable(**kwargs)
+
+
+# ── roster_table (promoted from development_dashboard, 2026-09-22) ─────────────
+# A plain html.Table, NOT a DataTable: it is the one table shape aspire_datatable /
+# aspire_grid cannot do, because its cells hold real flag IMAGES and dcc.Link
+# navigation. Use it for athlete-roster / directory tables; keep aspire_datatable
+# for sortable read-only data grids and aspire_grid for editable ones.
+
+def _roster_text(v) -> str:
+    """Row value as display text; missing/None/NaN -> en dash."""
+    if v is None or v == "" or (isinstance(v, float) and v != v):
+        return "–"
+    return str(v)
+
+
+def _roster_flag_cell(name, code):
+    """Flag IMAGE + country name (degrades to the name if the code is unmapped)."""
+    from .athlete import nationality_flag_img
+    if name is None or name == "":
+        return "–"
+    img = nationality_flag_img(code) if code else None
+    if img is None:
+        return str(name)
+    return html.Span([img, html.Span(str(name), style={"marginLeft": "6px"})],
+                     style={"display": "inline-flex", "alignItems": "center"})
+
+
+def roster_table(
+    data,
+    columns,
+    *,
+    className: str = "table table-hover tbl-zebra",
+    scroll: bool = True,
+    empty_text: str = "No rows",
+    empty_icon: str = "fa-solid fa-table",
+):
+    """A branded, mobile-scrolling roster table — a plain ``html.Table`` (NOT a
+    DataTable) so cells can hold real flag IMAGES and ``dcc.Link`` navigation, which
+    ``aspire_datatable`` / ``aspire_grid`` cannot. Promoted from the Development
+    Squads roster (development_dashboard) 2026-09-22.
+
+    Parameters
+    ----------
+    data : list[dict] | pandas.DataFrame
+        Rows. A DataFrame is converted with ``.to_dict("records")``.
+    columns : list[dict]
+        One spec per column. Recognised keys:
+          ``key``    (required) the row field to read.
+          ``label``  header text (defaults to a title-cased ``key``).
+          ``hover``  optional ``<th>`` tooltip text.
+          ``align``  ``"left"`` (default) | ``"center"`` | ``"right"``.
+          ``link``   ``callable(row) -> href``: render the value as a blue link
+                     (``.heat-athlete-link``); plain text if it returns falsy.
+          ``flag``   row field holding the IOC/nationality code: render the flag
+                     IMAGE + the value text.
+          ``format`` ``callable(value) -> str`` to format a plain value.
+          ``cell``   ``callable(row) -> component`` for full control (wins over all above).
+        A missing / None / NaN value renders as an en dash.
+    scroll : bool
+        Wrap in a ``.card .tbl-scroll`` box (own scroll + sticky header). Default True.
+
+    Returns an ``html.Div`` (a branded empty-state element when ``data`` is empty)."""
+    rows = data.to_dict("records") if hasattr(data, "to_dict") else list(data or [])
+    if not rows:
+        from .components import empty_state
+        return empty_state(icon=empty_icon, text=empty_text)
+
+    head = [html.Th(c.get("label", str(c["key"]).replace("_", " ").title()),
+                    title=c.get("hover")) for c in columns]
+
+    body = []
+    for r in rows:
+        tds = []
+        for c in columns:
+            align = c.get("align", "left")
+            style = {"textAlign": align} if align != "left" else None
+            if c.get("cell"):
+                content = c["cell"](r)
+            elif c.get("flag") is not None:
+                content = _roster_flag_cell(r.get(c["key"]), r.get(c["flag"]))
+            elif c.get("link") is not None:
+                href = c["link"](r)
+                content = (dcc.Link(_roster_text(r.get(c["key"])), href=href,
+                                    className="heat-athlete-link")
+                           if href else _roster_text(r.get(c["key"])))
+            else:
+                val = r.get(c["key"])
+                fmt = c.get("format")
+                content = fmt(val) if (fmt and val is not None) else _roster_text(val)
+            tds.append(html.Td(content, style=style))
+        body.append(html.Tr(tds))
+
+    table = html.Table(
+        [html.Thead(html.Tr(head)), html.Tbody(body)],
+        className=className,
+        style={"width": "100%", "fontVariantNumeric": "tabular-nums"})
+    return html.Div(table, className=("card tbl-scroll" if scroll else "card"),
+                    style={"overflowX": "auto"})
