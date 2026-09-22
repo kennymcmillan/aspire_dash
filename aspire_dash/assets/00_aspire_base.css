@@ -5061,3 +5061,90 @@ img.amc-avatar {
 .sparkline-tile .spk-sub  { font-size: 10px; color: var(--slate-400); margin-top: 2px; }
 .sparkline-tile.is-empty  { opacity: 0.55; box-shadow: none; }
 .sparkline-tile.is-empty .spk-value { color: var(--slate-400); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DENSE MODE + GENERIC IDENTITY PRIMITIVES  (v0.89.0, 2026-09-22)
+   Promoted from the padel dashboard so new apps get a tight, branded default
+   without re-hand-rolling identity headers, pills, a 2-col cockpit or grading.
+   DENSITY IS OPT-IN: add `dense` to the .page-content class — via
+   page_layout(..., dense=True), or html.Div(..., className="page-content dense").
+   Apps that do NOT opt in are visually unchanged (the roomy 2026-05-22 defaults
+   still hold). All colours use existing brand tokens; dark-mode variants below.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* --- Dense scope: tighter cards / KPI tiles / data rows / section titles --- */
+.page-content.dense .card,
+.page-content.dense .budget-card,
+.page-content.dense .athlete-card { padding: 10px 12px; }
+
+.page-content.dense .kpi-tile { padding: 6px 12px; }
+
+.page-content.dense .aspire-data-row__cell {
+    padding: 4px 10px;
+    font-size: 12.5px;
+    line-height: 1.3;
+    font-variant-numeric: tabular-nums;
+}
+.page-content.dense .aspire-data-row.is-header .aspire-data-row__cell {
+    font-size: 10.5px;
+    padding: 5px 10px;
+}
+.page-content.dense .section-title,
+.page-content.dense h2 {
+    font-size: 18px;
+    line-height: 1.2;
+    margin: 6px 0 8px;
+}
+
+/* --- Generic athlete identity header (photo + name + meta) --- */
+.aspire-identity {
+    display: flex; align-items: center; gap: 16px;
+    padding: 4px 2px 12px;
+    border-bottom: 1px solid var(--slate-200);
+    margin-bottom: 12px;
+}
+.aspire-avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    object-fit: cover; background: var(--aspire-50);
+    border: 2px solid var(--aspire-600); flex: 0 0 auto;
+}
+.aspire-avatar--sm { width: 32px; height: 32px; border-width: 1px; }
+.aspire-identity__name {
+    font-weight: 600; font-size: 20px;
+    color: var(--aspire-600); line-height: 1.2;
+}
+.aspire-identity__meta { font-size: 13px; color: var(--slate-500); margin-top: 2px; }
+.aspire-identity__sub  { font-size: 12px; color: var(--slate-400); margin-top: 3px; }
+
+/* --- Generic pills --- */
+.aspire-pill {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 9px; border-radius: var(--radius-full); letter-spacing: .02em;
+}
+.aspire-pill--current  { background: rgba(0, 65, 133, .10); color: var(--aspire-600); }
+.aspire-pill--archived { background: var(--slate-100);       color: var(--slate-500); }
+.aspire-pill--gold     { background: var(--gold-light);      color: #92600a; }
+
+/* --- 2-column cockpit grid (viz left, table right; collapses on mobile) --- */
+.aspire-cockpit {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 16px; align-items: start; margin-top: 10px;
+}
+@media (max-width: 900px) { .aspire-cockpit { grid-template-columns: 1fr; } }
+
+/* --- Percentile / status grading text --- */
+.pct-good { color: #0f7b3f; font-weight: 600; }
+.pct-ok   { color: #c07b0a; font-weight: 600; }
+.pct-bad  { color: #b42318; font-weight: 600; }
+
+/* --- Dark-mode variants --- */
+html.dark .aspire-identity        { border-bottom-color: var(--slate-700); }
+html.dark .aspire-identity__name  { color: var(--aspire-200); }
+html.dark .aspire-avatar          { background: var(--slate-800); border-color: var(--aspire-400); }
+html.dark .aspire-pill--current   { background: rgba(96, 165, 250, .15); color: var(--aspire-200); }
+html.dark .aspire-pill--archived  { background: var(--slate-700); color: var(--slate-300); }
+html.dark .pct-good { color: #4ade80; }
+html.dark .pct-ok   { color: #fbbf24; }
+html.dark .pct-bad  { color: #f87171; }

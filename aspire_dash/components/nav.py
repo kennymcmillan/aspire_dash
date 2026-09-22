@@ -350,9 +350,11 @@ def header(title: str = "", subtitle: str = "", right_content=None):
     left = html.Div([
         hamburger_button(),
         html.Div([
-            html.Div(title, style={
+            # Always render the title div (with a stable id) so setup_app(page_title=True)
+            # can fill it with the active page's name. Empty string when no title given.
+            html.Div(title, id="aspire-page-title", style={
                 "fontSize": "18px", "fontWeight": "600", "color": SLATE["800"],
-            }) if title else None,
+            }),
             html.Div(subtitle, style={
                 "fontSize": "12px", "color": SLATE["400"], "marginTop": "1px",
             }) if subtitle else None,

@@ -4,6 +4,41 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.89.0] - 2026-09-22
+
+### Opt-in dense mode + generic identity primitives
+
+Promoted from the padel dashboard so new data-tool apps get a tight, branded
+default instead of re-hand-rolling the same helpers in per-app CSS.
+
+- **Dense mode (opt-in).** `page_layout(..., dense=True)` adds a `dense` class to
+  `.page-content` and drops the inline 24px padding so the compact CSS default
+  applies. The dense scope tightens `.card`/`.budget-card`/`.athlete-card`
+  (10/12px), `.kpi-tile` (6/12px), `.aspire-data-row__cell` (4/10px @12.5px,
+  tabular figures), header rows and `.section-title`/`h2`. **Opt-in only —
+  apps that do not pass `dense` keep the roomy 2026-05-22 defaults, so no live
+  app changes.**
+- **New generic components** (app-agnostic, additive): `.aspire-identity` +
+  `.aspire-avatar`(`--sm`) + `.aspire-identity__name/__meta/__sub` (photo + name
+  identity header); `.aspire-pill`(`--current`/`--archived`/`--gold`);
+  `.aspire-cockpit` (2-col viz-left/table-right grid, collapses <900px);
+  `.pct-good`/`.pct-ok`/`.pct-bad` percentile-grading text. All use existing
+  brand tokens with dark-mode variants.
+- Version strings realigned (setup.py + `__version__` were drifting: 0.88 vs
+  0.83) — both now 0.89.0.
+
+### Header title follows the active page (opt-in)
+
+`setup_app(app, page_title=True)` makes the sticky header's title auto-update to
+the ACTIVE page's registered `name` on navigation. Pages then drop the in-canvas
+`H2` title (it was duplicated in the header and wasted vertical space). `header()`
+now always renders the title div with `id="aspire-page-title"` (empty when no
+title), and the callback matches the pathname against each page's `relative_path`
+so it works locally and behind a Connect subpath. Opt-in — default `False` keeps
+existing apps unchanged. New-app default going forward. Kenny 2026-09-22.
+
+Kenny 2026-09-22.
+
 ## [0.82.0] - 2026-09-14
 
 ### athlete_banner: true decimal age from DOB

@@ -74,7 +74,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.83.0"
+__version__ = "0.89.0"
 
 
 def normalised_path(pathname: str | None) -> str:
@@ -144,13 +144,20 @@ EXTERNAL_SCRIPTS = [
 _ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 
-def setup_app(app):
+def setup_app(app, page_title=False):
     """Copy shared CSS + logo into the app's assets/ folder.
 
     Call this once after creating the Dash app instance::
 
         app = Dash(__name__, external_stylesheets=STYLESHEETS, use_pages=True)
         setup_app(app)
+
+    page_title : bool
+        If True (new-app default), the sticky header's title auto-updates to the
+        ACTIVE page's registered name on navigation, so pages don't repeat the
+        title as an in-canvas H2 (saves vertical space). Requires a header()
+        (which carries id="aspire-page-title") and page_layout's dcc.Location
+        (id="url"). Default False keeps existing apps unchanged.
 
     This copies:
     - 00_aspire_base.css   (base stylesheet)
@@ -196,6 +203,26 @@ def setup_app(app):
             pass
 
     # Sidebar toggle is handled by sidebar_toggle.js (no callback needed)
+
+    # Optional: header title auto-follows the active page name (page_title=True).
+    # Matches the current pathname against each registered page's relative_path
+    # (which already carries the Connect requests prefix), so it works locally
+    # and behind a Connect subpath. Guarded so a missing url/header id can't
+    # break startup.
+    if page_title:
+        from dash import Output, Input, no_update
+        import dash as _dash
+
+        @app.callback(Output("aspire-page-title", "children"), Input("url", "pathname"))
+        def _aspire_page_title(pathname):
+            if not pathname:
+                return no_update
+            norm = pathname.rstrip("/") or "/"
+            for p in _dash.page_registry.values():
+                rp = (p.get("relative_path") or p.get("path") or "").rstrip("/") or "/"
+                if norm == rp:
+                    return p.get("name") or p.get("title") or ""
+            return no_update
 
     # Note: DON'T try to set requests_pathname_prefix here. It's read-only
     # on `app.config` after Dash() runs, so app.config.update(...) raises

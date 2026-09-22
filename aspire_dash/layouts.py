@@ -6,7 +6,7 @@ from .theme import SIDEBAR_WIDTH, SLATE
 __all__ = ["page_layout", "single_page_layout"]
 
 
-def page_layout(sidebar_el, header_el=None, use_pages=True):
+def page_layout(sidebar_el, header_el=None, use_pages=True, dense=False):
     """Full app layout: sidebar + main area (with Dash Pages support).
 
     Parameters
@@ -19,18 +19,27 @@ def page_layout(sidebar_el, header_el=None, use_pages=True):
     use_pages : bool
         If True, renders dash.page_container for multi-page routing.
         If False, renders an empty div with id="page-content" for manual routing.
+    dense : bool
+        If True, adds the ``dense`` class to ``.page-content`` (tighter cards,
+        KPI tiles, data rows and section titles — see 00_aspire_base.css dense
+        scope) and drops the inline 24px padding so the compact CSS default
+        applies. Default False keeps the roomy layout unchanged. New apps that
+        want the tight, data-tool look pass ``dense=True``.
     """
     main_children = []
     if header_el:
         main_children.append(header_el)
 
+    pc_class = "page-content dense" if dense else "page-content"
+    pc_style = {} if dense else {"padding": "24px"}
+
     if use_pages:
         main_children.append(
-            html.Div(page_container, className="page-content", style={"padding": "24px"})
+            html.Div(page_container, className=pc_class, style=pc_style)
         )
     else:
         main_children.append(
-            html.Div(id="page-content", className="page-content", style={"padding": "24px"})
+            html.Div(id="page-content", className=pc_class, style=pc_style)
         )
 
     return html.Div([
