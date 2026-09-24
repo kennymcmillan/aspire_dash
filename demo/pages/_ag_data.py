@@ -303,6 +303,6 @@ NEWS = [
      "text": "Twelve jumpers go through from qualifying. The card image is a branded gradient, since the demo ships no photos.",
      "tags": ["Athletics"], "icon": "fa-person-running", "tone": "gold"},
     {"title": "Sample: squash draw published", "date": "22 Sep 2026",
-     "text": "Seeds are placed and the first round starts on day three. Tags use the lavender chip style from the org site.",
+     "text": "Seeds are placed and the first round starts on day three. Tags use the tinted chip style from the org site.",
      "tags": ["Squash", "Draw"], "icon": "fa-table-tennis-paddle-ball", "tone": "green"},
 ]

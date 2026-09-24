@@ -3,7 +3,7 @@ import dash
 from dash import dcc, html
 
 from aspire_dash.asian_games import (
-    AG_COLORS, ag_athlete_card, ag_athlete_profile, ag_band, ag_button, ag_chip, ag_date_strip,
+    AG_COLORS, AG_COLORS_GAMES, ag_athlete_card, ag_athlete_profile, ag_band, ag_button, ag_chip, ag_date_strip,
     ag_discipline_card, ag_empty, ag_event_capsule, ag_feature_banner, ag_field, ag_filter_panel,
     ag_gradient_title, ag_hero_heading, ag_hero_stats, ag_intro, ag_legend, ag_medal_chip,
     ag_medal_icon, ag_medal_stack, ag_medal_table, ag_medal_widget, ag_news_card, ag_noc,
@@ -28,13 +28,13 @@ _COLS = [
 ]
 
 
-def _swatches():
+def _swatches(colors=AG_COLORS):
     return html.Div([
         html.Div([html.Div(style={"height": "44px", "borderRadius": "10px", "background": v,
                                   "border": "1px solid #e7e7e7"}),
                   html.Div(k, style={"fontSize": "12px", "fontWeight": 600, "marginTop": "4px"}),
                   html.Div(v, className="ag-muted", style={"fontSize": "11px"})])
-        for k, v in AG_COLORS.items()
+        for k, v in colors.items()
     ], style={"display": "grid", "gridTemplateColumns": "repeat(auto-fill, minmax(110px, 1fr))", "gap": "12px"})
 
 
@@ -50,7 +50,9 @@ def layout(bio=None, **_):
                className="ag-muted"),
 
         ag_section_title("Foundations"),
-        example("Palette (AG_COLORS)", _swatches(), "from aspire_dash.asian_games import AG_COLORS\nAG_COLORS['primary']  # '#4f3b95'"),
+        example("Palette (AG_COLORS)", _swatches(), "from aspire_dash.asian_games import AG_COLORS\nAG_COLORS['primary']  # '#004185' (Aspire blue)"),
+        example("Original Aichi-Nagoya palette (theme='games')", _swatches(AG_COLORS_GAMES),
+                'ag_shell(children, nav_items=NAV, theme="games")  # purple and gold instead of Aspire blue'),
         example("Headings", html.Div([ag_page_title("Swimming results"), ag_gradient_title("Competition"),
                                       ag_section_title("Final", aside="Official")]),
                 'ag_page_title("Swimming results")\nag_gradient_title("Competition")\nag_section_title("Final", aside="Official")'),
@@ -75,7 +77,7 @@ def layout(bio=None, **_):
                 'ag_hero_stats([("16", "NOCs"), ("197", "Golds")])'),
         example("Value-driven sub-tabs (read Input(ag_choice_id('demo-sub'), 'data'))",
                 html.Div(ag_subtabs("demo-sub", ["Entries", "Results", "Medals"], "Results"),
-                         style={"background": "#291f55", "borderRadius": "12px", "padding": "16px 12px 4px"}),
+                         style={"background": "#001d3d", "borderRadius": "12px", "padding": "16px 12px 4px"}),
                 'ag_subtabs("demo-sub", ["Entries", "Results", "Medals"], "Results")'),
 
         ag_section_title("Controls"),

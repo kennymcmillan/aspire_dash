@@ -20,7 +20,7 @@ DISCS = sorted({u["discipline"] for units in SCHEDULE.values() for u in units},
 
 def layout(bio=None, **_):
     hero = ag_hero_heading("Competition schedule", eyebrow="Schedule",
-                           lead="Pick a day on the strip. Gold days award medals; today is lavender.")
+                           lead="Pick a day on the strip. Gold days award medals; today is shaded light blue.")
     body = [
         ag_page_title("Competition schedule"),
         html.Div([
