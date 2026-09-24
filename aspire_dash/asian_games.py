@@ -33,7 +33,7 @@ from . import countries as _countries
 from .components.nav import _safe_relative
 
 __all__ = [
-    "AG_COLORS", "AG_DISCIPLINES",
+    "AG_COLORS", "AG_COLORS_GAMES", "AG_DISCIPLINES",
     # shell + hero
     "ag_shell", "ag_topnav", "ag_wave_hero", "ag_hero_heading", "ag_hero_stats",
     "ag_band", "ag_subtab_links", "ag_subtabs", "ag_event_capsule", "ag_footer",
@@ -53,7 +53,19 @@ __all__ = [
     "ag_news_card", "ag_feature_banner", "ag_stat",
 ]
 
+# Default palette: Aspire brand colours (brand.yml) mapped onto the Asian Games
+# layout. AG_COLORS_GAMES keeps the original Aichi-Nagoya purple and gold for
+# ag_shell(..., theme="games").
 AG_COLORS = {
+    "primary": "#004185", "primary_hover": "#003566", "primary_dark": "#001d3d",
+    "primary_light": "#dbeafe", "primary_50": "#eff6ff", "secondary": "#1876ab",
+    "gold": "#fbb800", "gold_text": "#c98f00", "gold_light": "#fde68a", "green": "#16a34a",
+    "page": "#f1f5f9", "card": "#ffffff", "border": "#e2e8f0", "muted": "#64748b",
+    "text": "#1e293b", "navy": "#001d3d",
+    "medal_gold": "#eaae47", "medal_silver": "#a7a6a6", "medal_bronze": "#ce8127",
+}
+
+AG_COLORS_GAMES = {
     "primary": "#4f3b95", "primary_hover": "#3c2e75", "primary_dark": "#291f55",
     "primary_light": "#d9d4ec", "primary_50": "#f2f0f9", "primary_400": "#8c7cc5",
     "gold": "#d1b100", "gold_light": "#ffec9f", "green": "#2e9a38", "tan": "#bd8d40",
@@ -282,12 +294,18 @@ def ag_footer(*, brand_title="Asian Games", brand_sub="Aspire design study",
 
 def ag_shell(children, *, nav_items, active=None, hero=None, hero_variant="curve",
              hero_kwargs=None, disciplines=None, brand_title="Asian Games",
-             brand_sub="Aspire design study", footer=True, overlays=None, className=""):
+             brand_sub="Aspire design study", footer=True, overlays=None, className="",
+             theme="aspire"):
     """Page wrapper that makes every page in a section share one design.
 
     Renders ``.ag-app`` with the wave hero (the top nav plus ``hero`` content),
     a 1140px content column holding ``children``, and the footer. ``overlays``
     (modals, stores) are appended at the end.
+
+    theme : ``"aspire"`` (default) colours everything with the Aspire palette;
+        ``"games"`` switches to the original Aichi-Nagoya purple and gold. A modal
+        rendered outside the shell takes the same colours if you give it the
+        ``ag-theme--games`` class too.
     """
     topnav = ag_topnav(nav_items, active, disciplines=disciplines,
                        brand_title=brand_title, brand_sub=brand_sub)
@@ -297,7 +315,7 @@ def ag_shell(children, *, nav_items, active=None, hero=None, hero_variant="curve
         html.Main(html.Div(children, className="ag-container"), className="ag-main"),
         ag_footer(brand_title=brand_title, brand_sub=brand_sub) if footer is True else (footer or None),
         *(overlays or []),
-    ], className=_cls("ag-app", className))
+    ], className=_cls("ag-app", "ag-theme--games" if theme == "games" else "", className))
 
 
 # ═══════════════════════════════ HEADINGS + SMALL PARTS ════════════════════

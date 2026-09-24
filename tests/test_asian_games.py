@@ -128,3 +128,16 @@ def test_stylesheet_is_scoped_and_ships_the_curve():
     # no bare element selectors that could restyle the rest of an Aspire app
     for bad in ("\nbody {", "\nh1 {", "\n.card {", "\ntable {"):
         assert bad not in css
+
+
+def test_default_palette_is_aspire_and_games_theme_is_opt_in():
+    assert ag.AG_COLORS["primary"] == "#004185"
+    assert ag.AG_COLORS_GAMES["primary"] == "#4f3b95"
+    nav = [{"label": "Home", "href": "/ag"}]
+    assert "ag-theme--games" not in _classes(ag.ag_shell(html.P(), nav_items=nav))
+    assert "ag-theme--games" in _classes(ag.ag_shell(html.P(), nav_items=nav, theme="games"))
+    css = open(CSS, encoding="utf-8").read()
+    assert ".ag-app.ag-theme--games" in css
+    # purple only lives inside the opt-in theme block
+    default_block = css[:css.index(".ag-app.ag-theme--games")]
+    assert "#4f3b95" not in default_block

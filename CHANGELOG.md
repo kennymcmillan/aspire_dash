@@ -4,6 +4,25 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.92.0] - 2026-09-24
+
+### Asian Games section in Aspire colours
+
+`aspire_dash.asian_games` now uses the Aspire palette by default. The layout, curved wave hero and
+interactions are unchanged; the purple and gold of the Aichi-Nagoya sites become Aspire blue
+(`#004185`), navy (`#001d3d`), secondary blue (`#1876ab`) and Aspire gold (`#fbb800`), on the slate
+neutrals from `brand.yml`.
+
+- **`ag_shell(..., theme="aspire")`** is the new default. `theme="games"` brings back the original
+  purple and gold through an `.ag-theme--games` class, so nothing is lost.
+- **`AG_COLORS`** now holds the Aspire values; the original palette moved to **`AG_COLORS_GAMES`**.
+- Gold used as text (page titles, medal labels) takes a darker `#c98f00` so it stays readable on the
+  light page, and text on gold backgrounds (medal days, gold chips) switches to navy.
+- The hero gradient, swoosh, mega-menu glass, focus rings, shadows, gradient headings and feature
+  banner all read from theme variables instead of hard-coded purple.
+- Dark mode uses the Aspire slate surfaces, and Dash 4 dropdowns and inputs inside the section no
+  longer keep a white face in dark mode.
+
 ## [0.91.0] - 2026-09-24
 
 ### Asian Games design language (`aspire_dash.asian_games`)
