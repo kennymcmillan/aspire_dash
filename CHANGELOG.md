@@ -4,6 +4,25 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.92.1] - 2026-09-24
+
+### Fix: Asian Games styles no longer reach into AG Grid tables
+
+Six class names in `03_asian_games.css` are also AG Grid's own: `ag-cell`, `ag-input`, `ag-name`,
+`ag-row`, `ag-select` and `ag-toolbar`. Their rules were written for the Asian Games section but, with
+nothing to stop them, they also matched the rows, cells, inputs and selects inside every dash-ag-grid
+table in any app on 0.91 or 0.92. The worst was `.ag-row { display: flex; flex-wrap: wrap; gap: 16px }`
+on every grid row. Tables only looked right because AG Grid positions its cells absolutely.
+
+- Every rule that styles one of those six names now carries
+  `:where(:not(.ag-root-wrapper *, .ag-popup *))`, so it stops at the edge of a grid and its filter
+  popups. `:where()` adds no specificity, so nothing else in the cascade moves.
+- The class names are unchanged, so pages and apps that use them keep working.
+- `tests/test_asian_games.py` fails if a rule on any of the six names is added without the guard.
+
+Found in the Talent ID coach app, which worked around it in its own CSS; that workaround can go once
+it pins 0.92.1.
+
 ## [0.92.0] - 2026-09-24
 
 ### Asian Games section in Aspire colours
