@@ -4,6 +4,39 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.91.0] - 2026-09-24
+
+### Asian Games design language (`aspire_dash.asian_games`)
+
+A second design language that sits beside the Aspire one, modelled on the Aichi-Nagoya 2026 sites
+(aichi-nagoya2026.org and results.asiangames2026.org). It covers navigation, page layouts, results
+tables and filtering, athlete profiles, the medal table and the schedule. The showcase has a new
+"Asian Games website design" sidebar section with six pages built on it. No existing page changes.
+
+- **`ag_wave_hero(children, *, variant="curve", rim=True, animate=True, dip=None,
+  curve_height=None)`** - the curved hero from the results site. The SVG curve (with its mobile path
+  under 768px) masks a black-to-indigo gradient carrying a purple and gold swoosh that drifts slowly
+  (it stops under `prefers-reduced-motion`). A thin purple-to-gold rim trails under the curve.
+  `variant="rounded"` gives the 24px-corner header from the Medals and Schedule pages.
+- **`ag_shell(children, *, nav_items, active, hero, ...)`** - wraps a page in `.ag-app` with the
+  glass nav capsule, a disciplines mega-menu with live search, a burger menu below 1080px and the
+  footer. A page inside `page_layout` that renders an `.ag-app` hides the Aspire header and drops
+  the content padding through CSS `:has`, so no callback is involved.
+- **`ag_results_table(columns, rows, *, table_id, sort_state, focus_noc)`** - each row is its own
+  card, with sortable headers, medal edges, GR/PB chips and a highlighted focus nation. It pairs
+  with `ag_unit_strip()` for heats, `ag_pill_tabs()`, `ag_filter_panel()` and `ag_records_panel()`.
+- **`ag_medal_table()`** has expandable rows with a per-discipline breakdown. Alongside it:
+  `ag_medal_widget()`, `ag_date_strip()` (the chosen day lifts and medal days are gold),
+  `ag_schedule_unit()`, `ag_discipline_card()`, `ag_athlete_card()` and `ag_athlete_profile()`.
+- One clientside callback drives every pill tab, sub-tab, heat strip and date strip, and a second
+  one drives sortable headers. Both register on import. Read the values with
+  `Input(ag_choice_id(group), "data")` and `Input(ag_sort_id(table), "data")`. The module is not
+  imported by `aspire_dash/__init__.py`, so apps that never use it register nothing.
+- `03_asian_games.css` scopes every rule to `.ag-app`, loads Outfit and DM Sans from Google Fonts and
+  handles dark mode. `asian_games.js` runs the mega-menu search and the burger toggle.
+- Demo pages: `/ag`, `/ag/results`, `/ag/athletes`, `/ag/medals`, `/ag/schedule` and
+  `/ag/components`, on seeded sample data in which every name and mark is invented.
+
 ## [0.90.0] - 2026-09-23
 
 ### Hover-out popouts: test-history modal + rich graph hover card
