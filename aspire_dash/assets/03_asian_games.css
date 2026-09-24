@@ -97,6 +97,12 @@
     --ag-hero-grad: linear-gradient(90deg, #000 0%, #291f55 100%);
     --ag-swoosh: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 550' preserveAspectRatio='xMidYMid slice'%3E%3Cpath d='M-220 30C190-70 640 110 790 580L650 580C520 210 170 80-220 150Z' fill='%234E3B93' fill-opacity='.55'/%3E%3Cpath d='M1660 540C1290 540 960 320 880-30L1010-30C1100 250 1350 420 1660 420Z' fill='%23D1B100' fill-opacity='.38'/%3E%3Cpath d='M260 620C470 250 880 110 1520 170' stroke='%23A699D2' stroke-opacity='.45' stroke-width='3' fill='none'/%3E%3Cpath d='M-40 470C300 330 700 300 1100 380' stroke='%23D1B100' stroke-opacity='.25' stroke-width='2' fill='none'/%3E%3C/svg%3E");
 }
+/* Six class names in this section are also AG Grid's own: ag-cell, ag-input,
+   ag-name, ag-row, ag-select, ag-toolbar. Every rule that styles one carries
+   :where(:not(.ag-root-wrapper *, .ag-popup *)), so it never reaches into a
+   dash-ag-grid table or its filter popups (without it, .ag-row turned every grid
+   row into a wrapping flexbox). :where() adds no specificity, so the cascade is
+   unchanged. tests/test_asian_games.py checks every such rule is guarded. */
 .ag-app {
     container-type: inline-size;
     container-name: ag;
@@ -326,15 +332,15 @@
 /* Dash 4 wraps dcc.Input in .dash-input-container and puts className on the
    wrapper; make the inner element transparent so the wrapper's look wins. */
 .ag-app .dash-input-container.ag-mega__search,
-.ag-app .dash-input-container.ag-input { display: flex; align-items: center; }
+.ag-app .dash-input-container.ag-input:where(:not(.ag-root-wrapper *, .ag-popup *)) { display: flex; align-items: center; }
 .ag-app .ag-mega__search .dash-input-element,
-.ag-app .ag-input .dash-input-element {
+.ag-app .ag-input:where(:not(.ag-root-wrapper *, .ag-popup *)) .dash-input-element {
     flex: 1; width: 100%; height: 100%; min-width: 0;
     background: transparent !important; border: 0 !important; box-shadow: none !important;
     outline: none; padding: 0; margin: 0; color: inherit; font: inherit;
 }
 .ag-app .ag-mega__search .dash-input-element::placeholder { color: rgba(255,255,255,.65); }
-.ag-app .ag-input:focus-within { border-color: var(--ag-400); box-shadow: 0 0 0 3px rgba(var(--ag-tint-rgb), .2); }
+.ag-app .ag-input:where(:not(.ag-root-wrapper *, .ag-popup *)):focus-within { border-color: var(--ag-400); box-shadow: 0 0 0 3px rgba(var(--ag-tint-rgb), .2); }
 .ag-mega__grid {
     display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
     margin-top: 14px;
@@ -568,14 +574,14 @@
 .ag-noc__code { font-size: 10px; font-weight: 300; color: var(--ag-muted); letter-spacing: .04em; }
 .ag-noc__name { font-size: 16px; font-weight: 700; color: var(--ag-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ag-noc__stack { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
-.ag-name { font-size: 14px; color: var(--ag-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ag-name b { font-weight: 700; text-transform: uppercase; }
+.ag-name:where(:not(.ag-root-wrapper *, .ag-popup *)) { font-size: 14px; color: var(--ag-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ag-name:where(:not(.ag-root-wrapper *, .ag-popup *)) b { font-weight: 700; text-transform: uppercase; }
 .ag-athlete-link {
     background: none; border: 0; padding: 0; margin: 0;
     color: inherit; text-align: left; cursor: pointer;
     font: inherit; min-width: 0;
 }
-.ag-athlete-link:hover .ag-name { color: var(--ag-500); text-decoration: underline; text-underline-offset: 3px; }
+.ag-athlete-link:hover .ag-name:where(:not(.ag-root-wrapper *, .ag-popup *)) { color: var(--ag-500); text-decoration: underline; text-underline-offset: 3px; }
 
 /* ═══════════════════ RESULTS TABLE (row cards) ══════════════════════════ */
 .ag-rtable { display: flex; flex-direction: column; gap: .5rem; }
@@ -602,7 +608,7 @@
 .ag-rrow:nth-child(4) { animation-delay: .06s; } .ag-rrow:nth-child(5) { animation-delay: .08s; }
 .ag-rrow:nth-child(6) { animation-delay: .10s; } .ag-rrow:nth-child(n+7) { animation-delay: .12s; }
 
-.ag-cell { min-width: 0; flex: 0 0 auto; }
+.ag-cell:where(:not(.ag-root-wrapper *, .ag-popup *)) { min-width: 0; flex: 0 0 auto; }
 .ag-cell--grow { flex: 1 1 220px; }
 .ag-cell--right { text-align: right; }
 .ag-cell--center { text-align: center; }
@@ -637,7 +643,7 @@
 }
 
 /* ═══════════════════ FILTER BAR ═════════════════════════════════════════ */
-.ag-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 8px 0 14px; }
+.ag-toolbar:where(:not(.ag-root-wrapper *, .ag-popup *)) { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 8px 0 14px; }
 .ag-filters { margin: 0 0 16px; }
 .ag-filters > summary { list-style: none; display: inline-flex; }
 .ag-filters > summary::-webkit-details-marker { display: none; }
@@ -649,17 +655,17 @@
 }
 .ag-filters[open] > summary .ag-btn { border-color: var(--ag-500); color: var(--ag-500) !important; }
 .ag-field__label { display: block; font-size: 12px; font-weight: 500; text-transform: uppercase; color: var(--ag-muted); margin-bottom: 4px; letter-spacing: .03em; }
-.ag-input {
+.ag-input:where(:not(.ag-root-wrapper *, .ag-popup *)) {
     width: 100%; min-height: 2.575rem; padding: 0 14px;
     border: 1px solid var(--ag-border); border-radius: .5rem;
     background: #fff; color: var(--ag-text); font-size: 15px; outline: none;
 }
-.ag-input:focus { border-color: var(--ag-400); box-shadow: 0 0 0 3px rgba(var(--ag-tint-rgb), .2); }
-.ag-select { font-size: 15px; }
-.ag-select .Select-control,
-.ag-select .dash-dropdown,
-.ag-select [class*="control"] { border-radius: .5rem !important; border-color: var(--ag-border) !important; min-height: 2.575rem; }
-.ag-select .Select-value, .ag-select [class*="multi-value"] { background: var(--ag-card-2) !important; border-radius: 6px !important; }
+.ag-input:where(:not(.ag-root-wrapper *, .ag-popup *)):focus { border-color: var(--ag-400); box-shadow: 0 0 0 3px rgba(var(--ag-tint-rgb), .2); }
+.ag-select:where(:not(.ag-root-wrapper *, .ag-popup *)) { font-size: 15px; }
+.ag-select:where(:not(.ag-root-wrapper *, .ag-popup *)) .Select-control,
+.ag-select:where(:not(.ag-root-wrapper *, .ag-popup *)) .dash-dropdown,
+.ag-select:where(:not(.ag-root-wrapper *, .ag-popup *)) [class*="control"] { border-radius: .5rem !important; border-color: var(--ag-border) !important; min-height: 2.575rem; }
+.ag-select:where(:not(.ag-root-wrapper *, .ag-popup *)) .Select-value, .ag-select:where(:not(.ag-root-wrapper *, .ag-popup *)) [class*="multi-value"] { background: var(--ag-card-2) !important; border-radius: 6px !important; }
 .ag-chipset { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .ag-chip {
     display: inline-flex; align-items: center; gap: 6px;
@@ -1003,7 +1009,7 @@
 .ag-footer__legal a:hover { color: #fff; }
 
 /* ═══════════════════ UTILITIES ══════════════════════════════════════════ */
-.ag-row { display: flex; flex-wrap: wrap; gap: 16px; }
+.ag-row:where(:not(.ag-root-wrapper *, .ag-popup *)) { display: flex; flex-wrap: wrap; gap: 16px; }
 .ag-split { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 24px; align-items: start; }
 @container ag (max-width: 900px) { .ag-split { grid-template-columns: 1fr; } }
 .ag-muted { color: var(--ag-muted); }
@@ -1040,7 +1046,7 @@ html.dark .ag-app.ag-theme--games {
 html.dark .ag-app .ag-unit, html.dark .ag-app .ag-day, html.dark .ag-app .ag-pilltab,
 html.dark .ag-app .ag-sunit, html.dark .ag-app .ag-record, html.dark .ag-app .ag-newscard,
 html.dark .ag-app .ag-disccard, html.dark .ag-app .ag-stat, html.dark .ag-app .ag-filters__panel,
-html.dark .ag-app .ag-mini-unit, html.dark .ag-app .ag-mwidget, html.dark .ag-app .ag-input,
+html.dark .ag-app .ag-mini-unit, html.dark .ag-app .ag-mwidget, html.dark .ag-app .ag-input:where(:not(.ag-root-wrapper *, .ag-popup *)),
 html.dark .ag-app .ag-tile, html.dark .ag-app .ag-banner { background-color: var(--ag-card); }
 html.dark .ag-app .ag-day--medal { background-color: var(--ag-gold); }
 html.dark .ag-app .ag-day.is-active, html.dark .ag-app .ag-pilltab.is-active { background-color: var(--ag-500); }
@@ -1080,7 +1086,7 @@ html.dark .page-content .ag-app .ag-band__name i { color: var(--ag-gold-200) !im
 html.dark .page-content .ag-app .ag-section-title { border-bottom-color: #f1f5f9; }
 /* Dash 4 dropdowns (.dash-dropdown) and inputs keep a white face in dark mode
    unless the AG surfaces are applied to them directly. */
-html.dark .ag-app .dash-dropdown.ag-select,
-html.dark .ag-app .ag-input { background-color: var(--ag-card) !important; border-color: var(--ag-border-2) !important; }
-html.dark .page-content .ag-app .dash-dropdown.ag-select span,
-html.dark .page-content .ag-app .ag-input input { color: #f1f5f9 !important; }
+html.dark .ag-app .dash-dropdown.ag-select:where(:not(.ag-root-wrapper *, .ag-popup *)),
+html.dark .ag-app .ag-input:where(:not(.ag-root-wrapper *, .ag-popup *)) { background-color: var(--ag-card) !important; border-color: var(--ag-border-2) !important; }
+html.dark .page-content .ag-app .dash-dropdown.ag-select:where(:not(.ag-root-wrapper *, .ag-popup *)) span,
+html.dark .page-content .ag-app .ag-input:where(:not(.ag-root-wrapper *, .ag-popup *)) input { color: #f1f5f9 !important; }

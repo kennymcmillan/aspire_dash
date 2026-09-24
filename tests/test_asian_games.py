@@ -141,3 +141,22 @@ def test_default_palette_is_aspire_and_games_theme_is_opt_in():
     # purple only lives inside the opt-in theme block
     default_block = css[:css.index(".ag-app.ag-theme--games")]
     assert "#4f3b95" not in default_block
+
+
+# AG Grid names its own elements with these classes too (dash-ag-grid rows,
+# cells, inputs, selects, toolbars), so an unguarded rule restyles every data
+# table in any app that loads this stylesheet.
+AG_GRID_SHARED = ("cell", "input", "name", "row", "select", "toolbar")
+GUARD = ":where(:not(.ag-root-wrapper *, .ag-popup *))"
+
+
+def test_rules_sharing_ag_grid_class_names_never_reach_into_a_grid():
+    import re
+    css = open(CSS, encoding="utf-8").read()
+    css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)          # comments may name them
+    pat = re.compile(r"\.ag-(%s)(?![-_a-zA-Z0-9])" % "|".join(AG_GRID_SHARED))
+    hits = list(pat.finditer(css))
+    assert hits, "expected the section to style some of these names"
+    unguarded = [css[m.start():m.end() + 40].split("{")[0].strip()
+                 for m in hits if not css.startswith(GUARD, m.end())]
+    assert not unguarded, f"rules that would restyle AG Grid tables: {unguarded}"
