@@ -35,6 +35,8 @@ Subsequent redeploys: `rsconnect deploy dash . --app-id <guid>`.
 | `/sports` | `aspire_dash.sports` |
 | `/firstbeat` | `aspire_dash.firstbeat` |
 | `/charts`, `/viz` | `aspire_dash.charts` + viz patterns |
+| `/ag`, `/ag/results`, `/ag/athletes`, `/ag/medals`, `/ag/schedule` | `aspire_dash.asian_games` (Asian Games website design section, one shared shell) |
+| `/ag/components` | `aspire_dash.asian_games` component reference |
 
 ## Contributing
 

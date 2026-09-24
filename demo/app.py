@@ -121,6 +121,21 @@ nav = [
     {"label": "Viz components",     "href": "/viz",
      "icon": "fa-solid fa-ring"},
 
+    # Asian Games website design: a self-contained section with its own shell
+    # (aspire_dash.asian_games). These pages hide the Aspire header themselves.
+    {"label": "AG home",            "href": "/ag",
+     "icon": "fa-solid fa-house",        "section": "Asian Games website design"},
+    {"label": "AG results",         "href": "/ag/results",
+     "icon": "fa-solid fa-list-ol"},
+    {"label": "AG participants",    "href": "/ag/athletes",
+     "icon": "fa-solid fa-users"},
+    {"label": "AG medals",          "href": "/ag/medals",
+     "icon": "fa-solid fa-medal"},
+    {"label": "AG schedule",        "href": "/ag/schedule",
+     "icon": "fa-solid fa-calendar-days"},
+    {"label": "AG components",      "href": "/ag/components",
+     "icon": "fa-solid fa-shapes"},
+
     # Legacy
     {"label": "Logo & assets (legacy)", "href": "/assets",
      "icon": "fa-solid fa-image",        "section": "Reference"},
