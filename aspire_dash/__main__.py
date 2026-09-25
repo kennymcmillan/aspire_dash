@@ -30,8 +30,14 @@ import dash
 from dash import Dash, dcc, html
 
 from aspire_dash import setup_app, STYLESHEETS
-from aspire_dash.components import sidebar, header
+from aspire_dash.components import sidebar, header, data_as_of_badge, register_data_as_of
 from aspire_dash.layouts import page_layout
+
+# Cache every live-data reader with aspire_data.cache.ttl_cache, NEVER lru_cache:
+#   from aspire_data.cache import ttl_cache, TTL_LIVE
+#   @ttl_cache(TTL_LIVE)
+#   def squad(): ...
+# tests/test_no_stale_cache.py fails the build if an lru_cache reads live data.
 
 app = Dash(
     __name__,
@@ -55,7 +61,7 @@ app.layout = html.Div([
     page_layout(
         sidebar_el=sidebar(title="{title}", subtitle="Aspire Academy",
                             nav_items=NAV),
-        header_el=header(title="{title}"),
+        header_el=header(title="{title}", right_content=data_as_of_badge()),
         use_pages=True,
     ),
 
@@ -77,6 +83,9 @@ app.layout = html.Div([
 # trigger a toast by writing dispatch_toast(...) to 'toast-trigger'.
 from aspire_dash.callbacks import register_toast
 register_toast(app, toast_id="app-toast", trigger_store_id="toast-trigger")
+
+# 'Data as of HH:MM' in the header: the oldest cached fetch behind the screen.
+register_data_as_of(app)
 
 if __name__ == "__main__":
     app.run(debug=True, port={port})
@@ -200,6 +209,21 @@ httpx>=0.27
 python-dotenv>=1.0
 truststore>=0.10                    # Aspire MITM corp-CA fix
 aspire_dash @ git+https://github.com/kennymcmillan/aspire_dash.git@main
+aspire_data @ git+https://github.com/kennymcmillan/aspire_data.git@5cf98a04185ee1990c4b131e340a9da16ee4e983  # 0.22.1: ttl_cache + guard
+"""
+
+
+NO_STALE_CACHE_TEST = """\"\"\"Guard: no functools.lru_cache on a live-data reader (it never expires, so a
+Posit Connect worker would serve stale data until restart). Use
+aspire_data.cache.ttl_cache. Silence a deliberate case with  # lru-ok: <reason>\"\"\"
+from pathlib import Path
+
+from aspire_data.cache import find_live_lru
+
+
+def test_no_lru_cache_on_live_readers():
+    hits = find_live_lru(Path(__file__).resolve().parents[1])
+    assert hits == [], "lru_cache on a live reader, use ttl_cache:\\n" + "\\n".join(hits)
 """
 
 
@@ -347,6 +371,7 @@ def _scaffold(name, port=8050, title=None, app_type="dashboard"):
 
     os.makedirs(os.path.join(target, "pages"))
     os.makedirs(os.path.join(target, "assets"))
+    os.makedirs(os.path.join(target, "tests"))
 
     files = {
         "app.py":             APP_PY.format(title=title, port=port),
@@ -360,6 +385,7 @@ def _scaffold(name, port=8050, title=None, app_type="dashboard"):
         "deploy.bat":         DEPLOY_BAT,
         "deploy.sh":          DEPLOY_SH,
         "README.md":          README_MD.format(title=title, port=port),
+        "tests/test_no_stale_cache.py": NO_STALE_CACHE_TEST,
     }
 
     for rel_path, content in files.items():

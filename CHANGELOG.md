@@ -4,6 +4,23 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.93.0] - 2026-09-25
+
+### "Data as of HH:MM" header badge + stale-cache guard in the scaffold
+
+Apps cached live readers with `functools.lru_cache`, which never expires, so Connect
+workers showed their startup snapshot for days (endurance, 2026-09-25). The fix is
+`aspire_data.cache.ttl_cache` (aspire_data >= 0.22.1); this release makes freshness
+visible and stops the bug coming back in new apps.
+
+- **`data_as_of_badge(id=...)`** for `header(right_content=...)` and
+  **`register_data_as_of(app, fns=())`**: shows the OLDEST still-cached fetch behind
+  the screen ("Data as of 14:05", Asia/Qatar time whatever the server clock), refreshes
+  every 60 s, turns amber past `stale_after` (1 h). Blank, not broken, without aspire_data.
+  `data_as_of_text(ts)` is the pure formatter. CSS: `.aspire-asof` in 00_aspire_base.css.
+- **Scaffold** (`python -m aspire_dash new`): header carries the badge, requirements pin
+  aspire_data 0.22.1, app.py documents `ttl_cache`, and `tests/test_no_stale_cache.py`
+  fails the build if an `lru_cache` reads live data (`aspire_data.cache.find_live_lru`).
 ## [0.92.1] - 2026-09-24
 
 ### Fix: Asian Games styles no longer reach into AG Grid tables

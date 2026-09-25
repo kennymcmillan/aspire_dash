@@ -5330,3 +5330,14 @@ html.dark .pct-bad  { color: #f87171; }
     from { opacity: 0; transform: translateY(3px) scale(0.985); }
     to   { opacity: 1; transform: none; }
 }
+
+/* v0.92 'Data as of HH:MM' header badge (components/freshness.py) */
+.aspire-asof { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500;
+  color: #475569; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 999px;
+  padding: 3px 10px; white-space: nowrap; cursor: help; }
+.aspire-asof:empty { display: none; }
+.aspire-asof::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #16a34a; }
+.aspire-asof--stale { color: #92400e; background: #fef3c7; border-color: #fde68a; }
+.aspire-asof--stale::before { background: #d97706; }
+html.dark .aspire-asof { color: #cbd5e1; background: #1e293b; border-color: #334155; }
+@media print { .aspire-asof { display: none; } }

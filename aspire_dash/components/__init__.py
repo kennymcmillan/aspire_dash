@@ -28,6 +28,7 @@ from .search import search_box, search_hit, search_hit_id, hit_list  # noqa: F40
 # modules AUTO-REGISTERS their callbacks on Dash's global callback registry.
 from .history import history_trigger, history_modal  # noqa: F401  (v0.90)
 from .hovercard import (hovercard_graph, render_card, HOVERCARD_ARROW)  # noqa: F401  (v0.90)
+from .freshness import data_as_of_badge, data_as_of_text, register_data_as_of  # noqa: F401  (v0.92)
 
 # v0.37 — re-export athlete banner helpers under components so
 # `from aspire_dash.components import selected_athlete_banner,
@@ -44,6 +45,7 @@ __all__ = [
     'roster_table',
     'topnav', 'register_topnav_active', 'sidebar', 'hamburger_button',
     'register_sidebar_toggle', 'header',
+    'data_as_of_badge', 'data_as_of_text', 'register_data_as_of',
     # cards
     'card', 'summary_card', 'graph_card', 'info_box', 'file_upload_card',
     'connect_user_chip',
