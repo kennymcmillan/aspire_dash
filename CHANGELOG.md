@@ -4,6 +4,26 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.94.0] - 2026-09-27
+
+### data_table auto-fit: every column sizes to its content, text is never cut
+
+Kenny 2026-09-27: "these tables need sized to always show all text, should be dynamic,
+and same across all apps". Rows were separate flexboxes, so a column could not know its
+widest cell and cells ellipsis-truncated ("4d ongoing", long dates, region names).
+
+- `data_table` renders ONE CSS grid (rows are `subgrid`s), track per column set inline:
+  normal `minmax(max-content, auto)` (never narrower than its widest cell, spare width
+  shared evenly), `width` = preferred size NOT a cap `minmax(max-content, <width>)`,
+  `wrap` = `minmax(160px, <width|320px>)` so long text wraps instead of stretching.
+- Table is at least full width and grows to its content; the -scroll wrapper scrolls
+  sideways on a phone (never shrink-to-fit). The guessed `minWidth` sum is gone.
+- `grow` is still accepted (API compatible) but no longer weights spare space: `fr`
+  tracks in a content-sized grid equalise to the largest demand (one long wrap cell made
+  every column ~460 px).
+- CSS: `.aspire-data-table.is-autofit` in 00_aspire_base.css. Browser-checked at 1440 and
+  390 px: 0 truncated cells, rows aligned, no page-level horizontal scroll.
+
 ## [0.93.1] - 2026-09-27
 
 ### Fix: history pop-out benchmark labels never clipped

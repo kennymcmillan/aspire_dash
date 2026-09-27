@@ -3945,6 +3945,27 @@ body {
     border-bottom: none;
 }
 
+/* v0.94 auto-fit: the table is ONE grid (track per column, set inline by
+   sports.data_table) and each row is a subgrid of it, so a column is sized from its
+   widest cell across every row. Cells never ellipsis-truncate; the table is at least
+   full width, grows to fit its content, and the -scroll wrapper scrolls sideways. */
+.aspire-data-table.is-autofit {
+    display: grid;
+    width: max-content;
+    min-width: 100%;
+}
+.aspire-data-table.is-autofit > .aspire-data-row {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+}
+.aspire-data-table.is-autofit .aspire-data-row__cell {
+    flex: none;
+    min-width: 0;
+    overflow: visible;
+    text-overflow: clip;
+}
+
 /* Faded row — e.g. a competition whose report isn't available yet.
    v0.61 — pairs with sports.data_table(row_class=...). */
 .aspire-data-row.is-dim {

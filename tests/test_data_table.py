@@ -49,11 +49,12 @@ def test_column_align_and_width_applied():
         [{"label": "Rank", "width": "70px"}, {"label": "Pts", "align": "right", "grow": 3}],
         [["1", "198.0"]],
     )
-    rank_cell, pts_cell = _table(tbl).children[1].children
-    assert rank_cell.style["flex"] == "0 0 70px"
-    assert rank_cell.style["maxWidth"] == "70px"
+    table = _table(tbl)
+    rank_cell, pts_cell = table.children[1].children
+    # v0.94 auto-fit: width is a preferred size, never a cap; grow shares spare space
+    assert table.style["gridTemplateColumns"] == "minmax(max-content, 70px) minmax(max-content, auto)"
+    assert "maxWidth" not in rank_cell.style and "flex" not in rank_cell.style
     assert pts_cell.style["textAlign"] == "right"
-    assert pts_cell.style["flex"] == "3"
 
 
 def test_per_cell_override_merges_style_and_value():
@@ -66,9 +67,8 @@ def test_per_cell_override_merges_style_and_value():
 
 def test_float_grow_preserved():
     tbl = data_table([{"label": "A", "grow": 1.5}, {"label": "B", "grow": 0.8}], [["a", "b"]])
-    a_cell, b_cell = _table(tbl).children[1].children
-    assert a_cell.style["flex"] == "1.5"
-    assert b_cell.style["flex"] == "0.8"
+    # grow is accepted (API compat); auto tracks size to content + share spare space
+    assert _table(tbl).style["gridTemplateColumns"] ==         "minmax(max-content, auto) minmax(max-content, auto)"
 
 
 def test_wrap_column_opts_out_of_ellipsis():
@@ -109,14 +109,13 @@ def test_scroll_wrapper_present():
     assert "aspire-data-table-scroll" in _classes(tbl)   # outer wrapper scrolls
 
 
-def test_wide_table_gets_min_width():
-    # 10 flex columns -> a min-width well past a phone/tablet, so it scrolls
-    cols = [{"label": f"C{i}"} for i in range(10)]
-    table = _table(data_table(cols, [["x"] * 10]))
-    mw = table.style["minWidth"]
-    assert mw.endswith("px") and int(mw[:-2]) >= 800
-
-
-def test_min_width_sums_fixed_column_widths():
-    tbl = data_table([{"label": "A", "width": "200px"}, {"label": "B", "width": "100px"}], [["a", "b"]])
-    assert _table(tbl).style["minWidth"] == "300px"
+def test_autofit_every_column_at_least_its_content():
+    """v0.94 (Kenny 2026-09-27): columns size to their widest cell across ALL rows
+    (one grid, rows are subgrids); nothing is ellipsis-cut; wide tables scroll."""
+    cols = [{"label": f"C{i}"} for i in range(10)] + [{"label": "W", "wrap": True}]
+    table = _table(data_table(cols, [["x"] * 11]))
+    assert "is-autofit" in _classes(table)
+    tracks = table.style["gridTemplateColumns"]
+    assert tracks.count("minmax(max-content,") == 10     # never narrower than content
+    assert tracks.endswith("minmax(160px, 320px)")        # wrap column wraps, capped
+    assert "minWidth" not in table.style                   # no guessed pixel floor

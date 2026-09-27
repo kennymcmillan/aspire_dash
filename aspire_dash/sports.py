@@ -595,14 +595,25 @@ def data_table(columns, rows, *, highlight=None, row_class=None, id=None, classN
 
     specs = [_spec(c) for c in columns]
 
+    def _track(spec):
+        """v0.94 auto-fit column track (CSS grid + subgrid across every row): a column is
+        NEVER narrower than its widest cell (max-content), so text is never cut; spare
+        width is shared by `grow`. `width` is a preferred size, not a cap. `wrap` columns
+        get a sensible minimum and wrap instead (Kenny 2026-09-27: 'tables need sized to
+        always show all text, dynamic, same across all apps')."""
+        # `auto` (not `fr`): under a content-sized grid, 1fr tracks are equalised to the
+        # largest fr demand, so one long wrap cell made EVERY column ~460 px. auto
+        # tracks size to their own content and share spare width evenly (grow is kept
+        # for API compatibility; spare space is no longer weighted by it).
+        if spec.get("wrap"):
+            return f"minmax(160px, {spec['width'] or '320px'})"
+        if spec["width"]:
+            return f"minmax(max-content, {spec['width']})"
+        return "minmax(max-content, auto)"
+
     def _cell(content, spec, override=None):
         override = override or {}
         st = {"textAlign": override.get("align", spec["align"])}
-        if spec["width"]:
-            st["flex"] = f"0 0 {spec['width']}"
-            st["maxWidth"] = spec["width"]
-        else:
-            st["flex"] = str(spec["grow"])
         if spec.get("wrap"):
             # rich / multi-line cell — opt out of the single-line ellipsis clamp
             st["whiteSpace"] = "normal"
@@ -644,25 +655,15 @@ def data_table(columns, rows, *, highlight=None, row_class=None, id=None, classN
                 cls += f" {extra}"
         body.append(html.Div(cells, className=cls))
 
-    # Wide tables must SCROLL on a narrow viewport, not shrink-to-fit (which
-    # crammed 10 columns into "Ve/D/SE/W/G…" — the responsive failure in
-    # v0.60-0.62). Give the table a min-width (sum of per-column minimums) and
-    # wrap it in a horizontal-scroll container, so narrow screens scroll instead
-    # of ellipsis-truncating every cell.
-    def _col_min_px(spec):
-        w = spec["width"]
-        if w:
-            try:
-                return int(str(w).replace("px", "").strip())
-            except ValueError:
-                return 90
-        return max(80, int(round(spec["grow"] * 75)))
-
-    min_width = sum(_col_min_px(s) for s in specs)
+    # v0.94: ONE grid for the whole table (rows are subgrids), so every column is
+    # sized from its widest cell across ALL rows and never ellipsis-truncates. The
+    # table is at least full width and grows to its content; on a narrow viewport
+    # the .aspire-data-table-scroll wrapper scrolls horizontally (never shrink-to-fit,
+    # the v0.60-0.62 "Ve/D/SE/W/G…" failure).
     table = html.Div(
         [header, *body],
-        className="aspire-data-table" + (f" {className}" if className else ""),
-        style={"minWidth": f"{min_width}px"},
+        className="aspire-data-table is-autofit" + (f" {className}" if className else ""),
+        style={"gridTemplateColumns": " ".join(_track(s) for s in specs)},
     )
     wrap = {"className": "aspire-data-table-scroll"}
     if id:
