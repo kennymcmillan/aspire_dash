@@ -444,9 +444,14 @@ def history_figure(series, unit=None, title=None, *, lower_is_better=False,
                            font=dict(size=11, color=colr))
 
     ytitle = f"{title} ({unit})" if (title and unit) else (title or unit or None)
+    # Right margin sized to the LONGEST mean/benchmark label (11 px text, ~6.9 px per
+    # char + the 4.5% leader gap) so a long name like "4.12 QAF U20 standard" is never
+    # clipped (Kenny 2026-09-27: QAF benchmark text cut off). Floor 120 px.
+    longest = max((len(t) for _y, t, _c in ymarks), default=0)
+    r_margin = max(120, int(longest * 6.9) + 48)
     fig.update_layout(
         template="aspire", height=height, width=width,
-        margin=dict(l=60, r=120, t=44, b=70), bargap=0.30, showlegend=False,
+        margin=dict(l=60, r=r_margin, t=44, b=70), bargap=0.30, showlegend=False,
         title=dict(text=title or "", font=dict(size=15, color=_HIST_AXIS), x=0.02, xanchor="left"),
         xaxis=dict(title=None, type="category", tickfont=dict(size=12, color=_HIST_AXIS),
                    tickangle=-45, showgrid=False, linecolor="#cbd5e1", ticks="outside",

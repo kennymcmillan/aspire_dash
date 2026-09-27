@@ -4,6 +4,14 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.93.1] - 2026-09-27
+
+### Fix: history pop-out benchmark labels never clipped
+
+`history_figure` sizes its right margin to the longest mean/benchmark label (was a fixed
+120 px, 130 px in the pop-out), so long names like "5.8 QAF U20 standard" show in full.
+The pop-out keeps the larger of 130 px and the figure margin.
+
 ## [0.93.0] - 2026-09-25
 
 ### "Data as of HH:MM" header badge + stale-cache guard in the scaffold

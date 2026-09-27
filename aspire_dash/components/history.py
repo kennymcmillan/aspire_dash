@@ -79,7 +79,9 @@ def _history_modal_toggle(card_clicks, _close, store):
                                  benchmarks=rec.get("benchmarks"), height=400, width=None)
             # r margin widened for the right-margin mean / benchmark labels; shorter
             # height so the modal doesn't need a vertical scroll.
-            fig.update_layout(margin=dict(l=66, r=130, t=52, b=78), font=dict(size=14),
+            # keep the figure's label-sized right margin if it needs more than 130
+            r = max(130, int(getattr(fig.layout.margin, "r", 0) or 0))
+            fig.update_layout(margin=dict(l=66, r=r, t=52, b=78), font=dict(size=14),
                               title=None)
             body = dcc.Graph(figure=fig, config={"displayModeBar": False}, responsive=True,
                              style={"width": "100%", "height": "400px"})
