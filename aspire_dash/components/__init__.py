@@ -64,6 +64,7 @@ __all__ = [
     # feedback
     'toast', 'badge', 'empty_state', 'loading_overlay', 'status_pill',
     'freshness_banner', 'confirm_modal', 'rate_limit_banner',
+    'fly_toast', 'dispatch_fly_toast', 'render_fly_toast', 'register_fly_toast',
     # inputs
     'toggle_group', 'mode_toggle', 'filter_bar', 'dark_mode_toggle',
     'aspire_tabs',

@@ -20,7 +20,9 @@ from ..theme import (
 __all__ = ['toast', 'badge', 'empty_state', 'loading_overlay', 'status_pill',
             'freshness_banner', 'confirm_modal', 'rate_limit_banner',
             # v0.45 — promoted from DASH_VALD / medical-dashboard / aspire-supplements
-            'legend_chips', 'error_banner']
+            'legend_chips', 'error_banner',
+            # v0.95 — fly-in / fly-out toast, no close button
+            'fly_toast', 'dispatch_fly_toast', 'render_fly_toast', 'register_fly_toast', 'FLY_TOAST_ICONS']
 
 # ── Toast ────────────────────────────────────────────────────────────────────
 
@@ -436,3 +438,53 @@ def error_banner(message, *, title: str = "Couldn't load data",
         "border": "1px solid #fecaca", "borderLeft": "4px solid #dc2626",
         "borderRadius": "8px", "padding": "12px 16px", "fontSize": "13px",
     })
+
+
+# ── Fly toast (v0.95, promoted from medical-dashboard) ──────────────────────
+# Flies in from the right, holds ~2.5 s, flies out on its own: NO close button, no clicks
+# (Kenny 2026-09-27). Pure CSS animation (.fly-toast in 00_aspire_base.css). Each payload
+# re-renders the toast with a NEW React key (its ts), so the element remounts and the
+# animation restarts: "Preparing..." then "Done" play as two clean fly-ins.
+#
+#   layout:    fly_toast()                                   # once, in the app shell
+#   wiring:    register_fly_toast(app)                       # once, after app.layout
+#   show one:  return dispatch_fly_toast("Saved", "3 rows written", "success")
+#              into Output("fly-toast-trigger", "data", allow_duplicate=True)
+FLY_TOAST_ICONS = ("primary", "success", "danger", "warning")
+
+
+def fly_toast(host_id: str = "fly-toast", trigger_id: str = "fly-toast-trigger"):
+    """The toast host + its trigger store. Mount once in the app shell."""
+    return html.Div([
+        dcc.Store(id=trigger_id),
+        html.Div(id=host_id, className="fly-toast-host", role="status", **{"aria-live": "polite"}),
+    ])
+
+
+_FLY_SEQ = __import__("itertools").count()
+
+
+def dispatch_fly_toast(header: str, msg: str = "", icon: str = "primary") -> dict:
+    """Payload for the trigger store. `ts` is unique per call (clock + counter: two toasts in the same
+    clock tick, ~15 ms on Windows, would otherwise share a key and the second would not animate)."""
+    import time
+    return {"header": header, "msg": msg, "icon": icon, "ts": f"{time.time_ns()}-{next(_FLY_SEQ)}"}
+
+
+def render_fly_toast(payload):
+    """One toast element for a payload ({header, msg, icon, ts}); unknown icons fall back to primary."""
+    if not payload:
+        return dash.no_update
+    icon = payload.get("icon") if payload.get("icon") in FLY_TOAST_ICONS else "primary"
+    return html.Div([
+        html.Div(payload.get("header", ""), className="fly-toast-title"),
+        html.Div(payload.get("msg", ""), className="fly-toast-msg") if payload.get("msg") else None,
+    ], className=f"fly-toast fly-toast--{icon}", key=str(payload.get("ts", "")))
+
+
+def register_fly_toast(app, host_id: str = "fly-toast", trigger_id: str = "fly-toast-trigger"):
+    """Wire the trigger store to the host. Call once per app (after fly_toast() is in the layout)."""
+    @app.callback(Output(host_id, "children"), Input(trigger_id, "data"), prevent_initial_call=True)
+    def _show_fly_toast(payload):
+        return render_fly_toast(payload)
+    return _show_fly_toast

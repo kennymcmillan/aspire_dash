@@ -4,6 +4,30 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.95.0] - 2026-09-27
+
+### Fly toast: flies in, holds ~2.5 s, flies out; no close button (Kenny 2026-09-27)
+
+- `fly_toast(host_id="fly-toast", trigger_id="fly-toast-trigger")` (mount once in the shell),
+  `register_fly_toast(app, ...)`, `dispatch_fly_toast(header, msg, icon)` → write into the trigger
+  store (`allow_duplicate=True`). Pure CSS (`.fly-toast`, reduced-motion = fade). Each payload remounts
+  the toast (React key = unique ts: clock + counter, so two toasts in one ~15 ms Windows clock tick still
+  both animate), so "Preparing…" then "Done" play as two clean fly-ins. Promoted from medical-dashboard.
+- The dbc `toast()` / `register_toast` stay (API compatible); prefer `fly_toast` in new apps.
+
+### Tables never cut text: DataTable + AG Grid defaults (Kenny 2026-09-27)
+
+- `datatable_autofit(columns, data, nowrap=(), skip=())`: style kwargs for `dash_table.DataTable`.
+  Each column's minWidth = its longest unbreakable piece (longest word of header or any cell; whole text
+  for `nowrap` columns such as dates), capped at 280 px (longer words break, never clip); text wraps;
+  the table fits the screen when it can and scrolls sideways inside its own box when it cannot.
+- `aspire_datatable(..., autofit=True, nowrap=())`: on by default; Aspire brand styles still win.
+- AG Grid (`aspire_grid` / `DEFAULT_COL_DEF`, `DEFAULT_GRID_OPTIONS`): `wrapHeaderText` +
+  `autoHeaderHeight` (headers never cut) and `autoSizeStrategy: fitCellContents` (columns start as wide
+  as their content). Opt out per grid: `grid_options_overrides={"autoSizeStrategy": {"type": "fitGridWidth"}}`.
+- Checked in medical-dashboard at 1440 and 390 px: every column incl. the last visible on desktop,
+  headers on one line, no page-level horizontal scroll on a phone.
+
 ## [0.94.0] - 2026-09-27
 
 ### data_table auto-fit: every column sizes to its content, text is never cut

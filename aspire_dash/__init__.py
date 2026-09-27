@@ -52,7 +52,7 @@ Usage in any Dash app:
         pdf_export, send_pdf,
     )
     from aspire_dash.tables import (
-        aspire_grid, register_dirty_tracking, aspire_datatable,
+        aspire_grid, register_dirty_tracking, aspire_datatable, datatable_autofit,
         DEFAULT_COL_DEF, EDITABLE_COL_DEF,
         DEFAULT_GRID_OPTIONS, EDITABLE_GRID_OPTIONS,
     )
@@ -74,7 +74,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.94.0"  # keep in lock-step with setup.py
+__version__ = "0.95.0"  # keep in lock-step with setup.py
 
 
 def normalised_path(pathname: str | None) -> str:

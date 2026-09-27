@@ -83,6 +83,9 @@ DEFAULT_COL_DEF = {
     "filter": True,
     "minWidth": 130,
     "cellStyle": {"fontSize": "12px", "fontFamily": "Inter, sans-serif"},
+    # v0.95: header text never cut (Kenny 2026-09-27) — long headers wrap and the header grows
+    "wrapHeaderText": True,
+    "autoHeaderHeight": True,
 }
 EDITABLE_COL_DEF = {**DEFAULT_COL_DEF, "editable": True}
 
@@ -92,6 +95,10 @@ DEFAULT_GRID_OPTIONS = {
     "suppressMovableColumns": True,
     "enableCellTextSelection": True,
     "animateRows": False,
+    # v0.95: every column starts as wide as its content (no "…" truncation); a grid wider than
+    # the screen scrolls sideways inside itself. Opt out per grid with
+    # grid_options_overrides={"autoSizeStrategy": {"type": "fitGridWidth"}}.
+    "autoSizeStrategy": {"type": "fitCellContents"},
 }
 EDITABLE_GRID_OPTIONS = {
     **DEFAULT_GRID_OPTIONS,
@@ -251,6 +258,50 @@ def register_dirty_tracking(
 
 # ── Plain dash_table.DataTable wrapper ─────────────────────────────────────
 
+def _longest_word(v) -> int:
+    return max((len(w) for w in str(v).split()), default=0)
+
+
+def datatable_autofit(columns, data, *, nowrap=(), skip=(), char_px: float = 7.2,
+                      header_char_px: float = 7.6, pad_px: int = 22, cap_px: int = 280) -> dict:
+    """Style kwargs so a ``dash_table.DataTable`` never cuts text (v0.95, Kenny 2026-09-27).
+
+    Each column's ``minWidth`` = its widest UNBREAKABLE piece: the longest single word in the
+    header or any cell (whole text for ``nowrap`` columns, e.g. dates), estimated from character
+    counts, capped at ``cap_px`` (a longer word breaks instead of being clipped). Beyond that,
+    text wraps and the browser shares the width, so a table fits the screen when it can and
+    scrolls sideways inside its own box when it cannot. ``skip`` = columns sized by the caller
+    (e.g. a markdown photo column). Merge the result into DataTable kwargs; caller rules added
+    afterwards still win.
+    """
+    cond, hcond = [], []
+    for c in columns or []:
+        cid = c.get("id")
+        if cid is None or cid in skip:
+            continue
+        name = c.get("name", "")
+        name = " ".join(name) if isinstance(name, (list, tuple)) else str(name)
+        vals = [r.get(cid) for r in data or [] if r.get(cid) not in (None, "")]
+        if cid in nowrap:
+            content, head = max((len(str(v)) for v in vals), default=0), len(name)
+        else:
+            content, head = max((_longest_word(v) for v in vals), default=0), _longest_word(name)
+        px = min(max(int(content * char_px), int(head * header_char_px)) + pad_px, cap_px)
+        rule = {"if": {"column_id": cid}, "minWidth": f"{px}px"}
+        if cid in nowrap:
+            rule["whiteSpace"] = "nowrap"
+            hcond.append({"if": {"column_id": cid}, "whiteSpace": "nowrap"})
+        cond.append(rule)
+    return dict(
+        style_table={"overflowX": "auto", "minWidth": "100%"},
+        style_cell={"whiteSpace": "normal", "height": "auto", "overflowWrap": "anywhere",
+                    "textOverflow": "clip"},
+        style_header={"whiteSpace": "normal", "height": "auto", "overflowWrap": "normal"},
+        style_cell_conditional=cond,
+        style_header_conditional=hcond,
+    )
+
+
 def aspire_datatable(
     id: str,
     data: list[dict] | None = None,
@@ -265,8 +316,13 @@ def aspire_datatable(
     tooltip_header: dict | None = None,
     tooltip_data: list | None = None,
     tooltip_duration: int | None = 2000,
+    autofit: bool = True,
+    nowrap: tuple = (),
 ):
     """Branded ``dash_table.DataTable`` with Aspire-blue headers + zebra rows.
+
+    v0.95: ``autofit=True`` (default) sizes every column from its header and content so text is
+    never cut (see ``datatable_autofit``); ``nowrap`` = column ids kept on one line (dates).
 
     Use this when AG Grid is overkill — read-only summary tables, modest
     row counts (< 500), no editing.
@@ -337,6 +393,15 @@ def aspire_datatable(
         ],
         style_as_list_view=True,
     )
+
+    if autofit:
+        fit = datatable_autofit(columns, data, nowrap=nowrap)
+        base_style["style_table"] = fit["style_table"]
+        base_style["style_cell"] = {**fit["style_cell"], **base_style["style_cell"]}
+        base_style["style_header"] = {**fit["style_header"], **base_style["style_header"]}
+        base_style["style_cell_conditional"] = fit["style_cell_conditional"] + base_style["style_cell_conditional"]
+        base_style["style_header_conditional"] = (fit["style_header_conditional"]
+                                                  + base_style["style_header_conditional"])
 
     if totals_row_label:
         base_style["style_data_conditional"].append({
