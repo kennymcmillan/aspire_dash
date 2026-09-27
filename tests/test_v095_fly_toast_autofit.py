@@ -54,6 +54,8 @@ def _min(fit, cid):
 
 def test_autofit_min_width_is_longest_word_not_whole_text():
     fit = datatable_autofit(COLS, ROWS)
+    # "Abdulrahman" (11 chars) sets the floor, not "Abdulrahman Al-Kuwari" (21): 11 * 7.2 + 22 padding
+    assert _min(fit, "name") == int(11 * 7.2) + 22
     assert _min(fit, "name") < _min(fit, "comment")               # "Abdulrahman" vs a huge word
     assert _min(fit, "comment") == 280                            # capped: breaks instead of clipping
     assert fit["style_cell"]["whiteSpace"] == "normal" and fit["style_cell"]["overflowWrap"] == "anywhere"
@@ -70,7 +72,7 @@ def test_autofit_nowrap_column_fits_whole_text_and_header():
 
 def test_autofit_header_word_sets_floor_for_empty_column():
     fit = datatable_autofit([{"name": "Tissue classification", "id": "t"}], [])
-    assert _min(fit, "t") >= int(len("classification") * 7.6)
+    assert _min(fit, "t") == int(len("classification") * 7.6) + 22      # longest header WORD, not the header
 
 
 def test_aspire_datatable_autofits_by_default_and_keeps_brand_styles():
