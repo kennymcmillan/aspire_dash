@@ -4,6 +4,31 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.97.0] - 2026-09-28
+
+Promoted from the Development Testing Dashboard (browser-verified there, Kenny signed off).
+
+### Added
+- `combo_chart(..., boxed_labels=True)`: the "physical" style. Every column's value inside its
+  top, bold navy on a white box; every secondary-axis line point's value above it, bold black on
+  a box in the line colour. Pair with `categorical_x=True` so grouped labels sit over their column.
+- `combo_chart(..., rounded_bars=True)`: rounded column tops, bargap .30 / group gap .12.
+- `combo_chart(..., headroom=0.15)`: both y-axes fixed to `[0, max * 1.15]` (autorange off).
+- `fit_yaxis(fig, values, min_span=, frac=)`: per-chart fitted y-axis, a minimum window so a
+  small change is not drawn as a cliff, whole-number ends. Unlike a bare `range=`, it turns
+  autorange off (`trend_rich` sets it on, which silently ignored the range).
+- `pad_date_xaxis(fig, dates)`: room either side of the first/last date so end markers are
+  not cut in half (ISO-string range, kaleido-safe).
+- `assets/hovercard_clamp.js` (shipped to every app by `setup_app()`): shifts any hover card
+  clipped by the sidebar, the sticky header or a scroll box back into view, on every page and
+  in modals; the pointer hides while shifted (`.hover.hc-nudged`).
+
+### Changed
+- `hovercard_graph` direction flip treats the fixed sidebar's right edge as the left wall
+  (was the window edge, so cards opened under the sidebar).
+
+All new chart options are opt-in; defaults are unchanged.
+
 ## [0.96.2] - 2026-09-28
 
 ### Fixed

@@ -5280,6 +5280,10 @@ html.dark .pct-bad  { color: #f87171; }
    the SVG hover layer does NOT stop the plotly_hover event, so the card still
    fires; this beats colouring the label, which can't match a non-white chart. */
 .hovercard-wrap .js-plotly-plot .hoverlayer { display: none !important; }
+/* hovercard_clamp.js shifts a card a scroll box / the sidebar / the header would
+   clip; the pointer then no longer lines up with the point, so hide it (0.97.0). */
+.hover.hc-nudged::before,
+.hover.hc-nudged::after { display: none !important; }
 
 .hover-card {
     /* no entry animation: it re-played on every hover move and read as flicker */

@@ -30,8 +30,8 @@ from dash import html
 __all__ = ["report_band", "athlete_rail", "report_page", "report_card",
            "report_grid", "trend_rich", "combo_chart", "multiline_chart",
            "PHV_ZONES", "date_categories", "categorical_date_axis",
-           "apply_break", "add_injury_markers",
-           "COMBO_BAR_LABEL", "DATE_TICK_FORMAT"]
+           "apply_break", "add_injury_markers", "fit_yaxis", "pad_date_xaxis",
+           "COMBO_BAR_LABEL", "COMBO_LINE", "DATE_TICK_FORMAT"]
 
 
 def report_band(title: str, subtitle: str = "", logo_src: str | None = None) -> html.Div:
@@ -219,7 +219,9 @@ def combo_chart(bars, line, left_unit: str = "", right_unit: str = "", *,
                 label_color: str = COMBO_LABEL, label_mode: str = "last",
                 bar_labels: bool | None = None,
                 bar_label_color: str = COMBO_BAR_LABEL,
-                categorical_x: bool = False) -> go.Figure:
+                categorical_x: bool = False, boxed_labels: bool = False,
+                rounded_bars: bool = False,
+                headroom: float | None = None) -> go.Figure:
     """Dual-axis combo (PBI lineClusteredColumnComboChart): grouped columns on the
     primary y, a line on the secondary y — e.g. test values as columns with a paired
     index (RSI, power, F/BM) as the line.
@@ -235,6 +237,16 @@ def combo_chart(bars, line, left_unit: str = "", right_unit: str = "", *,
     categorical_x: when ``True``, convert a datetime x-axis into evenly-spaced
         categories with two-line month/year labels (see ``categorical_date_axis``).
         Fixes the skinny-sliver look of clustered columns on unevenly spaced dates.
+    boxed_labels: the Development Testing Dashboard "physical" style (0.97.0).
+        EVERY column's value sits inside its top, bold navy on a white box, and
+        EVERY line point's value sits above it, bold black on a box in the line
+        colour. Overrides ``bar_labels`` / ``label_mode`` text (drawn as
+        annotations; Plotly trace text has no background). Pair with
+        ``categorical_x=True`` so grouped labels sit exactly over their column.
+    rounded_bars: rounded column tops + even width/gap (bargap .30, group .12).
+    headroom: e.g. ``0.15`` fixes BOTH y-axes to ``[0, max * 1.15]`` so the
+        tallest column / line point (and its label) never touches the plot top.
+        autorange is switched off, or Plotly silently ignores the range.
     """
     # Column value labels are resolved independently of the line's label_mode.
     if bar_labels is True:
@@ -272,6 +284,124 @@ def combo_chart(bars, line, left_unit: str = "", right_unit: str = "", *,
     if bar_labels is True:
         # Headroom so the outside value labels are not clipped at the plot top.
         fig.update_yaxes(automargin=True)
+    if rounded_bars:
+        fig.update_traces(marker_cornerradius=4, marker_line_width=0,
+                          selector=dict(type="bar"))
+        fig.update_layout(bargap=0.30, bargroupgap=0.12)
+    if boxed_labels:
+        _boxed_bar_values(fig, [dp for *_rest, dp in bars])
+        _boxed_line_values(fig, ldp, line_color)
+    if headroom is not None:
+        _combo_headroom(fig, headroom)
+    return fig
+
+
+_LABEL_FONT = "Poppins, 'Segoe UI', sans-serif"
+_LABEL_BORDER = "#e2e8f0"
+
+
+def _finite(v) -> bool:
+    return v is not None and not pd.isna(v)
+
+
+def _boxed_bar_values(fig: go.Figure, dps) -> go.Figure:
+    """Each column's value INSIDE its top, bold navy on a white box. Bar geometry
+    is pinned (width/offset) so a label sits exactly over its own column in a
+    grouped chart on a categorical axis."""
+    bars = [t for t in fig.data if t.type == "bar"]
+    if not bars:
+        return fig
+    cats = list(fig.layout.xaxis.categoryarray or [])
+    gap = fig.layout.bargap if fig.layout.bargap is not None else 0.2
+    ggap = fig.layout.bargroupgap if fig.layout.bargroupgap is not None else 0.0
+    group = 1 - gap
+    slot = group / len(bars)
+    width = slot * (1 - ggap)
+    for k, (tr, dp) in enumerate(zip(bars, dps)):
+        offset = -group / 2 + k * slot + (slot - width) / 2
+        if cats:
+            tr.update(width=width, offset=offset)
+        tr.update(textposition="none")
+        for x, y in zip(tr.x, tr.y):
+            if not _finite(y):
+                continue
+            if cats and x in cats:
+                ax = cats.index(x) + offset + width / 2
+            elif not cats and len(bars) == 1:
+                ax = x
+            else:
+                continue
+            fig.add_annotation(
+                x=ax, y=y, xref="x", yref="y", text=f"<b>{y:.{dp}f}</b>",
+                showarrow=False, yanchor="top", yshift=-3,
+                font=dict(size=10, color=COMBO_BAR_LABEL, family=_LABEL_FONT),
+                bgcolor="white", bordercolor=_LABEL_BORDER, borderwidth=1, borderpad=2)
+    return fig
+
+
+def _boxed_line_values(fig: go.Figure, dp: int, color: str) -> go.Figure:
+    """Each secondary-axis line point's value ABOVE it, bold black on a box in the
+    line colour (Kenny 2026-09-28, the gold line)."""
+    for tr in fig.data:
+        if tr.type != "scatter" or tr.yaxis != "y2":
+            continue
+        tr.update(mode="lines+markers", text=None)
+        for x, y in zip(tr.x, tr.y):
+            if not _finite(y):
+                continue
+            fig.add_annotation(
+                x=x, y=y, xref="x", yref="y2", text=f"<b>{y:.{dp}f}</b>",
+                showarrow=False, yanchor="bottom", yshift=8,
+                font=dict(size=10, color="#000000", family=_LABEL_FONT),
+                bgcolor=color, bordercolor=color, borderwidth=1, borderpad=2)
+    return fig
+
+
+def _combo_headroom(fig: go.Figure, frac: float) -> go.Figure:
+    """Both y-axes from 0 to the tallest value + ``frac``."""
+    def _top(traces):
+        ys = [y for t in traces for y in (list(t.y) if t.y is not None else [])
+              if _finite(y)]
+        return max(ys) if ys else None
+    top = _top([t for t in fig.data if t.type == "bar"])
+    if top and top > 0:
+        fig.update_layout(yaxis_range=[0, top * (1 + frac)], yaxis_autorange=False)
+    top2 = _top([t for t in fig.data if t.type == "scatter" and t.yaxis == "y2"])
+    if top2 and top2 > 0:
+        fig.update_layout(yaxis2_range=[0, top2 * (1 + frac)], yaxis2_autorange=False)
+    return fig
+
+
+def fit_yaxis(fig: go.Figure, values, *, min_span: float = 4.0,
+              frac: float = 0.2) -> go.Figure:
+    """Fit the y-axis to THIS chart's data (0.97.0): centred on the data, at least
+    ``min_span`` tall so a small change is not drawn as a cliff, ``frac`` headroom
+    above and below, ends on whole numbers. No break glyph (see ``apply_break``
+    for that look). autorange is switched off, or Plotly ignores the range
+    (``trend_rich`` sets it on). No-op on no data."""
+    import math
+    ys = pd.to_numeric(pd.Series(list(values)), errors="coerce").dropna()
+    if ys.empty:
+        return fig
+    lo, hi = float(ys.min()), float(ys.max())
+    mid, span = (lo + hi) / 2, max(hi - lo, min_span)
+    half = span / 2 * (1 + 2 * frac)
+    fig.update_yaxes(range=[math.floor(mid - half), math.ceil(mid + half)],
+                     autorange=False)
+    return fig
+
+
+def pad_date_xaxis(fig: go.Figure, dates, *, frac: float = 0.05,
+                   min_days: int = 20) -> go.Figure:
+    """Room either side of the first/last date so their markers are not cut in
+    half by the plot edge (0.97.0). Range is written as ISO strings, which every
+    serializer (Dash, kaleido) accepts. No-op on no dates."""
+    d = pd.to_datetime(pd.Series(list(dates)), errors="coerce").dropna()
+    if d.empty:
+        return fig
+    pad = max((d.max() - d.min()) * frac, pd.Timedelta(days=min_days))
+    fig.update_xaxes(range=[(d.min() - pad).strftime("%Y-%m-%d"),
+                            (d.max() + pad).strftime("%Y-%m-%d")], autorange=False)
     return fig
 
 

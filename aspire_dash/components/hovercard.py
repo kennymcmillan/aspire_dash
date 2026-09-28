@@ -180,6 +180,18 @@ clientside_callback(
 
         var W = document.documentElement.clientWidth || window.innerWidth;
         var MARGIN = 12;
+        // The left wall is the fixed sidebar's right edge, not the window edge
+        // (outside a modal); assets/hovercard_clamp.js then nudges any card still
+        // clipped by a scroll box or the header (0.97.0).
+        var LEFT = MARGIN;
+        try {
+            var sb = document.querySelector('.sidebar');
+            var inModal = plot && plot.closest && plot.closest('.modal');
+            if (sb && !inModal) {
+                var sr = sb.getBoundingClientRect();
+                if (sr.width > 0 && sr.left <= 0) LEFT = sr.right + MARGIN;
+            }
+        } catch (e) {}
 
         // Real half-width of the branded card. It is a fixed-width div, but measure the
         // rendered card when present so the guard self-corrects if the design changes;
@@ -195,14 +207,14 @@ clientside_callback(
             if (card) {
                 var cr = card.getBoundingClientRect();
                 if (cr.right > W - MARGIN) return 'left';
-                if (cr.left < MARGIN)      return 'right';
+                if (cr.left < LEFT)        return 'right';
             }
             return 'bottom';
         }
 
         var cx = plotRect.left + (bb.x0 + bb.x1) / 2;   // point centre in viewport pixels
         if (cx + half > W - MARGIN) return 'left';      // would clip the right edge -> open left
-        if (cx - half < MARGIN)     return 'right';     // would clip the left edge  -> open right
+        if (cx - half < LEFT)       return 'right';     // would clip the left edge  -> open right
         return 'bottom';
     }
     """,
