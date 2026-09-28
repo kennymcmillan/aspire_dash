@@ -4,6 +4,12 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.96.1] - 2026-09-28
+
+### Fixed
+- `04_site_feedback.css` no longer sets `--sfb-bottom` / `--sfb-right` on `:root` (it loads after app
+  CSS, so it overrode an app's offset); defaults now live in `var(..., 24px)` fallbacks.
+
 ## [0.96.0] - 2026-09-28
 
 ### Added

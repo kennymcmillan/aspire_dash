@@ -169,3 +169,12 @@ def test_register_wires_callbacks_once_in_a_real_app(store):
     outs = " ".join(k for k in dash._callback.GLOBAL_CALLBACK_MAP)
     assert "sfb-list.children" in outs and "sfb-page.options" in outs and "sfb-drawer.className" in outs
     assert app is not None
+
+
+def test_css_lets_the_app_move_the_button():
+    """04_site_feedback.css loads AFTER app CSS: a :root default there overrode the app's --sfb-bottom and
+    put the pill under the medical app's chat button (e2e, 2026-09-28). Fallbacks live in var() only."""
+    from pathlib import Path
+    css = (Path(sf.__file__).parent / "assets" / "04_site_feedback.css").read_text(encoding="utf-8")
+    rules = css.split("*/", 1)[1]
+    assert "--sfb-bottom:" not in rules and "var(--sfb-bottom, 24px)" in rules

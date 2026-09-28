@@ -1,8 +1,8 @@
 /* aspire_dash.site_feedback (v0.96): floating Feedback button + drawer + triage grid.
-   Apps can move the button with --sfb-bottom / --sfb-right (e.g. to sit above a chat bubble). */
-:root { --sfb-bottom: 24px; --sfb-right: 24px; }
+   Apps can move the button by setting --sfb-bottom / --sfb-right on :root (e.g. to sit above a chat
+   bubble). No :root default here: this file loads AFTER app CSS and would override it. */
 
-.sfb-fab { position: fixed; bottom: var(--sfb-bottom); right: var(--sfb-right); z-index: 1040;
+.sfb-fab { position: fixed; bottom: var(--sfb-bottom, 24px); right: var(--sfb-right, 24px); z-index: 1040;
   display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px;
   border: none; border-radius: 22px; background: #004185; color: #fff; font-weight: 600; font-size: 14px;
   box-shadow: 0 4px 14px rgba(0, 65, 133, .3); cursor: pointer; }
