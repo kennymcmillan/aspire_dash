@@ -28,6 +28,25 @@ additive minors, breaking changes get a major bump when we get there.
 - Checked in medical-dashboard at 1440 and 390 px: every column incl. the last visible on desktop,
   headers on one line, no page-level horizontal scroll on a phone.
 
+## [0.95.0] - 2026-09-28
+
+### `aspire_dash.testing`: one baseline test for every app
+
+Kenny 2026-09-28: "make sure we have a great test suite across apps". One call per app:
+
+    from aspire_dash.testing import baseline_problems
+    def test_baseline():
+        import app
+        assert baseline_problems(app.app, root=".") == []
+
+- `callback_target_problems`: an Output whose id NOTHING in the app (or aspire_dash)
+  creates: the whole callback errors and the page blanks (medical Bone/Growth 2026-07-08).
+  Source-aware, so components built inside callbacks are not false alarms.
+- `duplicate_output_problems`: two callbacks writing one Output without allow_duplicate
+  (found the real endurance Competition duplicate, 7 outputs, on first run).
+- `page_render_problems`: a registered page whose layout() raises.
+- `stale_cache_problems`: lru_cache on a live reader (aspire_data find_live_lru).
+
 ## [0.94.0] - 2026-09-27
 
 ### data_table auto-fit: every column sizes to its content, text is never cut
