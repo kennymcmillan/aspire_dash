@@ -74,7 +74,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.95.0"  # keep in lock-step with setup.py
+__version__ = "0.96.0"  # keep in lock-step with setup.py
 
 
 def normalised_path(pathname: str | None) -> str:

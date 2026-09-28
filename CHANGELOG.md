@@ -4,6 +4,19 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.96.0] - 2026-09-28
+
+### Added
+- `aspire_dash.site_feedback`: site feedback for every app. `site_feedback_button()` (once in the
+  shell) is a floating Feedback pill that opens a drawer with the CURRENT page pre-picked, optional
+  category chips, a comment box and Save (a bottom sheet on phones). `site_feedback_page()` is the
+  triage grid: status filter, and triage users (`ADMIN_USERS`) set Open / In progress / Done /
+  Won't do per request; with `inbox=read_all_feedback` admins switch to "All apps".
+  `register_site_feedback(store, ...)` wires it; storage is `aspire_data.feedback.FeedbackStore`
+  (aspire_data >= 0.24.0). A status change saves only the one request that changed; several changes
+  = a stale page, nothing saved. Styles in `assets/04_site_feedback.css`; move the pill with
+  `--sfb-bottom` / `--sfb-right`.
+
 ## [0.95.0] - 2026-09-27
 
 ### Fly toast: flies in, holds ~2.5 s, flies out; no close button (Kenny 2026-09-27)

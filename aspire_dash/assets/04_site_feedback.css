@@ -1,0 +1,71 @@
+/* aspire_dash.site_feedback (v0.96): floating Feedback button + drawer + triage grid.
+   Apps can move the button with --sfb-bottom / --sfb-right (e.g. to sit above a chat bubble). */
+:root { --sfb-bottom: 24px; --sfb-right: 24px; }
+
+.sfb-fab { position: fixed; bottom: var(--sfb-bottom); right: var(--sfb-right); z-index: 1040;
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px;
+  border: none; border-radius: 22px; background: #004185; color: #fff; font-weight: 600; font-size: 14px;
+  box-shadow: 0 4px 14px rgba(0, 65, 133, .3); cursor: pointer; }
+.sfb-fab:hover { background: #00346b; }
+.sfb-fab:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+
+.sfb-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 380px; max-width: 100vw; z-index: 1050;
+  background: #fff; box-shadow: -8px 0 28px rgba(15, 23, 42, .18); padding: 18px 18px 24px;
+  display: flex; flex-direction: column; gap: 10px; overflow-y: auto;
+  transform: translateX(105%); transition: transform .25s ease; visibility: hidden; }
+.sfb-drawer--open { transform: none; visibility: visible; }
+.sfb-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.sfb-title { font-size: 17px; font-weight: 700; color: #1e293b; }
+.sfb-close { border: none; background: #f1f5f9; color: #334155; border-radius: 8px; min-height: 36px;
+  padding: 0 12px; font-weight: 600; cursor: pointer; }
+.sfb-label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .3px; margin: 0; }
+.sfb-cats { display: flex; flex-wrap: wrap; gap: 6px; }
+.sfb-cats label { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #cbd5e1;
+  border-radius: 16px; padding: 6px 12px; font-size: 13px; cursor: pointer; min-height: 36px; margin: 0; }
+.sfb-cat-input { accent-color: #004185; }
+.sfb-note { width: 100%; min-height: 140px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px;
+  font-size: 14px; resize: vertical; }
+.sfb-notice { font-size: 12px; color: #64748b; }
+.sfb-msg { font-size: 13px; color: #b45309; min-height: 1em; }
+.sfb-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
+.sfb-save { border: none; border-radius: 8px; background: #004185; color: #fff; font-weight: 600;
+  min-height: 44px; padding: 0 22px; cursor: pointer; }
+.sfb-all { font-size: 13px; color: #004185; font-weight: 600; }
+
+@media (max-width: 600px) {
+  .sfb-drawer { top: auto; width: 100vw; max-height: 88vh; border-radius: 16px 16px 0 0;
+    transform: translateY(105%); }
+  .sfb-drawer--open { transform: none; }
+  .sfb-fab span { display: none; }                 /* icon-only pill on phones */
+  .sfb-fab { padding: 0 14px; }
+}
+
+/* triage page */
+.sfb-page-title { font-size: 20px; font-weight: 700; color: #1e293b; margin: 0 0 4px;
+  border-left: 5px solid #004185; padding-left: 10px; }
+.sfb-page-hint { font-size: 13px; color: #64748b; margin-bottom: 12px; }
+.sfb-toolbar { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-bottom: 10px; }
+.sfb-filter label { margin-right: 12px; font-size: 13px; cursor: pointer; min-height: 32px; display: inline-flex;
+  align-items: center; gap: 4px; }
+.sfb-filter-input { accent-color: #004185; }
+.sfb-count { font-size: 12px; color: #64748b; }
+.sfb-table-wrap { overflow-x: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; }
+.sfb-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.sfb-table th { text-align: left; color: #475569; font-size: 12px; font-weight: 600; padding: 8px 10px;
+  border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+.sfb-table td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+.sfb-td-status { width: 150px; }
+.sfb-status-dd { min-width: 130px; }
+.sfb-td-page, .sfb-td-app { white-space: nowrap; font-weight: 600; color: #1e293b; }
+.sfb-td-note { min-width: 260px; }
+.sfb-td-when { white-space: nowrap; color: #475569; }
+.sfb-meta { font-size: 11px; color: #94a3b8; }
+.sfb-tag { display: inline-block; font-size: 11px; font-weight: 600; color: #004185; background: #e0ecf8;
+  border-radius: 10px; padding: 1px 8px; margin-right: 6px; }
+.sfb-chip { display: inline-block; border-radius: 10px; padding: 2px 10px; font-size: 12px; font-weight: 600; }
+.sfb-chip--open { background: #fef3c7; color: #92400e; }
+.sfb-chip--in { background: #dbeafe; color: #1e40af; }
+.sfb-chip--done { background: #dcfce7; color: #166534; }
+.sfb-chip--wont { background: #f1f5f9; color: #475569; }
+.sfb-row--done td, .sfb-row--wont td { color: #94a3b8; }
+.sfb-empty { color: #64748b; font-style: italic; padding: 12px 4px; }
