@@ -58,6 +58,20 @@ def test_target_built_in_a_callback_counts_via_source(tmp_path):
     assert T.callback_target_problems(app, root=root) == []
 
 
+def test_source_ids_scans_a_root_inside_site_packages(tmp_path):
+    """0.96.2: a pip-installed aspire_dash sits under .../site-packages/aspire_dash; its
+    own ids must still count (the skip list applies only to dirs BELOW the root)."""
+    pkg = tmp_path / "Lib" / "site-packages" / "aspire_dash"
+    pkg.mkdir(parents=True)
+    (pkg / "hover.py").write_text('TIP = "hovercard-tip"\nhtml.Div(id="lib-owned")\n',
+                                  encoding="utf-8")
+    (pkg / "__pycache__").mkdir()
+    (pkg / "__pycache__" / "junk.py").write_text('html.Div(id="junk-id")', encoding="utf-8")
+    ids = T.source_ids(pkg)
+    assert "lib-owned" in ids and ("__pattern__", "hovercard-tip") in ids
+    assert "junk-id" not in ids                 # dirs below the root are still skipped
+
+
 def test_duplicate_output_is_caught():
     app = Dash(__name__)
     app.layout = html.Div([dcc.Input(id="kit-a"), dcc.Input(id="kit-b"), html.Div(id="kit-o")])

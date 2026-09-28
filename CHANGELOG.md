@@ -4,6 +4,14 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.96.2] - 2026-09-28
+
+### Fixed
+- `testing.source_ids`: skipped any path containing `site-packages`, so with aspire_dash
+  pip-installed (not editable) its OWN component ids (e.g. `hovercard-tip`) were not scanned and
+  `baseline_problems` reported false missing targets (found by the medical-dashboard rollout).
+  The skip list now applies only to directories BELOW the scanned root.
+
 ## [0.96.1] - 2026-09-28
 
 ### Fixed

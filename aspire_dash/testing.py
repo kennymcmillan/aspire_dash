@@ -137,8 +137,11 @@ def source_ids(root) -> set:
     ids: set = set()
     skip = {".venv", "venv", "site-packages", "node_modules", ".git", "build", "dist",
             ".claude", "_vendor", "__pycache__"}
-    for p in Path(root).rglob("*.py"):
-        if skip & set(p.parts):
+    root = Path(root)
+    for p in root.rglob("*.py"):
+        # skip dirs BELOW root only: a pip-installed aspire_dash lives under
+        # site-packages, and its own ids (hovercard-tip) must still be scanned (0.96.2)
+        if skip & set(p.relative_to(root).parts[:-1]):
             continue
         try:
             src = p.read_text(encoding="utf-8")
