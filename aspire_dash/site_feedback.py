@@ -2,7 +2,7 @@
 
 A floating "Feedback" button on every page opens a drawer with the CURRENT page already picked, an
 optional category, a comment box and Save: open, type, Save. The /feedback page is the triage grid:
-filter by status, and triage users set Open / In progress / Done / Won't do per request (one change
+filter Open / Done / All, and triage users tick a request when it is done (v0.98: a Done tick box, one tick
 saves exactly that request). Admins can switch the grid to "All apps": every app's requests in one
 place (aspire_data.feedback.read_all_feedback).
 
@@ -147,13 +147,19 @@ def site_feedback_button(label: str = "Feedback") -> html.Div:
 def site_feedback_page(title: str = "Site feedback") -> html.Div:
     """The triage grid for a registered page (call inside the page's layout function)."""
     inbox = bool(_CFG.get("inbox")) and _can_triage()
+    try:
+        any_open = bool((_CFG["store"].load()["status"] != "Done").any())
+    except Exception:  # noqa: BLE001
+        any_open = True
     return html.Div([
         html.H2(title, className="sfb-page-title"),
         html.Div("Every request stays here. Use the Feedback button on any page to add one."
-                 + (" Set the status as work moves." if _can_triage() else ""), className="sfb-page-hint"),
+                 + (" Tick a request when it is done." if _can_triage() else ""), className="sfb-page-hint"),
         html.Div([
-            dcc.RadioItems(id="sfb-filter", options=["Open", "In progress", "Done", "Won't do", "All"],
-                           value="Open", inline=True, className="sfb-filter", inputClassName="sfb-filter-input"),
+            # Open = everything not Done. Opens on "All" when nothing is open, so the page is never an
+            # empty "No open requests." that hides every tick box (Kenny 2026-09-28).
+            dcc.RadioItems(id="sfb-filter", options=["Open", "Done", "All"], value="Open" if any_open else "All",
+                           inline=True, className="sfb-filter", inputClassName="sfb-filter-input"),
             dcc.RadioItems(id="sfb-scope", options=["This app", "All apps"], value="This app", inline=True,
                            className="sfb-filter", inputClassName="sfb-filter-input",
                            style=None if inbox else {"display": "none"}),
@@ -164,8 +170,8 @@ def site_feedback_page(title: str = "Site feedback") -> html.Div:
 
 
 def _count(df) -> str:
-    n = {s: int((df["status"] == s).sum()) for s in STATUSES} if not df.empty else dict.fromkeys(STATUSES, 0)
-    txt = f"{n['Open']} open · {n['In progress']} in progress · {n['Done']} done · {len(df)} total"
+    done = int((df["status"] == "Done").sum()) if not df.empty else 0
+    txt = f"{len(df) - done} open · {done} done · {len(df)} total"
     store = _CFG.get("store")
     if store is not None and getattr(store, "pending", lambda: 0)():
         txt += " · saving…"
@@ -175,17 +181,18 @@ def _count(df) -> str:
 
 
 def _rows(df, which: str, scope: str):
-    view = df if which == "All" else df[df["status"] == which]
+    view = df if which == "All" else df[df["status"] == "Done"] if which == "Done" else df[df["status"] != "Done"]
     if view.empty:
         return html.Div(f"No {'' if which == 'All' else which.lower() + ' '}requests.", className="sfb-empty")
     edit = _can_triage() and scope == "This app"
     show_app = scope == "All apps"
-    head = html.Tr([html.Th("Status"), *([html.Th("App")] if show_app else []), html.Th("Page"),
-                    html.Th("Request"), html.Th("Added")])
+    head = html.Tr([html.Th("Done"), *([html.Th("App")] if show_app else []), html.Th("Page"),
+                    html.Th("Request"), html.Th("Added"), html.Th("Done on")])
     body = []
     for _, r in view.iterrows():
-        status = dcc.Dropdown(id={"type": "sfb-status", "id": r["id"]}, options=list(STATUSES),
-                              value=r["status"], clearable=False, searchable=False, className="sfb-status-dd") \
+        status = dcc.Checklist(id={"type": "sfb-done", "id": r["id"]}, options=[{"label": "", "value": "done"}],
+                               value=["done"] if r["status"] == "Done" else [], className="sfb-done",
+                               inputClassName="sfb-done-input") \
             if edit else html.Span(r["status"], className=f"sfb-chip sfb-chip--{_SLUG.get(r['status'], 'open')}")
         body.append(html.Tr([
             html.Td(status, className="sfb-td-status"),
@@ -194,6 +201,7 @@ def _rows(df, which: str, scope: str):
             html.Td([html.Span(r["category"], className="sfb-tag") if r["category"] else None, r["note"]],
                     className="sfb-td-note"),
             html.Td([_when(r["created_utc"]), html.Div(r["by"], className="sfb-meta")], className="sfb-td-when"),
+            html.Td(_when(r["status_on"]) if r["status"] == "Done" else "", className="sfb-td-when"),
         ], className=f"sfb-row--{_SLUG.get(r['status'], 'open')}"))
     return html.Div(html.Table([html.Thead(head), html.Tbody(body)], className="sfb-table"), className="sfb-table-wrap")
 
@@ -236,7 +244,7 @@ def register_site_feedback(store, *, extra_pages=(), categories=("Bug", "Idea", 
     status_outs = [Output("sfb-count", "children", allow_duplicate=True)]
     if toast_trigger:
         status_outs.append(Output(toast_trigger, "data", allow_duplicate=True))
-    dash.callback(*status_outs, Input({"type": "sfb-status", "id": ALL}, "value"),
+    dash.callback(*status_outs, Input({"type": "sfb-done", "id": ALL}, "value"),
                   prevent_initial_call=True)(_status)
 
 
@@ -284,9 +292,10 @@ def _status(_values):
     store = _CFG["store"]
     boxes = (dash.ctx.inputs_list or [[]])[0]
     current = dict(zip(*[store.load()[c] for c in ("id", "status")]))
-    diffs = [(b["id"]["id"], b.get("value")) for b in boxes
+    # ticked -> Done; unticked -> Open (only when it WAS Done: an 'In progress' row is left as it is)
+    diffs = [(b["id"]["id"], "Done" if b.get("value") else "Open") for b in boxes
              if isinstance(b.get("id"), dict) and b["id"].get("id") in current
-             and b.get("value") in STATUSES and b.get("value") != current[b["id"]["id"]]]
+             and bool(b.get("value")) != (current[b["id"]["id"]] == "Done")]
     if not diffs:
         return (no_update, *extra)
     if not _can_triage():
@@ -296,4 +305,4 @@ def _status(_values):
                                      "warning"),) if extra else ()))
     rid, status = diffs[0]
     store.set_status(rid, status, by=connect_viewer())
-    return (_count(store.load()), *((_toast("Status saved", f"Marked {status}.", "success"),) if extra else ()))
+    return (_count(store.load()), *((_toast("Saved", "Marked done." if status == "Done" else "Marked not done.", "success"),) if extra else ()))

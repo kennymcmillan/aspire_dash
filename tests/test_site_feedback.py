@@ -98,31 +98,53 @@ def test_save_failure_is_shown_not_raised(store):
     assert "Could not save (RuntimeError)" in run(sf._save, 1, "P", None, "note", "/")[2]
 
 
-def _boxes(values: dict):
-    return [[{"id": {"type": "sfb-status", "id": rid}, "property": "value", "value": v} for rid, v in values.items()]]
+def _boxes(done: dict):
+    """The Done tick boxes as Dash sends them: {row id: ticked?}."""
+    return [[{"id": {"type": "sfb-done", "id": rid}, "property": "value", "value": ["done"] if on else []}
+             for rid, on in done.items()]]
 
 
-def test_status_saves_only_the_one_change_and_refuses_a_stale_page(store):
+def test_tick_saves_only_the_one_change_and_refuses_a_stale_page(store):
+    """v0.98: a Done tick box per request (Kenny 2026-09-28: 'I need a way to tick if done or not')."""
     for n in ("a", "b", "c"):
         store.add("P", n)
     ids = [r["id"] for r in store.rows]
-    same = {i: "Open" for i in ids}
+    same = {i: False for i in ids}
     assert run(sf._status, None, inputs_list=_boxes(same))[0] is dash.no_update        # re-render: no write
-    count, toast = run(sf._status, None, inputs_list=_boxes({**same, ids[1]: "Done"}))
-    assert store.status_calls == [(ids[1], "Done")] and toast["header"] == "Status saved" and "1 done" in count
-    stale = run(sf._status, None, inputs_list=_boxes({ids[0]: "Done", ids[1]: "Open", ids[2]: "Won't do"}))
-    assert stale[1]["header"] == "Page out of date" and len(store.status_calls) == 1
+    count, toast = run(sf._status, None, inputs_list=_boxes({**same, ids[1]: True}))
+    assert store.status_calls == [(ids[1], "Done")] and toast == {**toast, "header": "Saved", "msg": "Marked done."}
+    assert count.startswith("2 open · 1 done")
+    count, toast = run(sf._status, None, inputs_list=_boxes(same))                     # untick it again
+    assert store.status_calls[-1] == (ids[1], "Open") and toast["msg"] == "Marked not done."
+    stale = run(sf._status, None, inputs_list=_boxes({ids[0]: True, ids[1]: True, ids[2]: False}))
+    assert stale[1]["header"] == "Page out of date" and len(store.status_calls) == 2
 
 
-def test_non_triage_users_cannot_change_status_and_see_chips(store, monkeypatch):
+def test_unticked_box_leaves_an_in_progress_request_alone(store):
+    store.add("P", "x")
+    store.rows[0]["status"] = "In progress"
+    assert run(sf._status, None, inputs_list=_boxes({store.rows[0]["id"]: False}))[0] is dash.no_update
+    assert store.status_calls == []
+
+
+def test_non_triage_users_cannot_tick_and_see_chips(store, monkeypatch):
     store.add("P", "x")
     monkeypatch.setenv("RSTUDIO_PRODUCT", "CONNECT")
     monkeypatch.setenv("ADMIN_USERS", "kenneth.mcmillan@aspire.qa")
     rid = store.rows[0]["id"]
-    res = run(sf._status, None, inputs_list=_boxes({rid: "Done"}))
+    res = run(sf._status, None, inputs_list=_boxes({rid: True}))
     assert res[1]["header"] == "Not allowed" and store.status_calls == []
     grid = str(sf._rows(store.load(), "Open", "This app"))
-    assert "sfb-status" not in grid and "sfb-chip--open" in grid
+    assert "sfb-done" not in grid and "sfb-chip--open" in grid
+
+
+def test_triage_users_get_a_tick_box_per_row(store):
+    store.add("P", "open one")
+    store.add("Q", "done one")
+    store.rows[0]["status"], store.rows[0]["status_on"] = "Done", "2026-09-28 06:00"
+    grid = str(sf._rows(store.load(), "All", "This app"))
+    assert grid.count("sfb-done-input") == 2 and "28-Sep-2026 09:00" in grid       # Done on (Qatar)
+    assert "value=['done']" in grid and "value=[]" in grid
 
 
 def test_default_can_triage(monkeypatch):
@@ -135,21 +157,30 @@ def test_default_can_triage(monkeypatch):
     assert not sf.default_can_triage("physio@aspire.qa") and not sf.default_can_triage("")
 
 
-def test_grid_filters_statuses_and_inbox_shows_the_app(store):
+def test_grid_filters_open_done_all_and_inbox_shows_the_app(store):
     store.add("P", "open one")
     store.add("Q", "done one")
-    store.rows[0]["status"] = "Won't do"
+    store.rows[0]["status"] = "Done"
     lst, count = sf._render("Open", "This app")
-    assert "open one" in str(lst) and "done one" not in str(lst) and count.startswith("1 open")
-    assert "sfb-row--wont" in str(sf._rows(store.load(), "All", "This app"))
+    assert "open one" in str(lst) and "done one" not in str(lst) and count.startswith("1 open · 1 done")
+    assert "done one" in str(sf._render("Done", "This app")[0]) and "open one" not in str(sf._render("Done", "This app")[0])
+    assert "sfb-row--done" in str(sf._rows(store.load(), "All", "This app"))
     inbox = pd.DataFrame([{**dict.fromkeys(COLS, ""), "id": "z", "app": "strength-rota", "note": "from rota",
                            "status": "Open"}])
     sf._CFG["inbox"] = lambda: inbox
     lst, _ = sf._render("Open", "All apps")
-    assert "strength-rota" in str(lst) and "from rota" in str(lst) and "sfb-status" not in str(lst)
+    assert "strength-rota" in str(lst) and "from rota" in str(lst) and "sfb-done" not in str(lst)
     sf._CFG["inbox"] = None
     lst, _ = sf._render("Open", "All apps")                           # no inbox configured: this app only
     assert "from rota" not in str(lst)
+
+
+def test_page_opens_on_all_when_nothing_is_open(store):
+    """10 requests all done showed an empty 'No open requests.' with no tick boxes (2026-09-28)."""
+    store.add("P", "x")
+    assert "value='Open'" in str(sf.site_feedback_page())
+    store.rows[0]["status"] = "Done"
+    assert "value='All'" in str(sf.site_feedback_page())
 
 
 def test_layout_pieces_render(store):

@@ -69,3 +69,8 @@
 .sfb-chip--wont { background: #f1f5f9; color: #475569; }
 .sfb-row--done td, .sfb-row--wont td { color: #94a3b8; }
 .sfb-empty { color: #64748b; font-style: italic; padding: 12px 4px; }
+
+/* v0.98: Done tick box per request (replaced the 4-way status dropdown) */
+.sfb-done label { margin: 0; padding: 8px; cursor: pointer; display: inline-flex; }
+.sfb-done-input { width: 20px; height: 20px; accent-color: #004185; cursor: pointer; }
+.sfb-td-status { width: 64px; text-align: center; }
