@@ -4,6 +4,14 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.98.0] - 2026-09-28
+
+### Changed
+- `site_feedback`: the triage grid has a **Done tick box** per request instead of the 4-way status
+  dropdown (tick = Done, untick = Open; an "In progress" request is left alone unless ticked). Filters
+  are Open / Done / All, with a "Done on" column. The page opens on "All" when nothing is open, so it
+  never shows an empty list that hides every tick box.
+
 ## [0.97.0] - 2026-09-28
 
 Promoted from the Development Testing Dashboard (browser-verified there, Kenny signed off).
