@@ -1,10 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Squash">
-  <!-- aspire_dash Asian Games set: Squash (Font Awesome has only a table-tennis paddle). Long-throat racket + ball. -->
-  <g transform="rotate(32 32 32)" fill="none" stroke="#004185" stroke-linecap="round">
-    <ellipse cx="32" cy="18" rx="10" ry="15" stroke-width="4"/>
-    <path d="M24 9h16M23 14h18M23 19h18M23 24h18M25 29h14M27 4v28M32 3v30M37 4v28" stroke-width="1"/>
-    <path d="M28 31l4 11M36 31l-4 11" stroke-width="3"/>
-    <rect x="29" y="41" width="6" height="19" rx="2" fill="#004185" stroke="none"/>
+  <!-- aspire_dash Asian Games set: Squash (Font Awesome has only a table-tennis paddle). Long-throat racket + ball,
+       bold enough to sit next to the solid Font Awesome icons. -->
+  <g transform="rotate(32 32 32)" fill="#004185">
+    <ellipse cx="32" cy="18" rx="8" ry="12" fill="none" stroke="#004185" stroke-width="6"/>
+    <path d="M25 11h14M25 18h14M25 25h14M28 7v22M32 6v24M36 7v22" stroke="#004185" stroke-width="2" fill="none"/>
+    <path d="M26 31h12l-4 13h-4z"/>
+    <rect x="28" y="42" width="8" height="19" rx="3"/>
   </g>
-  <circle cx="52" cy="50" r="6" fill="#004185"/>
+  <circle cx="52" cy="51" r="8" fill="#004185"/>
 </svg>

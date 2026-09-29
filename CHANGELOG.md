@@ -4,6 +4,12 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.99.1] - 2026-09-29
+
+### Changed
+- Squash icon redrawn bolder (thicker frame and handle, bigger ball) so it sits beside the solid Font Awesome
+  icons at text size and in PDFs; PNG now 128px.
+
 ## [0.99.0] - 2026-09-29
 
 ### Added
