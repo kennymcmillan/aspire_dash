@@ -24,6 +24,7 @@ the same way ``history_modal`` does. Read a group's value from
 from __future__ import annotations
 
 import datetime as _dt
+import os
 
 from dash import (
     ALL, MATCH, Input, Output, State, clientside_callback, dcc, html,
@@ -33,7 +34,8 @@ from . import countries as _countries
 from .components.nav import _safe_relative
 
 __all__ = [
-    "AG_COLORS", "AG_COLORS_GAMES", "AG_DISCIPLINES",
+    "AG_COLORS", "AG_COLORS_GAMES", "AG_DISCIPLINES", "AG_SPORT_IMAGES",
+    "ag_sport_icon", "ag_sport_fa", "ag_sport_icon_png",
     # shell + hero
     "ag_shell", "ag_topnav", "ag_wave_hero", "ag_hero_heading", "ag_hero_stats",
     "ag_band", "ag_subtab_links", "ag_subtabs", "ag_event_capsule", "ag_footer",
@@ -100,6 +102,52 @@ AG_DISCIPLINES = {
 }
 
 _MEDALS = ("gold", "silver", "bronze")
+
+
+# Sports Font Awesome has no fair icon for get our own picture (v0.99). Squash had the table-tennis paddle, the
+# same as Table Tennis. SVG for pages, PNG for reportlab PDFs; both under assets/brand/sport-icons/.
+AG_SPORT_IMAGES = {"SQU": "squash"}
+_SPORT_ICON_DIR = os.path.join(os.path.dirname(__file__), "assets", "brand", "sport-icons")
+
+
+def _ag_code(sport):
+    """'SQU' or 'Squash' (any case) -> 'SQU'; None when unknown."""
+    s = (sport or "").strip()
+    if s.upper() in AG_DISCIPLINES:
+        return s.upper()
+    return next((code for code, (label, _) in AG_DISCIPLINES.items() if label.lower() == s.lower()), None)
+
+
+def ag_sport_fa(sport, default="fa-medal"):
+    """Font Awesome class for a sport code or label ('Athletics' -> 'fa-person-running')."""
+    code = _ag_code(sport)
+    return AG_DISCIPLINES[code][1] if code else default
+
+
+def ag_sport_icon_png(sport):
+    """Filesystem path of the sport's own PNG (for PDFs), or None when the sport uses Font Awesome."""
+    code = _ag_code(sport)
+    name = AG_SPORT_IMAGES.get(code) if code else None
+    path = os.path.join(_SPORT_ICON_DIR, f"{name}.png") if name else None
+    return path if path and os.path.exists(path) else None
+
+
+def ag_sport_icon(sport, extra="", style=None, default="fa-medal"):
+    """THE icon for a sport, by code ('SQU') or label ('Squash'): our own SVG where the sport has one
+    (Squash), else its Font Awesome icon, else `default`. Size it with CSS (1em by default)."""
+    code = _ag_code(sport)
+    name = AG_SPORT_IMAGES.get(code) if code else None
+    if name:
+        try:
+            import dash
+            src = dash.get_asset_url(f"brand/sport-icons/{name}.svg")      # Connect subpath included
+        except Exception:  # noqa: BLE001  outside a running app
+            src = f"/assets/brand/sport-icons/{name}.svg"
+        return html.Img(src=src, alt="",
+                        className=_cls("ag-sport-img", extra),
+                        style={"width": "1em", "height": "1em", "verticalAlign": "-0.125em", **(style or {})})
+    return html.I(className=_cls("fa-solid", ag_sport_fa(sport, default), extra), style=style,
+                  **{"aria-hidden": "true"})
 
 
 def _icon(name, extra=""):

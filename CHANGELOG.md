@@ -4,6 +4,16 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.99.0] - 2026-09-29
+
+### Added
+- Asian Games set: a **Squash icon** of our own (`assets/brand/sport-icons/squash.svg` + `.png`), a long-throat
+  racket and ball. Font Awesome only has a table-tennis paddle, which is what Squash showed before.
+- `ag_sport_icon(sport)`: THE icon for a sport by code (`"SQU"`) or label (`"Squash"`): our own SVG where a
+  sport has one, else its Font Awesome icon. `ag_sport_fa(sport)` gives the Font Awesome class;
+  `ag_sport_icon_png(sport)` the PNG path for reportlab PDFs (None for Font Awesome sports).
+  `AG_SPORT_IMAGES` lists the sports with their own picture.
+
 ## [0.98.0] - 2026-09-28
 
 ### Changed
