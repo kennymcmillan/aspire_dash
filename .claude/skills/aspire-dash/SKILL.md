@@ -286,7 +286,7 @@ Reference these so the question flow is informed:
 - `--python "C:/Users/Kenneth.Mcmillan/AppData/Local/Programs/Python/Python312/python.exe"` — Connect needs 3.12
 - `--entrypoint app.app:server` ONLY if the app uses `app/` subpackage (aspire-nutrition pattern)
 - Env vars at deploy: `-E NAME=value`; otherwise set in Connect UI → Vars + redeploy
-- After deploy, ask "patch min_processes=1?" if it's an interactive Dash app (avoids cold-start)
+- After deploy, LEAVE `min_processes=0` and set `max_processes=1`. `min_processes=1` ONLY for an in-process scheduler (APScheduler) or an app Kenny names as needing instant load: each warm app holds ~250 MB 24/7, and ~20 warm apps on the 7.5 GB / 2 vCPU / no-swap host caused 3 outages on 2026-09-30. Run `py -3.12 ~/.claude/skills/posit/scripts/app_resource_audit.py <app_dir>` before deploy (checklist: posit `references/app-resource-checklist.md`).
 
 **Forge workflow** for visual polish: if the user asks "make this look amazing" mid-flow, invoke the `forge` skill — prototype in tools/forge/index.html first, then port.
 
