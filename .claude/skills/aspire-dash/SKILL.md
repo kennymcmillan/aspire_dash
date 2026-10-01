@@ -481,6 +481,23 @@ from aspire_dash.charts import GRAPH_CONFIG, apply_template
 ### header(title, subtitle, right_content)
 - Sticky with backdrop blur: `blur(12px) saturate(1.2)` (in base CSS)
 - Includes hamburger button automatically
+- Ids: `aspire-page-title`, `aspire-page-subtitle` (v0.100; hidden when empty)
+
+### App-quality kit (v0.100): the default for every NEW app
+Standard: `references/app-quality-standard.md` (in ~/.claude/skills/aspire-dash). Scaffold has it on.
+- Opt in: `setup_app(app, quality=True, loading_label="<app name>")` -> `<html class="aspire-quality" lang="en">`,
+  `update_title=None`. Without it nothing changes (CSS part B scoped to `.aspire-quality`, JS gated on it).
+- `page_head(title, lead=None, right=None)`: under the opt-in the title + lead go into the sticky top bar,
+  the in-page h1 is visually hidden (kept for screen readers), `right` (export buttons) stays top right.
+  Do NOT combine with `setup_app(page_title=True)`: both write `#aspire-page-title`.
+- `section_tabs(tab_id, items, active=None, sub=False)`: items `(label, key, children[, icon_url])`, every
+  pane rendered; sticky under the header (`--aspire-hdr`), `sub=True` pill row stacks under the main row,
+  roving-tabindex keyboard, `resize` on switch, wraps on phones. Heavy panes: render on `active_tab`.
+- `fold(title, children, open=False, icon=None)`: html.Details, 48px summary, +/- marker, closed by default.
+- Opt-in extras: sidebar `.active` + `aria-current`, skip link, landmarks, menu button name + aria-expanded,
+  inert closed phone drawer, focusable table scrollers, focus rings, 44px tap targets, compact page frame
+  (14/20px, 12px phones), branded `._dash-loading`.
+- Assets: `05_aspire_quality.css`, `aspire_section_tabs.js`, `aspire_quality.js` (copied by `setup_app()`).
 
 ### card(children, className, style)
 - White card with 12px radius and shadow-sm

@@ -4,6 +4,36 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.100.0] - unreleased
+
+The app-quality kit, promoted from the AG2026 showcase app (browser-verified there). Opt-in: apps that
+do not call `setup_app(app, quality=True)` look and behave exactly as before.
+
+### Added
+- `section_tabs(tab_id, items, active=None, sub=False)`: section tabs for a page. Items
+  `(label, key, children[, icon_url])`, every pane rendered. The row sticks under the sticky header,
+  a `sub=True` pill row stacks under the main row, soft shadow once stuck, roving-tabindex keyboard
+  (arrows, Home, End, Enter, Space; aria-selected follows), Plotly `resize` on switch, phone rows wrap.
+  Optional icon per tab via CSS mask.
+- `fold(title, children, open=False, icon=None)`: a collapsible section (html.Details), closed by default.
+- `page_head(title, lead=None, right=None)`: the page's heading block.
+- `setup_app(app, quality=True, loading_label=None)`: puts `class="aspire-quality" lang="en"` on `<html>`
+  and sets `update_title=None`. Under that class: `page_head` title + lead move into the sticky top bar
+  (in-page h1 visually hidden, kept for screen readers), sidebar marks the current page
+  (`.active` + `aria-current`), compact page frame, skip link, landmarks, menu button name +
+  aria-expanded, inert closed phone drawer, focusable table scrollers, input labels, logo/flag alt,
+  solid focus rings, sidebar label contrast, 44px tap targets, branded first paint.
+- Assets copied by `setup_app()` (inert without the opt-in or the new component classes):
+  `05_aspire_quality.css`, `aspire_section_tabs.js`, `aspire_quality.js`.
+- Scaffold (`python -m aspire_dash new`) and `templates/app_template.py` opt in; the Home page shows
+  `page_head` + `section_tabs` (with pill sub-tabs) + `fold`.
+
+### Changed
+- `header()` always renders the subtitle div with id `aspire-page-subtitle` (hidden when empty, so
+  headers without a subtitle look the same).
+- `tests/test_scaffold_e2e.py` browser leg now runs the scaffolded app against this checkout (it was
+  picking up the pip-installed aspire_dash).
+
 ## [0.99.1] - 2026-09-29
 
 ### Changed
