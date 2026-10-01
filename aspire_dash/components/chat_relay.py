@@ -120,6 +120,7 @@ class _DoneSniffer:
         self.done: dict | None = None
         self.error: str | None = None
         self.thread_id: str | None = None
+        self.started = False          # set once the first SSE bytes are relayed (JSON-door detection)
 
     def feed(self, chunk: bytes) -> None:
         self.buf += chunk.decode("utf-8", "replace")
@@ -165,6 +166,22 @@ def _upstream(url: str, body: dict, timeout: float) -> Iterator[bytes]:
             if not chunk:
                 break
             yield chunk
+
+
+def json_door_events(raw: bytes) -> list[dict]:
+    """v0.102.0: an engine reply that is ONE JSON object (the `/api/agent/ask` JSON door shape: answer, agent,
+    tools_used, usage, trace, suggestions, clarify, thread_id) -> the SSE events the browser expects:
+    a thread event (when it names one) and a done event; `{error}` with no answer -> an error event."""
+    try:
+        obj = json.loads(raw.decode("utf-8", "replace"))
+    except ValueError:
+        return [{"type": "error", "error": "engine sent malformed JSON"}]
+    if not isinstance(obj, dict):
+        return [{"type": "error", "error": "engine sent an unexpected JSON reply"}]
+    if obj.get("error") and not obj.get("answer"):
+        return [{"type": "error", "error": str(obj["error"])[:300]}]
+    evs = [{"type": "thread", "thread_id": obj["thread_id"]}] if obj.get("thread_id") else []
+    return evs + [dict(obj, type="done")]
 
 
 def _clean_id(v, n: int = 128) -> str | None:
@@ -250,11 +267,23 @@ def register_relay(app, *, backend: str = "relay", engine_url: str | None = None
 
         def gen_relay():
             fwd = {"question": q, "sport": sport, "thread_id": thread, "user_id": user}
+            door = None                       # JSON door: the engine answered with one JSON object, not SSE
             try:
                 for chunk in fetch(engine + "/" + STREAM_PATH, fwd, timeout):
-                    if chunk:
-                        sniff.feed(chunk)
-                        yield chunk
+                    if not chunk:
+                        continue
+                    if door is None and not sniff.started and chunk.lstrip()[:1] == b"{":
+                        door = bytearray()
+                    if door is not None:
+                        door += chunk
+                        continue
+                    sniff.started = True
+                    sniff.feed(chunk)
+                    yield chunk
+                if door is not None:
+                    for ev in json_door_events(bytes(door)):
+                        sniff.observe(ev)
+                        yield sse(ev)
             except GeneratorExit:            # client went away; after a done/error it is not an abort
                 if not (sniff.done or sniff.error):
                     state["status"] = "aborted"

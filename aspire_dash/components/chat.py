@@ -173,17 +173,59 @@ def chat_panel(engine_url: str = DEFAULT_ENGINE_URL, sport: str | None = None, t
     ], className="aspire-chat", **{"data-prefix": id_prefix})
 
 
+def clarify_reply(option: dict) -> str:
+    """The text a clarify option sends back on the same thread. The engine binds a reply to its pending
+    clarification by `aspire_id N` first (exact candidate), else by the option label, so a tracked option sends
+    both and an untracked one sends its label."""
+    label = str(option.get("label") or "").strip()
+    aid = option.get("aspire_id")
+    return f"{label} (aspire_id {aid})" if aid else label
+
+
+def _chip(label, question, *, why=None, sport=None, aspire_id=None, kind="suggestion"):
+    # html.Button (not dbc.Button): it accepts data-* attributes, which the delegated JS click handler reads
+    attrs = {"data-question": question}
+    if sport:
+        attrs["data-sport"] = str(sport)          # the JS sends it as this turn's sport (unless lock_sport)
+    if aspire_id:
+        attrs["data-aspire-id"] = str(aspire_id)
+    cls = "btn btn-sm aspire-chat-chip " + ("btn-primary aspire-chat-chip--clarify" if kind == "clarify"
+                                            else "btn-outline-primary")
+    return html.Button(label, type="button", title=why or question, className=cls, **attrs)
+
+
 def chips_from_done(done: dict | None) -> list:
-    """Pure: suggestion chips from a done event (`suggestions: [{label, question, why}]`), max 4."""
-    out = []
-    for s in (done or {}).get("suggestions") or []:
+    """Pure: the chips under the conversation from a done event or a JSON-door reply.
+
+    `clarify: {question, attr, options: [{label, aspire_id, sport}]}` (v0.102.0) renders first as a block: the
+    engine's question and one primary button per option (max 8) that replies with `clarify_reply(option)` on the
+    same thread, carrying the option's sport. Then `suggestions: [{label, question, why, aspire_id?, sport?}]`,
+    max 4, minus any that repeat a clarify option (the engine also sends each option as a suggestion)."""
+    done = done or {}
+    out, seen = [], set()
+    cl = done.get("clarify") if isinstance(done.get("clarify"), dict) else None
+    opts = [o for o in ((cl or {}).get("options") or []) if isinstance(o, dict) and o.get("label")][:8]
+    if cl and opts:
+        buttons = []
+        for o in opts:
+            seen.add(("id", str(o["aspire_id"])) if o.get("aspire_id") else ("label", o["label"].strip().lower()))
+            buttons.append(_chip(o["label"], clarify_reply(o), sport=o.get("sport"), aspire_id=o.get("aspire_id"),
+                                 kind="clarify"))
+        out.append(html.Div([html.Div(cl.get("question") or "Which one do you mean?", className="aspire-chat-clarify-q")]
+                            + buttons, className="aspire-chat-clarify", role="group",
+                            **{"aria-label": cl.get("question") or "Clarify"}))
+    n = 0
+    for s in done.get("suggestions") or []:
+        if not isinstance(s, dict):
+            continue
         q = s.get("question") or s.get("label")
         if not q:
             continue
-        # html.Button (not dbc.Button): it accepts data-* attributes, which the delegated JS click handler reads
-        out.append(html.Button(s.get("label") or q, type="button", title=s.get("why") or q,
-                               className="btn btn-sm btn-outline-primary aspire-chat-chip", **{"data-question": q}))
-        if len(out) >= 4:
+        if (("id", str(s["aspire_id"])) if s.get("aspire_id") else ("label", str(s.get("label") or "").strip().lower())) in seen:
+            continue
+        out.append(_chip(s.get("label") or q, q, why=s.get("why"), sport=s.get("sport"), aspire_id=s.get("aspire_id")))
+        n += 1
+        if n >= 4:
             break
     return out
 
