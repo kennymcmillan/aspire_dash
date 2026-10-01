@@ -104,6 +104,8 @@ def chat_panel(engine_url: str = DEFAULT_ENGINE_URL, sport: str | None = None, t
     ids = _ids(id_prefix)
     storage = "session" if thread_scope == "session" else "memory"
     starter_list = _starters(starters)
+    tab_bar = aspire_tabs(ids["tabs"], [{"label": lab, "value": v} for v, lab in TAB_LABELS], "answer")
+    tab_bar.mobile_breakpoint = 0     # dcc.Tabs stacks vertically under 800px by default; keep one row on phones
     config = {"backend": backend, "engine_url": engine_url.rstrip("/") if backend == "engine" else "", "sport": sport, "prefix": id_prefix,
               "thread_scope": storage, "starters": starter_list, "welcome": welcome or "",
               "lock_sport": bool(lock_sport and sport)}
@@ -139,7 +141,7 @@ def chat_panel(engine_url: str = DEFAULT_ENGINE_URL, sport: str | None = None, t
             dbc.CardBody([
                 # v0.102.0: Answer / Tables / Charts / Trace. The tab bar is the library's aspire_tabs; panes are
                 # siblings toggled by `hidden`, so the JS-owned message list is never unmounted.
-                aspire_tabs(ids["tabs"], [{"label": lab, "value": v} for v, lab in TAB_LABELS], "answer"),
+                tab_bar,
                 html.Div([
                     # aspire-chat.js owns this node's children (bubbles); no Dash callback writes to it
                     html.Div(id=ids["messages"], className="aspire-chat-messages", role="log", **{"aria-live": "polite"},

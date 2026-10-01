@@ -218,7 +218,7 @@ def run(vp, width, height, base, pw):
     ok_ev = [e for e in ev if e["status"] == "ok"]
     asked = 7                                          # sprint, chip, slow x2, flaky + retry, oversize
     check(vp, "audit: one event per question with status/agent/tools",
-          len(ev) == asked and ok_ev and all(e["agent"] == "athletics_agent" and e["tools_used"] == ["athlete_record"]
+          len(ev) == asked and ok_ev and all(e["agent"] == "athletics_agent" and e["tools_used"] == ["athlete_record", "athlete_context"]
                                              for e in ok_ev)
           and statuses.count("aborted") == 2 and statuses.count("error") == 1 and statuses.count("rejected") == 1,
           f"n={len(ev)} statuses={statuses}")

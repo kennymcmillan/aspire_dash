@@ -5616,5 +5616,6 @@ html.dark .aspire-chat { --chat-llm: var(--aspire-300); --chat-raised: var(--dm-
 .aspire-chat-chip--clarify { min-height: 40px; }
 @media (max-width: 575.98px) {
     .aspire-chat-tr-axis, .aspire-chat-tr-row { grid-template-columns: minmax(0, 44%) minmax(0, 1fr); }
-    .aspire-chat .aspire-tabs .tab { padding-left: 8px !important; padding-right: 8px !important; font-size: 13px !important; }
+    .aspire-chat .aspire-tabs .tab { padding-left: 6px !important; padding-right: 6px !important; font-size: 12.5px !important; }
+    .aspire-chat-tr-ticks span:nth-child(2), .aspire-chat-tr-ticks span:nth-child(4) { display: none; }
 }

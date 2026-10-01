@@ -51,7 +51,20 @@ SUGGESTIONS = [
     {"label": "Compare A vs B", "question": "Compare Athlete A and Athlete B", "why": "head to head"},
     {"label": "A's last 5", "question": "Show Athlete A last 5 results", "why": "recent form"},
 ]
-_state = {"count": 0, "flaky_seen": set(), "last_user": None}
+_state = {"count": 0, "flaky_seen": set(), "last_user": None, "bodies": []}
+# v0.102.0: every answer carries trace.spans (node rows + nested model/tool calls); "Ali" asks a clarify question
+TRACE = {"llm_calls": 1, "llm_ms": 610, "tool_calls": 2, "tool_ms": 330, "tool_errors": 0, "cached_tokens": 900,
+         "spans": [{"k": "node", "node": "router", "name": "router", "t": 0, "ms": 45, "err": False},
+                   {"k": "node", "node": "athletics_agent", "name": "athletics_agent", "t": 45, "ms": 1010, "err": False},
+                   {"k": "llm", "node": "athletics_agent", "name": "gpt-4o-mini", "t": 60, "ms": 610, "err": False,
+                    "in": 3200, "out": 240, "cached": 900, "calls": ["athlete_record"]},
+                   {"k": "tool", "node": "athletics_agent", "name": "athlete_record", "t": 690, "ms": 210, "err": False},
+                   {"k": "tool", "node": "athletics_agent", "name": "athlete_context", "t": 905, "ms": 120, "err": False},
+                   {"k": "node", "node": "writer", "name": "writer", "t": 1060, "ms": 90, "err": False}]}
+USAGE = {"llm_calls": 1, "input_tokens": 3200, "output_tokens": 240, "cost_usd": 0.0031}
+CLARIFY = {"question": "Which sport do you mean for 'Ali': Squash, Padel?", "attr": "sport",
+           "options": [{"label": "Squash", "aspire_id": 4242, "sport": "squash", "tracked": True},
+                       {"label": "Padel", "aspire_id": None, "sport": "padel", "tracked": False}]}
 _lock = threading.Lock()
 AUDITS: list[dict] = []
 log = logging.getLogger("aspire_dash.chat")
@@ -72,6 +85,8 @@ def build_engine() -> Flask:
         with _lock:
             _state["count"] += 1
             _state["last_user"] = body.get("user_id")
+            _state["bodies"].append({k: body.get(k) for k in ("question", "sport", "thread_id")})
+        clarify = "ali" in q.lower().split() and "aspire_id" not in q
         delay = 0.12 if "slow" in q.lower() else 0.02
         flaky_first = "flaky" in q.lower() and q not in _state["flaky_seen"]
         if flaky_first:
@@ -84,12 +99,24 @@ def build_engine() -> Flask:
                 time.sleep(0.2)
                 yield _sse({"type": "error", "error": "engine timeout (fake)"})
                 return
+            if clarify:
+                time.sleep(0.1)
+                yield _sse({"type": "token", "text": CLARIFY["question"], "node": "parameter_finder"})
+                yield _sse({"type": "done", "answer": CLARIFY["question"], "agent": "parameter_finder",
+                            "tools_used": ["resolve_athlete"], "usage": {"llm_calls": 0},
+                            "trace": {"spans": [{"k": "node", "node": "parameter_finder", "name": "parameter_finder",
+                                                 "t": 0, "ms": 40, "err": False}]},
+                            "clarify": CLARIFY,
+                            "suggestions": [{"label": "Squash", "question": "Ali PB (aspire_id 4242)",
+                                             "aspire_id": 4242, "sport": "squash"},
+                                            {"label": "Padel", "question": "Ali PB (padel)", "sport": "padel"}]})
+                return
             for i in range(0, len(ANSWER), 6):
                 time.sleep(delay)
                 yield _sse({"type": "token", "text": ANSWER[i:i + 6], "node": "athletics_agent"})
             yield _sse({"type": "done", "answer": ANSWER, "agent": "athletics_agent",
-                        "tools_used": ["athlete_record"], "usage": {"in": 10, "out": 20},
-                        "suggestions": SUGGESTIONS, "trace": {"ms": 123}})
+                        "tools_used": ["athlete_record", "athlete_context"], "usage": USAGE,
+                        "suggestions": SUGGESTIONS, "trace": TRACE})
         return Response(gen(), mimetype="text/event-stream", headers={"Cache-Control": "no-cache"})
 
     @eng.post("/api/agent/chips")
@@ -98,7 +125,7 @@ def build_engine() -> Flask:
 
     @eng.get("/_smoke/count")
     def _count():
-        return jsonify({"count": _state["count"], "last_user": _state["last_user"]})
+        return jsonify({"count": _state["count"], "last_user": _state["last_user"], "bodies": _state["bodies"]})
 
     return eng
 
