@@ -47,7 +47,9 @@ app = Dash(
 )
 server = app.server  # gunicorn / Posit Connect entrypoint
 
-setup_app(app)
+# quality=True: the app-quality standard (page title in the top bar, sticky
+# section tabs, compact spacing, accessibility floor, branded first paint).
+setup_app(app, quality=True, loading_label="{title}")
 
 NAV = [
     {{"label": "Home",    "href": "/",       "icon": "fa-solid fa-house"}},
@@ -92,22 +94,21 @@ if __name__ == "__main__":
 """
 
 
-HOME_PY = """\"\"\"Home page — KPI strip + skeleton-loaded content card.\"\"\"
+HOME_PY = """\"\"\"Home page: the app-quality layout. page_head puts the title in the top bar,
+section_tabs splits the page (sticky, keyboard-reachable), fold hides the secondary block.\"\"\"
 
 import dash
-from dash import Input, Output, callback, dcc, html
+from dash import Input, Output, callback, html
 
-from aspire_dash.components import card, kpi_strip
-from aspire_dash.skeletons import skel_card, skel_metric_tiles
+from aspire_dash.components import card, fold, kpi_strip, page_head, section_tabs
+from aspire_dash.skeletons import skel_card
 from aspire_dash.theme import ASPIRE_BLUE, SLATE
 
 dash.register_page(__name__, path="/", title="Home", name="Home")
 
 
 def layout(**kwargs):
-    return html.Div([
-        html.H2("Home", className="section-title my-3"),
-
+    overview = html.Div([
         # Static KPI strip (replace with real data via callback if dynamic)
         kpi_strip([
             {"label": "Athletes", "value": 0, "unit": ""},
@@ -115,11 +116,23 @@ def layout(**kwargs):
             {"label": "Today",    "value": 0, "unit": "events"},
             {"label": "Status",   "value": 0, "unit": "active"},
         ]),
-
-        # Data-bound section — skeleton until the callback resolves
-        html.Div(id="home-content", className="mt-4",
-                  children=skel_card(height="200px")),
-    ], style={"maxWidth": "1200px", "padding": "0 16px"})
+        # Data-bound section: skeleton until the callback resolves
+        html.Div(id="home-content", className="mt-3", children=skel_card(height="200px")),
+    ])
+    details = section_tabs("home-detail-tabs", [
+        ("Table", "table", card([html.P("A long table goes here.", style={"color": SLATE["600"]})])),
+        ("Chart", "chart", card([html.P("A chart goes here.", style={"color": SLATE["600"]})])),
+    ], sub=True)
+    return html.Div([
+        page_head("Home", lead="One line on what this page answers."),
+        # Default tab = the thing the reader came for.
+        section_tabs("home-tabs", [
+            ("Overview", "overview", overview),
+            ("Details",  "details",  details),
+        ]),
+        fold("About this page", html.P("Secondary or explanatory text lives in a fold, closed by default."),
+             icon="fa-solid fa-circle-info"),
+    ])
 
 
 @callback(
@@ -128,12 +141,10 @@ def layout(**kwargs):
 )
 def _load_home(_id):
     # Replace this with your data fetch (httpx, DB, etc).
-    # Until then the skeleton is visible — try setting NETWORK to
-    # 'Slow 3G' in devtools to see it.
     return card([
         html.H4("Welcome", style={"color": ASPIRE_BLUE}),
         html.P("Replace this with your data-bound content.",
-               style={"color": SLATE["500"]}),
+               style={"color": SLATE["600"]}),
     ])
 """
 
@@ -142,17 +153,17 @@ REPORTS_PY = """\"\"\"Reports page — placeholder.\"\"\"
 
 import dash
 from dash import html
-from aspire_dash.components import card, empty_state
+from aspire_dash.components import card, empty_state, page_head
 
 dash.register_page(__name__, path="/reports", title="Reports", name="Reports")
 
 
 def layout(**kwargs):
     return html.Div([
-        html.H2("Reports", className="section-title my-3"),
+        page_head("Reports", lead="Every report this app produces."),
         card([empty_state(text="No reports yet",
                            hint="Add your first report here")]),
-    ], style={"maxWidth": "1200px", "padding": "0 16px"})
+    ])
 """
 
 
@@ -326,7 +337,9 @@ rsconnect deploy dash . --entrypoint app:app
 
 ## What you got
 
-- Two pages: Home (KPI strip + skeleton-loaded card) and Reports
+- Two pages: Home (title in the top bar, sticky section tabs with pill sub-tabs,
+  a fold, KPI strip + skeleton-loaded card) and Reports
+- The app-quality standard switched on: `setup_app(app, quality=True)`
 - `api_client.py` preconfigured with truststore + httpx + X-API-Key
 - Toast notification wiring (use `dispatch_toast(...)` from any callback)
 - `.gitignore` excludes the aspire_dash auto-copied assets
@@ -338,13 +351,13 @@ rsconnect deploy dash . --entrypoint app:app
 # pages/squad.py
 import dash
 from dash import html
-from aspire_dash.components import card
+from aspire_dash.components import card, page_head
 
 dash.register_page(__name__, path="/squad", name="Squad")
 
 def layout(**kwargs):
     return html.Div([
-        html.H2("Squad"),
+        page_head("Squad", lead="One line on what this page answers."),
         card([html.P("Your content here.")]),
     ])
 ```

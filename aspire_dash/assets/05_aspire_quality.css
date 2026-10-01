@@ -1,0 +1,135 @@
+/* aspire_dash app-quality kit (v0.100). Promoted from the AG2026 showcase app; the written standard is
+   skills/aspire-dash/references/app-quality-standard.md.
+
+   PART A (always on, but only matches the classes the new components render, so existing apps are untouched):
+     section_tabs  -> .aspire-section-tabs   sticky tab rows, pill sub-tabs, icons, phone wrap, focus rings
+     fold          -> .aspire-fold           collapsible section, 48px summary, +/- marker
+   PART B (OPT-IN: only under .aspire-quality, which setup_app(app, quality=True) puts on <html>):
+     page title in the top bar, compact page frame, focus rings, contrast, 44px tap targets, skip link,
+     branded first paint (._dash-loading). */
+
+:root { --aspire-page-bg: var(--slate-100, #f1f5f9); }
+html.dark { --aspire-page-bg: var(--dm-bg, #0f172a); }
+
+/* ════════ PART A: section tabs ════════ */
+/* Main row sticks under the sticky header; --aspire-hdr is the header's live height (aspire_section_tabs.js). */
+.aspire-section-tabs--main { position: sticky; top: var(--aspire-hdr, 0px); z-index: 40;
+  background: var(--aspire-page-bg); margin: 0 0 12px; padding-top: 6px; }
+.aspire-section-tabs--main .nav-link { color: var(--slate-600, #475569); font-weight: 500; min-height: 44px;
+  display: inline-flex; align-items: center; }
+.aspire-section-tabs--main .nav-link.active { color: var(--aspire-600, #004185); font-weight: 600;
+  background: linear-gradient(to top, var(--aspire-50, #eff6ff), transparent 85%); }
+.aspire-section-tabs--stuck { box-shadow: 0 6px 12px -10px rgba(0, 29, 61, .35); }
+.aspire-section-tabs--main.aspire-section-tabs--has-sub.aspire-section-tabs--stuck { box-shadow: none; }
+
+/* Pill sub-tabs: a level below the main row, and they stack directly under it (--aspire-tabs-h = main row height). */
+.aspire-section-tabs--sub { position: sticky; top: calc(var(--aspire-hdr, 0px) + var(--aspire-tabs-h, 0px)); z-index: 39;
+  background: var(--aspire-page-bg); border-bottom: 0; gap: 8px; padding: 8px 0; margin: -4px 0 12px; }
+.aspire-section-tabs--sub .nav-link { border: 1px solid var(--slate-200, #e2e8f0); border-radius: 999px; padding: 8px 16px;
+  min-height: 40px; background: #fff; color: var(--slate-700, #334155); display: inline-flex; align-items: center; }
+.aspire-section-tabs--sub .nav-link.active { background: var(--aspire-600, #004185); color: #fff;
+  border-color: var(--aspire-600, #004185); }
+html.dark .aspire-section-tabs--sub .nav-link:not(.active) { background: var(--dm-surface, #1e293b); }
+
+/* A pane jumped to from a stuck row lands below the row, not under it. */
+.aspire-section-tabs + .tab-content { scroll-margin-top: calc(var(--aspire-hdr, 0px) + 56px); }
+
+/* Keyboard focus: solid ring, 3:1 against the page. */
+.aspire-section-tabs .nav-link:focus-visible { outline: 2px solid var(--aspire-600, #004185); outline-offset: 2px;
+  box-shadow: none; }
+
+/* Optional icon before a label (section_tabs item[3]): drawn in the text colour via CSS mask. */
+.aspire-section-tab--icon { display: inline-flex !important; align-items: center; gap: 8px; }
+.aspire-section-tab--icon::before { content: ""; flex: none; width: 20px; height: 20px; background-color: currentColor;
+  -webkit-mask: var(--aspire-tab-icon) center / contain no-repeat; mask: var(--aspire-tab-icon) center / contain no-repeat; }
+
+/* Phones: a row that overflows would hide its last tabs with no cue. Wrap onto a second line instead. */
+@media (max-width: 576px) {
+  .aspire-section-tabs { flex-wrap: wrap; overflow-x: visible; row-gap: 4px; }
+  .aspire-section-tabs .nav-link { padding-left: 12px; padding-right: 12px; }
+}
+
+/* ════════ PART A: fold ════════ */
+.aspire-fold { background: #fff; border: 1px solid var(--slate-200, #e2e8f0); border-radius: 12px; padding: 0 16px;
+  margin-bottom: 14px; }
+.aspire-fold > summary { min-height: 48px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600;
+  color: var(--aspire-900, #001d3d); list-style: none; }
+.aspire-fold > summary::-webkit-details-marker { display: none; }
+.aspire-fold > summary::after { content: "+"; margin-left: auto; font-size: 20px; line-height: 1;
+  color: var(--aspire-600, #004185); }
+.aspire-fold[open] > summary::after { content: "\2212"; }
+.aspire-fold[open] { padding-bottom: 16px; }
+.aspire-fold > summary:focus-visible { outline: 2px solid var(--aspire-600, #004185); outline-offset: 2px; border-radius: 8px; }
+.aspire-fold__icon { color: var(--aspire-600, #004185); }
+.aspire-fold__body { padding: 4px 0; }
+/* No card inside a card. */
+.aspire-fold__body > .card { border: 0 !important; box-shadow: none !important; padding-left: 0 !important;
+  padding-right: 0 !important; }
+html.dark .aspire-fold { background: var(--dm-surface, #1e293b); border-color: var(--dm-border, #475569); }
+
+/* page_head: a normal heading row without the opt-in. */
+.aspire-page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin: 4px 0 12px; }
+.aspire-page-head__title { font-size: clamp(1.35rem, 2.1vw, 1.8rem); font-weight: 700; color: var(--aspire-900, #001d3d);
+  margin: 0; }
+.aspire-page-head__lead { margin: 2px 0 0; font-size: 14px; color: var(--slate-600, #475569); }
+.aspire-page-head__right { flex: none; display: flex; gap: 8px; align-items: center; }
+
+/* ════════ PART B: opt-in (.aspire-quality) ════════ */
+
+/* Page title + lead live in the sticky top bar (aspire_quality.js copies them); the in-page copy stays for screen
+   readers, export buttons keep their place at the top right. */
+.aspire-quality .aspire-page-head__text { position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; }
+.aspire-quality .aspire-page-head { justify-content: flex-end; margin: 0 0 8px; }
+.aspire-quality .aspire-page-head:not(:has(.aspire-page-head__right)) { margin: 0; }
+.aspire-quality .header #aspire-page-title { font-size: 20px !important; font-weight: 700 !important;
+  color: var(--aspire-900, #001d3d) !important; }
+.aspire-quality .header #aspire-page-subtitle { max-width: 62vw; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; color: var(--slate-500, #64748b) !important; font-size: 13px !important; }
+@media (max-width: 576px) {
+  .aspire-quality .header #aspire-page-subtitle { display: none !important; }
+  .aspire-quality .header #aspire-page-title { font-size: 17px !important; }
+}
+
+/* Space: page frame 14px top / 20px sides (12px on phones), 14px between cards. */
+.aspire-quality .page-content { padding: 14px 20px 24px !important; }
+.aspire-quality .page-content .card { margin-bottom: 14px !important; }
+.aspire-quality .page-content .container-fluid { padding-left: 0; padding-right: 0; }
+@media (max-width: 576px) {
+  .aspire-quality .page-content { padding: 10px 12px 20px !important; }
+  /* Tables keep their width: card padding was eating a third of a 390px screen. */
+  .aspire-quality .page-content .card { padding: 10px 8px !important; }
+  .aspire-quality .page-content .card-body { padding: 0 !important; }
+}
+
+/* Skip link: off-screen until focused. */
+.aspire-skip { position: absolute; left: 12px; top: -48px; z-index: 2000; padding: 10px 16px; border-radius: 8px;
+  background: var(--aspire-600, #004185); color: #fff; font-weight: 600; text-decoration: none; }
+.aspire-skip:focus { top: 12px; color: #fff; outline: 3px solid var(--aspire-200, #93c5fd); }
+
+/* Focus rings: solid, 3:1 or better. */
+.aspire-quality .page-content .nav-link:focus-visible, .aspire-quality .btn:focus-visible,
+.aspire-quality #sidebar-toggle:focus-visible, .aspire-quality .page-content a:focus-visible,
+.aspire-quality .aspire-data-table-scroll:focus-visible { outline: 2px solid var(--aspire-600, #004185) !important;
+  outline-offset: 2px; box-shadow: none !important; }
+.aspire-quality #sidebar a:focus-visible { outline: 2px solid #fff !important; outline-offset: -2px; }
+
+/* Contrast: sidebar section labels were 45% white (under 4.5:1). */
+.aspire-quality #sidebar .sidebar-section-label { color: rgba(255, 255, 255, .7) !important; }
+
+/* 44px tap targets: menu button, radios and check boxes. */
+.aspire-quality #sidebar-toggle { min-width: 44px; min-height: 44px; }
+.aspire-quality .form-check-input { width: 1.25em; height: 1.25em; }
+.aspire-quality .form-check { min-height: 32px; display: flex; align-items: center; gap: 8px; }
+
+/* First paint: Dash's bare "Loading..." becomes a centred, branded loader.
+   Label: setup_app(quality=True, loading_label="...") or --aspire-loading-label in app CSS. */
+.aspire-quality ._dash-loading { position: fixed; inset: 0; display: grid; place-items: center; font-size: 0 !important;
+  background: var(--aspire-page-bg); }
+.aspire-quality ._dash-loading::before { content: ""; width: 44px; height: 44px; border-radius: 50%;
+  border: 4px solid var(--aspire-100, #dbeafe); border-top-color: var(--aspire-600, #004185);
+  animation: aspire-quality-spin .8s linear infinite; }
+.aspire-quality ._dash-loading::after { content: var(--aspire-loading-label, "Aspire Academy"); position: absolute;
+  top: calc(50% + 40px); font: 600 14px Inter, system-ui, sans-serif; color: var(--aspire-900, #001d3d); }
+@keyframes aspire-quality-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .aspire-quality ._dash-loading::before { animation-duration: 2.4s; } }

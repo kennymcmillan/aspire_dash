@@ -1,3 +1,4 @@
+import pytest
 """v0.92 'Data as of' badge (components/freshness.py)."""
 import json
 
@@ -32,7 +33,7 @@ def test_badge_and_callback_wire_up():
 
 def test_callback_uses_aspire_data_cache(monkeypatch):
     import time
-    import aspire_data.cache as adc
+    adc = pytest.importorskip("aspire_data.cache")   # aspire_data is an optional sibling library, not a dependency
     monkeypatch.setattr(adc, "data_as_of", lambda *f: time.time() - 60)   # real clock: fresh
     app = Dash(__name__)
     app.layout = data_as_of_badge()

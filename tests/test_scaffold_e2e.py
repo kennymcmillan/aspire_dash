@@ -148,7 +148,10 @@ def test_scaffolded_app_serves_home_page(scaffolded_app, monkeypatch):
         pytest.skip(f"port {port} already in use; can't run scaffolded app")
 
     env = os.environ.copy()
-    env["PYTHONPATH"] = str(scaffolded_app) + os.pathsep + env.get("PYTHONPATH", "")
+    # Repo root too, so the app runs THIS checkout's aspire_dash, not a
+    # pip-installed copy (which would test a stale release).
+    repo_root = str(Path(__file__).resolve().parents[1])
+    env["PYTHONPATH"] = os.pathsep.join([str(scaffolded_app), repo_root, env.get("PYTHONPATH", "")])
     proc = subprocess.Popen(
         [sys.executable, "app.py"],
         cwd=str(scaffolded_app),

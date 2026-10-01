@@ -27,7 +27,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e .
-          pip install pytest pytest-cov numpy plotly dash-svg
+          pip install pytest pytest-cov numpy scipy plotly dash-svg   # scipy: aspire_dash.adaptive (tests/test_adaptive.py, since 0.85.0)
 
       - name: Run pytest
         run: pytest -q --tb=short

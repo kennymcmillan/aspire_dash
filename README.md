@@ -157,6 +157,42 @@ cache_prewarm(
 )
 ```
 
+### App-quality kit: sticky section tabs, folds, title in the top bar (v0.100)
+
+The standard every new app ships with (scaffolded apps have it on). Opt in once:
+
+```python
+setup_app(app, quality=True, loading_label="Squad Planner")
+```
+
+That puts `class="aspire-quality" lang="en"` on `<html>` and switches on: the page's
+`page_head()` title + lead shown in the sticky top bar, the sidebar marking the current
+page, compact page spacing, the accessibility floor (skip link, landmarks, menu button
+name, inert closed phone drawer, focus rings, 44px tap targets) and a branded first paint.
+Apps that do not opt in look exactly as before. (Putting `aspire-quality` on any wrapper
+div also works, minus the first-paint loader.)
+
+```python
+from aspire_dash.components import page_head, section_tabs, fold
+
+def layout(**kwargs):
+    return html.Div([
+        page_head("Squad", lead="Who is fit this week", right=export_buttons("squad-exp")),
+        section_tabs("squad-tabs", [                        # sticky under the header
+            ("Overview", "overview", overview_children),
+            ("Tests", "tests", section_tabs("squad-sub", [    # pill sub-tabs stack under it
+                ("Speed", "speed", speed_children),
+                ("Power", "power", power_children, dash.get_relative_path("/assets/bolt.svg")),
+            ], sub=True)),
+        ]),
+        fold("How these numbers are made", method_children, icon="fa-solid fa-circle-info"),
+    ])
+```
+
+`section_tabs` and `fold` work with or without the opt-in: tab rows stick under the
+header, arrows/Home/End/Enter/Space move between tabs, Plotly charts in hidden panes are
+redrawn on switch, and phone tab rows wrap instead of hiding tabs off-screen.
+
 ## Install
 
 ```bash
