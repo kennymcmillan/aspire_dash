@@ -1,9 +1,13 @@
-"""R4 browser smoke for the chat panel (checklist 52, slice 1). Not collected by pytest (no test_ prefix).
+"""R4 browser smoke for the chat panel (checklist 52, slices 1-2). Not collected by pytest (no test_ prefix).
 
     .venv/Scripts/python tests/smoke/chat_smoke.py
 
-Starts tests/smoke/chat_demo.py on a free port, drives it with Playwright Chromium at 1280px and 390px,
-prints one PASS/FAIL line per check and writes screenshots to tests/smoke/_shots/ (untracked).
+Starts tests/smoke/chat_demo.py (Dash app under /content/abc/ in relay mode + a fake engine on a second
+port), drives it with Playwright Chromium at 1280px and 390px, prints one PASS/FAIL line per check and
+writes screenshots + the demo server log to tests/smoke/_shots/ (untracked). Slice 2 checks: every stream
+goes through the app's relay URL, NO browser request reaches the engine origin, the relay forwards the
+server-side identity, one audit event per question (+ the audit log line), an oversize question gets the
+relay's error, and the 390px header controls sit on one row with no overflow.
 """
 from __future__ import annotations
 
@@ -31,8 +35,19 @@ def free_port() -> int:
     return p
 
 
-def count(base) -> int:
-    return json.load(urllib.request.urlopen(base + "/_smoke/count"))["count"]
+ENGINE = {"base": ""}
+
+
+def count(_base=None) -> int:
+    return json.load(urllib.request.urlopen(ENGINE["base"] + "/_smoke/count"))["count"]
+
+
+def engine_info() -> dict:
+    return json.load(urllib.request.urlopen(ENGINE["base"] + "/_smoke/count"))
+
+
+def audits(base) -> list:
+    return json.load(urllib.request.urlopen(base + "_smoke/audit"))
 
 
 def check(vp, name, ok, detail=""):
@@ -51,14 +66,31 @@ def run(vp, width, height, base, pw):
         browser = pw.chromium.launch()
     ctx = browser.new_context(viewport={"width": width, "height": height})
     page = ctx.new_page()
-    errors = []
+    errors, reqs = [], []
     page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on("request", lambda r: reqs.append((r.method, r.url)))
+    a0 = len(audits(base))
     page.goto(base, wait_until="networkidle")
     page.wait_for_selector("#demo-input")
     page.wait_for_selector(".aspire-chat-welcome", timeout=10000)
     starters = page.locator("#demo-chips [data-question]").count()
     check(vp, "empty state: welcome + starters", starters == 2, f"starters={starters}")
     page.screenshot(path=os.path.join(SHOTS, f"{vp}_0_empty.png"), full_page=True)
+
+    # header controls (390px review: "Trace" wrapped onto its own line): one row, no overflow
+    hdr = page.evaluate("""() => {
+      const h = document.querySelector('.aspire-chat-header'), c = document.querySelector('.aspire-chat-controls');
+      const tops = [...c.children].filter(e => e.offsetParent).map(e => Math.round(e.getBoundingClientRect().top));
+      const rights = [...c.children].map(e => e.getBoundingClientRect().right);
+      return {tops, overflow: h.scrollWidth - h.clientWidth, maxRight: Math.max(...rights),
+              cardRight: document.querySelector('.aspire-chat-panel').getBoundingClientRect().right,
+              minH: Math.min(...[...c.children].map(e => e.getBoundingClientRect().height))};
+    }""")
+    one_row = len(set(hdr["tops"])) == 1 and len(hdr["tops"]) == 3
+    check(vp, "header controls on one row, no overflow, 44px targets",
+          one_row and hdr["overflow"] <= 0 and hdr["maxRight"] <= hdr["cardRight"] + 0.5 and hdr["minH"] >= 43.5,
+          f"tops={hdr['tops']} overflow={hdr['overflow']} minH={hdr['minH']:.0f}")
+    page.locator(".aspire-chat-panel .card-header").screenshot(path=os.path.join(SHOTS, f"{vp}_5_header.png"))
 
     # 1+2. stream renders; Enter mashed during the stream does not start a second stream
     c0 = count(base)
@@ -84,6 +116,11 @@ def run(vp, width, height, base, pw):
     copy_ok = bot.locator("[data-action=copy]").count() == 1
     check(vp, "stream renders markdown (table, link, code, list, Copy)", has_table and link_ok and code_ok and copy_ok,
           f"table={has_table} link={link_ok} code+ol={code_ok} copy={copy_ok}")
+    posts = [u for m, u in reqs if m == "POST" and u.endswith("api/agent/ask/stream")]
+    via_relay = bool(posts) and all(u == base + "api/agent/ask/stream" for u in posts)
+    fwd_user = engine_info()["last_user"] or ""
+    check(vp, "stream goes through the app relay (prefix kept), server-side user forwarded",
+          via_relay and fwd_user.startswith("anon:"), f"posts={posts[:1]} engine_saw_user={fwd_user[:20]!r}")
     page.screenshot(path=os.path.join(SHOTS, f"{vp}_1_answer.png"), full_page=True)
 
     # 3. chips (from the done event's suggestions) click -> new question streamed
@@ -126,6 +163,15 @@ def run(vp, width, height, base, pw):
     check(vp, "error bubble + Retry re-sends", errs == 0 and last_user == "flaky question " + vp,
           f"errors_left={errs} last_user={last_user!r}")
 
+    # relay guard: an oversize question comes back as the relay's 400 SSE error, shown in the bubble
+    c0 = count()
+    inp.fill("x" * 4001)
+    inp.press("Enter")
+    page.wait_for_selector(".aspire-chat-error-detail >> text=question too long", timeout=5000)
+    wait_idle(page, 5000)
+    check(vp, "oversize question refused by the relay (never reaches the engine)", count() - c0 == 0,
+          f"engine_streams_added={count() - c0}")
+
     # 5. reload restores the transcript
     before = page.locator(".aspire-chat-bubble").count()
     texts_before = page.locator(".aspire-chat-user").all_inner_texts()
@@ -160,6 +206,22 @@ def run(vp, width, height, base, pw):
     check(vp, "New chat clears transcript + storage", bubbles == 0 and keys == [] and bubbles_reload == 0,
           f"bubbles={bubbles} stored_keys={keys} after_reload={bubbles_reload}")
     check(vp, "no page JS errors", not errors, "; ".join(errors)[:300])
+
+    # no browser request ever reached the engine origin (relay mode): every call went to the app
+    direct = [u for _, u in reqs if u.startswith(ENGINE["base"])]
+    chips = [u for m, u in reqs if m == "POST" and u.endswith("api/agent/chips")]
+    check(vp, "no browser request to the engine URL", not direct and all(u.startswith(base) for u in chips),
+          f"direct={direct[:2]} chips_via_app={len(chips)}")
+    # one audit event per question, filled from the relayed done/error events
+    ev = audits(base)[a0:]
+    statuses = [e["status"] for e in ev]
+    ok_ev = [e for e in ev if e["status"] == "ok"]
+    asked = 7                                          # sprint, chip, slow x2, flaky + retry, oversize
+    check(vp, "audit: one event per question with status/agent/tools",
+          len(ev) == asked and ok_ev and all(e["agent"] == "athletics_agent" and e["tools_used"] == ["athlete_record"]
+                                             for e in ok_ev)
+          and statuses.count("aborted") == 2 and statuses.count("error") == 1 and statuses.count("rejected") == 1,
+          f"n={len(ev)} statuses={statuses}")
     browser.close()
 
 
@@ -168,15 +230,17 @@ def main():
         sys.stdout.reconfigure(encoding="utf-8")
     except Exception:
         pass
-    port = free_port()
-    env = dict(os.environ, CHAT_DEMO_PORT=str(port))
-    proc = subprocess.Popen([sys.executable, os.path.join(HERE, "chat_demo.py"), str(port)], env=env,
-                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    base = f"http://127.0.0.1:{port}"
+    port, eport = free_port(), free_port()
+    logf = open(os.path.join(SHOTS, "demo_server.log"), "w", encoding="utf-8")
+    proc = subprocess.Popen([sys.executable, os.path.join(HERE, "chat_demo.py"), str(port), str(eport)],
+                            stdout=logf, stderr=subprocess.STDOUT)
+    base = f"http://127.0.0.1:{port}/content/abc/"
+    ENGINE["base"] = f"http://127.0.0.1:{eport}"
     try:
         for _ in range(60):
             try:
-                urllib.request.urlopen(base + "/_smoke/count", timeout=1)
+                urllib.request.urlopen(base + "_smoke/audit", timeout=1)
+                urllib.request.urlopen(ENGINE["base"] + "/_smoke/count", timeout=1)
                 break
             except Exception:
                 time.sleep(0.5)
@@ -188,6 +252,10 @@ def main():
                     check(vp, "run completed", False, repr(e)[:400])
     finally:
         proc.terminate()
+        proc.wait(10)
+        logf.close()
+    lines = [ln for ln in open(os.path.join(SHOTS, "demo_server.log"), encoding="utf-8") if "chat_audit " in ln]
+    check("server", "audit log line emitted per question", len(lines) == 14, f"chat_audit_lines={len(lines)}")
     failed = [r for r in RESULTS if not r[2]]
     print(f"\n{len(RESULTS) - len(failed)}/{len(RESULTS)} checks passed; screenshots in {SHOTS}")
     sys.exit(1 if failed else 0)

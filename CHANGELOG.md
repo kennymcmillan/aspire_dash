@@ -6,6 +6,44 @@ additive minors, breaking changes get a major bump when we get there.
 
 ## [0.101.0] - 2026-10-01 (chat panel: hardened + server relay)
 
+Separate release from 0.100.0 (the app-quality kit) because the default network path changes: after upgrading, the browser
+talks to the app, not the engine.
+
+### Changed
+- **`backend="relay"` is the default** for `chat_panel` / `register_chat_panel` (checklist 52, slice 2).
+  The browser POSTs to the app's own server at `<requests_pathname_prefix>api/agent/ask/stream` (prefix read
+  from Dash's `#_dash-config`, so it works under Connect's `/content/<guid>/`); `register_chat_panel` mounts
+  that route on `app.server` and relays to `{engine_url}/api/agent/ask/stream` with `Accept:
+  text/event-stream` and `Accept-Encoding: identity`, streaming the SSE bytes through unbuffered
+  (`stream_with_context`, stdlib `urllib` `read1`, no new dependency). `/api/agent/chips` is relayed too.
+  In relay mode `engine_url` is no longer written into the page.
+- Identity comes from Posit Connect's `RStudio-Connect-Credentials` header (`{"user", "groups"}`, read via
+  `site_feedback.connect_viewer`); a client-sent `user_id` is ignored when the header is present. No header
+  = `anon:<browser id>` or `anonymous`. Override with `register_chat_panel(user_id_source=callable)`.
+- Header controls: icon + label buttons; under 576px the labels hide and 44px icon buttons stay, so the
+  sport picker, New chat and Trace sit on one row at 390px (Trace used to wrap onto its own line).
+- `register_chat_panel` engine URL: `engine_url=` > `$ASPIRE_CHAT_ENGINE_URL` > the sports-api default.
+
+### Added
+- `aspire_dash.components.chat_relay`: the relay, `RateLimiter`, the done-event sniffer and the local
+  backend's per-thread history.
+- Audit: `register_chat_panel(audit=callable)` gets ONE event per question `{ts, user, question[:500], sport,
+  thread_id, status (ok|error|aborted|incomplete|rejected), agent, tools_used, duration_ms, error, backend}`,
+  agent/tools taken from the relayed done event without buffering. Default: one `chat_audit {json}` line on
+  logger `aspire_dash.chat`. PII: the Connect username and the question text only.
+- Guards: empty or >4000-char question = 400 with an SSE error event; over 20 questions a minute per user
+  (`rate_limit=`, in-memory, per process) = 429 with an SSE error event. The JS shows that error text.
+- `backend="local"`: `register_chat_panel(app, handler=fn)` runs `fn(question, history, thread_id, user)` in
+  process and streams the event dicts it yields, so private data (Ask Medical's SAMS) never leaves the app.
+  A handler exception reaches the browser as `handler error: <ExceptionType>` only.
+- `backend="engine"` keeps the old browser-to-engine mode for local dev (no identity, no audit).
+- Tests: `tests/test_chat_relay.py` (22: unbuffered relay over a real HTTP fake engine, prefixes `/` and
+  `/content/abc/`, identity, audit, guards, local handler). The R4 smoke now runs the demo under
+  `/content/abc/` in relay mode with the fake engine on a second port: 33 checks incl. no browser request to
+  the engine origin, audit per question + log line, mobile header on one row.
+
+#### Part 1: hardened panel (was drafted as 0.100.0 before the app-quality kit took that number)
+
 ### Added
 - `chat_panel(starters=[...])`: example questions (str or `{label, question, why}`) shown as chips on an
   empty chat. The engine's "your athletes" chips (`/api/agent/chips`) still win when it has any.

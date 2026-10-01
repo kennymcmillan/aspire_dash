@@ -1,17 +1,23 @@
-"""Chat panel demo against a FAKE local engine (R4 smoke target, checklist 52 slice 1).
+"""Chat panel demo against a FAKE local engine (R4 smoke target, checklist 52 slices 1-2).
 
-    python tests/smoke/chat_demo.py [port]      # then open http://127.0.0.1:8765
+    python tests/smoke/chat_demo.py [port] [engine_port]   # then open http://127.0.0.1:8765/content/abc/
 
-The Flask routes below stand in for the sports-api engine contract:
-  POST /api/agent/ask/stream  SSE: thread, status, token*(text,node), done(answer, agent, tools_used,
-                              usage, suggestions, trace) | error
-  POST /api/agent/chips       {"chips": []}  (no "your athletes" memory, so the starters show)
+Two servers, as in production:
+  - the FAKE ENGINE (plain Flask, `engine_port`) stands in for the sports-api contract:
+      POST /api/agent/ask/stream  SSE: thread, status, token*(text,node), done(answer, agent, tools_used,
+                                  usage, suggestions, trace) | error
+      POST /api/agent/chips       {"chips": []}  (no "your athletes" memory, so the starters show)
+      GET  /_smoke/count          how many streams were started; /_smoke/last_user = last forwarded user_id
+  - the DASH APP (`port`) under url_base_pathname=/content/abc/ (a Connect-style prefix) with
+    backend="relay" (default): the browser only talks to the app, the app relays to the engine.
+      GET  /content/abc/_smoke/audit   the audit events the relay wrote
 Question keywords steer the fake: "slow" = 120 ms per token (for Stop), "flaky" = an error event the first
-time, a normal answer on Retry. GET /_smoke/count returns how many streams were started.
+time, a normal answer on Retry.
 """
 from __future__ import annotations
 
 import json
+import logging
 import os
 import sys
 import threading
@@ -22,10 +28,12 @@ sys.path.insert(0, ROOT)
 
 import dash  # noqa: E402
 import dash_bootstrap_components as dbc  # noqa: E402
-from flask import Response, jsonify, request  # noqa: E402
+from flask import Flask, Response, jsonify, request  # noqa: E402
+from werkzeug.serving import make_server  # noqa: E402
 
 from aspire_dash.components import chat_panel, register_chat_panel  # noqa: E402
 
+PREFIX = "/content/abc/"
 ANSWER = (
     "## Qatar 100m: top 3\n"
     "Here is the *current* picture from the **record** layer.\n\n"
@@ -43,32 +51,27 @@ SUGGESTIONS = [
     {"label": "Compare A vs B", "question": "Compare Athlete A and Athlete B", "why": "head to head"},
     {"label": "A's last 5", "question": "Show Athlete A last 5 results", "why": "recent form"},
 ]
-_state = {"count": 0, "flaky_seen": set()}
+_state = {"count": 0, "flaky_seen": set(), "last_user": None}
 _lock = threading.Lock()
+AUDITS: list[dict] = []
+log = logging.getLogger("aspire_dash.chat")
 
 
 def _sse(obj) -> str:
     return "data: " + json.dumps(obj) + "\n\n"
 
 
-def build_app() -> dash.Dash:
-    app = dash.Dash(__name__, assets_folder=os.path.join(ROOT, "aspire_dash", "assets"),
-                    external_stylesheets=[dbc.themes.BOOTSTRAP])
-    port = int(os.environ.get("CHAT_DEMO_PORT", "8765"))
-    app.layout = dbc.Container([
-        chat_panel(engine_url=f"http://127.0.0.1:{port}", id_prefix="demo", height="50vh",
-                   starters=["Who are Qatar's top 100m sprinters?", "Latest squash results"]),
-    ], fluid=True, className="py-3")
-    register_chat_panel(app, id_prefix="demo")
-    server = app.server
+def build_engine() -> Flask:
+    eng = Flask("fake_engine")
 
-    @server.post("/api/agent/ask/stream")
+    @eng.post("/api/agent/ask/stream")
     def _stream():
         body = request.get_json(force=True) or {}
         q = body.get("question") or ""
         thread = body.get("thread_id") or f"t-{int(time.time() * 1000)}"
         with _lock:
             _state["count"] += 1
+            _state["last_user"] = body.get("user_id")
         delay = 0.12 if "slow" in q.lower() else 0.02
         flaky_first = "flaky" in q.lower() and q not in _state["flaky_seen"]
         if flaky_first:
@@ -89,18 +92,42 @@ def build_app() -> dash.Dash:
                         "suggestions": SUGGESTIONS, "trace": {"ms": 123}})
         return Response(gen(), mimetype="text/event-stream", headers={"Cache-Control": "no-cache"})
 
-    @server.post("/api/agent/chips")
+    @eng.post("/api/agent/chips")
     def _chips():
         return jsonify({"chips": []})
 
-    @server.get("/_smoke/count")
+    @eng.get("/_smoke/count")
     def _count():
-        return jsonify({"count": _state["count"]})
+        return jsonify({"count": _state["count"], "last_user": _state["last_user"]})
+
+    return eng
+
+
+def _audit(event: dict) -> None:
+    AUDITS.append(event)
+    log.info("chat_audit %s", json.dumps(event, default=str))
+
+
+def build_app(engine_url: str, backend: str = "relay") -> dash.Dash:
+    app = dash.Dash(__name__, assets_folder=os.path.join(ROOT, "aspire_dash", "assets"),
+                    external_stylesheets=[dbc.themes.BOOTSTRAP], url_base_pathname=PREFIX)
+    app.layout = dbc.Container([
+        chat_panel(engine_url=engine_url, id_prefix="demo", height="50vh", backend=backend,
+                   starters=["Who are Qatar's top 100m sprinters?", "Latest squash results"]),
+    ], fluid=True, className="py-3")
+    register_chat_panel(app, id_prefix="demo", backend=backend, engine_url=engine_url, audit=_audit)
+
+    @app.server.get(PREFIX + "_smoke/audit")
+    def _audits():
+        return jsonify(AUDITS)
 
     return app
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(name)s %(message)s")
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8765
-    os.environ["CHAT_DEMO_PORT"] = str(port)
-    build_app().run(host="127.0.0.1", port=port, debug=False, threaded=True)
+    eport = int(sys.argv[2]) if len(sys.argv) > 2 else port + 1
+    esrv = make_server("127.0.0.1", eport, build_engine(), threaded=True)
+    threading.Thread(target=esrv.serve_forever, daemon=True).start()
+    build_app(f"http://127.0.0.1:{eport}").run(host="127.0.0.1", port=port, debug=False, threaded=True)

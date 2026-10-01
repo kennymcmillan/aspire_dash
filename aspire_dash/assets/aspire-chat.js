@@ -1,4 +1,4 @@
-/* aspire-chat.js (M7 2026-08-30, hardened v0.100.0 2026-10-01): the Aspire sports chatbot client.
+/* aspire-chat.js (M7 2026-08-30, hardened v0.100.0, relay v0.101.0 2026-10-01): the Aspire sports chatbot client.
    Plain JS, no build step. Two uses:
      1. window.AspireChat.stream(engineUrl, {question, sport, thread_id, user_id}, handlers, {signal})
         for React/Next/vanilla pages (POST {engineUrl}/api/agent/ask/stream, Server-Sent Events).
@@ -15,11 +15,15 @@
      (event.target.closest), never document.activeElement (Safari does not focus buttons on click).
    - the transcript is mirrored to sessionStorage under aspire-chat:<prefix>:<thread_id> and re-rendered
      on load; "New chat" clears both.
-   - md() escapes HTML FIRST, then adds markup, so engine text can never inject tags. */
+   - md() escapes HTML FIRST, then adds markup, so engine text can never inject tags.
+   - v0.101.0 backends: config.backend "relay" (default) | "local" POST to THIS app's server at
+     <requests_pathname_prefix>api/agent/ask/stream (prefix read from Dash's #_dash-config, so it works under
+     Connect's /content/<guid>/); only "engine" POSTs to config.engine_url. A non-200 reply's SSE error
+     event text (empty / too long / rate limit) is shown in the error bubble. */
 (function () {
   "use strict";
 
-  var VERSION = "0.100.0";
+  var VERSION = "0.101.0";
 
   async function stream(engineUrl, body, handlers, opts) {
     handlers = handlers || {};
@@ -40,7 +44,12 @@
       return null;
     }
     if (!res.ok || !res.body) {
-      if (handlers.onError) handlers.onError("HTTP " + res.status);
+      var msg = "HTTP " + res.status;
+      try {
+        var txt = await res.text(), m = /data:\s*(\{.*\})/.exec(txt || "");
+        if (m) { var ev0 = JSON.parse(m[1]); if (ev0 && ev0.error) msg = ev0.error; }
+      } catch (e) {}
+      if (handlers.onError) handlers.onError(msg);
       return null;
     }
     var reader = res.body.getReader();
@@ -177,6 +186,19 @@
 
   /* M4: a stable anonymous user id per browser (localStorage) so the engine can remember this coach's athletes
      across threads and sessions; apps with a login can set window.AspireChat.userId instead. */
+  /* Where the browser sends questions: this app's own server (relay/local) or the engine (engine mode). */
+  function dashPrefix() {
+    try {
+      var c = document.getElementById("_dash-config");
+      var pre = c ? JSON.parse(c.textContent).requests_pathname_prefix : null;
+      return (pre || "/").replace(/\/$/, "");
+    } catch (e) { return ""; }
+  }
+  function apiBase(cfg) {
+    if (cfg && cfg.backend === "engine") return (cfg.engine_url || "").replace(/\/$/, "");
+    return dashPrefix();
+  }
+
   function userId() {
     if (window.AspireChat && window.AspireChat.userId) return window.AspireChat.userId;
     try {
@@ -267,7 +289,7 @@
     var gen = st.gen;                                        // "New chat" bumps gen: a late event from the old stream is dropped
     function stale() { if (st.gen === gen) return false; cancelPaint(); if (st.controller === ctl) { st.controller = null; lock(p, false); } return true; }
     if (!sport) { var sel = el(p, "sport"); sport = sel && sel.value ? sel.value : null; }
-    stream(cfg.engine_url, { question: q, sport: cfg.sport || sport || null, thread_id: st.thread || null, user_id: userId() }, {
+    stream(apiBase(cfg), { question: q, sport: cfg.sport || sport || null, thread_id: st.thread || null, user_id: userId() }, {
       onThread: function (t) { if (stale()) return;
         if (!t || t === st.thread) return;
         st.thread = t; setStore(p + "-thread", t); persist(p);
@@ -410,8 +432,8 @@
       /* M4: on an empty chat, fetch this user's "your athletes" chips; the starters (rendered server-side)
          stay when the engine has none or the call fails */
       var uid = userId();
-      if (!config.engine_url || !uid) return nu();
-      fetch(config.engine_url.replace(/\/$/, "") + "/api/agent/chips", {
+      if ((config.backend === "engine" && !config.engine_url) || config.backend === "local" || !uid) return nu();
+      fetch(apiBase(config) + "/api/agent/chips", {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ user_id: uid }),
       }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
         if (d && d.chips && d.chips.length && !panel(p).msgs.length) setStore(p + "-last", { suggestions: d.chips, from: "user_memory" });
@@ -435,7 +457,7 @@
     },
   };
 
-  window.AspireChat = { stream: stream, md: md, esc: esc, userId: null, version: VERSION,
+  window.AspireChat = { stream: stream, md: md, esc: esc, userId: null, version: VERSION, apiBase: apiBase,
                         send: function (prefix, q) { return startSend(prefix, q); }, stop: stop };
   window.dash_clientside = window.dash_clientside || {};
   window.dash_clientside.aspire_chat = glue;

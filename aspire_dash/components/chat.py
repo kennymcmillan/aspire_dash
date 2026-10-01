@@ -19,13 +19,39 @@ v0.100.0 hardening (checklist 52, slice 1): one stream at a time (Enter double-f
 (AbortController), Retry on error, Copy answer, delegated chip clicks (Safari-safe), transcript mirrored to
 sessionStorage per thread and restored on reload, `starters=[...]` chips + `welcome=` text on an empty chat,
 markdown with links/lists/code/scrolling tables, bubble colours from CSS variables (dark-mode safe).
+
+v0.101.0 (checklist 52, slice 2): `backend="relay"` is the DEFAULT. The browser no longer calls the engine:
+the JS posts to the app's OWN server (`<requests_pathname_prefix>api/agent/ask/stream`, read from Dash's
+`_dash-config`, so it works under Connect's `/content/<guid>/` prefix) and `register_chat_panel` mounts that
+route on `app.server`. The relay takes the user from Posit Connect's `RStudio-Connect-Credentials` header
+(never from the client), forwards `{question, sport, thread_id, user_id}` to `{engine_url}/api/agent/ask/stream`,
+relays the SSE bytes unbuffered and writes one audit event per question. See `chat_relay.py` for identity,
+audit fields (username + question text only), the 4000-char cap and the 20/min per-user rate limit.
+
+Backends (pass the same value to `chat_panel` and `register_chat_panel`):
+  relay   (default) app server -> engine. `register_chat_panel(app, engine_url=..., audit=..., user_id_source=...)`.
+          engine_url defaults to $ASPIRE_CHAT_ENGINE_URL, else the sports-api.
+  local   app server runs `handler(question, history, thread_id, user)` in process and streams the event
+          dicts it yields ({type: status|token|done|error, ...}); private data (e.g. SAMS) never leaves
+          the app. Passing `handler=` alone implies local. history = this thread's last 20 messages
+          [{role, text}], kept in app memory. Audit lines carry the username + question text only.
+  engine  the old direct mode: the browser POSTs to `chat_panel(engine_url=...)`. Local dev only; no
+          identity, no audit.
+
+Adopt (relay)::
+
+    layout = chat_panel(sport="athletics")
+    register_chat_panel(app, audit=my_audit)                    # or handler=my_handler for local
 """
 from __future__ import annotations
 
 import json
+import os
 
 import dash_bootstrap_components as dbc
 from dash import ClientsideFunction, Input, Output, State, dcc, html, no_update
+
+from .chat_relay import BACKENDS, register_relay
 
 SPORTS = ["athletics", "fencing", "swimming", "squash", "padel", "tabletennis"]
 DEFAULT_ENGINE_URL = "https://qatar-sports-analytics.duckdns.org"
@@ -59,15 +85,20 @@ def _starters(starters) -> list[dict]:
 def chat_panel(engine_url: str = DEFAULT_ENGINE_URL, sport: str | None = None, thread_scope: str = "session",
                id_prefix: str = "aspire-chat", title: str = "Ask the sports database", show_sport_picker: bool = True,
                placeholder: str = "Ask about an athlete, a ranking, a result...", height: str = "60vh",
-               starters: list | None = None, welcome: str | None = DEFAULT_WELCOME) -> html.Div:
+               starters: list | None = None, welcome: str | None = DEFAULT_WELCOME,
+               backend: str = "relay") -> html.Div:
     """The chat panel layout. `engine_url` = the sports-api base (it proxies to the engine); `sport` pins the
     routing hint (None = the picker decides); `thread_scope` = 'session' (thread + transcript survive reloads in
     this tab) | 'memory'. `starters` = example questions (str or {label, question, why}) shown as chips on an
-    empty chat when the engine has no "your athletes" chips; `welcome` = the empty-chat text (None/'' = none)."""
+    empty chat when the engine has no "your athletes" chips; `welcome` = the empty-chat text (None/'' = none).
+    `backend` = 'relay' (default) | 'local' (the browser talks to this app's server) | 'engine' (the browser
+    talks to `engine_url` directly; local dev only). In relay/local mode `engine_url` is NOT sent to the page."""
+    if backend not in BACKENDS:
+        raise ValueError(f"backend must be one of {BACKENDS}, not {backend!r}")
     ids = _ids(id_prefix)
     storage = "session" if thread_scope == "session" else "memory"
     starter_list = _starters(starters)
-    config = {"engine_url": engine_url.rstrip("/"), "sport": sport, "prefix": id_prefix,
+    config = {"backend": backend, "engine_url": engine_url.rstrip("/") if backend == "engine" else "", "sport": sport, "prefix": id_prefix,
               "thread_scope": storage, "starters": starter_list, "welcome": welcome or ""}
     return html.Div([
         dcc.Store(id=ids["config"], data=config),
@@ -80,14 +111,20 @@ def chat_panel(engine_url: str = DEFAULT_ENGINE_URL, sport: str | None = None, t
                 html.Div([
                     # 44px-class controls (the R4 smoke floor measures tap targets on mobile)
                     dbc.Select(id=ids["sport"], options=[{"label": s.title(), "value": s} for s in SPORTS],
-                               value=sport or "athletics", style={"width": "160px", "minHeight": "44px"},
-                               className="me-2") if show_sport_picker else html.Div(id=ids["sport"], hidden=True),
-                    dbc.Button("New chat", id=ids["new_chat"], outline=True, color="secondary", className="me-2",
-                               style={"minHeight": "44px"}),
-                    dbc.Button("Trace", id=ids["debug_toggle"], outline=True, color="secondary", n_clicks=0,
-                               style={"minHeight": "44px"}, title="Show the agent, tools and usage behind the last answer"),
-                ], className="d-flex align-items-center flex-wrap gap-1"),
-            ], className="d-flex justify-content-between align-items-center flex-wrap gap-2")),
+                               value=sport or "athletics", className="aspire-chat-sport",
+                               ) if show_sport_picker else html.Div(id=ids["sport"], hidden=True),
+                    # icon + label; on phones (<576px) the label hides and a 44px square icon button stays,
+                    # so the header controls sit on one row at 390px (slice-2 review fix)
+                    dbc.Button([html.Span("+", className="aspire-chat-icon", **{"aria-hidden": "true"}),
+                                html.Span("New chat", className="aspire-chat-btn-label")],
+                               id=ids["new_chat"], outline=True, color="secondary", className="aspire-chat-hbtn",
+                               title="New chat"),
+                    dbc.Button([html.Span("\u2261", className="aspire-chat-icon", **{"aria-hidden": "true"}),
+                                html.Span("Trace", className="aspire-chat-btn-label")],
+                               id=ids["debug_toggle"], outline=True, color="secondary", n_clicks=0,
+                               className="aspire-chat-hbtn", title="Trace: the agent, tools and usage behind the last answer"),
+                ], className="aspire-chat-controls d-flex align-items-center flex-nowrap gap-2"),
+            ], className="aspire-chat-header d-flex justify-content-between align-items-center flex-wrap gap-2")),
             dbc.CardBody([
                 # aspire-chat.js owns this node's children (bubbles); no Dash callback writes to it
                 html.Div(id=ids["messages"], className="aspire-chat-messages", role="log", **{"aria-live": "polite"},
@@ -133,10 +170,24 @@ def trace_text(done: dict | None) -> str:
     return json.dumps(keep, indent=1, ensure_ascii=False)[:4000] if keep else ""
 
 
-def register_chat_panel(app, id_prefix: str = "aspire-chat") -> None:
+def register_chat_panel(app, id_prefix: str = "aspire-chat", *, backend: str | None = None,
+                        engine_url: str | None = None, handler=None, user_id_source=None, audit=None,
+                        rate_limit: int = 20) -> None:
     """Wire the panel: send, init (transcript restore + chips) and new-chat are CLIENTSIDE callbacks
     (assets/aspire-chat.js, namespace `aspire_chat`); chip, Stop, Retry and Copy clicks are one delegated JS
-    listener; the chips + trace render and the debug toggle are server-side and pure."""
+    listener; the chips + trace render and the debug toggle are server-side and pure.
+
+    backend: 'relay' (default; 'local' when `handler` is given) mounts the relay routes on `app.server`
+    (chat_relay.register_relay, once per app); 'engine' mounts nothing. `user_id_source()` -> str|None
+    overrides the Connect header read; `audit(event)` overrides the default log line; `rate_limit` =
+    questions per user per minute."""
+    backend = backend or ("local" if handler is not None else "relay")
+    if backend not in BACKENDS:
+        raise ValueError(f"backend must be one of {BACKENDS}, not {backend!r}")
+    if backend != "engine":
+        register_relay(app, backend=backend, handler=handler, user_id_source=user_id_source, audit=audit,
+                       rate_limit=rate_limit,
+                       engine_url=engine_url or os.environ.get("ASPIRE_CHAT_ENGINE_URL") or DEFAULT_ENGINE_URL)
     ids = _ids(id_prefix)
 
     # send refuses while a stream is in flight; on accept it clears the input VALUE prop (not just the DOM),

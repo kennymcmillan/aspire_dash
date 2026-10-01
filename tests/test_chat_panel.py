@@ -21,7 +21,7 @@ def _walk(c):
 
 
 def test_layout_carries_every_id_once_and_the_engine_config():
-    panel = chat_panel(engine_url="https://example.test/", sport="squash", id_prefix="p1")
+    panel = chat_panel(engine_url="https://example.test/", sport="squash", id_prefix="p1", backend="engine")
     ids = [getattr(c, "id", None) for c in _walk(panel) if getattr(c, "id", None)]
     for k, v in _ids("p1").items():
         assert ids.count(v) == 1, (k, v, ids.count(v))

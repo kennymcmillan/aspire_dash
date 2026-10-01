@@ -5523,5 +5523,19 @@ html.dark .aspire-chat {
 .aspire-chat-inputbar .form-control { min-width: 0; }
 .aspire-chat-inputbar .form-control[readonly] { opacity: 0.7; }
 .aspire-chat-stop { min-height: 44px; }
+/* v0.101.0 header (slice 2): sport picker + two 44px buttons stay on one row; on phones the button labels
+   hide and the icons stay (390px review: Trace wrapped onto its own line) */
+.aspire-chat-header { min-width: 0; }
+.aspire-chat-controls { flex-wrap: nowrap; min-width: 0; margin-left: auto; }
+.aspire-chat-sport { width: 160px; min-height: 44px; flex: 0 1 160px; min-width: 110px; }
+.aspire-chat-hbtn { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center;
+  justify-content: center; gap: 6px; white-space: nowrap; flex: 0 0 auto; }
+.aspire-chat-icon { font-size: 1.15rem; line-height: 1; font-weight: 600; }
+@media (max-width: 575.98px) {
+  .aspire-chat-btn-label { display: none; }
+  .aspire-chat-hbtn { width: 44px; padding: 0; }
+  .aspire-chat-controls { width: 100%; justify-content: flex-end; }
+  .aspire-chat-sport { flex: 1 1 auto; width: auto; }
+}
 .aspire-chat-chip { min-height: 36px; }
 .aspire-chat-debug { background: var(--chat-code-bg); color: inherit; }
