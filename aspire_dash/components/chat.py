@@ -86,20 +86,23 @@ def chat_panel(engine_url: str = DEFAULT_ENGINE_URL, sport: str | None = None, t
                id_prefix: str = "aspire-chat", title: str = "Ask the sports database", show_sport_picker: bool = True,
                placeholder: str = "Ask about an athlete, a ranking, a result...", height: str = "60vh",
                starters: list | None = None, welcome: str | None = DEFAULT_WELCOME,
-               backend: str = "relay") -> html.Div:
+               backend: str = "relay", lock_sport: bool = False) -> html.Div:
     """The chat panel layout. `engine_url` = the sports-api base (it proxies to the engine); `sport` pins the
     routing hint (None = the picker decides); `thread_scope` = 'session' (thread + transcript survive reloads in
     this tab) | 'memory'. `starters` = example questions (str or {label, question, why}) shown as chips on an
     empty chat when the engine has no "your athletes" chips; `welcome` = the empty-chat text (None/'' = none).
     `backend` = 'relay' (default) | 'local' (the browser talks to this app's server) | 'engine' (the browser
-    talks to `engine_url` directly; local dev only). In relay/local mode `engine_url` is NOT sent to the page."""
+    talks to `engine_url` directly; local dev only). In relay/local mode `engine_url` is NOT sent to the page.
+    `sport` SEEDS the picker (v0.102.0): the user's pick is what gets sent. `lock_sport=True` (with a `sport`)
+    pins every question to `sport` and disables the picker; before 0.102.0 a `sport` always locked it."""
     if backend not in BACKENDS:
         raise ValueError(f"backend must be one of {BACKENDS}, not {backend!r}")
     ids = _ids(id_prefix)
     storage = "session" if thread_scope == "session" else "memory"
     starter_list = _starters(starters)
     config = {"backend": backend, "engine_url": engine_url.rstrip("/") if backend == "engine" else "", "sport": sport, "prefix": id_prefix,
-              "thread_scope": storage, "starters": starter_list, "welcome": welcome or ""}
+              "thread_scope": storage, "starters": starter_list, "welcome": welcome or "",
+              "lock_sport": bool(lock_sport and sport)}
     return html.Div([
         dcc.Store(id=ids["config"], data=config),
         dcc.Store(id=ids["thread"], storage_type=storage, data=None),
@@ -112,6 +115,7 @@ def chat_panel(engine_url: str = DEFAULT_ENGINE_URL, sport: str | None = None, t
                     # 44px-class controls (the R4 smoke floor measures tap targets on mobile)
                     dbc.Select(id=ids["sport"], options=[{"label": s.title(), "value": s} for s in SPORTS],
                                value=sport or "athletics", className="aspire-chat-sport",
+                               disabled=bool(lock_sport and sport),
                                ) if show_sport_picker else html.Div(id=ids["sport"], hidden=True),
                     # icon + label; on phones (<576px) the label hides and a 44px square icon button stays,
                     # so the header controls sit on one row at 390px (slice-2 review fix)

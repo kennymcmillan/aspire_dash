@@ -288,8 +288,8 @@
     function finish() { st.controller = null; cancelPaint(); lock(p, false); }
     var gen = st.gen;                                        // "New chat" bumps gen: a late event from the old stream is dropped
     function stale() { if (st.gen === gen) return false; cancelPaint(); if (st.controller === ctl) { st.controller = null; lock(p, false); } return true; }
-    if (!sport) { var sel = el(p, "sport"); sport = sel && sel.value ? sel.value : null; }
-    stream(apiBase(cfg), { question: q, sport: cfg.sport || sport || null, thread_id: st.thread || null, user_id: userId() }, {
+    sport = pickSport(p, cfg, sport);
+    stream(apiBase(cfg), { question: q, sport: sport, thread_id: st.thread || null, user_id: userId() }, {
       onThread: function (t) { if (stale()) return;
         if (!t || t === st.thread) return;
         st.thread = t; setStore(p + "-thread", t); persist(p);
@@ -331,6 +331,16 @@
       },
     }, { signal: ctl ? ctl.signal : undefined });
     return true;
+  }
+
+  /* v0.102.0: config.sport SEEDS the picker; only config.lock_sport pins it. An explicit sport (a clarify option
+     naming its sport) wins, then the picker's current value, then the seed. */
+  function pickSport(p, cfg, explicit) {
+    if (cfg && cfg.lock_sport && cfg.sport) return cfg.sport;
+    if (explicit) return explicit;
+    var sel = el(p, "sport");
+    if (sel && sel.value) return sel.value;
+    return (cfg && cfg.sport) || null;
   }
 
   function stop(p) { var st = panel(p); if (st.busy && st.controller) st.controller.abort(); }
@@ -458,7 +468,8 @@
   };
 
   window.AspireChat = { stream: stream, md: md, esc: esc, userId: null, version: VERSION, apiBase: apiBase,
-                        send: function (prefix, q) { return startSend(prefix, q); }, stop: stop };
+                        send: function (prefix, q, sport) { return startSend(prefix, q, sport); }, stop: stop,
+                        pickSport: pickSport, _panel: panel };
   window.dash_clientside = window.dash_clientside || {};
   window.dash_clientside.aspire_chat = glue;
 })();
