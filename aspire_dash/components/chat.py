@@ -28,6 +28,11 @@ route on `app.server`. The relay takes the user from Posit Connect's `RStudio-Co
 relays the SSE bytes unbuffered and writes one audit event per question. See `chat_relay.py` for identity,
 audit fields (username + question text only), the 4000-char cap and the 20/min per-user rate limit.
 
+v0.102.0 (chat v2, ported from the Workbench v2 chat): Answer / Tables / Charts / Trace tabs (aspire_tabs), tables
+as aspire_dash data_table with medal badges, the trace waterfall from the done event's `trace.spans` (incl. k:"node"
+rows), per-thread turn persistence, clarify chips (`clarify.options` reply on the same thread), the JSON door, and
+`sport=` now SEEDS the picker (`lock_sport=True` to pin). Renderers: chat_workspace.py.
+
 Backends (pass the same value to `chat_panel` and `register_chat_panel`):
   relay   (default) app server -> engine. `register_chat_panel(app, engine_url=..., audit=..., user_id_source=...)`.
           engine_url defaults to $ASPIRE_CHAT_ENGINE_URL, else the sports-api.

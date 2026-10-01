@@ -4,6 +4,43 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.102.0] - 2026-10-02 (chat panel v2: workspace tabs, trace waterfall, clarify chips)
+
+Ports the Workbench v2 chat (DASH_WORKBENCH_v2 `feat/v2-chat-panel`) into `chat_panel` as a generic component.
+The relay stays the transport. Apps with their own chat copy (Workbench v2 chat page, data_exporter) can drop it.
+
+### Fixed
+- **`chat_panel(sport=X)` seeds the picker, it no longer locks it.** Before, the JS sent `X` over the user's pick
+  on every question (found by E1 in data_exporter). Behaviour change for apps that relied on the lock: pass
+  `lock_sport=True`.
+
+### Added
+- `lock_sport=False` (new kwarg): with a `sport`, pins every question to it and disables the picker.
+- Workspace tabs (`<prefix>-tabs`, the library's `aspire_tabs`; one row on phones): **Answer** (the conversation),
+  **Tables** (every markdown table in every answer, newest first, as `sports.data_table`; places 1-3 as
+  `placement_badge` medals), **Charts** (seasons as lines, marks as bars, ranks as dots on a reversed axis,
+  aspire Plotly template), **Trace** (KPI strip, node path, and the span waterfall from the done event's
+  `trace.spans`: `k:"node"` rows at depth 0 with model and tool calls nested; falls back to `trace.hops`). Tab
+  labels carry counts. The header Trace button flips to the Trace tab; the raw JSON trace sits in a fold.
+- Turn persistence per thread: each finished answer's workspace payload (answer, agent, tools, usage, trace,
+  clarify, client duration) is kept in sessionStorage (`aspire-chat-turns:<prefix>:<thread>`, last 30 turns,
+  300 spans each) and written to the new `<prefix>-turns` store; reload restores Tables/Charts/Trace.
+- Clarify chips: the engine's `clarify {question, attr, options[{label, aspire_id, sport}]}` renders as a block
+  of reply buttons. A tracked option replies `Label (aspire_id N)` (the engine binds by id first), an untracked
+  one its label; the option's sport goes with it; same `thread_id`. Suggestions carry `data-sport` and
+  `data-aspire-id`; suggestions that repeat an option are dropped. `clarify_reply(option)` is public.
+- JSON door: an engine reply that is one JSON object (the `/api/agent/ask` shape) is turned into thread + done
+  SSE events by the relay (`chat_relay.json_door_events`) and by `AspireChat.stream` in engine mode.
+- Pure renderers in `aspire_dash.components.chat_workspace`: `render_workspace`, `trace_view`, `shape_trace`,
+  `tables_from_markdown` (exported from `aspire_dash.components`).
+- Tests: `tests/test_chat_v2.py`, `tests/test_chat_v2_clarify.py` (fake engine with clarify + trace over SSE and
+  the JSON door), `tests/js/chat_v2.test.js`; smoke `tests/smoke/chat_v2_smoke.py` (1440 + 390, 30 checks).
+
+### Changed
+- New component ids per prefix: `-turns`, `-tabs`, `-pane-answer|tables|charts|trace`, `-tables`, `-charts`,
+  `-trace`. `-debug` (raw trace) now lives inside the Trace pane; its `hidden` follows the active tab.
+- `chips_from_done` returns the clarify block (an `html.Div`) first when the done event asks a question.
+
 ## [0.101.0] - 2026-10-01 (chat panel: hardened + server relay)
 
 Separate release from 0.100.0 (the app-quality kit) because the default network path changes: after upgrading, the browser
