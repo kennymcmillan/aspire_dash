@@ -5399,3 +5399,129 @@ html.dark .aspire-asof { color: #cbd5e1; background: #1e293b; border-color: #334
 html.dark .fly-toast { background: #1e293b; }
 html.dark .fly-toast-title { color: #f1f5f9; }
 html.dark .fly-toast-msg { color: #cbd5e1; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CHAT PANEL (components/chat.py + aspire-chat.js), v0.100.0
+   Bubble colours come from these tokens, never hard-coded, so html.dark
+   (dark_mode.js) re-skins the panel. Brand blue = --aspire-600 (theme.ASPIRE_BLUE).
+   ═══════════════════════════════════════════════════════════════════════════ */
+.aspire-chat {
+    --chat-user-bg: var(--aspire-600);
+    --chat-user-fg: #ffffff;
+    --chat-bot-bg: var(--slate-100);
+    --chat-bot-fg: var(--slate-800);
+    --chat-border: var(--slate-200);
+    --chat-muted: var(--slate-500, #64748b);
+    --chat-code-bg: var(--slate-50);
+    --chat-zebra: var(--slate-50);
+    --chat-head-bg: var(--aspire-50);
+    --chat-link: var(--aspire-600);
+    --chat-err-bg: #fef2f2;
+    --chat-err-fg: #991b1b;
+    --chat-err-border: #fecaca;
+    min-width: 0;
+}
+html.dark .aspire-chat {
+    --chat-user-bg: var(--aspire-500);
+    --chat-bot-bg: var(--dm-surface-raised);
+    --chat-bot-fg: var(--dm-text);
+    --chat-border: var(--dm-border);
+    --chat-muted: var(--dm-text-muted);
+    --chat-code-bg: var(--dm-bg);
+    --chat-zebra: rgba(255, 255, 255, 0.04);
+    --chat-head-bg: var(--dm-surface);
+    --chat-link: var(--aspire-300);
+    --chat-err-bg: rgba(153, 27, 27, 0.25);
+    --chat-err-fg: #fecaca;
+    --chat-err-border: #7f1d1d;
+}
+.aspire-chat-panel, .aspire-chat-messages { min-width: 0; max-width: 100%; }
+.aspire-chat-bubble {
+    margin: 6px 0;
+    padding: 8px 12px;
+    border-radius: var(--radius-lg);
+    width: fit-content;
+    max-width: 95%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.aspire-chat-user {
+    margin-left: auto;
+    max-width: 85%;
+    background: var(--chat-user-bg);
+    color: var(--chat-user-fg);
+    white-space: pre-wrap;
+}
+.aspire-chat-assistant { margin-right: auto; background: var(--chat-bot-bg); color: var(--chat-bot-fg); }
+.aspire-chat-error {
+    margin-right: auto;
+    background: var(--chat-err-bg);
+    color: var(--chat-err-fg);
+    border: 1px solid var(--chat-err-border);
+}
+.aspire-chat-error-title { font-weight: 600; }
+.aspire-chat-error-detail { font-size: 0.85em; opacity: 0.85; }
+.aspire-chat-body p { margin: 0 0 4px; }
+.aspire-chat-body ul, .aspire-chat-body ol { margin: 2px 0 6px; padding-left: 1.4em; }
+.aspire-chat-body h4, .aspire-chat-body h5, .aspire-chat-body h6 { font-size: 1em; font-weight: 600; margin: 8px 0 4px; }
+.aspire-chat-body a { color: var(--chat-link); text-decoration: underline; }
+.aspire-chat-body code {
+    font-size: 0.88em;
+    background: var(--chat-code-bg);
+    border: 1px solid var(--chat-border);
+    border-radius: 4px;
+    padding: 0 4px;
+    color: inherit;
+}
+.aspire-chat-code {
+    margin: 6px 0;
+    padding: 8px 10px;
+    background: var(--chat-code-bg);
+    border: 1px solid var(--chat-border);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    max-width: 100%;
+    font-size: 0.85em;
+}
+.aspire-chat-code code { background: none; border: 0; padding: 0; white-space: pre; }
+.aspire-chat-gap { height: 6px; }
+.aspire-chat-note, .aspire-chat-thinking { color: var(--chat-muted); font-size: 0.85em; font-style: italic; }
+.aspire-chat-welcome { color: var(--chat-muted); padding: 12px 8px; text-align: center; }
+/* tables: scroll sideways inside the bubble, never the page; sticky header; zebra rows */
+.aspire-chat-table-wrap {
+    overflow-x: auto;
+    max-width: 100%;
+    max-height: 360px;
+    overflow-y: auto;
+    margin: 6px 0;
+    border: 1px solid var(--chat-border);
+    border-radius: var(--radius-md);
+}
+.aspire-chat-table { margin: 0; width: auto; min-width: 100%; color: inherit; background: transparent; }
+.aspire-chat-table th, .aspire-chat-table td { white-space: nowrap; padding: 4px 8px; background: transparent; color: inherit; border-color: var(--chat-border); }
+.aspire-chat-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--chat-head-bg);
+    border-bottom: 1px solid var(--chat-border);
+}
+.aspire-chat-table tbody tr:nth-child(even) td { background: var(--chat-zebra); }
+.aspire-chat-actions { margin-top: 4px; display: flex; gap: 6px; }
+.aspire-chat-action {
+    font-size: 0.8em;
+    min-height: 32px;
+    padding: 2px 10px;
+    border: 1px solid var(--chat-border);
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+.aspire-chat-action:hover { border-color: var(--chat-link); }
+.aspire-chat-inputbar { flex-wrap: nowrap; }
+.aspire-chat-inputbar .form-control { min-width: 0; }
+.aspire-chat-inputbar .form-control[readonly] { opacity: 0.7; }
+.aspire-chat-stop { min-height: 44px; }
+.aspire-chat-chip { min-height: 36px; }
+.aspire-chat-debug { background: var(--chat-code-bg); color: inherit; }

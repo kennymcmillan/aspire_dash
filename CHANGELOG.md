@@ -4,6 +4,39 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.101.0] - 2026-10-01 (chat panel: hardened + server relay)
+
+### Added
+- `chat_panel(starters=[...])`: example questions (str or `{label, question, why}`) shown as chips on an
+  empty chat. The engine's "your athletes" chips (`/api/agent/chips`) still win when it has any.
+- `chat_panel(welcome=...)`: empty-chat text (default given; `None` hides it).
+- Stop button and Esc cancel a streaming answer (AbortController); the partial answer stays, marked "Stopped".
+- Error bubble with **Retry** (re-sends the last question); **Copy** on every finished answer
+  (`navigator.clipboard`, `execCommand` fallback).
+- The transcript is mirrored to sessionStorage under `aspire-chat:<prefix>:<thread_id>` and re-rendered on
+  reload (with `thread_scope="session"`). "New chat" clears the DOM, the stored transcript and the thread.
+- Markdown: links (http/https only, `target=_blank rel=noopener`), ordered lists, italics, inline code,
+  fenced code blocks. Tables sit in a horizontal-scroll wrapper with a sticky header and zebra rows.
+- `window.AspireChat.stream(..., handlers, {signal})` takes an AbortSignal and calls `onAbort`; a stream
+  that ends with no done/error event now reports an error. `AspireChat.send(prefix, q)` / `.stop(prefix)`.
+- `tests/js/md.test.js` (node, run from pytest when node is on PATH) and the R4 browser smoke
+  `tests/smoke/chat_smoke.py` against a fake SSE engine (`tests/smoke/chat_demo.py`).
+
+### Fixed
+- Enter double-fire: send refuses while a stream is in flight (input read-only, Send disabled until
+  done/error/abort). The input's Dash `value` is now cleared too, so a stale question cannot be re-sent.
+- Chip clicks on Safari: one delegated click listener (`event.target.closest('[data-question]')`) replaces
+  the `document.activeElement` read. The `chip_click` clientside callback is gone.
+- Starter chips are no longer wiped by the `last` Store's mount-time `None` event.
+- Streaming re-renders are batched with `requestAnimationFrame` (one per frame, not one per token).
+
+### Changed
+- Bubble colours come from `--chat-*` CSS variables over `--aspire-*` / `--slate-*`, with `html.dark`
+  overrides from `--dm-*`; no hard-coded `#004185` / `#f3f5f8` inline styles.
+- "New chat" is a clientside callback (`aspire_chat.new_chat`); the messages node is owned by
+  aspire-chat.js and no Dash callback writes to it. `load_chips` is now `init` (old name kept as an alias).
+- `trace_text` returns `""` for an event with no trace fields (was `"{}"`).
+
 ## [0.100.0] - unreleased
 
 The app-quality kit, promoted from the AG2026 showcase app (browser-verified there). Opt-in: apps that
