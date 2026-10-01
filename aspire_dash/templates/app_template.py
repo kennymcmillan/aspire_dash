@@ -21,8 +21,9 @@ app = Dash(
 )
 server = app.server  # for Posit Connect / gunicorn
 
-# Copy shared CSS + logo into this app's assets/
-setup_app(app)
+# Copy shared CSS + logo into this app's assets/. quality=True switches on the
+# app-quality standard (title in the top bar, sticky section tabs, a11y floor).
+setup_app(app, quality=True, loading_label="My App")
 
 # Define sidebar navigation
 nav = [
