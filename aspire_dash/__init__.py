@@ -74,7 +74,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.99.1"  # keep in lock-step with setup.py
+__version__ = "0.100.0"  # keep in lock-step with setup.py
 
 
 def normalised_path(pathname: str | None) -> str:
@@ -144,13 +144,55 @@ EXTERNAL_SCRIPTS = [
 _ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 
-def setup_app(app, page_title=False):
+def _quality_index_string(index_string: str, loading_label: str | None = None) -> str:
+    """Mark the page as opted in to the app-quality kit: ``<html lang="en"
+    class="aspire-quality">`` (+ the first-paint label as a CSS variable).
+    Idempotent; keeps any attributes/classes an app already put on <html>."""
+    import re
+
+    def _html(m):
+        attrs = m.group(1) or ""
+        if "aspire-quality" not in attrs:
+            cls = re.search(r'class\s*=\s*"([^"]*)"', attrs)
+            if cls:
+                merged = f"{cls.group(1)} aspire-quality".strip()
+                attrs = attrs.replace(cls.group(0), f'class="{merged}"', 1)
+            else:
+                attrs += ' class="aspire-quality"'
+        if not re.search(r"\blang\s*=", attrs):
+            attrs += ' lang="en"'
+        return f"<html{attrs}>"
+
+    out = re.sub(r"<html(\s[^>]*)?>", _html, index_string, count=1)
+    if loading_label and "--aspire-loading-label" not in out:
+        safe = loading_label.replace("\\", "").replace('"', "'").replace("<", "").replace(">", "")
+        out = out.replace("</head>", f'<style>:root{{--aspire-loading-label:"{safe}"}}</style>\n</head>', 1)
+    return out
+
+
+def setup_app(app, page_title=False, quality=False, loading_label=None):
     """Copy shared CSS + logo into the app's assets/ folder.
 
     Call this once after creating the Dash app instance::
 
         app = Dash(__name__, external_stylesheets=STYLESHEETS, use_pages=True)
         setup_app(app)
+
+    quality : bool
+        Opt in to the app-quality kit (v0.100; the standard in the aspire-dash
+        skill, references/app-quality-standard.md). Puts
+        ``class="aspire-quality" lang="en"`` on ``<html>`` and sets
+        ``update_title=None``, which switches on, via the shipped
+        ``05_aspire_quality.css`` + ``aspire_quality.js``: the page's
+        ``page_head()`` title/lead moved into the sticky top bar, the sidebar
+        marking the current page, compact page spacing, the accessibility floor
+        (skip link, landmarks, menu button name, inert closed drawer, focus
+        rings, 44px tap targets) and a branded first paint. Default False:
+        apps that do not opt in look exactly as before. (``section_tabs`` and
+        ``fold`` work with or without it.)
+    loading_label : str or None
+        Text under the first-paint spinner when ``quality=True`` (default
+        "Aspire Academy"). Usually the app's name.
 
     page_title : bool
         If True (new-app default), the sticky header's title auto-updates to the
@@ -203,6 +245,15 @@ def setup_app(app, page_title=False):
             pass
 
     # Sidebar toggle is handled by sidebar_toggle.js (no callback needed)
+
+    # Opt-in app-quality kit: the CSS/JS assets above are copied to every app
+    # but only act under the .aspire-quality class this adds to <html>.
+    if quality:
+        app.index_string = _quality_index_string(app.index_string, loading_label)
+        try:
+            app.config.update_title = None   # no "Updating..." flicker in the tab title
+        except Exception:  # noqa: BLE001  (read-only on some Dash versions: cosmetic only)
+            pass
 
     # Optional: header title auto-follows the active page name (page_title=True).
     # Matches the current pathname against each registered page's relative_path

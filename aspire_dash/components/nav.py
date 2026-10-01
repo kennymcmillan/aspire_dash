@@ -355,9 +355,12 @@ def header(title: str = "", subtitle: str = "", right_content=None):
             html.Div(title, id="aspire-page-title", style={
                 "fontSize": "18px", "fontWeight": "600", "color": SLATE["800"],
             }),
-            html.Div(subtitle, style={
+            # Stable id so setup_app(quality=True) can put a page's lead line here.
+            # Rendered hidden when empty, so headers without a subtitle look as before.
+            html.Div(subtitle, id="aspire-page-subtitle", style={
                 "fontSize": "12px", "color": SLATE["400"], "marginTop": "1px",
-            }) if subtitle else None,
+                **({} if subtitle else {"display": "none"}),
+            }),
         ]),
     ], style={"display": "flex", "alignItems": "center", "gap": "12px"})
 
