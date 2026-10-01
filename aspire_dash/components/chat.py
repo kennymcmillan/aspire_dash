@@ -52,6 +52,7 @@ import dash_bootstrap_components as dbc
 from dash import ClientsideFunction, Input, Output, State, dcc, html, no_update
 
 from .chat_relay import BACKENDS, register_relay
+from .chat_workspace import TAB_LABELS, pane_hidden, render_workspace, tab_labels
 
 SPORTS = ["athletics", "fencing", "swimming", "squash", "padel", "tabletennis"]
 DEFAULT_ENGINE_URL = "https://qatar-sports-analytics.duckdns.org"
@@ -62,7 +63,9 @@ DEFAULT_WELCOME = ("Ask about any tracked athlete, a ranking or a result. Answer
 def _ids(prefix: str) -> dict:
     """Every component id the panel uses, from one prefix (two panels on a page = two prefixes)."""
     keys = ["config", "messages", "input", "send", "sport", "thread", "status", "chips", "debug_toggle",
-            "debug", "new_chat", "last", "stream_state", "stop"]
+            "debug", "new_chat", "last", "stream_state", "stop",
+            # v0.102.0 workspace: turns store, tab bar, the four panes and their bodies
+            "turns", "tabs", "pane_answer", "pane_tables", "pane_charts", "pane_trace", "tables", "charts", "trace"]
     return {k: f"{prefix}-{k.replace('_', '-')}" for k in keys}
 
 
@@ -97,6 +100,7 @@ def chat_panel(engine_url: str = DEFAULT_ENGINE_URL, sport: str | None = None, t
     pins every question to `sport` and disables the picker; before 0.102.0 a `sport` always locked it."""
     if backend not in BACKENDS:
         raise ValueError(f"backend must be one of {BACKENDS}, not {backend!r}")
+    from .inputs import aspire_tabs
     ids = _ids(id_prefix)
     storage = "session" if thread_scope == "session" else "memory"
     starter_list = _starters(starters)
@@ -108,6 +112,9 @@ def chat_panel(engine_url: str = DEFAULT_ENGINE_URL, sport: str | None = None, t
         dcc.Store(id=ids["thread"], storage_type=storage, data=None),
         dcc.Store(id=ids["last"], data=None),           # the last done event (answer, agent, tools_used, suggestions)
         dcc.Store(id=ids["stream_state"], data=None),   # 'streaming' | 'idle' (drives the send button)
+        # v0.102.0: this thread's finished turns {turns: [{q, answer, agent, tools_used, usage, trace, clarify, ms}],
+        # sel}, written by aspire-chat.js (set_props) and restored from sessionStorage on load
+        dcc.Store(id=ids["turns"], data=None),
         dbc.Card([
             dbc.CardHeader(html.Div([
                 html.Span(title, className="fw-semibold"),
@@ -130,12 +137,29 @@ def chat_panel(engine_url: str = DEFAULT_ENGINE_URL, sport: str | None = None, t
                 ], className="aspire-chat-controls d-flex align-items-center flex-nowrap gap-2"),
             ], className="aspire-chat-header d-flex justify-content-between align-items-center flex-wrap gap-2")),
             dbc.CardBody([
-                # aspire-chat.js owns this node's children (bubbles); no Dash callback writes to it
-                html.Div(id=ids["messages"], className="aspire-chat-messages", role="log", **{"aria-live": "polite"},
-                         style={"height": height, "overflowY": "auto", "padding": "4px"}),
-                html.Div(chips_from_done({"suggestions": starter_list}), id=ids["chips"],
-                         className="aspire-chat-chips d-flex flex-wrap gap-2 my-2"),
-                html.Div(id=ids["status"], className="text-muted small mb-2", style={"minHeight": "1.2em"}),
+                # v0.102.0: Answer / Tables / Charts / Trace. The tab bar is the library's aspire_tabs; panes are
+                # siblings toggled by `hidden`, so the JS-owned message list is never unmounted.
+                aspire_tabs(ids["tabs"], [{"label": lab, "value": v} for v, lab in TAB_LABELS], "answer"),
+                html.Div([
+                    # aspire-chat.js owns this node's children (bubbles); no Dash callback writes to it
+                    html.Div(id=ids["messages"], className="aspire-chat-messages", role="log", **{"aria-live": "polite"},
+                             style={"height": height, "overflowY": "auto", "padding": "4px"}),
+                    html.Div(chips_from_done({"suggestions": starter_list}), id=ids["chips"],
+                             className="aspire-chat-chips d-flex flex-wrap gap-2 my-2"),
+                ], id=ids["pane_answer"], className="aspire-chat-pane", role="tabpanel"),
+                html.Div(html.Div(id=ids["tables"], className="aspire-chat-cards"), id=ids["pane_tables"], hidden=True,
+                         className="aspire-chat-pane aspire-chat-pane--scroll", role="tabpanel", style={"height": height}),
+                html.Div(html.Div(id=ids["charts"], className="aspire-chat-cards"), id=ids["pane_charts"], hidden=True,
+                         className="aspire-chat-pane aspire-chat-pane--scroll", role="tabpanel", style={"height": height}),
+                html.Div([
+                    html.Div(id=ids["trace"]),
+                    html.Details([html.Summary("Raw trace (JSON)"),
+                                  html.Pre(id=ids["debug"], className="small mt-2 p-2 border rounded aspire-chat-debug",
+                                           style={"whiteSpace": "pre-wrap", "maxHeight": "200px", "overflowY": "auto"})],
+                                 className="aspire-chat-raw mt-2"),
+                ], id=ids["pane_trace"], hidden=True, className="aspire-chat-pane aspire-chat-pane--scroll",
+                    role="tabpanel", style={"height": height}),
+                html.Div(id=ids["status"], className="text-muted small my-2", style={"minHeight": "1.2em"}),
                 dbc.InputGroup([
                     dbc.Input(id=ids["input"], placeholder=placeholder, type="text", debounce=False, n_submit=0,
                               autoComplete="off"),
@@ -144,8 +168,6 @@ def chat_panel(engine_url: str = DEFAULT_ENGINE_URL, sport: str | None = None, t
                     html.Button("Stop", id=ids["stop"], type="button", hidden=True, title="Stop the answer (Esc)",
                                 className="btn btn-outline-secondary aspire-chat-stop", **{"data-action": "stop"}),
                 ], className="aspire-chat-inputbar"),
-                html.Pre(id=ids["debug"], className="small mt-2 p-2 border rounded aspire-chat-debug", hidden=True,
-                         style={"whiteSpace": "pre-wrap", "maxHeight": "200px", "overflowY": "auto"}),
             ]),
         ], className="aspire-chat-panel"),
     ], className="aspire-chat", **{"data-prefix": id_prefix})
@@ -235,6 +257,26 @@ def register_chat_panel(app, id_prefix: str = "aspire-chat", *, backend: str | N
             return no_update, ""
         return chips_from_done(done), trace_text(done)
 
-    @app.callback(Output(ids["debug"], "hidden"), Input(ids["debug_toggle"], "n_clicks"))
-    def _toggle_debug(n):
-        return not bool((n or 0) % 2)   # odd click = shown
+    # v0.102.0 workspace. Panes: one Output per pane `hidden` (+ the raw-trace Pre, kept for pre-0.102 callers).
+    @app.callback(Output(ids["pane_answer"], "hidden"), Output(ids["pane_tables"], "hidden"),
+                  Output(ids["pane_charts"], "hidden"), Output(ids["pane_trace"], "hidden"),
+                  Output(ids["debug"], "hidden"), Input(ids["tabs"], "value"))
+    def _panes(value):
+        hide = pane_hidden(value)
+        return (*hide, hide[3])
+
+    # the header Trace button flips between the Trace tab and the conversation
+    @app.callback(Output(ids["tabs"], "value"), Input(ids["debug_toggle"], "n_clicks"), State(ids["tabs"], "value"),
+                  prevent_initial_call=True)
+    def _trace_button(n, current):
+        return "answer" if current == "trace" else "trace"
+
+    # finished turns -> Tables (aspire_dash data_table + medal badges), Charts, the Trace waterfall, tab counts
+    @app.callback(Output(ids["tables"], "children"), Output(ids["charts"], "children"),
+                  Output(ids["trace"], "children"), Output(ids["tabs"], "children"), Input(ids["turns"], "data"))
+    def _workspace(data):
+        from .inputs import aspire_tabs
+        tables, charts, trace, counts = render_workspace(data)
+        labels = tab_labels(counts)
+        tabs = aspire_tabs("_", [{"label": lab, "value": v} for lab, (v, _) in zip(labels, TAB_LABELS)]).children
+        return tables, charts, trace, tabs

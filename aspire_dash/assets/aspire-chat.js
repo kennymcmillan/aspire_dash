@@ -23,7 +23,7 @@
 (function () {
   "use strict";
 
-  var VERSION = "0.101.0";
+  var VERSION = "0.102.0";
 
   async function stream(engineUrl, body, handlers, opts) {
     handlers = handlers || {};
@@ -51,6 +51,16 @@
       } catch (e) {}
       if (handlers.onError) handlers.onError(msg);
       return null;
+    }
+    var ctype = (res.headers && res.headers.get && res.headers.get("content-type")) || "";
+    if (/application\/json/i.test(ctype)) {                 // the JSON door (/api/agent/ask): one flat payload
+      var j0 = null;
+      try { j0 = doneFromJson(await res.json()); } catch (e) { j0 = null; }
+      if (!j0) { if (handlers.onError) handlers.onError("bad JSON reply"); return null; }
+      if (j0.error && !j0.answer) { if (handlers.onError) handlers.onError(j0.error); return null; }
+      if (j0.thread_id && handlers.onThread) handlers.onThread(j0.thread_id);
+      if (handlers.onDone) handlers.onDone(j0);
+      return j0;
     }
     var reader = res.body.getReader();
     var dec = new TextDecoder();
@@ -82,6 +92,16 @@
     }
     if (!done && !errored && handlers.onError) handlers.onError("the stream ended without an answer");
     return done;
+  }
+
+  /* v0.102.0: the engine's JSON door returns the same flat keys as the SSE done event (answer, agent,
+     tools_used, usage, trace, suggestions, clarify, thread_id). Normalise it to a done event. */
+  function doneFromJson(j) {
+    if (!j || typeof j !== "object") return null;
+    var ev = {};
+    Object.keys(j).forEach(function (k) { ev[k] = j[k]; });
+    ev.type = "done";
+    return ev;
   }
 
   /* ---------------------------------------------------------------- markdown */
@@ -159,7 +179,7 @@
   /* ---------------------------------------------------------------- panel state */
   var panels = {};   // prefix -> {config, busy, controller, thread, msgs, lastQ, raf}
   function panel(p) {
-    if (!panels[p]) panels[p] = { gen: 0, config: null, busy: false, controller: null, thread: null, msgs: [], lastQ: null, raf: 0 };
+    if (!panels[p]) panels[p] = { gen: 0, config: null, busy: false, controller: null, thread: null, msgs: [], turns: [], lastQ: null, raf: 0 };
     return panels[p];
   }
   function el(p, k) { return document.getElementById(p + "-" + k); }
@@ -177,7 +197,39 @@
     if (!s || !thread) return [];
     try { var v = JSON.parse(s.getItem(storeKey(p, thread)) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; }
   }
-  function dropTranscript(p, thread) { var s = ss(); if (s && thread) try { s.removeItem(storeKey(p, thread)); } catch (e) {} }
+  function dropTranscript(p, thread) {
+    var s = ss(); if (!s || !thread) return;
+    try { s.removeItem(storeKey(p, thread)); s.removeItem(turnsKey(p, thread)); } catch (e) {}
+  }
+
+  /* v0.102.0 turn persistence: the workspace payload of every finished answer (tables come from `answer`, the
+     Trace tab from `trace.spans`), per thread in sessionStorage, last MAX_TURNS, spans capped at MAX_SPANS. */
+  var MAX_TURNS = 30, MAX_SPANS = 300;
+  function turnsKey(p, thread) { return "aspire-chat-turns:" + p + ":" + thread; }
+  function turnOf(ev, q, ms, sport) {
+    var tr = ev.trace || null;
+    if (tr && Array.isArray(tr.spans) && tr.spans.length > MAX_SPANS) {
+      var c = {}; Object.keys(tr).forEach(function (k) { c[k] = tr[k]; });
+      c.spans_dropped = (tr.spans_dropped || 0) + tr.spans.length - MAX_SPANS; c.spans = tr.spans.slice(0, MAX_SPANS); tr = c;
+    }
+    return { q: q, answer: ev.answer || "", agent: ev.agent || null, tools_used: ev.tools_used || [], usage: ev.usage || null,
+             trace: tr, clarify: ev.clarify || null, suggestions: ev.suggestions || [], ms: ms, sport: sport || null };
+  }
+  function pushTurns(p) {
+    var st = panel(p);
+    setStore(p + "-turns", { turns: st.turns, sel: st.turns.length - 1 });
+    var s = ss();
+    if (!s || !st.thread) return;
+    var keep = st.turns.slice(-MAX_TURNS);
+    for (var i = 0; i < keep.length; i++) {          // over ~2 MB: drop the oldest answers' bulky parts first
+      try { s.setItem(turnsKey(p, st.thread), JSON.stringify(keep.slice(i))); return; } catch (e) {}
+    }
+  }
+  function loadTurns(p, thread) {
+    var s = ss();
+    if (!s || !thread) return [];
+    try { var v = JSON.parse(s.getItem(turnsKey(p, thread)) || "[]"); return Array.isArray(v) ? v.filter(function (t) { return t && typeof t.q === "string"; }) : []; } catch (e) { return []; }
+  }
 
   function setStore(id, data) {
     /* write a dcc.Store from JS via dash_clientside.set_props (Dash >= 2.16) */
@@ -286,9 +338,11 @@
     function paint() { st.raf = 0; body.innerHTML = md(acc); scroll(msgs); }
     function cancelPaint() { if (st.raf) { cancelAnimationFrame(st.raf); st.raf = 0; } }
     function finish() { st.controller = null; cancelPaint(); lock(p, false); }
+    var t0 = Date.now(), sentSport = null;
     var gen = st.gen;                                        // "New chat" bumps gen: a late event from the old stream is dropped
     function stale() { if (st.gen === gen) return false; cancelPaint(); if (st.controller === ctl) { st.controller = null; lock(p, false); } return true; }
     sport = pickSport(p, cfg, sport);
+    sentSport = sport;
     stream(apiBase(cfg), { question: q, sport: sport, thread_id: st.thread || null, user_id: userId() }, {
       onThread: function (t) { if (stale()) return;
         if (!t || t === st.thread) return;
@@ -305,9 +359,12 @@
         body.innerHTML = md(ans);
         addActions(bot, ans);
         if (status) status.textContent = (ev.agent ? ev.agent : "") + (ev.tools_used && ev.tools_used.length ? " via " + ev.tools_used.join(", ") : "");
-        st.msgs.push({ role: "assistant", text: ans, suggestions: ev.suggestions || [] });
+        st.msgs.push({ role: "assistant", text: ans, suggestions: ev.suggestions || [], clarify: ev.clarify || null });
         persist(p);
         ev.thread_id = st.thread;
+        ev.answer = ans;
+        st.turns.push(turnOf(ev, q, Date.now() - t0, sentSport));
+        pushTurns(p);
         setStore(p + "-last", ev);
         finish();
         scroll(msgs);
@@ -397,7 +454,7 @@
         return;
       }
       var chip = t.closest("[data-question]");
-      if (chip) { e.preventDefault(); startSend(p, chip.getAttribute("data-question")); }
+      if (chip) { e.preventDefault(); startSend(p, chip.getAttribute("data-question"), chip.getAttribute("data-sport") || null); }
     });
     document.addEventListener("keydown", function (e) {
       if (e.key !== "Escape") return;
@@ -427,13 +484,15 @@
       }
       st.thread = thread || null;
       st.msgs = loadTranscript(p, st.thread);
+      st.turns = loadTurns(p, st.thread);
+      if (st.turns.length) setStore(p + "-turns", { turns: st.turns, sel: st.turns.length - 1 });
       if (msgs) {
         msgs.innerHTML = "";
         if (st.msgs.length) {
           st.msgs.forEach(function (m) { msgs.appendChild(renderMsg(m)); });
           for (var i = st.msgs.length - 1; i >= 0; i--) if (st.msgs[i].role === "user") { st.lastQ = st.msgs[i].text; break; }
           var last = st.msgs[st.msgs.length - 1];
-          setStore(p + "-last", { suggestions: (last && last.suggestions) || [], from: "restored" });
+          setStore(p + "-last", { suggestions: (last && last.suggestions) || [], clarify: (last && last.clarify) || null, from: "restored" });
           scroll(msgs);
           return nu();
         }
@@ -460,7 +519,8 @@
       if (st.busy && st.controller) st.controller.abort();
       st.controller = null; lock(p, false);
       dropTranscript(p, st.thread);
-      st.thread = null; st.msgs = []; st.lastQ = null;
+      st.thread = null; st.msgs = []; st.turns = []; st.lastQ = null;
+      setStore(p + "-turns", { turns: [], sel: null });
       if (msgs) { msgs.innerHTML = ""; welcome(p); }
       if (status) status.textContent = "";
       return [null, { suggestions: config.starters || [], from: "starters" }];
@@ -469,7 +529,7 @@
 
   window.AspireChat = { stream: stream, md: md, esc: esc, userId: null, version: VERSION, apiBase: apiBase,
                         send: function (prefix, q, sport) { return startSend(prefix, q, sport); }, stop: stop,
-                        pickSport: pickSport, _panel: panel };
+                        pickSport: pickSport, doneFromJson: doneFromJson, turnOf: turnOf, _panel: panel };
   window.dash_clientside = window.dash_clientside || {};
   window.dash_clientside.aspire_chat = glue;
 })();
