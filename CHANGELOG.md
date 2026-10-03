@@ -4,6 +4,29 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.102.0] - 2026-10-03 (brand hero: the spinning 3D Aspire badge)
+
+### Added
+- **`brand_hero(children=None, *, id, label, min_height, app)`** in `aspire_dash.components`: a full-bleed
+  landing hero playing the 3D spinning Aspire Academy badge (8 s seamless loop: chrome crest, blue enamel,
+  gleam, "SPORTS DEPT. · DATA ANALYTICS"). Optional `children` render under the badge (buttons, nav cards).
+  Visually hidden `<h1>` carries `label`; the video is decorative (`aria-hidden`). `prefers-reduced-motion`
+  shows the still poster instead.
+- **Seamless at any width.** Chrome/Edge/Firefox play a TRANSPARENT VP9 WebM (alpha) over one solid hero blue
+  (#002656) plus a CSS stage glow that fades to that blue. Safari ignores WebM alpha, so the helper JS hands it an
+  MP4 composited over a pixel copy of the same stage gradient (BT.709-tagged), then samples the video's corner as
+  that browser decodes it and paints the hero that colour (guarded: retries, and only a near-#002656 sample is
+  trusted). Verified in Playwright Chromium + WebKit at 1440 and 390 wide: video playing, no overflow, edge delta
+  1 level (Chromium) / 4 levels (WebKit).
+- **Media in `aspire_dash/media/`** (720 px: alpha WebM 968 KB, Safari MP4 726 KB, poster JPG 45 KB), deliberately NOT in
+  `assets/`: `setup_app` copies all of `assets/` into every app, so `brand_hero()` copies the three files into
+  `<assets>/aspire-media/` only for apps that use it (`ensure_brand_media(app)`; idempotent, newer wins).
+  `brand_media_path(name)` returns the packaged file for reports, decks and emails.
+- `assets/06_brand_hero.css` (solid hero blue + stage glow, reduced-motion still, phone layout) and
+  `assets/aspire_brand_hero.js` (sets `muted` + `playsinline` as ATTRIBUTES so iOS autoplays inline; React sets
+  `muted` only as a property and Dash's `html.Video` has no `playsInline`).
+- Render recipe: HyperFrames + Three.js project `videos/aspire-badge-3d` (redrawn vector crest, 2x supersampled).
+
 ## [0.101.0] - 2026-10-01 (chat panel: hardened + server relay)
 
 Separate release from 0.100.0 (the app-quality kit) because the default network path changes: after upgrading, the browser

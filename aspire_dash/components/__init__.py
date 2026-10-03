@@ -30,6 +30,8 @@ from .history import history_trigger, history_modal  # noqa: F401  (v0.90)
 from .hovercard import (hovercard_graph, render_card, HOVERCARD_ARROW)  # noqa: F401  (v0.90)
 from .freshness import data_as_of_badge, data_as_of_text, register_data_as_of  # noqa: F401  (v0.92)
 from .sections import section_tabs, fold, page_head  # noqa: F401  (v0.100, app-quality kit)
+from .brand_hero import (brand_hero, ensure_brand_media, brand_media_path,  # noqa: F401  (v0.102)
+                         BRAND_HERO_MP4, BRAND_HERO_WEBM, BRAND_HERO_POSTER, BRAND_HERO_FILES)
 
 # v0.37 — re-export athlete banner helpers under components so
 # `from aspire_dash.components import selected_athlete_banner,
@@ -49,6 +51,9 @@ __all__ = [
     'data_as_of_badge', 'data_as_of_text', 'register_data_as_of',
     # v0.100 app-quality kit: sticky section tabs, collapsible folds, page head
     'section_tabs', 'fold', 'page_head',
+    # v0.102 brand hero: the spinning 3D Aspire badge (landing pages)
+    'brand_hero', 'ensure_brand_media', 'brand_media_path',
+    'BRAND_HERO_MP4', 'BRAND_HERO_WEBM', 'BRAND_HERO_POSTER', 'BRAND_HERO_FILES',
     # cards
     'card', 'summary_card', 'graph_card', 'info_box', 'file_upload_card',
     'connect_user_chip',

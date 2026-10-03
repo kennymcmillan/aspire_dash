@@ -3,11 +3,11 @@ from setuptools import setup, find_packages
 
 setup(
     name="aspire_dash",
-    version="0.101.0",
+    version="0.102.0",
     description="Aspire Academy shared Dash branding, components, layouts, observability, timeseries, athlete + budget + time + export + tables + forms modules",
     author="Kenny McMillan",
     packages=find_packages(),
-    package_data={"aspire_dash": ["assets/*", "assets/**/*", "templates/*", "brand.yml"]},
+    package_data={"aspire_dash": ["assets/*", "assets/**/*", "templates/*", "media/*", "brand.yml"]},
     include_package_data=True,
     python_requires=">=3.10",
     # Lower bounds set what we tested against; upper bounds prevent a

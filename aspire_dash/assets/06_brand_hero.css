@@ -1,0 +1,53 @@
+/* aspire_dash v0.102: brand_hero() - the spinning 3D Aspire badge as a landing hero.
+   Seamless at any width: the hero is ONE solid blue (#002656); the stage draws the glow and fades to exactly
+   that blue at its edge. Chrome/Edge/Firefox play a TRANSPARENT WebM over it; Safari (no WebM alpha) plays an
+   MP4 composited over a pixel copy of this same stage gradient, so neither shows a box. */
+.aspire-brand-hero {
+  position: relative;
+  min-height: min(78vh, 760px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 16px 28px;
+  background: #002656;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.aspire-brand-hero__stage {
+  position: relative;
+  width: min(100%, 70vh, 720px);
+  aspect-ratio: 1 / 1;
+  background: radial-gradient(circle closest-side at 50% 40%, #0a4f9c 0%, #00367a 55%, #002656 100%);
+}
+.aspire-brand-hero__video,
+.aspire-brand-hero__still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.aspire-brand-hero__still { display: none; }
+.aspire-brand-hero__content {
+  position: relative;
+  width: min(100%, 960px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  color: #fff;
+}
+@media (prefers-reduced-motion: reduce) {
+  .aspire-brand-hero__video { display: none; }
+  .aspire-brand-hero__still { display: block; }
+}
+@media (max-width: 600px) {
+  .aspire-brand-hero { min-height: auto; border-radius: 0; padding: 8px 8px 20px; }
+  .aspire-brand-hero__stage { width: 100%; }
+}
+.aspire-visually-hidden {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
