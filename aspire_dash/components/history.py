@@ -37,7 +37,8 @@ def history_modal(figures: dict):
     ``figures`` maps ``str(index)`` -> a record for every trigger on the page::
 
         {"title": str, "label": str, "unit": str, "series": [(date, value), ...],
-         "lower_is_better": bool, "benchmarks": [(label, value), ...]}
+         "lower_is_better": bool, "benchmarks": [(label, value), ...],
+         "bands": [(label, low, high), ...]}          # optional shaded zones
 
     ``series`` and the build params are stored raw; the figure is built on click by
     :func:`aspire_dash.charts.history_figure`."""
@@ -76,7 +77,8 @@ def _history_modal_toggle(card_clicks, _close, store):
             fig = history_figure(rec.get("series") or [], unit=rec.get("unit", ""),
                                  title=rec.get("label"),
                                  lower_is_better=rec.get("lower_is_better", False),
-                                 benchmarks=rec.get("benchmarks"), height=400, width=None)
+                                 benchmarks=rec.get("benchmarks"), bands=rec.get("bands"),
+                                 height=400, width=None)
             # r margin widened for the right-margin mean / benchmark labels; shorter
             # height so the modal doesn't need a vertical scroll.
             # keep the figure's label-sized right margin if it needs more than 130

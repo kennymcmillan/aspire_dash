@@ -4,6 +4,16 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.103.0] - 2026-10-08 (history chart: shaded performance bands)
+
+### Added
+- `charts.history_figure(..., bands=[(label, low, high[, fill]), ...])`: shaded
+  performance zones behind the bars (worst -> best, open ends run to the axis
+  edge), each labelled inside the plot. Default fills red -> amber -> light green
+  -> green. The history modal passes a record's optional `"bands"` through.
+  Additive: no `bands` = the chart is unchanged. First user: Endurance Strength
+  (RSAIP Peak Force / Rapid Force: Developing / Good / Very good / Elite).
+
 ## [0.102.0] - 2026-10-03 (brand hero: the spinning 3D Aspire badge)
 
 ### Added

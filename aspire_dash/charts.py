@@ -330,8 +330,24 @@ def _repel_1d(values, lo, hi, gap):
     return disp
 
 
+# Default band fills, worst -> best (red, amber, light green, green), faint so the
+# bars and value chips stay the focus. Used when a band carries no colour.
+_HIST_BAND_FILLS = ["rgba(239,68,68,0.10)", "rgba(245,158,11,0.12)",
+                    "rgba(74,222,128,0.14)", "rgba(22,163,74,0.18)"]
+_HIST_BAND_TEXT = ["#b91c1c", "#b45309", "#15803d", "#166534"]
+
+
+def _band_range(lo, hi):
+    """'< 3', '3-3.5', '>= 4' (the band's cut-offs, read straight off the chart)."""
+    if lo is None:
+        return f"&lt; {hi:g}"
+    if hi is None:
+        return f"≥ {lo:g}"          # plain unicode: plotly renders &lt; but not &ge;/&ndash;
+    return f"{lo:g}–{hi:g}"
+
+
 def history_figure(series, unit=None, title=None, *, lower_is_better=False,
-                   benchmarks=None, last_n=12, height=360, width=560):
+                   benchmarks=None, bands=None, last_n=12, height=360, width=560):
     """Column history chart from `series` = [(date, value), ...] oldest->newest.
 
     The latest bar is highlighted (aspire-600), the best test is gold-ringed, each
@@ -353,6 +369,12 @@ def history_figure(series, unit=None, title=None, *, lower_is_better=False,
     benchmarks : list[tuple] or None
         ``[(label, value), ...]`` drawn as dotted reference lines. A value of
         ``None`` renders a small 'benchmark pending' note so the slot stays visible.
+    bands : list[tuple] or None
+        Shaded performance zones behind the bars, ``[(label, low, high), ...]`` or
+        ``[(label, low, high, fill_rgba), ...]``, listed worst -> best. ``None`` for
+        ``low``/``high`` = open-ended (runs to the axis edge). Each band is labelled
+        inside the plot at its left edge. Default fills run red -> amber -> light
+        green -> green (0.103.0).
     last_n : int
         Keep only the most recent ``last_n`` tests (default 12).
     height, width : int or None
@@ -422,10 +444,29 @@ def history_figure(series, unit=None, title=None, *, lower_is_better=False,
     # 15% headroom above/below so bars, labels and benchmark lines never hug the
     # frame. Range spans the bars AND any drawn benchmark lines.
     pts = list(vals) + [v for _, v in (benchmarks or []) if v is not None]
+    # every finite band edge stays on screen so each zone is visible
+    pts += [e for b in (bands or []) for e in (b[1], b[2]) if e is not None]
     lo, hi = min(pts), max(pts)
     span = (hi - lo) or abs(hi) or 1.0
     # extra top headroom so the outside value labels + the delta chip clear the frame
     yrange = [min(0, lo - 0.10 * span), hi + 0.24 * span]
+
+    # Shaded zones (below the bars), open ends run to the axis edge; label inside
+    # the plot at the left edge of each zone, vertically centred in its visible part.
+    nb = len(bands or [])
+    for i, b in enumerate(bands or []):
+        name, b_lo, b_hi = b[0], b[1], b[2]
+        k = i if nb >= len(_HIST_BAND_FILLS) else i + (len(_HIST_BAND_FILLS) - nb)
+        k = min(k, len(_HIST_BAND_FILLS) - 1)
+        fill = b[3] if len(b) > 3 and b[3] else _HIST_BAND_FILLS[k]
+        y0 = yrange[0] if b_lo is None else b_lo
+        y1 = yrange[1] if b_hi is None else b_hi
+        fig.add_shape(type="rect", xref="paper", yref="y", x0=0, x1=1, y0=y0, y1=y1,
+                      fillcolor=fill, line_width=0, layer="below")
+        fig.add_annotation(xref="paper", x=0.005, xanchor="left", yref="y",
+                           y=(y0 + y1) / 2, yanchor="middle", showarrow=False,
+                           text=f"<b>{name}</b> {_band_range(b_lo, b_hi)}",
+                           font=dict(size=11, color=_HIST_BAND_TEXT[k]))
 
     # Right-margin labels for the mean + benchmark rules, de-collided ggrepel-style:
     # spread any that sit too close and draw a thin leader line from the label back to
