@@ -4,6 +4,15 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.104.0] - 2026-10-08 (history chart: tidy band labels)
+
+### Changed
+- `history_figure(bands=...)`: band labels move OUT of the plot (they collided with
+  the bars) into the right margin as tinted chips (name bold + cut-offs), de-collided
+  with the mean / benchmark labels in one pass. An open-ended top zone now gets at
+  least one typical zone-width of height (no more sliver), and thin white rules
+  separate the zones. Margin width ignores the label markup.
+
 ## [0.103.0] - 2026-10-08 (history chart: shaded performance bands)
 
 ### Added

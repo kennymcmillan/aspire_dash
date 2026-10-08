@@ -8,6 +8,8 @@ Default styling tightened per the 2026-05-22 design audit:
  - legend defaults to horizontal at y=-0.18 (best for dashboards)
 """
 
+import re
+
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.io as pio
@@ -335,6 +337,10 @@ def _repel_1d(values, lo, hi, gap):
 _HIST_BAND_FILLS = ["rgba(239,68,68,0.10)", "rgba(245,158,11,0.12)",
                     "rgba(74,222,128,0.14)", "rgba(22,163,74,0.18)"]
 _HIST_BAND_TEXT = ["#b91c1c", "#b45309", "#15803d", "#166534"]
+# Right-margin chip fills (same hue, a touch stronger than the zone) so each label
+# reads as the key for its zone.
+_HIST_BAND_CHIP = ["rgba(239,68,68,0.16)", "rgba(245,158,11,0.20)",
+                   "rgba(74,222,128,0.24)", "rgba(22,163,74,0.26)"]
 
 
 def _band_range(lo, hi):
@@ -451,44 +457,59 @@ def history_figure(series, unit=None, title=None, *, lower_is_better=False,
     # extra top headroom so the outside value labels + the delta chip clear the frame
     yrange = [min(0, lo - 0.10 * span), hi + 0.24 * span]
 
-    # Shaded zones (below the bars), open ends run to the axis edge; label inside
-    # the plot at the left edge of each zone, vertically centred in its visible part.
-    nb = len(bands or [])
-    for i, b in enumerate(bands or []):
-        name, b_lo, b_hi = b[0], b[1], b[2]
-        k = i if nb >= len(_HIST_BAND_FILLS) else i + (len(_HIST_BAND_FILLS) - nb)
-        k = min(k, len(_HIST_BAND_FILLS) - 1)
-        fill = b[3] if len(b) > 3 and b[3] else _HIST_BAND_FILLS[k]
-        y0 = yrange[0] if b_lo is None else b_lo
-        y1 = yrange[1] if b_hi is None else b_hi
-        fig.add_shape(type="rect", xref="paper", yref="y", x0=0, x1=1, y0=y0, y1=y1,
-                      fillcolor=fill, line_width=0, layer="below")
-        fig.add_annotation(xref="paper", x=0.005, xanchor="left", yref="y",
-                           y=(y0 + y1) / 2, yanchor="middle", showarrow=False,
-                           text=f"<b>{name}</b> {_band_range(b_lo, b_hi)}",
-                           font=dict(size=11, color=_HIST_BAND_TEXT[k]))
+    # Shaded zones (below the bars). An open-ended TOP zone gets at least one
+    # typical zone-width of height so it never shows as a sliver; open ends run to
+    # the axis edge. Thin white rules separate the zones. Their labels are chips in
+    # the right margin (below), never inside the plot where they hit the bars.
+    band_marks = []
+    if bands:
+        edges = sorted({e for b in bands for e in (b[1], b[2]) if e is not None})
+        widths = [b2 - b1 for b1, b2 in zip(edges, edges[1:])] or [0.1 * span]
+        typical = sorted(widths)[len(widths) // 2]
+        if bands[-1][2] is None and edges:
+            yrange[1] = max(yrange[1], edges[-1] + typical)
+        nb = len(bands)
+        for i, b in enumerate(bands):
+            name, b_lo, b_hi = b[0], b[1], b[2]
+            k = i if nb >= len(_HIST_BAND_FILLS) else i + (len(_HIST_BAND_FILLS) - nb)
+            k = min(k, len(_HIST_BAND_FILLS) - 1)
+            fill = b[3] if len(b) > 3 and b[3] else _HIST_BAND_FILLS[k]
+            y0 = yrange[0] if b_lo is None else b_lo
+            y1 = yrange[1] if b_hi is None else b_hi
+            fig.add_shape(type="rect", xref="paper", yref="y", x0=0, x1=1, y0=y0, y1=y1,
+                          fillcolor=fill, line_width=0, layer="below")
+            band_marks.append(((y0 + y1) / 2, f"<b>{name}</b>  {_band_range(b_lo, b_hi)}",
+                               _HIST_BAND_TEXT[k], _HIST_BAND_CHIP[k]))
+        for e in edges:
+            fig.add_shape(type="line", xref="paper", yref="y", x0=0, x1=1, y0=e, y1=e,
+                          line=dict(color="rgba(255,255,255,0.95)", width=2), layer="below")
 
     # Right-margin labels for the mean + benchmark rules, de-collided ggrepel-style:
     # spread any that sit too close and draw a thin leader line from the label back to
     # its true line height, so no two labels overlap.
-    ymarks = [(mean_v, f"mean {_num_fmt(mean_v, unit)}", _HIST_MEAN_LABEL)]
-    ymarks += [(v, txt, _HIST_REFLINE) for v, txt in drawn_benchmarks]
+    # Band chips join the same de-collision pass (no leader line: a chip names a
+    # zone, not a line height).
+    ymarks = [(mean_v, f"mean {_num_fmt(mean_v, unit)}", _HIST_MEAN_LABEL, None)]
+    ymarks += [(v, txt, _HIST_REFLINE, None) for v, txt in drawn_benchmarks]
+    ymarks += band_marks
     ymarks.sort(key=lambda m: m[0])
-    disp = _repel_1d([m[0] for m in ymarks], yrange[0] + 0.03 * span,
-                     yrange[1] - 0.03 * span, 0.11 * span)
-    for (true_y, txt, colr), dy in zip(ymarks, disp):
-        if abs(dy - true_y) > 1e-9:
+    yspan = yrange[1] - yrange[0]
+    disp = _repel_1d([m[0] for m in ymarks], yrange[0] + 0.04 * yspan,
+                     yrange[1] - 0.04 * yspan, 0.085 * yspan)
+    for (true_y, txt, colr, chip), dy in zip(ymarks, disp):
+        if chip is None and abs(dy - true_y) > 1e-9:
             fig.add_shape(type="line", xref="paper", yref="y", x0=1.0, y0=true_y,
                           x1=1.035, y1=dy, line=dict(color=colr, width=1))
         fig.add_annotation(xref="paper", x=1.045, xanchor="left", yref="y", y=dy,
                            yanchor="middle", showarrow=False, text=txt,
-                           font=dict(size=11, color=colr))
+                           font=dict(size=11.5 if chip else 11, color=colr),
+                           **({"bgcolor": chip, "borderpad": 4} if chip else {}))
 
     ytitle = f"{title} ({unit})" if (title and unit) else (title or unit or None)
     # Right margin sized to the LONGEST mean/benchmark label (11 px text, ~6.9 px per
     # char + the 4.5% leader gap) so a long name like "4.12 QAF U20 standard" is never
     # clipped (Kenny 2026-09-27: QAF benchmark text cut off). Floor 120 px.
-    longest = max((len(t) for _y, t, _c in ymarks), default=0)
+    longest = max((len(re.sub(r"<[^>]+>", "", m[1])) for m in ymarks), default=0)
     r_margin = max(120, int(longest * 6.9) + 48)
     fig.update_layout(
         template="aspire", height=height, width=width,
