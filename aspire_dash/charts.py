@@ -302,17 +302,23 @@ def _num_fmt(v, unit=""):
 
 
 def _hist_fmt_delta(delta, unit="", prev=None, dp=2):
-    """A 'vs last test' delta so absolute-vs-percentage is never ambiguous:
-    a metric WITH a unit shows the absolute change in that unit ('+1.70 cm'); a
-    unitless metric shows the percentage change vs the prior value ('+3.4%')."""
+    """A 'vs last test' change, always absolute AND percentage (0.105.0):
+    '+1.70 cm (+3.4%)', unitless '+0.12 (+4.0%)'. The % needs a non-zero `prev`;
+    without one only the absolute change is shown. '' for a missing delta."""
     if delta is None or (isinstance(delta, float) and pd.isna(delta)):
         return ""
-    if unit:
-        return f"{delta:+.{dp}f} {unit}".strip()
-    if prev not in (None, 0) and not (isinstance(prev, float) and pd.isna(prev)) \
-            and abs(prev) > 1e-9:
-        return f"{delta / abs(prev) * 100:+.1f}%"
-    return f"{delta:+.{dp}f}"
+    txt = f"{delta:+.{dp}f} {unit}".strip()
+    if prev is not None and not (isinstance(prev, float) and pd.isna(prev))             and abs(prev) > 1e-9:
+        txt += f" ({delta / abs(prev) * 100:+.1f}%)"
+    return txt
+
+
+def _delta_dp(v, unit=""):
+    """Decimals for a change so it reads at the value's own precision: 3 for
+    seconds, 0 for magnitudes >=100 (N, N/m), else 2."""
+    if unit == "s":
+        return 3
+    return 0 if v is not None and abs(v) >= 100 else 2
 
 
 def _repel_1d(values, lo, hi, gap):
@@ -409,11 +415,17 @@ def history_figure(series, unit=None, title=None, *, lower_is_better=False,
     line_colors[best_idx] = _HIST_BEST_OUTLINE
     line_widths[best_idx] = 2.5
 
+    # Per-bar change vs the previous test, absolute AND % (0.105.0).
+    changes = ["first test"] + [
+        _hist_fmt_delta(vals[i] - vals[i - 1], unit, vals[i - 1], _delta_dp(vals[i - 1], unit))
+        for i in range(1, n)]
     fig = go.Figure()
     fig.add_bar(x=dates, y=vals, marker_color=colors,
                 marker_line_color=line_colors, marker_line_width=line_widths,
-                cliponaxis=False,
-                hovertemplate="%{x}<br>" + (title or "value") + ": %{y}<extra></extra>")
+                cliponaxis=False, customdata=[[ch] for ch in changes],
+                hovertemplate="%{x}<br>" + (title or "value") + ": %{y}"
+                              + (f" {unit}" if unit else "")
+                              + "<br>vs last: %{customdata[0]}<extra></extra>")
     # Value chips: each test's number in a small navy box with white text, sat at the
     # TOP of its own bar (boxing it inside the bar top de-collides it from the mean rule).
     for d, v in zip(dates, vals):
@@ -430,7 +442,7 @@ def history_figure(series, unit=None, title=None, *, lower_is_better=False,
         good = (dlt < 0) if lower_is_better else (dlt > 0)
         col = SUCCESS if (good and abs(dlt) > 1e-9) else (DANGER if abs(dlt) > 1e-9 else _HIST_MUTED_TXT)
         fig.add_annotation(x=dates[-1], y=vals[-1], yshift=30, showarrow=False,
-                           text=f"{_hist_fmt_delta(dlt, unit, vals[-2])} vs last",
+                           text=f"{changes[-1]} vs last",
                            font=dict(size=13, color=col))
 
     pending = []

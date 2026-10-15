@@ -4,6 +4,15 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.105.0] - 2026-10-15 (history chart: change vs last, absolute AND %)
+
+### Changed
+- `history_figure`: every bar's hover now shows its change vs the previous test as
+  absolute AND percentage ('vs last: +463 N (+36.7%)'; first bar 'first test'), and
+  the latest-bar label reads the same way. Change precision matches the value
+  (0 dp for >=100, 3 dp for seconds, else 2), so no more '-11830.26 N/m'.
+  `_hist_fmt_delta` always appends the % when a non-zero previous value exists.
+
 ## [0.104.0] - 2026-10-08 (history chart: tidy band labels)
 
 ### Changed
