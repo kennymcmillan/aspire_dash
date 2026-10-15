@@ -5549,7 +5549,7 @@ img.flag-chip__img[class*="flag-img--"] { display: inline-block; vertical-align:
 
 .rank-pill__label { font-weight: 500; opacity: 0.75; }
 .rank-pills { display: inline-flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.rank-inline { white-space: nowrap; color: var(--aspire-600, #004185); font-size: 12px; }
+.rank-inline { white-space: nowrap; color: var(--aspire-600, #004185); }   /* size: inherits */
 .rank-inline__icon { margin-right: 4px; }
 .rank-inline__label { color: var(--slate-500, #64748b); font-weight: 500; }
 .upset-star { color: #FBB800; margin-left: 3px; }
