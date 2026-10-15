@@ -4,6 +4,28 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.106.0] - 2026-10-15 (draw path, inline ranks, upset star, event pill, bare flags)
+
+Promoted from the Fencing Reports app so every knockout sport draws the same way.
+
+### Added
+- `aspire_dash.draw`: an athlete's run through a draw as a horizontal chain. Steps are plain
+  dicts built with `lead_step` (pools / group), `win_step`, `loss_step`, `bye_step`, `finish_step`;
+  `draw_path(steps)` draws one chain, `draw_rows([(header, steps), ...])` aligns several athletes'
+  rounds in shared columns (`draw_columns`). Opponent flag, name and `#rank` under each pill, an
+  upset star in the round label, a medal-coloured finish circle. `short_round` ('Table of 64' -> 'T64',
+  'Round of 32' -> 'R32') and `round_depth` (draw order) included. CSS `.draw-*`.
+- `sports.rank_pills([(label, rank), ...])`: one inline rank per list, unranked skipped.
+- `sports.upset_star(title=)`: gold star for a win over a higher-ranked opponent.
+- `sports.event_pill("individual" | "team")`: navy INDIVIDUAL EVENT / maroon TEAM EVENT pill.
+
+### Changed (backwards compatible)
+- `sports.rank_pill(rank, label=None, *, variant="pill")`: optional list label ('#89 EuroF cadet');
+  `variant="inline"` = icon + bold '#89' + muted label, no background, None when unranked.
+  Calls without the new arguments render exactly as before.
+- `sports.country_flag(..., *, bare=False, className="")`: `bare=True` returns ONE element (the
+  `<img>`, or the AIN chip) and None for no code, for inline use in table cells. Default unchanged.
+
 ## [0.105.0] - 2026-10-15 (history chart: change vs last, absolute AND %)
 
 ### Changed

@@ -120,7 +120,7 @@ def country_flag_url(ioc_code, size=24):
 
 # ── Country Flag Component ──────────────────────────────────────────────────
 
-def country_flag(ioc_code, size="md", show_text=False):
+def country_flag(ioc_code, size="md", show_text=False, *, bare=False, className=""):
     """Render a country flag image from an IOC code.
 
     Parameters
@@ -131,20 +131,27 @@ def country_flag(ioc_code, size="md", show_text=False):
         "sm" (16px), "md" (20px), "lg" (24px).
     show_text : bool
         Show the IOC code text next to the flag.
+    bare : bool
+        Return ONE element: the ``<img>`` itself (or the AIN chip), not the span wrapper, and
+        ``None`` when there is no code. For inline use inside table cells and text (v0.106.0).
+    className : str
+        Extra class on the returned element.
     """
-    if not ioc_code:
-        return html.Span()
-
-    code = ioc_code.strip().upper()
+    code = str(ioc_code or "").strip().upper()
+    if not code:
+        return None if bare else html.Span()
 
     # Special: AIN / _AI (Individual Neutral Athletes — various source formats)
     if code in ("AIN", "_AIN", "AIN_", "_AI"):
-        return html.Span("AIN", className="flag-chip__ain")
+        return html.Span("AIN", className=f"flag-chip__ain {className}".strip())
 
     sizes = {"sm": 16, "md": 20, "lg": 24}
     px = sizes.get(size, 20)
     size_mod = size if size in sizes else "md"
     url = country_flag_url(code, size=max(40, px * 2))  # 2x for retina
+    if bare:
+        return html.Img(src=url, title=code,
+                        className=f"flag-chip__img flag-img--{size_mod} {className}".strip())
 
     children = [
         html.Img(src=url, className="flag-chip__img", title=code),
@@ -152,7 +159,7 @@ def country_flag(ioc_code, size="md", show_text=False):
     if show_text:
         children.append(html.Span(code, className="flag-chip__code"))
 
-    return html.Span(children, className=f"flag-chip flag-chip--{size_mod}")
+    return html.Span(children, className=f"flag-chip flag-chip--{size_mod} {className}".strip())
 
 
 def flag_with_name(nationality, name, highlight_nation=None):
@@ -339,7 +346,7 @@ def placement_badge(place, size="md"):
 
 # ── Rank Pill ───────────────────────────────────────────────────────────────
 
-def rank_pill(rank):
+def rank_pill(rank, label=None, *, variant="pill"):
     """World / leaderboard rank pill — gold for top-10, blue for top-50, grey beyond.
 
     Distinct from :func:`placement_badge` (event podium, where 1/2/3 are the
@@ -351,13 +358,55 @@ def rank_pill(rank):
     rank : int, str, or None
         The ranking number. Anything that won't convert to an int (None, NaN,
         pandas NA, blank) renders an em-dash placeholder.
+    label : str or None
+        Which list the rank is on ('FIE', 'EuroF cadet', 'PSA'), shown muted after the
+        number: '#89 EuroF cadet' (v0.106.0).
+    variant : "pill" or "inline"
+        "pill" (default) = the tiered pill. "inline" = no background: ranking-star icon,
+        bold '#89', muted label, for use inside a name line or a timeline. "inline"
+        renders None when the rank is missing (nothing to say).
     """
     try:
         r = int(rank)
     except (ValueError, TypeError):
+        if variant == "inline":
+            return None
         return html.Span("—", className="rank-pill rank-na")
+    if variant == "inline":
+        return html.Span([html.I(className="fa-solid fa-ranking-star rank-inline__icon"),
+                          html.B(f"#{r}"),
+                          html.Span(f" {label}", className="rank-inline__label") if label else None],
+                         className="rank-inline")
     tone = "rank-top10" if r <= 10 else ("rank-top50" if r <= 50 else "rank-other")
+    if label:
+        return html.Span([str(r), html.Span(f" {label}", className="rank-pill__label")],
+                         className=f"rank-pill {tone}")
     return html.Span(str(r), className=f"rank-pill {tone}")
+
+
+def rank_pills(ranks, *, variant="inline"):
+    """Several ranks side by side, one per list: [('EuroF cadet', 89), ('FIE', 120)] ->
+    '#89 EuroF cadet  #120 FIE'. Unranked entries are skipped; None when nothing is ranked."""
+    items = [rank_pill(r, label, variant=variant) for label, r in (ranks or [])]
+    items = [i for i in items if i is not None and "rank-na" not in (getattr(i, "className", "") or "")]
+    return html.Span(items, className="rank-pills") if items else None
+
+
+def upset_star(title="Win over a fencer ranked above"):
+    """Gold star marking an upset: a win over an opponent ranked above (v0.106.0). Pass `title` with
+    the sport's wording ('Win over a player ranked above')."""
+    return html.I(className="fa-solid fa-star upset-star", title=title)
+
+
+# ── Event Pill ──────────────────────────────────────────────────────────────
+
+def event_pill(kind, text=None):
+    """INDIVIDUAL EVENT (navy, single-person icon) or TEAM EVENT (maroon, group icon) pill (v0.106.0).
+    kind: "individual" / "team" (or a truthy is_team). `text` overrides the label."""
+    team = (str(kind).lower() == "team") if isinstance(kind, str) else bool(kind)
+    return html.Span([html.I(className="fa-solid fa-users" if team else "fa-solid fa-user"),
+                      text or ("TEAM EVENT" if team else "INDIVIDUAL EVENT")],
+                     className=f"event-pill event-pill--{'team' if team else 'individual'}")
 
 
 # ── Rank Change Indicator ──────────────────────────────────────────────────

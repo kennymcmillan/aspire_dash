@@ -5539,3 +5539,68 @@ html.dark .aspire-chat {
 }
 .aspire-chat-chip { min-height: 36px; }
 .aspire-chat-debug { background: var(--chat-code-bg); color: inherit; }
+
+/* ── v0.106.0: bare flags, inline ranks, upset star, event pill, draw path ─────────────
+   Promoted from the Fencing Reports app (Kenny 2026-10-15). */
+.flag-img--sm { width: 16px; height: 12px; }
+.flag-img--md { width: 20px; height: 15px; }
+.flag-img--lg { width: 24px; height: 18px; }
+img.flag-chip__img[class*="flag-img--"] { display: inline-block; vertical-align: -1px; }
+
+.rank-pill__label { font-weight: 500; opacity: 0.75; }
+.rank-pills { display: inline-flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.rank-inline { white-space: nowrap; color: var(--aspire-600, #004185); font-size: 12px; }
+.rank-inline__icon { margin-right: 4px; }
+.rank-inline__label { color: var(--slate-500, #64748b); font-weight: 500; }
+.upset-star { color: #FBB800; margin-left: 3px; }
+
+.event-pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: #fff; white-space: nowrap;
+}
+.event-pill--individual { background: #004185; }
+.event-pill--team { background: #8A1538; }
+
+.draw-path { overflow-x: auto; padding-bottom: 4px; }
+.draw-path__grid { display: grid; align-items: start; }
+.draw-cell { position: relative; min-width: 0; }
+.draw-line { position: absolute; width: 50%; height: 3px; top: 28px; }
+.draw-line--in { left: 0; }
+.draw-line--out { right: 0; }
+.draw-line--win { background: #16A34A; }
+.draw-line--loss { background: #DC2626; }
+.draw-line--rule { background: #CBD5E1; }
+.draw-node { width: 72px; margin: 0 auto; position: relative; z-index: 1; }
+.draw-node__label {
+    height: 16px; font-size: 9px; font-weight: 700; color: #64748b; letter-spacing: 0.06em;
+    text-align: center; white-space: nowrap;
+}
+.draw-pill {
+    height: 26px; line-height: 26px; border-radius: 8px; color: #fff; font-size: 12px; font-weight: 700;
+    text-align: center; padding: 0 6px; white-space: nowrap;
+}
+.draw-pill--win { background: #16A34A; }
+.draw-pill--loss { background: #DC2626; }
+.draw-pill--bye { background: #64748b; }
+.draw-pill--lead { background: #004185; }
+.draw-finish {
+    min-width: 34px; width: fit-content; padding: 0 6px; height: 34px; line-height: 30px; border-radius: 17px;
+    margin: -4px auto 0; background: #fff; color: #004185; border: 2px solid #004185; font-size: 12px;
+    font-weight: 800; text-align: center; box-sizing: border-box;
+}
+.draw-finish--1 { background: #FBB800; color: #3B2A00; border-color: #FBB800; }
+.draw-finish--2 { background: #CBD5E1; color: #1E293B; border-color: #CBD5E1; }
+.draw-finish--3 { background: #D97706; color: #fff; border-color: #D97706; }
+.draw-node__below {
+    min-height: 18px; display: flex; justify-content: center; align-items: center; gap: 3px; margin-top: 3px;
+    font-size: 10px; font-weight: 600; color: #1E293B;
+}
+.draw-node__opp { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 50px; }
+.draw-node__rank { text-align: center; font-size: 10px; font-weight: 700; color: #004185; }
+.draw-rows { display: flex; flex-direction: column; gap: 10px; }
+.draw-rows__title { font-size: 14px; font-weight: 600; color: #1e40af; margin: 20px 0 10px; }
+.draw-row {
+    padding: 12px 14px; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;
+    border-left: 4px solid #004185;
+}
+.draw-row__head { margin-bottom: 6px; }
