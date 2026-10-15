@@ -41,3 +41,9 @@ def test_delta_precision_matches_the_value():
     assert _delta_dp(29703.0, "N/m") == 0
     assert _delta_dp(0.167, "s") == 3
     assert _delta_dp(42.1, "cm") == 2
+
+
+def test_first_shown_bar_compares_with_the_test_before_the_window():
+    series = [("2026-01-01", 10.0)] + [(f"2026-02-{d:02d}", 11.0) for d in range(1, 13)]
+    bar = history_figure(series, unit="cm", last_n=12).data[0]
+    assert bar.customdata[0][0] == "+1.00 cm (+10.0%)"

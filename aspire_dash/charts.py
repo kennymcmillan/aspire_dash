@@ -394,6 +394,8 @@ def history_figure(series, unit=None, title=None, *, lower_is_better=False,
     """
     unit = unit or ""
     series = [(d, v) for d, v in (series or []) if v is not None and not pd.isna(v)]
+    # the test just before the window still gives the first shown bar its 'vs last'
+    prev_v = float(series[-last_n - 1][1]) if len(series) > last_n else None
     series = series[-last_n:]
     if not series:
         fig = go.Figure()
@@ -416,7 +418,9 @@ def history_figure(series, unit=None, title=None, *, lower_is_better=False,
     line_widths[best_idx] = 2.5
 
     # Per-bar change vs the previous test, absolute AND % (0.105.0).
-    changes = ["first test"] + [
+    first = ("first test" if prev_v is None else
+             _hist_fmt_delta(vals[0] - prev_v, unit, prev_v, _delta_dp(prev_v, unit)))
+    changes = [first] + [
         _hist_fmt_delta(vals[i] - vals[i - 1], unit, vals[i - 1], _delta_dp(vals[i - 1], unit))
         for i in range(1, n)]
     fig = go.Figure()
