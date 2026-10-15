@@ -251,3 +251,10 @@ def test_tier_card_without_link_keeps_data_attrs():
     c = tier_card("Athlete F", data={"band": "U18"})
     assert getattr(c, "data-band") == "U18" and c.className == "ad-tier-cell"
     assert "ad-tier-card" in c.children.className
+
+
+def test_only_first_place_gets_the_win_chip():
+    rows = [{"date": "d", "title": "t", "result": "r", "pos": p} for p in ("1st", "10th", "11", "1", "2nd")]
+    h = spotlight_hero(0, "Athlete W", rows=rows)
+    pos = [x.className for x in _walk(h) if (getattr(x, "className", "") or "").startswith("ad-row-pos")]
+    assert pos == ["ad-row-pos is-win", "ad-row-pos", "ad-row-pos", "ad-row-pos is-win", "ad-row-pos"]

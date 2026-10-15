@@ -48,6 +48,11 @@ def _data_attrs(data) -> dict:
     return {f"data-{k}": str(v) for k, v in (data or {}).items() if v is not None}
 
 
+def _is_win(pos) -> bool:
+    """1 / '1' / '1st' / 'gold' is a win; '10th', '11', '1:52.4' are not."""
+    return str(pos).strip().lower() in {"1", "1st", "gold", "winner"}
+
+
 def meta_line(parts):
     """Join non-empty parts (strings or components) with soft '·' separators."""
     out = []
@@ -155,7 +160,7 @@ def spotlight_hero(index, name, *, photo=None, band="squad", band_label=None, su
     `chips` strings, link). Right: stat columns, each left out when empty:
     - value block: `value_label`, big `value`, `value_sub`, ring(`pct`) + `pct_text`
     - `bars`: ``[(label, pct 0-100), ...]`` mini column chart (e.g. season bests)
-    - `rows`: ``[{"date", "title", "result", "pos"?}, ...]`` (e.g. last races; pos '1'
+    - `rows`: ``[{"date", "title", "result", "pos"?}, ...]`` (e.g. last races; pos 1 / '1st' / 'gold'
       gets the gold chip). Only index 0 is visible at first; ``register_spotlight``
       switches."""
     cols = [html.Div([
@@ -176,7 +181,7 @@ def spotlight_hero(index, name, *, photo=None, band="squad", band_label=None, su
             html.Div([html.Span(r.get("date", ""), className="ad-row-date"),
                       html.Span(r.get("title", ""), className="ad-row-title")], className="ad-row-left"),
             html.Span(r.get("result", ""), className="ad-row-res"),
-            html.Span(r["pos"], className="ad-row-pos" + (" is-win" if str(r["pos"]).startswith("1") else ""))
+            html.Span(r["pos"], className="ad-row-pos" + (" is-win" if _is_win(r["pos"]) else ""))
             if r.get("pos") else None], className="ad-row") for r in rows]], className="ad-hero-col"))
     left = [html.Span((band_label or "").upper(), className="ad-hero-tier"),
             athlete_avatar(photo, name, size=112),

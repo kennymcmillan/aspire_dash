@@ -67,7 +67,10 @@
 /* ---- asymmetry -------------------------------------------------------------- */
 .ad-asym { display: flex; flex-direction: column; }
 .ad-asym-big { font-size: 30px; font-weight: 800; line-height: 1.05; margin: 2px 0 6px; }
-.ad-asym-bar { display: flex; height: 18px; border-radius: 9px; overflow: hidden; margin-top: auto; }
+.ad-asym-bar { display: flex; height: 18px; border-radius: 9px; overflow: hidden; margin-top: auto;
+  background: #e2e8f0; }
+.ad-asym-bar > div { height: 100%; }
+.ad-asym-bar > div + div { border-left: 2px solid #fff; }
 .ad-asym-legend { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-top: 6px; }
 
 /* ---- band profile (radar + list) -------------------------------------------- */

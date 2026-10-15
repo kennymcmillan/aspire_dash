@@ -4,6 +4,14 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.107.1] - 2026-10-15 (spotlight: only first place is a win)
+
+### Fixed
+- `spotlight_hero` rows: the gold win chip went on any place starting with "1"
+  (10th..19th). Now only 1 / '1st' / 'gold' / 'winner'.
+- `asymmetry_card` bar: white divider between the sides and a grey track, as in
+  endurance's original.
+
 ## [0.107.0] - 2026-10-15 (band cards, band radar, squad tier cards, spotlight)
 
 Promoted from endurance-dashboard (Strength redesign + Group Overview, Kenny
