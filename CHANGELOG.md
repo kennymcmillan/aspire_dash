@@ -4,6 +4,14 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.107.2] - 2026-10-15 (baseline kit: ids built from a caller prefix)
+
+### Fixed
+- `testing.callback_target_problems` now recognises ids built as `f"{prefix}-idx"`
+  (component families keyed by a caller id, e.g. `spotlight(id="go")` -> `go-idx`).
+  Only the prefix shape `f"go-{x}"` was understood, so endurance's baseline flagged
+  `go-idx` / `go-pos` as missing although the spotlight renders them.
+
 ## [0.107.1] - 2026-10-15 (spotlight: only first place is a win)
 
 ### Fixed

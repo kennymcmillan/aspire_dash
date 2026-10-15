@@ -133,7 +133,9 @@ def source_ids(root) -> set:
     if _ID_LITERAL is None:
         _ID_LITERAL = (re.compile(r"""\bid\s*=\s*["']([^"'{}]+)["']"""),
                        re.compile(r"""["']type["']\s*:\s*["']([^"']+)["']"""),
-                       re.compile(r"""\bid\s*=\s*f["']([^"'{}]+)\{"""))
+                       re.compile(r"""\bid\s*=\s*f["']([^"'{}]+)\{"""),
+                       # f"{prefix}-idx": a component family keyed by a caller prefix (0.107.2)
+                       re.compile(r"""\bid\s*=\s*f["']\{[^}]+\}([^"'{}]+)["']"""))
     ids: set = set()
     skip = {".venv", "venv", "site-packages", "node_modules", ".git", "build", "dist",
             ".claude", "_vendor", "__pycache__"}
@@ -150,6 +152,7 @@ def source_ids(root) -> set:
         ids.update(_ID_LITERAL[0].findall(src))
         ids.update(("__pattern__", t) for t in _ID_LITERAL[1].findall(src))
         ids.update(("__prefix__", t) for t in _ID_LITERAL[2].findall(src))
+        ids.update(("__suffix__", t) for t in _ID_LITERAL[3].findall(src))
         # pattern-matching ids are often built from a constant (TYPE = "x"; {"type": TYPE}):
         # accept a pattern type whose name appears as any string literal in the source
         ids.update(("__pattern__", t) for t in _STR_LITERAL.findall(src))
@@ -163,6 +166,7 @@ def callback_target_problems(app, ignore: Iterable[str] = (), root=None) -> list
     ids = layout_ids(app) | (source_ids(root) if root is not None else set())
     ids |= source_ids(Path(__file__).resolve().parent)   # components aspire_dash itself builds
     prefixes = [t for k, t in (i for i in ids if isinstance(i, tuple)) if k == "__prefix__"]
+    suffixes = [t for k, t in (i for i in ids if isinstance(i, tuple)) if k == "__suffix__"]
     ign = set(ignore)
     bad = []
     for cid, prop, _dup in _callback_outputs(app):
@@ -171,6 +175,8 @@ def callback_target_problems(app, ignore: Iterable[str] = (), root=None) -> list
             continue
         if isinstance(n, str) and any(n.startswith(pfx) for pfx in prefixes):
             continue                                # id built as f"{prefix}{...}"
+        if isinstance(n, str) and any(n.endswith(sfx) and len(n) > len(sfx) for sfx in suffixes):
+            continue                                # id built as f"{...}-idx" (0.107.2)
         bad.append(f"callback Output {cid}.{prop} has no component in any layout")
     return sorted(set(bad))
 

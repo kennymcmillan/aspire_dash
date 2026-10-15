@@ -98,3 +98,22 @@ def test_page_render_problem_is_caught(monkeypatch):
     monkeypatch.setattr(dash, "page_registry", {"x": {"path": "/x", "layout": boom}})
     probs = T.page_render_problems()
     assert probs and "/x" in probs[0] and "bad page" in probs[0]
+
+
+def test_target_built_from_a_caller_prefix_counts(tmp_path):
+    """0.107.2: component families keyed by a caller prefix (spotlight(id="go") ->
+    'go-idx') build ids as f"{id}-idx"; the suffix counts, an unrelated id still fails."""
+    app = Dash(__name__)
+    app.layout = html.Div([dcc.Input(id="kit-in4")])
+
+    @app.callback(Output("go-kitidx", "children"), Input("kit-in4", "value"))
+    def _f(v):
+        return v
+
+    @app.callback(Output("kit-gone", "children"), Input("kit-in4", "value"))
+    def _g(v):
+        return v
+    root = _fresh(tmp_path, 'def shell(id):\n    return html.Div(id=f"{id}-kitidx")\n')
+    probs = T.callback_target_problems(app, root=root)
+    assert not any("go-kitidx" in p for p in probs)
+    assert any("kit-gone" in p for p in probs)
