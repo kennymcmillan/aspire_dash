@@ -258,3 +258,10 @@ def test_only_first_place_gets_the_win_chip():
     h = spotlight_hero(0, "Athlete W", rows=rows)
     pos = [x.className for x in _walk(h) if (getattr(x, "className", "") or "").startswith("ad-row-pos")]
     assert pos == ["ad-row-pos is-win", "ad-row-pos", "ad-row-pos", "ad-row-pos is-win", "ad-row-pos"]
+
+
+def test_avatar_photo_alt_text_never_spills():
+    from aspire_dash.athlete import athlete_avatar
+    img = athlete_avatar("https://example.invalid/x.jpg", "Athlete Q", size=44)
+    node = next(x for x in _walk(img) if getattr(x, "style", None) and "objectFit" in x.style)
+    assert node.style["color"] == "transparent" and node.style["fontSize"] == "0"

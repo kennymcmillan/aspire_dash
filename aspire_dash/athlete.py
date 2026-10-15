@@ -91,7 +91,11 @@ def athlete_avatar(
             photo_url,
             alt=name or "athlete",
             className="athlete-avatar" + (" is-target" if is_target else ""),
-            style={**common_style, "objectFit": "cover"},
+            # a photo that fails to load must not spill its alt text (the name) over
+            # the circle: alt stays for screen readers, drawn invisible on the initials
+            # colour (0.107.3)
+            style={**common_style, "objectFit": "cover", "objectPosition": "center 20%",
+                   "color": "transparent", "fontSize": "0", "background": ASPIRE["600"]},
         )
 
     return html.Div(

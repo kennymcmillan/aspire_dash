@@ -4,6 +4,13 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.107.3] - 2026-10-15 (avatar: no alt-text spill)
+
+### Fixed
+- `athlete_avatar`: a photo that fails to load no longer prints the athlete's name
+  across the circle (alt text drawn invisible on a navy disc, still read by screen
+  readers). Faces sit higher in the crop (`object-position: center 20%`).
+
 ## [0.107.2] - 2026-10-15 (baseline kit: ids built from a caller prefix)
 
 ### Fixed
