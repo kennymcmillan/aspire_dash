@@ -4,6 +4,33 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.107.0] - 2026-10-15 (band cards, band radar, squad tier cards, spotlight)
+
+Promoted from endurance-dashboard (Strength redesign + Group Overview, Kenny
+2026-10-15); the squad card API was shaped with High Management Overview so both
+apps share it. Styling ships in `assets/07_squad_bands.css` (classes `ad-*`).
+
+### Added
+- `components.bands`: `band_gauge` (equal-width band bar, gold marker, names,
+  cut-offs; lower-is-better bands detected), `band_gauge_card` (big value, gauge,
+  change vs last absolute AND %, gap to next band), `band_radar` (every banded test
+  on one 0..N ring scale, dashed previous test), `band_profile` / `band_profile_list`
+  (radar + absolute-value list; `radar: False` keeps a row off the radar),
+  `metric_panel` / `metric_panels` (tinted per-test container: icon, what it
+  measures, date, 'n of m improved' chip; families jump / force / speed),
+  `asymmetry_card`, `panel_status`, and the maths `band_index`, `band_position`,
+  `gap_to_next`. Bands use the `history_figure(bands=...)` shape.
+- `components.squad`: `tier_card` (band strip, avatar, name + sub line, ONE big
+  number = optional `percentile_ring` + value/scope, optional position badge,
+  status pill, attendance bar, footer slot, whole-card `html.A` or `dcc.Link`),
+  `percentile_ring`, `spotlight` + `spotlight_hero` + `spotlight_thumb` +
+  `register_spotlight` (clientside prev/next/thumb, optional filter), `view_switch`
+  (clientside show/hide of view containers), `stat_chip`, `meta_line`.
+  Bands are data: `band="<key>"` -> class `ad-band-<key>` setting `--ad-tier`,
+  `--ad-tier-ink`, `--ad-tier-deep`, `--ad-tier-soft`; shipped keys target / future
+  / squad, apps add their own in CSS.
+- `aspire_tabs(..., keep_row=True)` keeps pills in one row on phones (sets
+  `mobile_breakpoint=0`); `persistence="session"` remembers the choice.
 ## [0.106.0] - 2026-10-15 (draw path, inline ranks, upset star, event pill, bare flags)
 
 Promoted from the Fencing Reports app so every knockout sport draws the same way.

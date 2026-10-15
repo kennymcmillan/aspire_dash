@@ -32,6 +32,13 @@ from .freshness import data_as_of_badge, data_as_of_text, register_data_as_of  #
 from .sections import section_tabs, fold, page_head  # noqa: F401  (v0.100, app-quality kit)
 from .brand_hero import (brand_hero, ensure_brand_media, brand_media_path,  # noqa: F401  (v0.102)
                          BRAND_HERO_MP4, BRAND_HERO_WEBM, BRAND_HERO_POSTER, BRAND_HERO_FILES)
+# v0.107 band components + squad overview, promoted from endurance-dashboard
+# (Strength + Group Overview), squad card shaped with High Management Overview.
+from .bands import (band_gauge, band_gauge_card, band_radar, band_profile,  # noqa: F401  (v0.107)
+                    band_profile_list, metric_panel, metric_panels, asymmetry_card,
+                    panel_status, band_index, band_position, gap_to_next)
+from .squad import (percentile_ring, tier_card, spotlight_hero, spotlight_thumb,  # noqa: F401  (v0.107)
+                    spotlight, register_spotlight, view_switch, stat_chip, meta_line)
 
 # v0.37 — re-export athlete banner helpers under components so
 # `from aspire_dash.components import selected_athlete_banner,
@@ -86,4 +93,11 @@ __all__ = [
     # hover-out popouts (v0.90, promoted from endurance-dashboard)
     'history_trigger', 'history_modal',
     'hovercard_graph', 'render_card', 'HOVERCARD_ARROW',
+    # bands (v0.107): gauge cards, band radar + profile, test panels, asymmetry
+    'band_gauge', 'band_gauge_card', 'band_radar', 'band_profile', 'band_profile_list',
+    'metric_panel', 'metric_panels', 'asymmetry_card', 'panel_status',
+    'band_index', 'band_position', 'gap_to_next',
+    # squad overview (v0.107): tier card, percentile ring, spotlight, view switch
+    'percentile_ring', 'tier_card', 'spotlight_hero', 'spotlight_thumb', 'spotlight',
+    'register_spotlight', 'view_switch', 'stat_chip', 'meta_line',
 ]

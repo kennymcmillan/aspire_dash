@@ -298,7 +298,8 @@ TAB_SELECTED_STYLE_PILL = {
 
 
 def aspire_tabs(id: str, tabs: list[dict], value: str | None = None, *,
-                variant: str = "pill"):
+                variant: str = "pill", keep_row: bool = False,
+                persistence: str | None = None):
     """Branded ``dcc.Tabs`` as a segmented pill bar (or classic underline).
 
     Replaces hand-rolled TAB_STYLE / TAB_SELECTED_STYLE dicts in every
@@ -321,6 +322,12 @@ def aspire_tabs(id: str, tabs: list[dict], value: str | None = None, *,
         distinct control. ``"underline"``: the pre-0.73 look, a thin Aspire-blue
         underline on the selected tab. Pass ``variant="underline"`` to keep the
         old appearance unchanged.
+    keep_row : bool
+        True keeps the tabs in one row on phones (0.107). ``dcc.Tabs`` otherwise
+        turns vertical under its 800px ``mobile_breakpoint``, stacking short pill
+        toggles (Cards | Spotlight, age groups) into a tall column.
+    persistence : {"session", "local", "memory"} or None
+        Remember the selected tab across page navigation / reloads (0.107).
     """
     pill = variant != "underline"
     tab_style = TAB_STYLE_PILL if pill else TAB_STYLE
@@ -341,6 +348,11 @@ def aspire_tabs(id: str, tabs: list[dict], value: str | None = None, *,
         value=value or (tabs[0]["value"] if tabs else None),
         children=tab_children,
     )
+    if keep_row:
+        tabs_kwargs["mobile_breakpoint"] = 0
+    if persistence:
+        tabs_kwargs["persistence"] = True
+        tabs_kwargs["persistence_type"] = persistence
     if pill:
         # In Dash 4.x, `className` + `style` both land on the `.tab-container`
         # (the tab row), so the band sits on the row, not the content. Set the

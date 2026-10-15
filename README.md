@@ -193,6 +193,36 @@ def layout(**kwargs):
 header, arrows/Home/End/Enter/Space move between tabs, Plotly charts in hidden panes are
 redrawn on switch, and phone tab rows wrap instead of hiding tabs off-screen.
 
+### Band cards, band radar, squad tier cards, spotlight (v0.107)
+
+Bands use the `history_figure(bands=...)` shape, worst -> best, `None` = open end.
+
+```python
+from aspire_dash.components import (band_gauge_card, band_profile, metric_panel, metric_panels,
+    panel_status, tier_card, spotlight, spotlight_hero, spotlight_thumb, register_spotlight,
+    view_switch, aspire_tabs)
+
+CMJ = [("Development", None, 30), ("Typical-Good", 30, 40), ("Strong", 40, 45), ("Very strong", 45, None)]
+card = band_gauge_card("Jump Height", 42.1, "cm", CMJ, date="01-Oct-2026", delta=3.9, prev=38.2)
+panel = metric_panel("CMJ", [card], subtitle="Countermovement jump", icon="fa-person-arrow-up-from-line",
+                     date="01-Oct-2026", status=panel_status([(3.9, False)]))
+profile = band_profile([{"label": "Jump Height", "value": 42.1, "prev": 38.2, "bands": CMJ, "unit": "cm"}],
+                       ring_names=["Development", "Typical-Good", "Strong", "Very strong"])
+
+tier_card("Athlete A", band="target", band_label="Target", corner="Grade 3",
+          sub=["QAT", "16.7y", "U18"], value_label="800m PB", value="1:52.40", pct=81,
+          status=("Available", "ok"), attendance=(100, 93), href="/athlete?id=1")
+
+# Cards | Spotlight, switched in the browser; the choice survives navigation
+aspire_tabs("view", [{"label": "Cards", "value": "cards"}, {"label": "Spotlight", "value": "spot"}],
+            value="cards", keep_row=True, persistence="session")
+view_switch("view", {"cards": "cards-box", "spot": "spot-box"})
+register_spotlight("sq", filter_id="age-filter")   # steps only through matching data-band
+```
+
+Add your own band colours without forking: `.ad-band-gcc { --ad-tier:#8fb3e0;
+--ad-tier-ink:#0b2545; --ad-tier-deep:#1d4f91; --ad-tier-soft:#e6eef9; }`.
+
 ## Install
 
 ```bash
