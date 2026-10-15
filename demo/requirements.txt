@@ -1,3 +1,4 @@
+--index-url https://mirror.kakao.com/pypi/simple/
 dash>=2.17.0,<4.2   # cap: 4.2 untested with aspire_dash
 dash-bootstrap-components>=1.6.0
 dash-ag-grid>=31.0.0
@@ -5,4 +6,4 @@ plotly>=5.18.0
 pandas>=2.0.0
 # aspire_dash itself — kept current with each release by aspire-fleet-bump
 # (the demo is a fleet target now, so it never lags the library again).
-aspire_dash @ git+https://github.com/kennymcmillan/aspire_dash.git@ee13e4bd2ce05584b1cd925fa202ac067bd0b0f8
+aspire_dash @ git+https://github.com/kennymcmillan/aspire_dash.git@de6c64a75b1faa47c0f032a37bc16c84d431d8e3
