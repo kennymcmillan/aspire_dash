@@ -220,6 +220,10 @@ view_switch("view", {"cards": "cards-box", "spot": "spot-box"})
 register_spotlight("sq", filter_id="age-filter")   # steps only through matching data-band
 ```
 
+Photo-led variant (v0.109, squash broadcast style): `photo_card(name, photo=..., band="target",
+tab_caption="Target · 800m PB", tab_value="1:50.85", pct=90, injury=("Calf", "bad"), recovery=72,
+stats=[("800m PB", "1:50.85"), ...], last={...}, attendance=93, hover=short_summary)` in an `.ad-pc-grid`.
+
 Add your own band colours without forking: `.ad-band-gcc { --ad-tier:#8fb3e0;
 --ad-tier-ink:#0b2545; --ad-tier-deep:#1d4f91; --ad-tier-soft:#e6eef9; }`.
 

@@ -27,11 +27,11 @@ import re
 
 from dash import ALL, Input, Output, State, clientside_callback, dcc, html
 
-from ..athlete import athlete_avatar
+from ..athlete import athlete_avatar, _initials
 
 __all__ = [
     "percentile_ring", "tier_card", "spotlight_hero", "spotlight_thumb", "spotlight",
-    "register_spotlight", "view_switch", "stat_chip", "meta_line", "STATUS_TONES",
+    "register_spotlight", "view_switch", "stat_chip", "meta_line", "STATUS_TONES", "photo_card",
 ]
 
 # status pill (label, tone): background, text
@@ -302,3 +302,97 @@ def stat_chip(value, label, color: str = "#0f172a"):
     """Inline KPI for a one-line top bar: big number + small caps label, never wraps."""
     return html.Div([html.Span(str(value), className="ad-stat-chip-num", style={"color": color}),
                      html.Span(label, className="ad-stat-chip-label")], className="ad-stat-chip")
+
+
+# --------------------------------------------------------------------------- #
+# photo card (v0.109): squash PSA-broadcast style, band-tinted (Kenny 2026-10-16,
+# option B from the endurance mock: PB in the tab, percentile ring on the photo)
+# --------------------------------------------------------------------------- #
+PHOTO_TONES = {"bad": "is-bad", "warn": "is-warn", "ok": "is-ok"}
+
+
+def _split_name(name):
+    parts = [p for p in (name or "").split() if p]
+    if len(parts) < 2:
+        return "", (name or "Unknown")
+    return " ".join(parts[:-1]), parts[-1]
+
+
+def photo_card(name, *, photo=None, band="squad", band_label=None, tab_caption=None,
+               tab_value=None, pct=None, injury=None, recovery=None, flag=None, meta=None,
+               chip=None, stats=None, last=None, attendance=None, hover=None, href=None,
+               link: str = "a", data=None, id=None):
+    """A photo-led athlete card, broadcast style, tinted by ``band`` (same
+    ``ad-band-<key>`` variables as ``tier_card``).
+
+    Photo (or big initials) fading into the band's deep colour; top-left tab
+    ``tab_caption`` over ``tab_value`` (e.g. 'TARGET · 800M PB' / '1:50.85'); the
+    ``percentile_ring(pct)`` on the photo bottom-right; status top-right: ``injury``
+    ``(text, tone)`` pill (tone bad/warn), WHOOP-style ``recovery`` 0-100 ring, ``flag``
+    ``(text, tone)`` pill (tone warn/bad). First name light over SURNAME caps.
+
+    Below: ``meta`` (string or list for ``meta_line``) + optional ``chip`` text,
+    ``stats`` ``[(caption, value), ...]`` (up to 3), ``last`` ``{"title", "result",
+    "ago", "win"}`` and an ``attendance`` % bar on the bottom edge. Each part is left
+    out when None. ``hover`` = the card's tooltip (e.g. a stored short summary)."""
+    first, surname = _split_name(name)
+    photo_el = (html.Img(src=photo, alt=name or "", className="ad-pc-img")
+                if photo else html.Div(_initials(name), className="ad-pc-img is-initials"))
+    over = [photo_el, html.Div(className="ad-pc-shade")]
+    if tab_value is not None or tab_caption:
+        over.append(html.Div([html.Span(tab_caption or "", className="ad-pc-tab-cap"),
+                              html.Span(str(tab_value) if tab_value is not None else "–",
+                                        className="ad-pc-tab-val")], className="ad-pc-tab"))
+    status = []
+    if injury:
+        status.append(html.Span([html.I(className="fa-solid fa-kit-medical", **{"aria-hidden": "true"}),
+                                 html.Span(injury[0])],
+                                className=f"ad-pc-pill {PHOTO_TONES.get(injury[1] if len(injury) > 1 else 'bad', 'is-bad')}"))
+    if recovery is not None:
+        r = max(0.0, min(100.0, float(recovery)))
+        col = "#16a34a" if r >= 67 else ("#ca8a04" if r >= 34 else "#dc2626")
+        status.append(html.Div(html.Span(f"{r:.0f}", className="ad-pc-rec-num"), className="ad-pc-rec",
+                               title=f"Recovery {r:.0f}% today",
+                               style={"background": f"conic-gradient({col} 0 {r:.1f}%, rgba(255,255,255,.25) 0)"}))
+    if flag:
+        status.append(html.Span(flag[0], className=f"ad-pc-pill {PHOTO_TONES.get(flag[1] if len(flag) > 1 else 'warn', 'is-warn')}"))
+    if status:
+        over.append(html.Div(status, className="ad-pc-status"))
+    if pct is not None:
+        over.append(html.Div(percentile_ring(pct, band), className="ad-pc-ring"))
+    over.append(html.Div([html.Span(first, className="ad-pc-first"),
+                          html.Span(surname.upper(), className="ad-pc-last")], className="ad-pc-name"))
+    body = [html.Div(over, className="ad-pc-photo")]
+    if meta or chip:
+        body.append(html.Div([html.Span(meta_line(meta) if isinstance(meta, (list, tuple)) else meta,
+                                        className="ad-pc-meta-text") if meta else None,
+                              html.Span(chip, className="ad-pc-chip") if chip else None],
+                             className="ad-pc-meta"))
+    if stats:
+        body.append(html.Div([html.Div([html.Span(c, className="ad-pc-stat-cap"),
+                                        html.Span(v if v not in (None, "") else "–",
+                                                  className="ad-pc-stat-val")], className="ad-pc-stat")
+                              for c, v in stats[:3]], className="ad-pc-stats"))
+    if last:
+        win = bool(last.get("win"))
+        body.append(html.Div([
+            html.Span(className="ad-pc-dot" + (" is-win" if win else "")),
+            html.Div([html.Span(last.get("title") or "", className="ad-pc-last-title"),
+                      html.Span(last.get("result") or "", className="ad-pc-last-res" + (" is-win" if win else ""))],
+                     className="ad-pc-last-text"),
+            html.Span(last.get("ago") or "", className="ad-pc-ago")], className="ad-pc-lastrow"))
+    if attendance is not None:
+        a = max(0.0, min(100.0, float(attendance)))
+        tone = "good" if a >= 95 else ("mid" if a >= 90 else "low")
+        body.append(html.Div(html.Div(className=f"ad-att-fill is-{tone}", style={"width": f"{a:.0f}%"}),
+                             className="ad-pc-att", title=f"Attendance {a:.0f}%"))
+    kw = {"id": id} if id is not None else {}
+    card = html.Div(body, className=f"ad-pc {_band_cls(band)}", **kw)
+    attrs = _data_attrs(data)
+    if hover:
+        attrs["title"] = hover
+    if href is None:
+        return html.Div(card, className="ad-tier-cell", **attrs)
+    if link == "dcc":
+        return html.Div(dcc.Link(card, href=href, className="ad-tier-link"), className="ad-tier-cell", **attrs)
+    return html.A(card, href=href, className="ad-tier-link ad-tier-cell", **attrs)

@@ -38,7 +38,7 @@ from .bands import (band_gauge, band_gauge_card, band_radar, band_profile,  # no
                     band_profile_list, metric_panel, metric_panels, asymmetry_card,
                     panel_status, band_index, band_position, gap_to_next)
 from .squad import (percentile_ring, tier_card, spotlight_hero, spotlight_thumb,  # noqa: F401  (v0.107)
-                    spotlight, register_spotlight, view_switch, stat_chip, meta_line)
+                    spotlight, register_spotlight, view_switch, stat_chip, meta_line, photo_card)
 # v0.108 athlete profile components, promoted from High Management Overview.
 from .profile import (podium, profile_hero, profile_pill, form_strip,  # noqa: F401  (v0.108)
                       form_from_results)
@@ -107,7 +107,7 @@ __all__ = [
     'band_index', 'band_position', 'gap_to_next',
     # squad overview (v0.107): tier card, percentile ring, spotlight, view switch
     'percentile_ring', 'tier_card', 'spotlight_hero', 'spotlight_thumb', 'spotlight',
-    'register_spotlight', 'view_switch', 'stat_chip', 'meta_line',
+    'register_spotlight', 'view_switch', 'stat_chip', 'meta_line', 'photo_card',
     # athlete profile (v0.108): podium, profile hero, form strip
     'podium', 'profile_hero', 'profile_pill', 'form_strip', 'form_from_results',
     # rank over time (v0.108): linear axis, best on top, titles as stars

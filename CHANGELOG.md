@@ -4,6 +4,19 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.109.0] - 2026-10-16 (photo card: broadcast style, band-tinted)
+
+### Added
+- `components.squad.photo_card(name, ...)`: a photo-led athlete card in the squash
+  PSA-broadcast style, tinted by `band` (the same `ad-band-<key>` variables as
+  `tier_card`). Photo fading into the band colour, top-left tab (caption + value,
+  e.g. 'Target · 800m PB' / '1:50.85'), `percentile_ring` on the photo, status
+  top-right (injury pill, 0-100 recovery ring 67/34 zones, a flag pill), first name
+  light over SURNAME caps, meta + chip, up to 3 stats, last result (gold dot for a
+  win), attendance bar on the bottom edge and a hover tooltip (`hover`). Every part
+  is left out when None. Grid: `.ad-pc-grid`. Styles in `07_squad_bands.css`
+  (`ad-pc-*`). First user: endurance Group Overview (Kenny picked option B).
+
 ## [0.108.0] - 2026-10-16 (athlete profile: podium, hero, rank over time, ladder)
 
 Promoted from High Management Overview (Kenny: "add anything to aspire dash that we have used"). Bands are the

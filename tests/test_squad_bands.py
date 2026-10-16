@@ -265,3 +265,45 @@ def test_avatar_photo_alt_text_never_spills():
     img = athlete_avatar("https://example.invalid/x.jpg", "Athlete Q", size=44)
     node = next(x for x in _walk(img) if getattr(x, "style", None) and "objectFit" in x.style)
     assert node.style["color"] == "transparent" and node.style["fontSize"] == "0"
+
+
+# ---- photo card (0.109) ------------------------------------------------------
+def test_photo_card_full():
+    from aspire_dash.components import photo_card
+    c = photo_card("Athlete Middle Alpha", photo="https://example.invalid/p.jpg", band="target",
+                   tab_caption="Target · 800m PB", tab_value="1:50.85", pct=90,
+                   injury=("Calf", "bad"), recovery=72, flag=("Load 1.6", "bad"),
+                   meta=["QAT", "U20"], chip="GCC class", stats=[("800m PB", "1:50.85"), ("1500m PB", None)],
+                   last={"title": "Mock Meet", "result": "1st · 1:51.20", "ago": "3w ago", "win": True},
+                   attendance=93, hover="Short summary.", href="/competition?id=1", data={"band": "U20"})
+    assert isinstance(c, html.A) and c.title == "Short summary." and getattr(c, "data-band") == "U20"
+    t = _texts(c)
+    assert "ALPHA" in t and "Athlete Middle" in t and "1:50.85" in t and "P90" in t
+    assert "Calf" in t and "72" in t and "Load 1.6" in t and "GCC class" in t and "–" in t
+    cls = _classes(c)
+    for k in ("ad-pc ad-band-target", "ad-pc-pill is-bad", "ad-pc-dot is-win", "ad-att-fill is-mid",
+              "ad-pc-ring", "ad-pc-chip", "ad-pc-img"):
+        assert k in cls, k
+    rec = next(x for x in _walk(c) if getattr(x, "className", "") == "ad-pc-rec")
+    assert "#16a34a 0 72.0%" in rec.style["background"]
+
+
+def test_photo_card_minimal_leaves_parts_out():
+    from aspire_dash.components import photo_card
+    c = photo_card("Solo")
+    cls = _classes(c)
+    for absent in ("ad-pc-tab", "ad-pc-status", "ad-pc-ring", "ad-pc-meta", "ad-pc-stats",
+                   "ad-pc-lastrow", "ad-pc-att"):
+        assert not any(x.split(" ")[0] == absent for x in cls), absent
+    assert "SOLO" in _texts(c) and "ad-pc-img is-initials" in cls
+    assert c.className == "ad-tier-cell" and not hasattr(c, "title")
+
+
+def test_photo_card_recovery_zones_and_warn_flag():
+    from aspire_dash.components import photo_card
+    def rec_bg(v):
+        c = photo_card("A B", recovery=v)
+        return next(x for x in _walk(c) if getattr(x, "className", "") == "ad-pc-rec").style["background"]
+    assert "#ca8a04" in rec_bg(50) and "#dc2626" in rec_bg(20) and "#16a34a" in rec_bg(67)
+    assert "ad-pc-pill is-warn" in _classes(photo_card("A B", flag=("Load 1.4", "warn")))
+    assert "ad-pc-pill is-warn" in _classes(photo_card("A B", injury=("Knee", "warn")))
