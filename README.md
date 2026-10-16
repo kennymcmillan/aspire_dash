@@ -223,6 +223,26 @@ register_spotlight("sq", filter_id="age-filter")   # steps only through matching
 Add your own band colours without forking: `.ad-band-gcc { --ad-tier:#8fb3e0;
 --ad-tier-ink:#0b2545; --ad-tier-deep:#1d4f91; --ad-tier-soft:#e6eef9; }`.
 
+### Athlete profile: podium, hero, rank over time, ladder (v0.108)
+
+Promoted from High Management Overview. Same band keys as `tier_card`. Every number is passed in.
+
+```python
+from aspire_dash.components import (podium, profile_hero, profile_pill, form_from_results,
+    rank_over_time, rank_series_from_record, rank_titles_from_record, ladder_card, season_section)
+
+podium([{"name": "Athlete A", "band": "target", "band_label": "Target", "value": "#6", "scope": "world",
+         "sub": ["Squash", "PSA"], "note": "World class", "href": "/athlete/7327"}])   # top 5, None if nobody ranked
+profile_hero("Athlete A", band="target", band_label="Target", value="#6", scope="World", of=812,
+             meta=["Squash", "Age 22"], pills=[profile_pill("World class", "level")],
+             form=form_from_results(results_rows), next_step=html.Span("#5 world: 1 place"),
+             chips=[{"label": "Career high", "value": "#6", "sub": "2025"}])
+rank_over_time(rank_series_from_record("squash", record_payload),
+               rank_titles_from_record("squash", record_payload))   # linear axis, best rank on top
+ladder_card(journey)        # Steps on desktop (>= 900px), Ladder on phone; journey = API brief?view=page
+season_section(journey)     # season bests vs the same rungs
+```
+
 ## Install
 
 ```bash

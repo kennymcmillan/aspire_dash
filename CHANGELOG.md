@@ -4,6 +4,26 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.108.0] - 2026-10-16 (athlete profile: podium, hero, rank over time, ladder)
+
+Promoted from High Management Overview (Kenny: "add anything to aspire dash that we have used"). Bands are the
+same data as the 0.107 tier card (`ad-band-<key>`, `--ad-tier*` variables).
+
+### Added
+- `components.profile`: `podium` (top N as band-tinted cards, one big number, None when nobody has a number),
+  `profile_hero` (tinted frame, ONE big number or "No ranking on file", identity, pills, form strip, next step,
+  medals slot, up to six chips), `profile_pill`, `form_strip`, `form_from_results` (W / L / place from a results table).
+- `components.rank_chart`: `rank_over_time` + `rank_over_time_figure` (LINEAR axis, best rank on top, career high
+  and "now" labelled, titles as stars), `rank_series_from_record` / `rank_titles_from_record` for the Sports API
+  record shapes of squash, fencing, padel and table tennis.
+- `components.ladder`: `ladder_card` (Steps on desktop >= 900px, vertical Ladder on phone, far rungs fold),
+  `season_section` + `season_chart_figure`, `ladder_story`, `first_beaten`, `steps_view`. Reads the API journey
+  (`brief?view=page`). `className=` hook for page grids.
+- `assets/08_profile.css` (classes `ad-pod-*`, `ad-ph-*`, `ad-rot-*`, `ad-lj-*`, dark mode via `html.dark`) and
+  `assets/aspire_ladder.js` (in-view animation via IntersectionObserver, Replay, fold; static under reduced motion
+  and in print). Adds the "next rung" pulse keyframes that HMO referenced but never defined.
+- Tests: `test_profile.py`, `test_rank_chart.py`, `test_ladder.py` (HMO's ladder tests, ported).
+
 ## [0.107.3] - 2026-10-15 (avatar: no alt-text spill)
 
 ### Fixed

@@ -122,10 +122,13 @@ def rank_over_time_figure(series: dict, titles: Optional[list] = None, *, max_li
                              marker=dict(size=11, color=GOLD, line=dict(color="#ffffff", width=2)),
                              hovertemplate=f"Career high #{best[1]} ({best[0][:7]})<extra></extra>"))
     at_end = best[1] == last[1]
+    # a title star on (or within ~60 days of) the career high would sit on its label: move the label to the right
+    near_star = not at_end and any(abs((date.fromisoformat(d) - date.fromisoformat(best[0])).days) <= 60
+                                   for d, _ in (titles or []))
     fig.add_annotation(x=last[0] if at_end else best[0], y=best[1],
                        text=f"<b>Career high #{best[1]}{', now' if at_end else ''}</b>", showarrow=False,
-                       yanchor="top", xanchor="right" if at_end else "center", xshift=-6 if at_end else 0, yshift=-10,
-                       font=dict(size=11.5))
+                       yanchor="top", xanchor="right" if at_end else ("left" if near_star else "center"),
+                       xshift=-6 if at_end else (12 if near_star else 0), yshift=-10, font=dict(size=11.5))
     if not at_end:
         fig.add_annotation(x=last[0], y=last[1], text=f"<b>#{last[1]} now</b>", showarrow=False, xanchor="right",
                            yanchor="top", xshift=-6, yshift=-10, font=dict(size=11.5, color=COLOURS[0]))

@@ -44,6 +44,9 @@ from .profile import (podium, profile_hero, profile_pill, form_strip,  # noqa: F
                       form_from_results)
 from .rank_chart import (rank_over_time, rank_over_time_figure,  # noqa: F401  (v0.108)
                          rank_series_from_record, rank_titles_from_record, RANKED_SPORTS)
+# the card is ladder_card so `aspire_dash.components.ladder` stays the module
+from .ladder import (ladder as ladder_card, steps_view, season_section,  # noqa: F401  (v0.108)
+                     chart_figure as season_chart_figure, story as ladder_story, first_beaten)
 
 # v0.37 — re-export athlete banner helpers under components so
 # `from aspire_dash.components import selected_athlete_banner,
@@ -110,4 +113,6 @@ __all__ = [
     # rank over time (v0.108): linear axis, best on top, titles as stars
     'rank_over_time', 'rank_over_time_figure', 'rank_series_from_record', 'rank_titles_from_record',
     'RANKED_SPORTS',
+    # ladder (v0.108): Steps on desktop, Ladder on phone, season-by-season chart
+    'ladder_card', 'steps_view', 'season_section', 'season_chart_figure', 'ladder_story', 'first_beaten',
 ]
