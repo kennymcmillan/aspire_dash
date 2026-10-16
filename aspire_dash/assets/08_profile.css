@@ -92,3 +92,8 @@ a.ad-pod:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0
     padding: 14px; }
   .ad-ph-frame { width: 96px; } .ad-ph-num { font-size: 2.4rem; } .ad-ph-name { font-size: 1.35rem; }
   .ad-ph-chips { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ---- rank over time (components/rank_chart.py) ------------------------------ */
+.ad-rot-title { font-size: .95rem; font-weight: 700; margin: 0 0 10px; }
+.ad-rot-note { font-size: .78rem; color: #64748b; margin: 4px 0 0; }
+html.dark .ad-rot-note { color: #a3b1c6; }
