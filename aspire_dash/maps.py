@@ -157,9 +157,11 @@ def region_rank_map(rows: Iterable[dict], region: str = "gulf", highlight: Optio
                     color=[RANK_BANDS[b][1] for b in bands],
                     line=dict(color=[_GOLD if c == hl else "#ffffff" for c in codes],
                               width=[3.5 if c == hl else 1.5 for c in codes]))))
+    # the code sits under the bubble, never on the rank: drop it by about a bubble's height in degrees
+    drop = (spec["lat"][1] - spec["lat"][0]) * 0.075
     fig.add_trace(go.Scattergeo(
-        mode="text", lon=[cents[c][0] for c in codes], lat=[cents[c][1] for c in codes],
-        text=codes if spec["codes"] else [""] * len(codes), textposition="bottom center",
+        mode="text", lon=[cents[c][0] for c in codes], lat=[cents[c][1] - drop for c in codes],
+        text=codes if spec["codes"] else [""] * len(codes), textposition="middle center",
         textfont=dict(size=10, family=FONT_DATA, color="#0f172a"), hoverinfo="skip", name="Codes"))
 
     apply_template(fig)
