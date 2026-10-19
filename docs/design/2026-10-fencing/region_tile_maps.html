@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Team Rankings maps: Gulf and Asia</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+:root{--navy:#004185;--deep:#001d3d;--gold:#fbb800;--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--page:#f1f5f9;
+--b0:#001d3d;--b1:#004185;--b2:#4d86c4;--b3:#b4cde8;--b4:#eef2f7}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font-family:Poppins,system-ui,sans-serif;font-size:14px;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:4px 0 2px}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 12px}
+.ctl{position:sticky;top:0;z-index:20;background:rgba(241,245,249,.96);backdrop-filter:blur(6px);padding:10px 0 8px;border-bottom:1px solid var(--line)}
+.ctl .card{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+.eyebrow{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:4px}
+.pills{display:inline-flex;background:var(--page);border-radius:999px;padding:3px}
+.pills button{border:0;background:none;font:600 13px Poppins;color:var(--muted);padding:8px 18px;min-height:40px;border-radius:999px;cursor:pointer}
+.pills button.on{background:var(--navy);color:#fff;box-shadow:0 2px 6px rgba(0,65,133,.3)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-size:12px}
+.chip{display:inline-flex;align-items:center;gap:6px}
+.sw{width:18px;height:18px;border-radius:5px;border:1px solid rgba(0,0,0,.08)}
+.sw.b4{border:1.5px dashed #94a3b8}
+.sw.q{background:#fff;border:3px solid var(--gold)}
+.note{margin:10px 0 0;padding:10px 14px;border-radius:12px;background:#fff8e1;border:1px solid #fde68a;font-size:12.5px;display:none}
+.dir{margin:26px 0 8px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}
+.dir.pick{outline:3px solid var(--gold);outline-offset:3px}
+.dir h2{margin:0;font-size:17px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tag{background:var(--navy);color:#fff;border-radius:8px;padding:2px 10px;font-size:13px}
+.rec{background:var(--gold);color:var(--deep);border-radius:999px;padding:2px 12px;font-size:11.5px;font-weight:700}
+.why{color:var(--muted);font-size:12.5px;margin:4px 0 12px}
+.cols{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.desk{flex:1 1 640px;min-width:0}
+.phone{flex:0 0 390px;width:390px;border:1px solid var(--line);border-radius:22px;background:var(--page);padding:12px 16px;box-shadow:0 6px 20px rgba(15,23,42,.08)}
+.lbl{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 6px}
+.band{display:flex;align-items:center;gap:8px;background:#fff;border-left:4px solid var(--gold);border-radius:6px;padding:6px 10px;margin:0 0 8px;font-weight:600;font-size:13px;color:var(--deep)}
+.band small{color:var(--muted);font-weight:400}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:10px;min-width:0}
+.two{display:grid;grid-template-columns:minmax(260px,5fr) 7fr;gap:12px}
+.detail{margin-top:8px;font-size:12.5px;background:var(--deep);color:#fff;border-radius:10px;padding:8px 12px;min-height:38px}
+.detail b{color:var(--gold)}
+.tiles{display:grid;gap:5px}
+.tile{aspect-ratio:1;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;border:1px solid rgba(0,0,0,.05);transition:transform .12s}
+.tile:hover,.tile.hl{transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,29,61,.25);z-index:2}
+.tile .r{font-weight:700;font-size:20px;line-height:1}
+.tile .c{font-size:10px;font-weight:600;letter-spacing:.04em;opacity:.9;margin-top:2px}
+.tile.qat{box-shadow:0 0 0 3px var(--gold);z-index:1}
+.tile.b4{border:1.5px dashed #94a3b8}
+.phone .tile .r{font-size:15px}.phone .tile .c{font-size:9px}
+.hexwrap{position:relative}
+.hex{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);transition:transform .12s}
+.hex:hover,.hex.hl{transform:scale(1.08);z-index:3}
+.hexq{position:absolute;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--gold)}
+.hex .r{font-weight:700;font-size:18px;line-height:1}.hex .c{font-size:9.5px;font-weight:600;margin-top:2px}
+.phone .hex .r{font-size:13px}.phone .hex .c{font-size:8px}
+.row{display:grid;grid-template-columns:32px 46px 1fr 54px;gap:8px;align-items:center;padding:5px 8px;border-radius:9px;cursor:pointer;font-size:12.5px;border:1px solid transparent}
+.row:hover,.row.hl{background:#eaf1fb}
+.row.qat{background:#fff8e1;border-color:var(--gold);font-weight:600}
+.row .rk{font-weight:700;text-align:right;color:var(--deep)}
+.row .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.row .bar{height:7px;border-radius:4px;background:var(--line);margin-top:3px;overflow:hidden}
+.row .bar i{display:block;height:100%;border-radius:4px}
+.row .pt{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.row.nr{color:var(--muted)}
+.row .code{font-weight:700;font-size:11px;background:var(--page);border-radius:6px;text-align:center;padding:2px 0}
+.phone .row{grid-template-columns:28px 40px 1fr 46px;gap:6px;padding:7px 6px;min-height:40px}
+.listhead{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:0 8px 4px}
+.pl{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0 0 10px}
+.pl div{background:var(--deep);color:#fff;border-radius:10px;padding:6px 10px}
+.pl small{display:block;color:var(--gold);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.pl b{font-size:15px}
+.foot{font-size:12px;color:var(--muted);margin:18px 0 40px}
+.foot table{border-collapse:collapse;margin-top:6px}.foot td,.foot th{padding:2px 10px 2px 0;text-align:left;font-size:11.5px}
+@media(max-width:700px){.wrap{padding:12px 16px}.phone{flex:1 1 100%;width:auto;max-width:390px}.desk{display:none}}
+</style></head><body><div class="wrap">
+<h1>Team rankings maps: Gulf and Asia</h1>
+<p class="sub">FIE senior team rankings, 2025/26 list (season 2026). Rank is the world team rank. Nothing invented.</p>
+<div class="ctl"><div class="card">
+ <div><div class="eyebrow">Weapon</div><div class="pills" id="pw"><button data-v="foil" class="on">Foil</button><button data-v="epee">Epee</button></div></div>
+ <div><div class="eyebrow">Gender</div><div class="pills" id="pg"><button data-v="men" class="on">Men</button><button data-v="women">Women</button></div></div>
+ <div style="flex:1 1 300px"><div class="eyebrow">World team rank band</div><div class="legend">
+  <span class="chip"><i class="sw" style="background:var(--b0)"></i>Top 8</span>
+  <span class="chip"><i class="sw" style="background:var(--b1)"></i>9-16</span>
+  <span class="chip"><i class="sw" style="background:var(--b2)"></i>17-32</span>
+  <span class="chip"><i class="sw" style="background:var(--b3)"></i>33+</span>
+  <span class="chip"><i class="sw b4" style="background:var(--b4)"></i>Not ranked</span>
+  <span class="chip"><i class="sw q"></i>Qatar</span></div></div>
+</div><div class="note" id="note"></div></div>
+
+<section class="dir" id="dA"><h2><span class="tag">A</span>Geographic map (Plotly choropleth + rank bubbles)</h2>
+<p class="why">True borders, rank number in a bubble on each country. The Gulf map is zoomed to the region. Weak on Asia: the six Gulf bubbles are nudged apart so they do not stack, and Macao, Hong Kong and Singapore are specks.</p>
+<div class="cols"><div class="desk"><p class="lbl">Desktop</p>
+ <div class="two" style="grid-template-columns:1fr 1fr"><div class="panel"><div class="band">Gulf <small>6 nations</small></div><div id="A-g-d"></div></div><div class="panel"><div class="band">Asia <small>27 nations</small></div><div id="A-a-d"></div></div></div>
+ <div class="detail" id="A-det"></div></div>
+ <div class="phone"><p class="lbl">Phone 390px</p><div class="panel"><div class="band">Gulf</div><div id="A-g-m"></div></div><div class="panel"><div class="band">Asia</div><div id="A-a-m"></div></div><div class="detail" id="A-detm"></div></div></div></section>
+
+<section class="dir" id="dB"><h2><span class="tag">B</span>Hex tile map (one equal hex per nation)</h2>
+<p class="why">Every nation gets the same size, so Bahrain is as readable as China. Laid out roughly where the countries sit. Colour is the rank band, number inside. Stylised, not to scale.</p>
+<div class="cols"><div class="desk"><p class="lbl">Desktop</p>
+ <div class="two"><div class="panel"><div class="band">Gulf</div><div class="hexwrap" id="B-g-d" data-r="gulf"></div></div><div class="panel"><div class="band">Asia</div><div class="hexwrap" id="B-a-d" data-r="asia"></div></div></div>
+ <div class="detail" id="B-det"></div></div>
+ <div class="phone"><p class="lbl">Phone 390px</p><div class="panel"><div class="band">Gulf</div><div class="hexwrap" id="B-g-m" data-r="gulf"></div></div><div class="panel"><div class="band">Asia</div><div class="hexwrap" id="B-a-m" data-r="asia"></div></div><div class="detail" id="B-detm"></div></div></div></section>
+
+<section class="dir pick" id="dC"><h2><span class="tag">C</span>Tile map + ranked list, linked <span class="rec"><i class="fa-solid fa-star"></i> Recommended</span></h2>
+<p class="why">Pick: the tile map answers "where and which band", the list answers "who is ahead, by how many points" in one glance. Hover or tap a tile or row and both light up. No tiny countries, works at 390px, and it is easy to reuse for other sports.</p>
+<div class="cols"><div class="desk"><p class="lbl">Desktop</p>
+ <div class="pl" id="C-pl"></div>
+ <div class="two" style="grid-template-columns:1fr 1fr"><div class="panel"><div class="band">Gulf <small id="C-gs"></small></div><div class="tiles" id="C-g-d" data-r="gulf" style="grid-template-columns:repeat(4,1fr);margin-bottom:10px"></div><div id="C-gl-d" data-r="gulf"></div></div>
+ <div class="panel"><div class="band">Asia <small id="C-as"></small></div><div class="tiles" id="C-a-d" data-r="asia" style="grid-template-columns:repeat(8,1fr);margin-bottom:10px"></div><div id="C-al-d" data-r="asia"></div></div></div>
+ <div class="detail" id="C-det"></div></div>
+ <div class="phone"><p class="lbl">Phone 390px</p><div class="panel"><div class="band">Gulf</div><div class="tiles" id="C-g-m" data-r="gulf" style="grid-template-columns:repeat(4,1fr);margin-bottom:8px"></div><div id="C-gl-m" data-r="gulf"></div></div>
+ <div class="panel"><div class="band">Asia</div><div class="tiles" id="C-a-m" data-r="asia" style="grid-template-columns:repeat(8,1fr);margin-bottom:8px"></div><div id="C-al-m" data-r="asia"></div></div><div class="detail" id="C-detm"></div></div></div></section>
+
+<div class="foot"><b>IOC to ISO-3 mapping used</b> (the map joins on ISO-3, the data on IOC):<table id="map"></table>
+<p>Grey or dashed means the nation has no team in the FIE list for that weapon and gender. Oman has no team rank in any of the eight lists. Bubble and tile positions are placement only, not data. Plotly loads country shapes from cdn.plot.ly.</p></div>
+</div>
+<script>
+const DATA={"foil": {"men": {"QAT": [27, 64.0], "BRN": [39, 28.0], "KUW": [52, 0.0], "UAE": [53, 0.0], "HKG": [2, 344.0], "JPN": [4, 272.0], "KOR": [9, 196.0], "CHN": [11, 192.0], "TPE": [18, 102.0], "UZB": [23, 72.0], "SGP": [24, 68.0], "IND": [25, 66.0], "KAZ": [26, 65.0], "MAS": [34, 38.0], "PHI": [42, 23.0], "THA": [46, 19.0], "NEP": [47, 18.0], "MAC": [48, 16.0], "VIE": [48, 8.0], "SRI": [49, 8.0], "INA": [50, 8.0], "IRI": [57, 0.0]}, "women": {"JPN": [3, 296.0], "KOR": [8, 206.0], "CHN": [10, 203.0], "HKG": [14, 159.0], "SGP": [15, 151.0], "TPE": [18, 83.0], "PHI": [25, 50.0], "KAZ": [27, 44.0], "IND": [29, 40.0], "CAM": [37, 23.0], "THA": [37, 24.0], "INA": [40, 21.0], "NEP": [40, 22.0], "MAC": [41, 16.0], "IRI": [43, 16.0]}}, "epee": {"men": {"KSA": [34, 50.0], "QAT": [60, 16.0], "UAE": [66, 8.0], "KUW": [68, 0.0], "KAZ": [3, 311.0], "KOR": [7, 197.0], "JPN": [9, 191.0], "HKG": [14, 155.0], "CHN": [16, 153.0], "TPE": [17, 128.0], "UZB": [18, 126.0], "SGP": [37, 46.0], "PHI": [39, 39.0], "IND": [41, 37.0], "KGZ": [43, 33.0], "IRI": [48, 27.0], "VIE": [52, 24.0], "THA": [55, 19.0], "TKM": [58, 18.0], "MAC": [59, 8.0], "NEP": [62, 8.0], "INA": [63, 8.0]}, "women": {"UAE": [41, 29.0], "KUW": [62, 0.0], "KOR": [1, 376.0], "CHN": [7, 252.0], "HKG": [12, 167.0], "JPN": [17, 115.0], "KAZ": [18, 110.0], "SGP": [21, 84.0], "UZB": [22, 76.0], "IND": [24, 65.0], "TPE": [33, 46.0], "PHI": [46, 23.0], "TKM": [46, 23.0], "INA": [48, 22.0], "THA": [48, 22.0], "VIE": [51, 20.0], "NEP": [53, 19.0], "IRI": [59, 8.0]}}};const NAT={"QAT": {"n": "Qatar", "iso": "QAT", "g": [2, 1], "a": [1, 4], "gl": [51.45, 25.0], "al": [52.5, 25.0]}, "BRN": {"n": "Bahrain", "iso": "BHR", "g": [1, 1], "a": [1, 3], "gl": [50.2, 26.6], "al": [49.5, 27.5]}, "KUW": {"n": "Kuwait", "iso": "KWT", "g": [1, 0], "a": [0, 3], "gl": [47.6, 29.3], "al": [46, 31]}, "UAE": {"n": "United Arab Emirates", "iso": "ARE", "g": [2, 2], "a": [2, 4], "gl": [54.3, 23.9], "al": [56, 22.5]}, "KSA": {"n": "Saudi Arabia", "iso": "SAU", "g": [0, 1], "a": [0, 4], "gl": [44.5, 24.5], "al": [43, 24.5]}, "OMA": {"n": "Oman", "iso": "OMN", "g": [3, 2], "a": [3, 4], "gl": [56.2, 20.6], "al": [59.5, 19.5]}, "IRI": {"n": "Iran", "iso": "IRN", "g": null, "a": [1, 2], "gl": null, "al": [54, 32.5]}, "KAZ": {"n": "Kazakhstan", "iso": "KAZ", "g": null, "a": [3, 0], "gl": null, "al": [67, 48]}, "TKM": {"n": "Turkmenistan", "iso": "TKM", "g": null, "a": [1, 1], "gl": null, "al": [59, 39]}, "UZB": {"n": "Uzbekistan", "iso": "UZB", "g": null, "a": [2, 1], "gl": null, "al": [64, 41.5]}, "KGZ": {"n": "Kyrgyzstan", "iso": "KGZ", "g": null, "a": [3, 1], "gl": null, "al": [74.5, 41.5]}, "CHN": {"n": "China", "iso": "CHN", "g": null, "a": [4, 1], "gl": null, "al": [104, 35]}, "KOR": {"n": "South Korea", "iso": "KOR", "g": null, "a": [6, 1], "gl": null, "al": [127.8, 36.5]}, "JPN": {"n": "Japan", "iso": "JPN", "g": null, "a": [7, 1], "gl": null, "al": [138, 36]}, "NEP": {"n": "Nepal", "iso": "NPL", "g": null, "a": [3, 2], "gl": null, "al": [84, 28.3]}, "HKG": {"n": "Hong Kong", "iso": "HKG", "g": null, "a": [4, 2], "gl": null, "al": [114.2, 22.6]}, "TPE": {"n": "Chinese Taipei", "iso": "TWN", "g": null, "a": [5, 2], "gl": null, "al": [121, 23.7]}, "IND": {"n": "India", "iso": "IND", "g": null, "a": [3, 3], "gl": null, "al": [79, 22]}, "MAC": {"n": "Macao", "iso": "MAC", "g": null, "a": [4, 3], "gl": null, "al": [112.4, 21.2]}, "VIE": {"n": "Vietnam", "iso": "VNM", "g": null, "a": [5, 3], "gl": null, "al": [106, 16]}, "PHI": {"n": "Philippines", "iso": "PHL", "g": null, "a": [6, 3], "gl": null, "al": [122, 12.5]}, "THA": {"n": "Thailand", "iso": "THA", "g": null, "a": [4, 4], "gl": null, "al": [101, 15.5]}, "CAM": {"n": "Cambodia", "iso": "KHM", "g": null, "a": [5, 4], "gl": null, "al": [104.9, 12.6]}, "SRI": {"n": "Sri Lanka", "iso": "LKA", "g": null, "a": [3, 5], "gl": null, "al": [80.7, 7.8]}, "MAS": {"n": "Malaysia", "iso": "MYS", "g": null, "a": [4, 5], "gl": null, "al": [102, 4.2]}, "SGP": {"n": "Singapore", "iso": "SGP", "g": null, "a": [5, 5], "gl": null, "al": [104.6, 0.4]}, "INA": {"n": "Indonesia", "iso": "IDN", "g": null, "a": [6, 5], "gl": null, "al": [113, -1]}};
+const GULF=['QAT','BRN','KUW','UAE','KSA','OMA'];const ASIA=Object.keys(NAT);
+const BC=['#001d3d','#004185','#4d86c4','#b4cde8','#eef2f7'];const TC=['#fff','#fff','#fff','#0f172a','#64748b'];
+let S={w:'foil',g:'men'};
+const info=c=>{const v=DATA[S.w][S.g][c];return v?{r:v[0],p:v[1]}:null};
+const band=c=>{const i=info(c);if(!i)return 4;return i.r<=8?0:i.r<=16?1:i.r<=32?2:3};
+const WL=()=>S.w[0].toUpperCase()+S.w.slice(1)+' '+S.g;
+const txt=c=>{const i=info(c),n=NAT[c].n;return i?`<b>${n}</b> world team rank <b>${i.r}</b>, ${i.p} pts (${WL()})`:`<b>${n}</b> not ranked in the FIE team list (${WL()})`};
+const plain=c=>txt(c).replace(/<[^>]+>/g,'');
+const codes=r=>r==='gulf'?GULF:ASIA;
+const sorted=r=>codes(r).slice().sort((a,b)=>{const x=info(a),y=info(b);if(x&&y)return x.r-y.r;return x?-1:y?1:a<b?-1:1});
+function setDet(id,c){const a=document.getElementById(id);if(a)a.innerHTML=txt(c)}
+function hl(scope,c,on){document.querySelectorAll(`[data-sc="${scope}"] [data-c="${c}"]`).forEach(e=>e.classList.toggle('hl',on))}
+function bind(el,scope,det){
+ el.querySelectorAll('[data-c]').forEach(e=>{const c=e.dataset.c;
+  e.setAttribute('role','button');e.setAttribute('tabindex','0');e.setAttribute('aria-label',plain(c));e.title=plain(c);
+  const on=()=>{setDet(det,c);hl(scope,c,true)};const off=()=>hl(scope,c,false);
+  e.addEventListener('mouseenter',on);e.addEventListener('mouseleave',off);e.addEventListener('click',on);e.addEventListener('focus',on);e.addEventListener('blur',off)})}
+const dims=r=>r==='gulf'?[4,3]:[8,6];
+const pos=(r,c)=>r==='gulf'?NAT[c].g:NAT[c].a;
+function tiles(el,det,scope){
+ const r=el.dataset.r;el.dataset.sc=scope;el.innerHTML='';
+ const [cols,rows]=dims(r);
+ const grid=Array.from({length:rows},()=>Array(cols).fill(null));
+ codes(r).forEach(c=>{const p=pos(r,c);grid[p[1]][p[0]]=c});
+ grid.forEach(row=>row.forEach(c=>{const d=document.createElement('div');
+  if(!c){d.style.aspectRatio='1';el.appendChild(d);return}
+  const b=band(c),i=info(c);d.className='tile'+(c==='QAT'?' qat':'')+(b===4?' b4':'');d.dataset.c=c;
+  d.style.background=BC[b];d.style.color=TC[b];d.innerHTML=`<span class="r">${i?i.r:'-'}</span><span class="c">${c}</span>`;el.appendChild(d)}));
+ bind(el,scope,det)}
+function hexes(el,det,scope){
+ const r=el.dataset.r;el.dataset.sc=scope;el.innerHTML='';
+ const [cols,rows]=dims(r);const W=el.clientWidth||340;
+ const w=W/(cols+.5),h=w*1.1547,dy=h*.76;el.style.height=(dy*(rows-1)+h)+'px';
+ codes(r).forEach(c=>{const p=pos(r,c);const x=p[0]*w+(p[1]%2?w/2:0),y=p[1]*dy;
+  const b=band(c),i=info(c);
+  if(c==='QAT'){const q=document.createElement('div');q.className='hexq';q.style.cssText=`left:${x-2}px;top:${y-3}px;width:${w+4}px;height:${h+6}px`;el.appendChild(q)}
+  const d=document.createElement('div');d.className='hex';d.dataset.c=c;
+  d.style.cssText=`left:${x+1}px;top:${y+1}px;width:${w-2}px;height:${h-2}px;background:${b===4?'repeating-linear-gradient(45deg,#eef2f7,#eef2f7 4px,#dfe5ee 4px,#dfe5ee 8px)':BC[b]};color:${TC[b]}`;
+  d.innerHTML=`<span class="r">${i?i.r:'-'}</span><span class="c">${c}</span>`;el.appendChild(d)});
+ bind(el,scope,det)}
+function list(el,det,scope){
+ const r=el.dataset.r;el.dataset.sc=scope;
+ const mx=Math.max(1,...codes(r).map(c=>info(c)?info(c).p:0));
+ let h='<div class="listhead">World rank / nation / points</div>';
+ sorted(r).forEach(c=>{const i=info(c),b=band(c);
+  h+=`<div class="row${c==='QAT'?' qat':''}${i?'':' nr'}" data-c="${c}"><span class="rk">${i?i.r:'-'}</span><span class="code">${c}</span><span><span class="nm">${NAT[c].n}</span><div class="bar"><i style="width:${i?Math.max(2,i.p/mx*100):0}%;background:${i?BC[b===3?2:b]:'transparent'}"></i></div></span><span class="pt">${i?i.p+' pts':'n/r'}</span></div>`});
+ el.innerHTML=h;bind(el,scope,det)}
+function plot(el,r,det){
+ const cs=codes(r),W=el.clientWidth||340;
+ const z=cs.map(band),T=cs.map(plain);
+ const gulf=r==='gulf';
+ const sz=gulf?(W<400?38:44):(W<400?17:22),fs=gulf?10:(W<400?8:10);
+ const cp=[[0,BC[0]],[.125,BC[0]],[.125,BC[1]],[.375,BC[1]],[.375,BC[2]],[.625,BC[2]],[.625,BC[3]],[.875,BC[3]],[.875,BC[4]],[1,BC[4]]];
+ const P=c=>gulf?NAT[c].gl:NAT[c].al;
+ const t1={type:'choropleth',locations:cs.map(c=>NAT[c].iso),z,zmin:0,zmax:4,colorscale:cp,showscale:false,text:T,hovertemplate:'%{text}<extra></extra>',marker:{line:{color:'#fff',width:.8}}};
+ const t2={type:'scattergeo',mode:'markers+text',lon:cs.map(c=>P(c)[0]),lat:cs.map(c=>P(c)[1]),text:cs.map(c=>gulf?(info(c)?'<b>'+info(c).r+'</b>':'-')+'<br>'+c:(info(c)?String(info(c).r):'-')),textfont:{size:fs,color:cs.map(c=>TC[band(c)]),family:'Poppins'},hovertext:T,hoverinfo:'text',
+  marker:{size:cs.map(c=>c==='QAT'?sz+6:sz),color:cs.map(c=>BC[band(c)]),line:{color:cs.map(c=>c==='QAT'?'#fbb800':'#ffffff'),width:cs.map(c=>c==='QAT'?3.5:1.5)}},customdata:cs};
+ const t3={type:'scattergeo',mode:'text',lon:cs.map(c=>P(c)[0]),lat:cs.map(c=>P(c)[1]),text:(gulf||W>600)?cs:cs.map(()=>''),textposition:'bottom center',textfont:{size:gulf?10:8,color:'#0f172a',family:'Poppins'},hoverinfo:'skip'};
+ const rg=gulf?{lon:[43.5,60.5],lat:[19,31.5],ar:1.3}:{lon:[36,150],lat:[-8,54],ar:1.55};
+ const lay={margin:{l:0,r:0,t:0,b:0},height:Math.round(W/rg.ar),showlegend:false,paper_bgcolor:'rgba(0,0,0,0)',dragmode:false,
+  geo:{scope:'asia',projection:{type:'mercator'},lonaxis:{range:rg.lon},lataxis:{range:rg.lat},showland:true,landcolor:'#e6ebf2',showocean:true,oceancolor:'#d9e8f7',showcountries:true,countrycolor:'#fff',countrywidth:.6,coastlinecolor:'#c5d3e3',showframe:false,resolution:50,bgcolor:'rgba(0,0,0,0)'}};
+ Plotly.react(el,[t1,t2],lay,{displayModeBar:false,responsive:true}).then(()=>{
+  if(!el._b){el._b=1;const f=d=>{const p=d.points[0];const c=p.customdata||cs[p.pointNumber];if(c)setDet(det,c)};el.on('plotly_hover',f);el.on('plotly_click',f)}});
+}
+function counts(){
+ const g=GULF.filter(c=>info(c)).length;
+ document.getElementById('C-gs').textContent=g+' of 6 ranked';
+ document.getElementById('C-as').textContent=ASIA.filter(c=>info(c)).length+' of '+ASIA.length+' ranked';
+ const rk=a=>a.filter(c=>info(c)).sort((x,y)=>info(x).r-info(y).r)[0];
+ const top=rk(ASIA),gt=rk(GULF),q=info('QAT');
+ const mk=(a,b)=>`<div><small>${a}</small><b>${b}</b></div>`;
+ document.getElementById('C-pl').innerHTML=mk('Qatar world rank',q?q.r+' ('+q.p+' pts)':'Not ranked')+mk('Best in Gulf',gt?NAT[gt].n+' '+info(gt).r:'None ranked')+mk('Best in Asia',top?NAT[top].n+' '+info(top).r:'None ranked');
+ const n=document.getElementById('note');const m=[];
+ if(!g)m.push(`No Gulf nation has a team rank in ${WL()}. Every Gulf tile shows as not ranked.`);
+ else if(!q)m.push(`Qatar has no team rank in ${WL()}.`);
+ m.push('Oman has no team rank in any weapon or gender.');
+ n.style.display='block';n.textContent=m.join(' ');
+}
+const $=id=>document.getElementById(id);
+function render(){
+ counts();
+ tiles($('C-g-d'),'C-det','Cd');tiles($('C-a-d'),'C-det','Cd');tiles($('C-g-m'),'C-detm','Cm');tiles($('C-a-m'),'C-detm','Cm');
+ list($('C-gl-d'),'C-det','Cd');list($('C-al-d'),'C-det','Cd');list($('C-gl-m'),'C-detm','Cm');list($('C-al-m'),'C-detm','Cm');
+ hexes($('B-g-d'),'B-det','Bd');hexes($('B-a-d'),'B-det','Bd');hexes($('B-g-m'),'B-detm','Bm');hexes($('B-a-m'),'B-detm','Bm');
+ try{plot($("A-g-d"),"gulf","A-det");plot($("A-a-d"),"asia","A-det");plot($("A-g-m"),"gulf","A-detm");plot($("A-a-m"),"asia","A-detm")}catch(e){$("A-g-d").textContent="ERR "+e.message}
+ ['A-det','A-detm','B-det','B-detm','C-det','C-detm'].forEach(id=>setDet(id,'QAT'));
+}
+function pills(id,k){document.querySelectorAll('#'+id+' button').forEach(b=>b.addEventListener('click',()=>{S[k]=b.dataset.v;document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.toggle('on',x===b));render()}))}
+pills('pw','w');pills('pg','g');
+$('map').innerHTML='<tr><th>IOC</th><th>ISO-3</th><th>Nation</th></tr>'+ASIA.map(c=>`<tr><td>${c}</td><td>${NAT[c].iso}</td><td>${NAT[c].n}</td></tr>`).join('');
+window.addEventListener('load',render);
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(render,250)});
+</script></body></html>

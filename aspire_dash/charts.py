@@ -73,6 +73,7 @@ _aspire_template.layout = go.Layout(
     margin=dict(l=40, r=16, t=8, b=32),
     xaxis=dict(
         showgrid=False,  # vertical gridlines off — visual clutter
+        automargin=True,   # v0.110: tick labels never clipped by the margin
         linecolor=SLATE["200"],
         zerolinecolor=SLATE["200"],
         tickfont=dict(size=11, color=SLATE["500"]),
@@ -80,6 +81,7 @@ _aspire_template.layout = go.Layout(
     ),
     yaxis=dict(
         gridcolor=SLATE["50"],   # near-invisible — data carries the chart
+        automargin=True,   # v0.110
         linecolor="rgba(0,0,0,0)",
         zerolinecolor=SLATE["200"],
         tickfont=dict(size=11, color=SLATE["500"]),
@@ -95,11 +97,11 @@ _aspire_template.layout = go.Layout(
     # radius). Replaces stock Plotly white-on-white tooltips. Matches the
     # Linear / Stripe / Whoop tooltip feel.
     hoverlabel=dict(
-        bgcolor=SLATE["800"],
+        bgcolor="#001d3d",     # v0.110: deep navy (was slate-800)
         font_size=12,
         font_family=FONT_DATA,
         font_color="white",
-        bordercolor=SLATE["900"],
+        bordercolor="#001d3d",
         align="left",
     ),
     # v0.28 — branded modebar (when shown). Default GRAPH_CONFIG hides it,

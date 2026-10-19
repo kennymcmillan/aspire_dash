@@ -42,7 +42,7 @@ from .squad import (percentile_ring, tier_card, spotlight_hero, spotlight_thumb,
 # v0.108 athlete profile components, promoted from High Management Overview.
 from .profile import (podium, profile_hero, profile_pill, form_strip,  # noqa: F401  (v0.108)
                       form_from_results)
-from .rank_chart import (rank_over_time, rank_over_time_figure,  # noqa: F401  (v0.108)
+from .rank_chart import (rank_over_time, rank_over_time_figure, rank_small_multiples, rank_sources,  # noqa: F401  (v0.108, v0.110)
                          rank_series_from_record, rank_titles_from_record, RANKED_SPORTS)
 # the card is ladder_card so `aspire_dash.components.ladder` stays the module
 from .ladder import (ladder as ladder_card, steps_view, season_section,  # noqa: F401  (v0.108)

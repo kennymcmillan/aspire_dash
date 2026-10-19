@@ -1,13 +1,15 @@
 """Sports — country flags, IOC→ISO conversion, placement badges, rank arrows."""
 import dash
-from dash import html
+from dash import dcc, html
 
 from aspire_dash.sports import (
     country_flag, flag_with_name, placement_badge, rank_pill, rank_change,
     competition_badge, category_badge, format_season, gradient_stat_card,
     stat_card, source_badge, competition_card, data_row, mini_stat,
-    header_stat, trend_arrow,
+    header_stat, trend_arrow, data_table,
 )
+from aspire_dash.maps import region_rank_map
+from aspire_dash.components import rank_small_multiples
 
 from ._shared import section, example
 
@@ -163,6 +165,28 @@ def layout():
                  ], style={"display": "flex", "gap": "24px",
                             "alignItems": "center"}),
                  "mini_stat('Win%', '67%') · header_stat('Bouts', 174) · trend_arrow([...])"),
+
+        section("data_table / region_rank_map / rank_small_multiples",
+                 "v0.110 design-board pieces: content-fit table, region rank map, rank history small multiples."),
+        example("data_table (fit='content', default)",
+                 data_table([{"label": "Rank", "align": "center"}, "Nation", {"label": "Points", "align": "right"}],
+                            [[rank_pill(1), "Nation A", "310"], [rank_pill(2), "Nation B", "255"],
+                             [rank_pill(27), "Nation C", "120.5"]],
+                            highlight=[2]),
+                 "data_table(cols, rows)  # fit='content', max_width='880px'; fit='full' = old full-width"),
+        example("region_rank_map",
+                 dcc.Graph(figure=region_rank_map(
+                     [{"nation_code": "QAT", "rank_position": 27, "points": 120.5},
+                      {"nation_code": "KUW", "rank_position": 5, "points": 300},
+                      {"nation_code": "UAE", "rank_position": 40, "points": 20}], "gulf"),
+                     config={"displayModeBar": False}),
+                 "region_rank_map(rows, region='gulf' | 'asia', highlight='QAT')"),
+        example("rank_small_multiples",
+                 dcc.Graph(figure=rank_small_multiples(
+                     {"Senior Foil (FIE)": [("2024-07-01", 80), ("2025-07-01", 55), ("2026-07-01", 30)],
+                      "Cadet Foil (EuroF)": [("2024-07-01", 400), ("2025-07-01", 120)]}, "lists"),
+                     config={"displayModeBar": False}),
+                 "rank_small_multiples(series, mode='lists' | 'sources')"),
 
         section("format_season",
                  "Season-string normaliser."),

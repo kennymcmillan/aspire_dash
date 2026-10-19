@@ -75,7 +75,7 @@ _IOC_TO_ISO3_OVERRIDES = {
     "SVK": "SVK", "KUW": "KWT", "OMA": "OMN", "LIB": "LBN", "CHI": "CHL",
     "NGR": "NGA", "ANG": "AGO", "ALG": "DZA", "CMR": "CMR", "CIV": "CIV",
     "MOZ": "MOZ", "NAM": "NAM", "BOT": "BWA", "ZIM": "ZWE", "PLE": "PSE",
-    "PUR": "PRI", "ISV": "VIR", "HAI": "HTI",
+    "PUR": "PRI", "ISV": "VIR", "HAI": "HTI", "BRN": "BHR",   # IOC BRN = Bahrain (Brunei is BRU)
 }
 
 
@@ -378,6 +378,8 @@ def rank_pill(rank, label=None, *, variant="pill"):
                           html.Span(f" {label}", className="rank-inline__label") if label else None],
                          className="rank-inline")
     tone = "rank-top10" if r <= 10 else ("rank-top50" if r <= 50 else "rank-other")
+    if r <= 3:
+        tone += f" rank-p{r}"    # v0.110: gold / silver / bronze discs for 1 to 3
     if label:
         return html.Span([str(r), html.Span(f" {label}", className="rank-pill__label")],
                          className=f"rank-pill {tone}")
@@ -583,7 +585,8 @@ def data_row(cells, header=False, highlight=False):
     )
 
 
-def data_table(columns, rows, *, highlight=None, row_class=None, id=None, className=""):
+def data_table(columns, rows, *, highlight=None, row_class=None, id=None, className="",
+               fit="content", max_width="880px"):
     """Assemble a hover/highlight data grid from the ``.aspire-data-row`` family.
 
     A thin assembler over the same classes :func:`data_row` uses, adding
@@ -617,6 +620,14 @@ def data_table(columns, rows, *, highlight=None, row_class=None, id=None, classN
         ``.aspire-data-row`` — e.g. ``"is-dim"`` to fade a not-yet-available row.
     id, className : str
         Forwarded to the wrapping ``.aspire-data-table`` container.
+    fit : "content" | "full"
+        v0.110 "Tidy fit". ``"content"`` (default): the scroll wrapper is as wide as the
+        table needs, capped at ``min(100%, max_width)``; columns stay auto-fit, and a table
+        narrower than the cap keeps its own width instead of stretching to the page. A
+        wider table scrolls sideways inside its own box (phones included).
+        ``"full"``: the pre-0.110 behaviour, at least the full width of the container.
+    max_width : str
+        Cap for ``fit="content"`` (any CSS length), default ``"880px"``. Ignored by ``"full"``.
 
     Returns
     -------
@@ -709,12 +720,16 @@ def data_table(columns, rows, *, highlight=None, row_class=None, id=None, classN
     # table is at least full width and grows to its content; on a narrow viewport
     # the .aspire-data-table-scroll wrapper scrolls horizontally (never shrink-to-fit,
     # the v0.60-0.62 "Ve/D/SE/W/G…" failure).
+    if fit not in ("content", "full"):
+        raise ValueError(f"fit must be 'content' or 'full', got {fit!r}")
     table = html.Div(
         [header, *body],
         className="aspire-data-table is-autofit" + (f" {className}" if className else ""),
         style={"gridTemplateColumns": " ".join(_track(s) for s in specs)},
     )
-    wrap = {"className": "aspire-data-table-scroll"}
+    wrap = {"className": "aspire-data-table-scroll" + (" is-fit-content" if fit == "content" else "")}
+    if fit == "content":
+        wrap["style"] = {"maxWidth": f"min(100%, {max_width})"}
     if id:
         wrap["id"] = id
     return html.Div(table, **wrap)

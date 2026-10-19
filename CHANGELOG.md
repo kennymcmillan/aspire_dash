@@ -4,6 +4,31 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.110.0] - 2026-10-19 (design board: tidy-fit tables, region rank map, rank small multiples)
+
+From the Fencing Reports design pass (Kenny picked table A "Tidy fit", map A, rankings history A + a toggle to B).
+
+### Changed
+- **`sports.data_table` is content-fit by default** (affects every app). New `fit="content"` (default) | `"full"`
+  and `max_width="880px"`. Content fit: the scroll wrapper is as wide as the table needs, capped at
+  `min(100%, max_width)`, columns stay auto-fit, 36px rows, grey header, and a wide table scrolls inside its own
+  box on a phone. `fit="full"` is the old full-width behaviour, unchanged. Tests: `tests/test_data_table.py`,
+  `tests/test_design_board_0110.py`.
+- `rank_pill`: ranks 1-3 also carry `rank-p1/2/3` (gold, silver, bronze discs). Existing `rank-top10` kept.
+- Plotly `aspire` template: `automargin=True` on both axes; hover label is deep navy `#001d3d` with white text.
+  Zoom and legend position untouched.
+
+### Added
+- `aspire_dash.maps.region_rank_map(rows, region="gulf"|"asia", highlight="QAT", ...)`: choropleth zoomed to the
+  region with rank-number bubbles (bands top 8 / 9-16 / 17-32 / 33+ / not ranked), gold ring on the highlight,
+  hover rank + points, unranked members drawn as "not ranked". Also `REGIONS`, `RANK_BANDS`, `rank_band`.
+- `components.rank_small_multiples(series, mode="lists"|"sources", ...)`: rank history as small multiples, one
+  chart per list (own reversed scale) or one per source (lists overlaid); `rank_sources(series)`.
+- `docs/design/2026-10-fencing/`: public-data design prototypes.
+
+### Fixed
+- `ioc_to_iso3("BRN")` returned `BRN` (Brunei); IOC BRN is Bahrain, so it now returns `BHR` (Brunei is `BRU`).
+
 ## [0.109.0] - 2026-10-16 (photo card: broadcast style, band-tinted)
 
 ### Added

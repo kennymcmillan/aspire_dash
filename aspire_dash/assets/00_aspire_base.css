@@ -3844,6 +3844,9 @@ body {
     color: #92400e;                     /* amber-800 — elite, matches place-gold */
     box-shadow: inset 0 0 0 1px rgba(217, 119, 6, 0.25);
 }
+.rank-pill.rank-p1 { background: linear-gradient(135deg, #fde68a, #fbb800); color: #5b3b00; box-shadow: none; }
+.rank-pill.rank-p2 { background: linear-gradient(135deg, #f1f5f9, #cbd5e1); color: #334155; box-shadow: none; }
+.rank-pill.rank-p3 { background: linear-gradient(135deg, #fed7aa, #d98a4a); color: #5a2d0c; box-shadow: none; }
 .rank-pill.rank-top50 { background: #dbeafe; color: #1e40af; }
 .rank-pill.rank-other { background: var(--slate-100); color: var(--slate-500); }
 .rank-pill.rank-na    { background: transparent; color: var(--slate-300); font-weight: 400; }
@@ -3964,6 +3967,27 @@ body {
     min-width: 0;
     overflow: visible;
     text-overflow: clip;
+}
+
+/* v0.110 "Tidy fit": fit="content" (default). The wrapper is as wide as the table
+   needs, capped by the inline max-width (min(100%, max_width)); the table keeps its
+   max-content width and scrolls inside the wrapper when wider. Look: bordered grid,
+   36px rows, grey header. fit="full" omits .is-fit-content (pre-0.110 behaviour). */
+.aspire-data-table-scroll.is-fit-content {
+    width: fit-content;
+}
+.aspire-data-table-scroll.is-fit-content .aspire-data-table.is-autofit {
+    min-width: 0;
+}
+.aspire-data-table-scroll.is-fit-content .aspire-data-row {
+    min-height: 36px;
+    align-items: center;
+}
+.aspire-data-table-scroll.is-fit-content .aspire-data-row__cell {
+    padding: 6px 12px;
+}
+.aspire-data-table-scroll.is-fit-content .aspire-data-row.is-header {
+    background: #f1f5f9;
 }
 
 /* Faded row — e.g. a competition whose report isn't available yet.

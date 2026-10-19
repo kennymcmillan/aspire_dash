@@ -5,6 +5,7 @@
     rank_over_time_figure(series, titles)     the figure: LINEAR axis, best rank on top, career high + now
                                               labelled, titles as stars on the main line
     rank_over_time(series, titles, ...)       the section (heading, graph, note); None when there is no series
+    rank_small_multiples(series, mode)        v0.110: one small chart per list ("lists") or per source ("sources")
 
 Kenny 2026-10-13: "dont use log scale" for rank charts. The axis runs from the worst rank shown at the bottom to
 #1 at the top. Supported record shapes (payload.<sport>): squash ranking_history (PSA, '01 Oct 2011' dates),
@@ -22,7 +23,7 @@ from dash import dcc, html
 from ..charts import apply_template
 
 __all__ = ["RANKED_SPORTS", "rank_series_from_record", "rank_titles_from_record", "rank_over_time_figure",
-           "rank_over_time"]
+           "rank_over_time", "rank_small_multiples", "rank_sources"]
 
 RANKED_SPORTS = ("squash", "fencing", "padel", "tabletennis")
 COLOURS = ("#004185", "#0f7a6e", "#b06a35", "#6b7a90")
@@ -161,3 +162,79 @@ def rank_over_time(series: dict, titles: Optional[list] = None, *, heading: str 
                   config={"displayModeBar": False}, className="ad-rot-graph"),
         html.P(note, className="ad-rot-note"),
     ], className=f"ad-rot {className}".strip(), **{"aria-label": heading})
+
+
+# ── v0.110: small multiples (Kenny's pick, Fencing Reports rankings history) ─────────────────────────────
+_SM_MODES = ("lists", "sources")
+
+
+def rank_sources(series: dict) -> dict[str, str]:
+    """{label: source}. The source is the trailing ' (FIE)' of a label like 'Senior Foil (FIE)' (the shape
+    ``rank_series_from_record`` gives fencing); a label without one is filed under 'Rankings'."""
+    out = {}
+    for label in series:
+        t = str(label).rstrip()
+        inner = t[t.rfind("(") + 1:-1].strip() if t.endswith(")") and "(" in t else ""
+        out[label] = inner or "Rankings"
+    return out
+
+
+def rank_small_multiples(series: dict, mode: str = "lists", *, sources: Optional[dict] = None, cols: int = 3,
+                         row_height: int = 190, colours: Optional[tuple] = None) -> go.Figure:
+    """Rank history as small multiples.
+
+    ``series``: {label: [(iso_date, rank)]} as from ``rank_series_from_record`` (empty lists are dropped).
+    ``mode="lists"``: one chart per list, each on its OWN reversed rank axis (best on top), so a list that
+    runs 1-6 is not flattened by one that runs 1-500. The latest point is ringed in gold.
+    ``mode="sources"``: one chart per source with that source's lists overlaid (toggle target for the
+    per-list view). ``sources`` maps label -> source (default: ``rank_sources(series)``).
+    ``cols`` charts per row, ``row_height`` px per row. Raises ValueError for an unknown mode or no data.
+    """
+    from plotly.subplots import make_subplots
+
+    if mode not in _SM_MODES:
+        raise ValueError(f"mode must be one of {_SM_MODES}, got {mode!r}")
+    sers = {k: v for k, v in (series or {}).items() if v}
+    if not sers:
+        raise ValueError("rank_small_multiples needs at least one non-empty series")
+    colours = colours or COLOURS
+    if mode == "lists":
+        panels = {label: {label: pts} for label, pts in sers.items()}
+    else:
+        src = sources or rank_sources(sers)
+        panels = {}
+        for label, pts in sers.items():
+            panels.setdefault(src.get(label) or "Rankings", {})[label] = pts
+    n = len(panels)
+    cols = max(1, min(cols, n))
+    rows = -(-n // cols)
+    titles = [str(k).upper() for k in panels]
+    fig = make_subplots(rows=rows, cols=cols, subplot_titles=titles, horizontal_spacing=0.09,
+                        vertical_spacing=min(0.2, 0.55 / rows))
+    ci = 0
+    for i, (_, lists) in enumerate(panels.items()):
+        r, c = i // cols + 1, i % cols + 1
+        ranks = [p[1] for pts in lists.values() for p in pts]
+        worst, best = max(ranks), min(ranks)
+        pad = max(1.0, (worst - best) * 0.2)
+        for label, pts in lists.items():
+            col = colours[ci % len(colours)]
+            ci += 1
+            fig.add_trace(go.Scatter(
+                x=[p[0] for p in pts], y=[p[1] for p in pts], mode="lines+markers", name=str(label),
+                line=dict(width=2.6, color=col), marker=dict(size=7, color=col, line=dict(width=1.5, color="#ffffff")),
+                hovertemplate=f"{label}<br>%{{x|%d %b %Y}}: #%{{y}}<extra></extra>", showlegend=False), row=r, col=c)
+            last = pts[-1]
+            fig.add_trace(go.Scatter(
+                x=[last[0]], y=[last[1]], mode="markers", name=f"{label} latest", hoverinfo="skip", showlegend=False,
+                marker=dict(size=16, color="rgba(251,184,0,0.10)", line=dict(color="#fbb800", width=2))), row=r, col=c)
+        fig.update_yaxes(range=[worst + pad, max(0.5, best - pad)], tickprefix="#", nticks=4, showgrid=True,
+                         title=None, row=r, col=c)
+        fig.update_xaxes(title=None, tickfont=dict(size=10), row=r, col=c)
+    apply_template(fig)
+    for i, a in enumerate(fig.layout.annotations):     # subplot titles: small caps, left-aligned on the panel
+        ax = fig.layout["xaxis" + ("" if i == 0 else str(i + 1))]
+        a.update(font=dict(size=11, color="#0f172a"), xanchor="left", x=ax.domain[0])
+    fig.update_layout(height=row_height * rows + 30, margin=dict(l=44, r=16, t=30, b=30), hovermode="closest",
+                      showlegend=False)
+    return fig
