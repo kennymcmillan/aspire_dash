@@ -9,7 +9,7 @@ additive minors, breaking changes get a major bump when we get there.
 ### Added
 - `sports.trend_arrow(..., lower_is_better=False)`: pass True for ranks so 48 -> 59 reads as worse (red, down).
   Default unchanged.
-- `maps` Asia region draws IRQ, JOR, SYR, LBN, PAK, MGL (IRQ and JOR hold sabre team ranks and were listed but
+- `maps` Asia region draws IRQ, JOR, SYR, LIB (Lebanon), PAK, MGL (IRQ and JOR hold sabre team ranks and were listed but
   never drawn). Asia window starts at lon 34 so Jordan sits inside it.
 
 ## [0.110.0] - 2026-10-19 (design board: tidy-fit tables, region rank map, rank small multiples)

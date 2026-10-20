@@ -129,7 +129,7 @@ def test_choropleth_z_matches_bands():
 
 def test_asia_region_is_zoomed_and_larger():
     gulf, asia = region_rank_map(ROWS, "gulf"), region_rank_map(ROWS, "asia")
-    assert len(asia.data[1].customdata) == 33      # 27 + IRQ JOR SYR LBN PAK MGL (0.111)
+    assert len(asia.data[1].customdata) == 33      # 27 + IRQ JOR SYR LIB PAK MGL (0.111)
     assert set(REGIONS["gulf"]["centroids"]) <= set(REGIONS["asia"]["centroids"])
     assert list(asia.layout.geo.lonaxis.range) == [34, 150]
     assert list(gulf.layout.geo.lonaxis.range) == [43.5, 60.5]

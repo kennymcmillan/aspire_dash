@@ -34,7 +34,7 @@ _GOLD = "#fbb800"
 
 # IOC code -> (lon, lat) of the rank bubble. Placement only, not data: Gulf bubbles are nudged apart so
 # the small states do not stack; the Asia set is the Gulf six plus 27 more
-# (IRQ, JOR, SYR, LBN, PAK, MGL added 2026-10-20: IRQ + JOR hold sabre team ranks and were never drawn).
+# (IRQ, JOR, SYR, LIB, PAK, MGL added 2026-10-20: IRQ + JOR hold sabre team ranks and were never drawn).
 _GULF = {
     "QAT": (51.45, 25.0), "BRN": (50.2, 26.6), "KUW": (47.6, 29.3),
     "UAE": (54.3, 23.9), "KSA": (44.5, 24.5), "OMA": (56.2, 20.6),
@@ -46,7 +46,7 @@ _ASIA = {
     "HKG": (114.2, 22.6), "TPE": (121, 23.7), "IND": (79, 22), "MAC": (112.4, 21.2), "VIE": (106, 16),
     "PHI": (122, 12.5), "THA": (101, 15.5), "CAM": (104.9, 12.6), "SRI": (80.7, 7.8), "MAS": (102, 4.2),
     "SGP": (104.6, 0.4), "INA": (113, -1),
-    "IRQ": (43.8, 33.2), "JOR": (36.6, 30.8), "SYR": (38.5, 35.2), "LBN": (35.9, 33.9),
+    "IRQ": (43.8, 33.2), "JOR": (36.6, 30.8), "SYR": (38.5, 35.2), "LIB": (35.9, 33.9),
     "PAK": (69.5, 29.8), "MGL": (103, 46.8),
 }
 

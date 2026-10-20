@@ -27,3 +27,10 @@ def test_asia_map_draws_iraq_and_jordan_inside_the_window():
     lat0, lat1 = REGIONS["asia"]["lat"]
     for lon, lat in REGIONS["asia"]["centroids"].values():
         assert lon0 <= lon <= lon1 and lat0 <= lat <= lat1
+
+
+def test_asia_members_are_ioc_codes_with_a_country_name():
+    # 2026-10-20: Lebanon went in as ISO "LBN" and showed as a raw code; IOC is LIB
+    from aspire_dash.countries import name
+    for code in REGIONS["asia"]["centroids"]:
+        assert name(code) != code, code
