@@ -129,9 +129,9 @@ def test_choropleth_z_matches_bands():
 
 def test_asia_region_is_zoomed_and_larger():
     gulf, asia = region_rank_map(ROWS, "gulf"), region_rank_map(ROWS, "asia")
-    assert len(asia.data[1].customdata) == 27
+    assert len(asia.data[1].customdata) == 33      # 27 + IRQ JOR SYR LBN PAK MGL (0.111)
     assert set(REGIONS["gulf"]["centroids"]) <= set(REGIONS["asia"]["centroids"])
-    assert list(asia.layout.geo.lonaxis.range) == [36, 150]
+    assert list(asia.layout.geo.lonaxis.range) == [34, 150]
     assert list(gulf.layout.geo.lonaxis.range) == [43.5, 60.5]
     assert asia.layout.dragmode is False
 
@@ -203,4 +203,4 @@ def test_sources_mapping_override_and_errors():
 
 
 def test_version_bumped():
-    assert aspire_dash.__version__ == "0.110.0"
+    assert aspire_dash.__version__ == "0.111.0"

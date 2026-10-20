@@ -4,6 +4,14 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.111.0] - 2026-10-20 (rank fixes from the Team Rankings board)
+
+### Added
+- `sports.trend_arrow(..., lower_is_better=False)`: pass True for ranks so 48 -> 59 reads as worse (red, down).
+  Default unchanged.
+- `maps` Asia region draws IRQ, JOR, SYR, LBN, PAK, MGL (IRQ and JOR hold sabre team ranks and were listed but
+  never drawn). Asia window starts at lon 34 so Jordan sits inside it.
+
 ## [0.110.0] - 2026-10-19 (design board: tidy-fit tables, region rank map, rank small multiples)
 
 From the Fencing Reports design pass (Kenny picked table A "Tidy fit", map A, rankings history A + a toggle to B).

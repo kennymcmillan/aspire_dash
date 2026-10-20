@@ -847,7 +847,7 @@ def benchmark_table(rows, *, value_format=None, value_label="Best PB",
 
 # ── Trend Arrow (mini) ─────────────────────────────────────────────────────
 
-def trend_arrow(values, label=None):
+def trend_arrow(values, label=None, lower_is_better=False):
     """Compact trend indicator from a list of values (last vs first).
 
     Parameters
@@ -856,14 +856,17 @@ def trend_arrow(values, label=None):
         Historical values (oldest first).
     label : str or None
         Optional label before the arrow.
+    lower_is_better : bool
+        True for ranks (48 -> 59 is worse): a smaller value then shows the green up arrow.
     """
     if not values or len(values) < 2:
         return html.Span()
 
     first, last = values[0], values[-1]
-    if last > first:
+    better, worse = (last < first, last > first) if lower_is_better else (last > first, last < first)
+    if better:
         icon, tone = "fa-solid fa-arrow-trend-up", "ta-up"
-    elif last < first:
+    elif worse:
         icon, tone = "fa-solid fa-arrow-trend-down", "ta-down"
     else:
         icon, tone = "fa-solid fa-minus", "ta-flat"
