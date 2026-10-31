@@ -203,4 +203,4 @@ def test_sources_mapping_override_and_errors():
 
 
 def test_version_bumped():
-    assert aspire_dash.__version__ == "0.111.0"
+    assert aspire_dash.__version__ == "0.111.1"

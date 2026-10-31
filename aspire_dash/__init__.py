@@ -74,7 +74,7 @@ import os
 import shutil
 import dash_bootstrap_components as dbc
 
-__version__ = "0.111.0"  # keep in lock-step with setup.py
+__version__ = "0.111.1"  # keep in lock-step with setup.py
 
 
 def normalised_path(pathname: str | None) -> str:
@@ -114,9 +114,13 @@ def normalised_path(pathname: str | None) -> str:
     return "/" + relative if relative else "/"
 
 # â”€â”€ External stylesheets every Aspire app should load â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# use.fontawesome.com (dbc.icons.FONT_AWESOME) serves webfonts without a CORS header, so
+# browsers drop them and icons render as boxes; jsDelivr serves the same 6.7.2 with ACAO *
+FONT_AWESOME = "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"
+
 STYLESHEETS = [
     dbc.themes.BOOTSTRAP,
-    dbc.icons.FONT_AWESOME,
+    FONT_AWESOME,
     # Inter font is loaded via @import in 00_aspire_base.css
 ]
 

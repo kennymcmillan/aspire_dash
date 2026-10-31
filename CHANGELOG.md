@@ -4,6 +4,12 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.111.1] - 2026-10-31 (icons render again)
+
+### Fixed
+- `STYLESHEETS` loads Font Awesome 6.7.2 from jsDelivr (new `FONT_AWESOME` constant). use.fontawesome.com sends its
+  webfonts without Access-Control-Allow-Origin, so every icon rendered as an empty box on Connect apps.
+
 ## [0.111.0] - 2026-10-20 (rank fixes from the Team Rankings board)
 
 ### Added
