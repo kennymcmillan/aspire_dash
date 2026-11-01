@@ -2366,6 +2366,13 @@ a, button, input, select {
     box-shadow: var(--elev-hover-card);
     border-color: var(--aspire-200);
 }
+/* A transform makes the card the containing block for the Dash 4 dropdown's position:fixed list, so the
+   open list widens or is clipped by the card (a scrolling side panel slid sideways while typing). */
+.card:has(.dash-dropdown),
+.card:has(.dash-dropdown):hover {
+    transform: none;
+    will-change: auto;
+}
 .financial-report .card:hover,
 .financial-report .fr-kpi:hover {
     transform: none;
