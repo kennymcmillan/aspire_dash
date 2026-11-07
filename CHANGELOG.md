@@ -4,6 +4,13 @@ All notable changes to `aspire_dash`. The library follows
 [Semantic Versioning](https://semver.org/) within the 0.x line —
 additive minors, breaking changes get a major bump when we get there.
 
+## [0.112.0] - 2026-11-07 (custom zone models)
+
+### Added
+- `firstbeat.zone_bars(..., config=None)` and `zone_stacked_bar(..., config=None)`: pass your own zone defs
+  (`[{"key", "label", "color"}]`) for a model other than Firstbeat's five, e.g. the endurance squad's
+  three lab zones (below LT1 / LT1 to LT2 / above LT2). Default unchanged.
+
 ## [0.111.1] - 2026-10-31 (icons render again)
 
 ### Fixed

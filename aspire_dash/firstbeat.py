@@ -86,7 +86,7 @@ def acwr_badge(acwr, show_value=True):
 
 # ── Zone Bars (Horizontal, stacked per-zone) ────────────────────────────────
 
-def zone_bars(zones, show_labels=True, show_duration=True, bar_height=16):
+def zone_bars(zones, show_labels=True, show_duration=True, bar_height=16, config=None):
     """Horizontal HR zone bars — one bar per zone, like the Firstbeat session card.
 
     Parameters
@@ -99,13 +99,17 @@ def zone_bars(zones, show_labels=True, show_duration=True, bar_height=16):
         Show duration text (e.g. "42.1m") on the right.
     bar_height : int
         Height of each bar in px.
+    config : list[dict] or None
+        Zone defs ({"key", "label", "color"}); default ZONE_CONFIG (Firstbeat 5).
+        Pass your own for another model, e.g. a 3-zone LT1/LT2 split.
     """
     zones = zones or {}
-    max_val = max((zones.get(z["key"], 0) or 0 for z in ZONE_CONFIG), default=1)
+    config = config or ZONE_CONFIG
+    max_val = max((zones.get(z["key"], 0) or 0 for z in config), default=1)
     max_val = max(max_val, 0.1)  # avoid division by zero
 
     rows = []
-    for z in ZONE_CONFIG:
+    for z in config:
         val = zones.get(z["key"], 0) or 0
         pct = max(2, (val / max_val) * 100) if val > 0 else 0
 
@@ -148,7 +152,7 @@ def zone_bars(zones, show_labels=True, show_duration=True, bar_height=16):
 
 # ── Zone Stacked Bar (Compact inline) ────────────────────────────────────────
 
-def zone_stacked_bar(zones, width=120, height=16):
+def zone_stacked_bar(zones, width=120, height=16, config=None):
     """Compact inline stacked bar showing zone distribution.
 
     Parameters
@@ -159,9 +163,12 @@ def zone_stacked_bar(zones, width=120, height=16):
         Total bar width in px.
     height : int
         Bar height in px.
+    config : list[dict] or None
+        Zone defs; default ZONE_CONFIG (see :func:`zone_bars`).
     """
     zones = zones or {}
-    total = sum(zones.get(z["key"], 0) or 0 for z in ZONE_CONFIG)
+    config = config or ZONE_CONFIG
+    total = sum(zones.get(z["key"], 0) or 0 for z in config)
 
     if total <= 0:
         return html.Div(style={
@@ -170,7 +177,7 @@ def zone_stacked_bar(zones, width=120, height=16):
         })
 
     segments = []
-    for z in ZONE_CONFIG:
+    for z in config:
         val = zones.get(z["key"], 0) or 0
         if val <= 0:
             continue
@@ -181,7 +188,7 @@ def zone_stacked_bar(zones, width=120, height=16):
         }))
 
     tooltip = " | ".join(
-        f"{z['label']}: {zones.get(z['key'], 0) or 0:.0f}m" for z in ZONE_CONFIG
+        f"{z['label']}: {zones.get(z['key'], 0) or 0:.0f}m" for z in config
     )
 
     return html.Div(segments, title=tooltip, style={

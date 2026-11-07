@@ -243,3 +243,19 @@ def test_aspire_datatable_renders():
         totals_row_label="TOTAL",
     )
     assert is_dash_component(out)
+
+
+# ── 0.112: zone components take a custom zone model (3-zone LT1/LT2) ───────
+
+def test_zone_components_custom_config():
+    from aspire_dash.firstbeat import zone_bars, zone_stacked_bar
+    three = [{"key": "z1", "label": "Z1", "color": "#111111"},
+             {"key": "z2", "label": "Z2", "color": "#222222"},
+             {"key": "z3", "label": "Z3", "color": "#333333"}]
+    zones = {"z1": 30, "z2": 10, "z3": 0}
+    bars = zone_bars(zones, config=three)
+    assert len(bars.children) == 3                      # one row per configured zone
+    stacked = zone_stacked_bar(zones, config=three)
+    assert [seg.style["backgroundColor"] for seg in stacked.children] == ["#111111", "#222222"]
+    assert stacked.title == "Z1: 30m | Z2: 10m | Z3: 0m"
+    assert len(zone_bars({"zone1": 5}).children) == 5   # default stays Firstbeat 5
